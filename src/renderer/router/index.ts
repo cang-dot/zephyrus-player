@@ -39,7 +39,13 @@ const routes = [
   {
     path: '/',
     component: AppLayout,
-    children: [...homeRouter, loginRouter, ...otherRouter]
+    children: [...homeRouter, loginRouter, ...otherRouter],
+    redirect: () => {
+      // 读取用户设置的默认启动页
+      const settings = getSettingsStore();
+      const defaultPage = settings.setData?.defaultPage || '/';
+      return defaultPage;
+    }
   },
   {
     path: '/lyric',

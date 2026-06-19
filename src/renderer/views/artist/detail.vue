@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="artist-detail-page h-full w-full bg-white dark:bg-neutral-900 transition-colors duration-500"
   >
@@ -93,7 +93,7 @@
                 <div class="artist-info flex-1 text-center md:text-left">
                   <div class="artist-badge mb-2 md:mb-3">
                     <span
-                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-semibold uppercase tracking-wider"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-semibold uppercase tracking-wider"
                     >
                       <i class="iconfont icon-verified text-sm" />
                       Artist
@@ -111,7 +111,7 @@
                     class="artist-stats flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4 md:mt-5"
                   >
                     <div v-if="artistInfo.musicSize" class="stat-item flex items-center gap-2">
-                      <i class="iconfont icon-music text-[var(--accent-color)] text-lg" />
+                      <i class="iconfont icon-music text-primary text-lg" />
                       <span class="text-sm font-medium text-neutral-600 dark:text-neutral-300">
                         <span class="font-bold text-neutral-900 dark:text-white">{{
                           artistInfo.musicSize
@@ -120,7 +120,7 @@
                       </span>
                     </div>
                     <div v-if="artistInfo.albumSize" class="stat-item flex items-center gap-2">
-                      <i class="iconfont icon-album text-[var(--accent-color)] text-lg" />
+                      <i class="iconfont icon-album text-primary text-lg" />
                       <span class="text-sm font-medium text-neutral-600 dark:text-neutral-300">
                         <span class="font-bold text-neutral-900 dark:text-white">{{
                           artistInfo.albumSize
@@ -143,7 +143,7 @@
               <div class="flex items-center gap-2 md:gap-3">
                 <!-- Play All Button -->
                 <button
-                  class="play-all-btn flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-full bg-[var(--accent-color)] hover:bg-[var(--accent-color)]/90 text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/25"
+                  class="play-all-btn flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-full bg-primary hover:bg-primary/90 text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
                   @click="handlePlayAll"
                 >
                   <i class="iconfont icon-playfill text-lg" />
@@ -168,7 +168,7 @@
                   class="action-btn w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
                   :class="
                     isSearchVisible
-                      ? 'bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 text-[var(--accent-color)]'
+                      ? 'bg-primary/10 dark:bg-primary/20 text-primary'
                       : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
                   "
                   @click="isSearchVisible ? closeSearch() : showSearch()"
@@ -283,7 +283,7 @@
               <div ref="songsLoadMoreRef" class="load-more-trigger py-8">
                 <div v-if="songLoading" class="flex items-center justify-center gap-2">
                   <div
-                    class="w-5 h-5 border-2 border-[var(--accent-color)]/30 border-t-primary rounded-full animate-spin"
+                    class="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"
                   />
                   <span class="text-sm text-neutral-400 dark:text-neutral-500">{{
                     t('common.loading') || 'Loading...'
@@ -293,7 +293,8 @@
                   v-else-if="!songPage.hasMore && songs.length > 0"
                   class="text-center text-sm text-neutral-400 dark:text-neutral-500"
                 >
-                  鈥?{{ t('common.noMore') || 'No more' }} 鈥?                </div>
+                  — {{ t('common.noMore') || 'No more' }} —
+                </div>
               </div>
             </div>
 
@@ -336,7 +337,7 @@
                   <!-- Info -->
                   <div class="album-info mt-3">
                     <h3
-                      class="album-name line-clamp-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100 group-hover:text-[var(--accent-color)] dark:group-hover:text-[var(--accent-color)] transition-colors"
+                      class="album-name line-clamp-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100 group-hover:text-primary dark:group-hover:text-primary transition-colors"
                     >
                       {{ album.name }}
                     </h3>
@@ -351,7 +352,7 @@
               <div ref="albumsLoadMoreRef" class="load-more-trigger py-8">
                 <div v-if="albumLoading" class="flex items-center justify-center gap-2">
                   <div
-                    class="w-5 h-5 border-2 border-[var(--accent-color)]/30 border-t-primary rounded-full animate-spin"
+                    class="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"
                   />
                   <span class="text-sm text-neutral-400 dark:text-neutral-500">{{
                     t('common.loading') || 'Loading...'
@@ -361,7 +362,8 @@
                   v-else-if="!albumPage.hasMore && albums.length > 0"
                   class="text-center text-sm text-neutral-400 dark:text-neutral-500"
                 >
-                  鈥?{{ t('common.noMore') || 'No more' }} 鈥?                </div>
+                  — {{ t('common.noMore') || 'No more' }} —
+                </div>
               </div>
             </div>
 
@@ -460,7 +462,7 @@ const tabs = computed(() => [
   { value: 'about', label: t('artist.description') }
 ]);
 
-// 姝屾墜淇℃伅
+// 歌手信息
 const artistInfo = ref<IArtist>();
 const songs = ref<any[]>([]);
 const albums = ref<any[]>([]);
@@ -469,11 +471,12 @@ const titleElRef = ref<HTMLElement | null>(null);
 const artistTitle = computed(() => artistInfo.value?.name ?? '');
 useScrollTitle(artistTitle, titleElRef);
 
-// 鍔犺浇鐘舵€?const loading = ref(false);
+// 加载状态
+const loading = ref(false);
 const songLoading = ref(false);
 const albumLoading = ref(false);
 
-// 鍒嗛〉鍙傛暟
+// 分页参数
 const songPage = ref({
   page: 1,
   pageSize: 30,
@@ -486,27 +489,30 @@ const albumPage = ref({
   hasMore: true
 });
 
-// 鏃犻檺婊氬姩寮曠敤
+// 无限滚动引用
 const songsLoadMoreRef = ref<HTMLElement | null>(null);
 const albumsLoadMoreRef = ref<HTMLElement | null>(null);
 let songsObserver: IntersectionObserver | null = null;
 let albumsObserver: IntersectionObserver | null = null;
 
-// 娣诲姞涓婁竴涓狪D鐨勫紩鐢紝鐢ㄤ簬姣旇緝
+// 添加上一个ID的引用，用于比较
 const previousId = ref<string | null>(null);
 
-// 绠€鍖栫紦瀛樻満鍒?const artistDataCache = new Map();
+// 简化缓存机制
+const artistDataCache = new Map();
 
-// 鍗曚釜缂撳瓨閿嚱鏁?const getCacheKey = (id: string | number) => `artist_${id}`;
+// 单个缓存键函数
+const getCacheKey = (id: string | number) => `artist_${id}`;
 
-// 鎼滅储鍜屽竷灞€鐩稿叧
+// 搜索和布局相关
 const searchKeyword = ref('');
 const isSearchVisible = ref(false);
 const isCompactLayout = ref(
   isMobile.value ? false : localStorage.getItem('musicListLayout') === 'compact'
 );
 
-// 瀵艰埅鍒颁笓杈戣鎯?const handleAlbumClick = async (album: any) => {
+// 导航到专辑详情
+const handleAlbumClick = async (album: any) => {
   try {
     navigateToMusicList(router, {
       id: album.id,
@@ -524,17 +530,19 @@ const isCompactLayout = ref(
   }
 };
 
-// 鍔犺浇姝屾墜淇℃伅
+// 加载歌手信息
 const loadArtistInfo = async () => {
   if (!artistId.value) return;
 
-  // 婊氬姩鍒伴《閮?  nextTick(() => {
+  // 滚动到顶部
+  nextTick(() => {
     scrollbarRef.value?.scrollTo(0, 0);
   });
 
-  // 绠€鍖栫紦瀛樻鏌?  const cacheKey = getCacheKey(artistId.value);
+  // 简化缓存检查
+  const cacheKey = getCacheKey(artistId.value);
   if (artistDataCache.has(cacheKey)) {
-    console.log('浣跨敤缂撳瓨鏁版嵁');
+    console.log('使用缓存数据');
     const cachedData = artistDataCache.get(cacheKey);
     artistInfo.value = cachedData.artistInfo;
     songs.value = cachedData.songs;
@@ -544,16 +552,19 @@ const loadArtistInfo = async () => {
     return;
   }
 
-  // 鍔犺浇鏂版暟鎹?  loading.value = true;
+  // 加载新数据
+  loading.value = true;
   try {
     const info = await getArtistDetail(artistId.value);
     if (info.data?.data?.artist) {
       artistInfo.value = info.data.data.artist;
     }
-    // 閲嶇疆鍒嗛〉骞跺姞杞藉垵濮嬫暟鎹?    resetPagination();
+    // 重置分页并加载初始数据
+    resetPagination();
     await Promise.all([loadSongs(), loadAlbums()]);
 
-    // 淇濆瓨鍒扮紦瀛?    artistDataCache.set(cacheKey, {
+    // 保存到缓存
+    artistDataCache.set(cacheKey, {
       artistInfo: artistInfo.value,
       songs: [...songs.value],
       albums: [...albums.value],
@@ -561,13 +572,13 @@ const loadArtistInfo = async () => {
       albumPage: { ...albumPage.value }
     });
   } catch (error) {
-    console.error('鍔犺浇姝屾墜淇℃伅澶辫触:', error);
+    console.error('加载歌手信息失败:', error);
   } finally {
     loading.value = false;
   }
 };
 
-// 閲嶇疆鍒嗛〉
+// 重置分页
 const resetPagination = () => {
   songPage.value = {
     page: 1,
@@ -583,7 +594,7 @@ const resetPagination = () => {
   albums.value = [];
 };
 
-// 鍔犺浇姝屾洸
+// 加载歌曲
 const loadSongs = async () => {
   if (!artistId.value || !songPage.value.hasMore || songLoading.value) return;
 
@@ -618,13 +629,13 @@ const loadSongs = async () => {
       songPage.value.hasMore = false;
     }
   } catch (error) {
-    console.error('鍔犺浇姝屾洸澶辫触:', error);
+    console.error('加载歌曲失败:', error);
   } finally {
     songLoading.value = false;
   }
 };
 
-// 鍔犺浇涓撹緫
+// 加载专辑
 const loadAlbums = async () => {
   if (!artistId.value || !albumPage.value.hasMore || albumLoading.value) return;
 
@@ -646,20 +657,21 @@ const loadAlbums = async () => {
       albumPage.value.hasMore = false;
     }
   } catch (error) {
-    console.error('鍔犺浇涓撹緫澶辫触:', error);
+    console.error('加载专辑失败:', error);
   } finally {
     albumLoading.value = false;
   }
 };
 
-// 鏍煎紡鍖栧彂甯冩椂闂?const formatPublishTime = (time: number) => {
+// 格式化发布时间
+const formatPublishTime = (time: number) => {
   return useDateFormat(time, 'YYYY-MM-DD').value;
 };
 
-// 鎼滅储鐩稿叧鏂规硶
+// 搜索相关方法
 const showSearch = () => {
   isSearchVisible.value = true;
-  // 娣诲姞涓€涓皬寤惰繜鍚庤仛鐒︽悳绱㈡
+  // 添加一个小延迟后聚焦搜索框
   nextTick(() => {
     const inputEl = document.querySelector('.search-container input');
     if (inputEl) {
@@ -674,7 +686,7 @@ const closeSearch = () => {
 };
 
 const handleSearchBlur = () => {
-  // 濡傛灉鎼滅储妗嗕负绌猴紝鍒欏湪澶辩劍鏃跺叧闂悳绱㈡
+  // 如果搜索框为空，则在失焦时关闭搜索框
   if (!searchKeyword.value) {
     setTimeout(() => {
       isSearchVisible.value = false;
@@ -682,7 +694,7 @@ const handleSearchBlur = () => {
   }
 };
 
-// 杩囨护姝屾洸鍒楄〃
+// 过滤歌曲列表
 const filteredSongs = computed(() => {
   if (!searchKeyword.value) {
     return songs.value;
@@ -694,14 +706,14 @@ const filteredSongs = computed(() => {
     const albumName = song.al?.name?.toLowerCase() || '';
     const artists = song.ar || song.artists || [];
 
-    // 鍘熷鏂囨湰鍖归厤
+    // 原始文本匹配
     const nameMatch = songName.includes(keyword);
     const albumMatch = albumName.includes(keyword);
     const artistsMatch = artists.some((artist: any) => {
       return artist.name?.toLowerCase().includes(keyword);
     });
 
-    // 鎷奸煶鍖归厤
+    // 拼音匹配
     const namePinyinMatch = song.name && PinyinMatch.match(song.name, keyword);
     const albumPinyinMatch = song.al?.name && PinyinMatch.match(song.al.name, keyword);
     const artistsPinyinMatch = artists.some((artist: any) => {
@@ -719,13 +731,13 @@ const filteredSongs = computed(() => {
   });
 });
 
-// 甯冨眬鍒囨崲
+// 布局切换
 const toggleLayout = () => {
   isCompactLayout.value = !isCompactLayout.value;
   localStorage.setItem('musicListLayout', isCompactLayout.value ? 'compact' : 'normal');
 };
 
-// 鎾斁鍏ㄩ儴
+// 播放全部
 const handlePlayAll = () => {
   if (filteredSongs.value.length === 0) return;
 
@@ -736,18 +748,20 @@ const handlePlayAll = () => {
     }))
   );
 
-  // 寮€濮嬫挱鏀剧涓€棣?  playerStore.setPlay(filteredSongs.value[0]);
+  // 开始播放第一首
+  playerStore.setPlay(filteredSongs.value[0]);
 
   message.success(t('comp.musicList.playAll'));
 };
 
-// 娣诲姞鍒版挱鏀惧垪琛?const addToPlaylist = () => {
+// 添加到播放列表
+const addToPlaylist = () => {
   if (filteredSongs.value.length === 0) return;
 
-  // 鑾峰彇褰撳墠鎾斁鍒楄〃
+  // 获取当前播放列表
   const currentList = playerStore.playList;
 
-  // 娣诲姞姝屾洸鍒版挱鏀惧垪琛?閬垮厤閲嶅娣诲姞)
+  // 添加歌曲到播放列表(避免重复添加)
   const newSongs = filteredSongs.value.filter(
     (song) => !currentList.some((item) => item.id === song.id)
   );
@@ -757,7 +771,8 @@ const handlePlayAll = () => {
     return;
   }
 
-  // 鍚堝苟鍒板綋鍓嶆挱鏀惧垪琛ㄦ湯灏?  const newList = [
+  // 合并到当前播放列表末尾
+  const newList = [
     ...currentList,
     ...newSongs.map((song) => ({
       ...song,
@@ -771,12 +786,14 @@ const handlePlayAll = () => {
 };
 
 const handlePlay = (song?: any) => {
-  // 濡傛灉浼犲叆浜嗙壒瀹氭瓕鏇诧紙鐐瑰嚮鍗曟洸鎾斁锛夛紝鍒欏皢鍏朵綔涓烘挱鏀惧垪琛ㄧ殑绗竴棣?  if (song) {
+  // 如果传入了特定歌曲（点击单曲播放），则将其作为播放列表的第一首
+  if (song) {
     const songList = [...filteredSongs.value];
     const index = songList.findIndex((item) => item.id === song.id);
 
     if (index !== -1) {
-      // 灏嗙偣鍑荤殑姝屾洸绉诲埌绗竴浣?      const clickedSong = songList.splice(index, 1)[0];
+      // 将点击的歌曲移到第一位
+      const clickedSong = songList.splice(index, 1)[0];
       songList.unshift(clickedSong);
     }
 
@@ -787,10 +804,11 @@ const handlePlay = (song?: any) => {
       }))
     );
 
-    // 璁剧疆褰撳墠鎾斁姝屾洸
+    // 设置当前播放歌曲
     playerStore.setPlay(song);
   } else {
-    // 榛樿琛屼负锛氭挱鏀炬暣涓繃婊ゅ悗鐨勫垪琛?    playerStore.setPlayList(
+    // 默认行为：播放整个过滤后的列表
+    playerStore.setPlayList(
       filteredSongs.value.map((item) => ({
         ...item,
         picUrl: item.al?.picUrl || item.picUrl
@@ -799,13 +817,13 @@ const handlePlay = (song?: any) => {
   }
 };
 
-// 绠€鍖栬瀵熷櫒璁剧疆
+// 简化观察器设置
 const setupObservers = () => {
-  // 娓呯悊涔嬪墠鐨勮瀵熷櫒
+  // 清理之前的观察器
   if (songsObserver) songsObserver.disconnect();
   if (albumsObserver) albumsObserver.disconnect();
 
-  // 鍒涘缓瑙傚療鍣?濡傛灉涓嶅瓨鍦?
+  // 创建观察器(如果不存在)
   if (!songsObserver) {
     songsObserver = new IntersectionObserver(
       (entries) => {
@@ -828,7 +846,7 @@ const setupObservers = () => {
     );
   }
 
-  // 瑙傚療褰撳墠鏍囩椤电殑鍏冪礌
+  // 观察当前标签页的元素
   nextTick(() => {
     if (activeTab.value === 'songs' && songsLoadMoreRef.value) {
       songsObserver?.observe(songsLoadMoreRef.value);
@@ -838,42 +856,49 @@ const setupObservers = () => {
   });
 };
 
-// 鐩戝惉鏍囩鍒囨崲
+// 监听标签切换
 watch(activeTab, () => {
   setupObservers();
 });
 
-// 鐩戝惉寮曠敤鍏冪礌鐨勫彉鍖?watch([songsLoadMoreRef, albumsLoadMoreRef], () => {
+// 监听引用元素的变化
+watch([songsLoadMoreRef, albumsLoadMoreRef], () => {
   setupObservers();
 });
 
-// 鎼滅储璇嶅彉鍖栨椂閲嶆柊璁剧疆瑙傚療鍣?watch(searchKeyword, () => {
+// 搜索词变化时重新设置观察器
+watch(searchKeyword, () => {
   nextTick(() => {
     setupObservers();
   });
 });
 
 onActivated(() => {
-  // 纭繚褰撳墠璺敱鏄壓鏈璇︽儏椤?  if (route.name === 'artistDetail') {
+  // 确保当前路由是艺术家详情页
+  if (route.name === 'artistDetail') {
     const currentId = route.params.id as string;
 
-    // 婊氬姩鍒伴《閮?    nextTick(() => {
+    // 滚动到顶部
+    nextTick(() => {
       scrollbarRef.value?.scrollTo(0, 0);
     });
 
-    // 棣栨鍔犺浇鎴朓D鍙樺寲鏃跺姞杞芥暟鎹?    if (!previousId.value || previousId.value !== currentId) {
-      console.log('ID宸插彉鍖栵紝鍔犺浇鏂版暟鎹?);
+    // 首次加载或ID变化时加载数据
+    if (!previousId.value || previousId.value !== currentId) {
+      console.log('ID已变化，加载新数据');
       previousId.value = currentId;
       activeTab.value = 'songs';
       loadArtistInfo();
     }
 
-    // 閲嶆柊璁剧疆瑙傚療鍣?    setupObservers();
+    // 重新设置观察器
+    setupObservers();
   }
 });
 
 onMounted(() => {
-  // 棣栨鎸傝浇鏃跺姞杞芥暟鎹?  if (route.params.id) {
+  // 首次挂载时加载数据
+  if (route.params.id) {
     previousId.value = route.params.id as string;
     loadArtistInfo();
     setupObservers();
@@ -881,12 +906,14 @@ onMounted(() => {
 });
 
 onDeactivated(() => {
-  // 鏂紑瑙傚療鍣ㄤ絾涓嶆竻闄ゅ紩鐢?  if (songsObserver) songsObserver.disconnect();
+  // 断开观察器但不清除引用
+  if (songsObserver) songsObserver.disconnect();
   if (albumsObserver) albumsObserver.disconnect();
 });
 
 onUnmounted(() => {
-  // 瀹屽叏娓呯悊瑙傚療鍣?  if (songsObserver) {
+  // 完全清理观察器
+  if (songsObserver) {
     songsObserver.disconnect();
     songsObserver = null;
   }
@@ -896,7 +923,8 @@ onUnmounted(() => {
   }
 });
 
-// 鏍煎紡鍖栨瓕鏇诧紙浣跨敤鍦ㄥ垪琛ㄤ腑锛?const formatSong = (item: any) => {
+// 格式化歌曲（使用在列表中）
+const formatSong = (item: any) => {
   if (!item) {
     return null;
   }
@@ -976,7 +1004,7 @@ onUnmounted(() => {
 /* CSS-based virtualization for performance */
 .song-item-container {
   content-visibility: auto;
-  contain-intrinsic-size: 0 72px; /* 棰勪及楂樺害锛岄槻姝㈠竷灞€鎶栧姩 */
+  contain-intrinsic-size: 0 72px; /* 预估高度，防止布局抖动 */
 }
 
 /* Compact layout - smaller item height */
@@ -1021,7 +1049,8 @@ onUnmounted(() => {
 }
 
 .album-card:hover .album-cover {
-  @apply shadow-2xl shadow-primary/10;
+  @apply shadow-2xl;
+  box-shadow: 0 10px 15px -3px rgba(var(--accent-color-rgb, 0, 0, 0), 0.1), 0 4px 6px -2px rgba(var(--accent-color-rgb, 0, 0, 0), 0.05);
 }
 
 /* Mobile Optimizations */
@@ -1049,7 +1078,6 @@ button:focus-visible {
 }
 
 input:focus-visible {
-  @apply outline-none ring-2 ring-primary/50;
+  @apply outline-none ring-2 ring-primary ring-opacity-50;
 }
 </style>
-

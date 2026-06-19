@@ -59,7 +59,7 @@
                 <!-- Avatar -->
                 <div class="relative mx-auto w-fit">
                   <div
-                    class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-lg ring-2 ring-transparent group-hover:ring-primary/30 transition-all duration-300"
+                    class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-lg ring-2 ring-transparent group-hover:ring-primary group-hover:ring-opacity-30 transition-all duration-300"
                   >
                     <img
                       :src="getImgUrl(item.avatarUrl, '100y100')"

@@ -5,7 +5,7 @@
       class="flex w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-1.5 text-sm transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed"
       :class="
         isOpen
-          ? 'border-[var(--accent-color)] bg-white dark:bg-neutral-900 ring-2 ring-primary/20'
+          ? 'border-[var(--accent-color)] bg-white dark:bg-neutral-900 ring-2 ring-primary ring-opacity-20'
           : 'border-neutral-200 bg-neutral-50 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600'
       "
       @click="toggle"

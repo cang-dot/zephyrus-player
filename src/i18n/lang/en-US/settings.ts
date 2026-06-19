@@ -5,6 +5,7 @@ export default {
   logout: 'Logout',
   sections: {
     basic: 'Basic Settings',
+    interface: 'Interface Settings',
     playback: 'Playback Settings',
     application: 'Application Settings',
     network: 'Network Settings',
@@ -61,6 +62,12 @@ export default {
     gpuAccelerationChangeError: 'Failed to update GPU acceleration settings',
     tabletMode: 'Tablet Mode',
     tabletModeDesc: 'Enabling tablet mode allows using PC-style interface on mobile devices'
+  },
+  interface: {
+    defaultPage: 'Default Startup Page',
+    defaultPageDesc: 'Select the page to display when the app starts',
+    sidebarOrder: 'Sidebar Customization',
+    sidebarOrderDesc: 'Adjust sidebar item order and visibility'
   },
   playback: {
     quality: 'Audio Quality',

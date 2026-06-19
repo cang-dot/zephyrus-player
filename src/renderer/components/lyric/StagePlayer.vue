@@ -70,19 +70,7 @@
             class="single-lyric"
             :style="lyricStyle"
           >
-            <!-- 节奏模式：逐词显示 -->
-            <template v-if="animationMode === 'rhythm' && currentLine?.hasWordByWord && currentLine.words">
-              <span
-                v-for="(word, wIdx) in currentLine.words"
-                :key="wIdx"
-                class="lyric-word"
-                :style="getRhythmWordStyle(word, wIdx)"
-              >{{ word.text }}<span v-if="word.space">&nbsp;</span></span>
-            </template>
-            <!-- 普通模式：整行显示 -->
-            <template v-else>
-              {{ displayText }}
-            </template>
+            {{ displayText }}
           </div>
           <!-- 翻译歌词 -->
           <transition name="tr-fade">
@@ -132,7 +120,7 @@ import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
 import LyricSettings from './LyricSettings.vue';
 
-const animationSelector = new AnimationSelector(8);
+const animationSelector = new AnimationSelector(7);
 
 // 从 localStorage 读取动画强度设置
 const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {
@@ -175,13 +163,6 @@ const isVisible = computed({
 
 const currentLine = computed<ILyricText | undefined>(() => lrcArray.value[nowIndex.value]);
 const currentLineKey = computed(() => `${nowIndex.value}-${currentLine.value?.text}`);
-
-const animationMode = computed<'normal' | 'rhythm'>(() => {
-  const line = currentLine.value;
-  if (!line) return 'normal';
-  const nextLine = lrcArray.value[nowIndex.value + 1];
-  return detectAnimationMode(line, nextLine);
-});
 
 const controlsVisible = ref(true);
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
@@ -344,65 +325,10 @@ const particlesContainer = ref<HTMLElement | null>(null);
 const displayText = ref('');
 let currentTimeline: gsap.core.Timeline | null = null;
 let particleInterval: ReturnType<typeof setInterval> | null = null;
-
-// ==================== 动画模式检测 ====================
-
-const LINE_GAP_THRESHOLD = 200;
-const WORD_GAP_THRESHOLD = 300;
-
-function detectAnimationMode(line: ILyricText, nextLine?: ILyricText): 'normal' | 'rhythm' {
-  if (!nextLine) return 'normal';
-  if (typeof line.startTime !== 'number' || typeof line.duration !== 'number') return 'normal';
-  if (typeof nextLine.startTime !== 'number' || typeof nextLine.duration !== 'number') return 'normal';
-
-  const lineGap = nextLine.startTime - (line.startTime + line.duration);
-  if (lineGap < LINE_GAP_THRESHOLD) return 'normal';
-
-  if (line.hasWordByWord && line.words && line.words.length > 1) {
-    for (let i = 1; i < line.words.length; i++) {
-      const prev = line.words[i - 1];
-      const curr = line.words[i];
-      const gap = curr.startTime - (prev.startTime + prev.duration);
-      if (gap > WORD_GAP_THRESHOLD) return 'rhythm';
-    }
-  }
-
-  return 'normal';
-}
+let lastProcessedIndex = -1;
+let pendingRafId: number | null = null;
 
 // ==================== 歌词动画 ====================
-
-function getRhythmWordStyle(word: IWordData, _wordIndex: number) {
-  const currentTime = nowTime.value * 1000;
-  const wordStart = word.startTime;
-  const wordEnd = word.startTime + word.duration;
-
-  if (currentTime >= wordStart && currentTime < wordEnd) {
-    return {
-      opacity: 1,
-      transform: 'scale(1.15)',
-      color: 'rgba(255,255,255,1)',
-      textShadow: '0 0 30px rgba(255,255,255,0.5)',
-      transition: 'all 0.15s cubic-bezier(0.32, 0.72, 0, 1)'
-    };
-  } else if (currentTime >= wordEnd) {
-    return {
-      opacity: 0.85,
-      transform: 'scale(1)',
-      color: 'rgba(255,255,255,0.95)',
-      textShadow: '0 0 40px rgba(255,255,255,0.3)',
-      transition: 'all 0.3s cubic-bezier(0.32, 0.72, 0, 1)'
-    };
-  } else {
-    return {
-      opacity: 0.4,
-      transform: 'scale(1)',
-      color: 'rgba(255,255,255,0.5)',
-      textShadow: 'none',
-      transition: 'all 0.3s cubic-bezier(0.32, 0.72, 0, 1)'
-    };
-  }
-}
 
 // ==================== 歌词动画触发 ====================
 
@@ -414,8 +340,47 @@ watch(
     if (newId !== prevSongId) {
       prevSongId = newId;
       displayText.value = '';
+      lastProcessedIndex = -1;
       const el = lyricRef.value;
-      if (el) gsap.set(el, { autoAlpha: 0 });
+      if (el) {
+        gsap.set(el, {
+          x: 0,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          filter: 'none',
+          autoAlpha: 0,
+          clearProps: 'transform'
+        });
+      }
+    }
+  }
+);
+
+// 当舞台播放器变为可见时，同步显示当前歌词
+watch(
+  () => isVisible.value,
+  (visible) => {
+    if (visible) {
+      nextTick(() => {
+        const line = currentLine.value;
+        if (line && displayText.value !== line.text) {
+          displayText.value = line.text;
+          lastProcessedIndex = nowIndex.value;
+        }
+      });
+    }
+  }
+);
+
+// 安全网：确保 displayText 始终与 currentLine 同步
+watch(
+  () => currentLine.value,
+  (line) => {
+    if (!line) return;
+    if (displayText.value !== line.text && displayText.value.length === 0) {
+      displayText.value = line.text;
+      lastProcessedIndex = nowIndex.value;
     }
   }
 );
@@ -425,14 +390,13 @@ function getAnimationDirection(animIndex: number): { x?: number; y?: number; sca
   const intensity = animationIntensity.value;
   const mult = intensity === 'power' ? 1.8 : intensity === 'soft' ? 0.5 : 1;
   const dirs: Record<number, { x?: number; y?: number; scale?: number; blur?: number }> = {
-    0: { x: Math.round(80 * mult) },
-    1: { x: Math.round(-80 * mult) },
-    2: { y: Math.round(-50 * mult) },
-    3: { y: Math.round(50 * mult) },
-    4: {},
-    5: {},
-    6: { scale: intensity === 'power' ? 0.3 : intensity === 'soft' ? 0.8 : 0.5 },
-    7: { blur: intensity === 'power' ? 20 : intensity === 'soft' ? 5 : 12 },
+    0: { x: Math.round(80 * mult) },   // slideRight
+    1: { x: Math.round(-80 * mult) },  // slideLeft
+    2: { y: Math.round(-50 * mult) },  // slideTop
+    3: { y: Math.round(50 * mult) },   // slideBottom
+    4: {},                               // fadeIn
+    5: { scale: intensity === 'power' ? 0.3 : intensity === 'soft' ? 0.8 : 0.5 }, // scaleIn
+    6: { blur: intensity === 'power' ? 20 : intensity === 'soft' ? 5 : 12 },       // blurIn
   };
   return dirs[animIndex] || {};
 }
@@ -446,12 +410,10 @@ watch(
     const el = lyricRef.value;
     if (!el) return;
 
-    // 如果是节奏模式，不使用整句动画
-    if (animationMode.value === 'rhythm') {
-      nextTick(() => {
-        displayText.value = currentLine.value?.text || '';
-      });
-      return;
+    // 取消之前的 requestAnimationFrame
+    if (pendingRafId !== null) {
+      cancelAnimationFrame(pendingRafId);
+      pendingRafId = null;
     }
 
     // 中断之前的动画
@@ -469,21 +431,48 @@ watch(
 
     if (hasCurrentText) {
       if (isSlideIn) {
-        gsap.set(el, { autoAlpha: 0 });
+        // 滑入动画：先重置所有属性，然后隐藏
+        gsap.set(el, {
+          x: 0,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          filter: 'none',
+          autoAlpha: 0,
+          clearProps: 'transform'
+        });
         nextTick(() => {
+          // 检查索引是否仍是最新的
+          if (nowIndex.value !== newIndex) return;
           const text = currentLine.value?.text || '';
           displayText.value = text;
-          requestAnimationFrame(() => {
+          lastProcessedIndex = newIndex;
+          pendingRafId = requestAnimationFrame(() => {
+            if (nowIndex.value !== newIndex) return;
             applyEnterAnimation(el, text, animIndex, direction);
           });
         });
       } else {
         const exitTl = gsap.timeline();
         exitTl.to(el, { autoAlpha: 0, duration: 0.25, ease: 'power2.in' });
-        exitTl.set(el, { clearProps: 'all' });
+        exitTl.call(() => {
+          // 退出动画完成后，重置所有属性
+          gsap.set(el, {
+            x: 0,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            filter: 'none',
+            autoAlpha: 0,
+            clearProps: 'transform'
+          });
+        });
         exitTl.call(() => {
           nextTick(() => {
+            // 检查索引是否仍是最新的
+            if (nowIndex.value !== newIndex) return;
             const text = currentLine.value?.text || '';
+            lastProcessedIndex = newIndex;
             applyEnterAnimation(el, text, animIndex, direction);
           });
         });
@@ -491,7 +480,10 @@ watch(
       }
     } else {
       nextTick(() => {
+        // 检查索引是否仍是最新的
+        if (nowIndex.value !== newIndex) return;
         const text = currentLine.value?.text || '';
+        lastProcessedIndex = newIndex;
         applyEnterAnimation(el, text, animIndex, direction);
       });
     }
@@ -504,6 +496,17 @@ function applyEnterAnimation(
   animIndex: number,
   direction: { x?: number; y?: number; scale?: number; blur?: number }
 ) {
+  // 强制重置所有可能被动画设置的属性到默认值
+  // 注意：不设置 autoAlpha，由动画本身控制
+  gsap.set(el, {
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotation: 0,
+    filter: 'none',
+    clearProps: 'transform'
+  });
+
   // 设置位置/缩放/模糊（不动画透明度，由动画本身控制）
   const initProps: gsap.TweenVars = { duration: 0 };
   if (direction.x !== undefined) initProps.x = direction.x;
@@ -584,6 +587,10 @@ onBeforeUnmount(() => {
   if (particleInterval) {
     clearInterval(particleInterval);
     particleInterval = null;
+  }
+  if (pendingRafId !== null) {
+    cancelAnimationFrame(pendingRafId);
+    pendingRafId = null;
   }
   document.removeEventListener('fullscreenchange', handleFullScreenChange);
   if (document.fullscreenElement) {

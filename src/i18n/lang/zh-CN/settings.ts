@@ -5,6 +5,7 @@ export default {
   logout: '退出登录',
   sections: {
     basic: '基础设置',
+    interface: '界面设置',
     playback: '播放设置',
     application: '应用设置',
     network: '网络设置',
@@ -58,6 +59,12 @@ export default {
     gpuAccelerationChangeError: 'GPU加速设置更新失败',
     tabletMode: '平板模式',
     tabletModeDesc: '启用后将在移动设备上使用PC样式界面，适合平板等大屏设备'
+  },
+  interface: {
+    defaultPage: '启动默认页',
+    defaultPageDesc: '选择应用启动时默认显示的页面',
+    sidebarOrder: '侧边栏自定义',
+    sidebarOrderDesc: '调整侧边栏项目的显示顺序和可见性'
   },
   playback: {
     quality: '音质设置',

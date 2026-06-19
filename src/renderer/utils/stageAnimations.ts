@@ -232,7 +232,7 @@ export const wordByWord: AnimationFn = (element, options = {}) => {
 export const scaleIn: AnimationFn = (element, options = {}) => {
   const { energy = ENERGY_NORMAL, duration = 0.7 } = options
   const tl = createTimeline(prefersReducedMotion())
-  const scaleFrom = 1 - scaleByEnergy(0.5, energy) // 能量越高，缩放起始值越小（0.5 -> 0.25）
+  const scaleFrom = 1 - scaleByEnergy(0.5, energy)
 
   tl.fromTo(
     element,
@@ -247,6 +247,16 @@ export const scaleIn: AnimationFn = (element, options = {}) => {
       ease: 'back.out(1.7)',
     }
   )
+
+  // 动画完成后清除所有动画属性
+  tl.eventCallback('onComplete', () => {
+    gsap.set(element, { clearProps: 'scale,autoAlpha,opacity,transform' })
+  })
+
+  // 动画被中断时也清除属性
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'scale,autoAlpha,opacity,transform' })
+  })
 
   return tl
 }
@@ -276,7 +286,12 @@ export const blurIn: AnimationFn = (element, options = {}) => {
 
   // 动画完成后清除 filter 属性，避免影响性能
   tl.eventCallback('onComplete', () => {
-    gsap.set(element, { clearProps: 'filter' })
+    gsap.set(element, { clearProps: 'filter,autoAlpha,opacity' })
+  })
+
+  // 动画被中断时也清除属性
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'filter,autoAlpha,opacity' })
   })
 
   return tl
@@ -399,9 +414,11 @@ export const exit: AnimationFn = (element, options = {}) => {
  * 2 - slideTop（上方滑入）
  * 3 - slideBottom（下方滑入）
  * 4 - fadeIn（淡入）
- * 5 - wordByWord（逐字淡入）
- * 6 - scaleIn（缩放进入）
- * 7 - blurIn（模糊进入）
+ * 5 - scaleIn（缩放进入）
+ * 6 - blurIn（模糊进入）
+ * 
+ * 注意：wordByWord 不在此数组中，因为它会修改 DOM 结构（清空 textContent 创建 span）
+ * 只用于节奏模式的逐词显示
  */
 export const normalAnimations: AnimationFn[] = [
   slideRight,
@@ -409,7 +426,6 @@ export const normalAnimations: AnimationFn[] = [
   slideTop,
   slideBottom,
   fadeIn,
-  wordByWord,
   scaleIn,
   blurIn,
 ]

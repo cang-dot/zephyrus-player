@@ -40,6 +40,17 @@ export default {
           900: '#14532d',
           950: '#052e16'
         }
+      },
+      boxShadow: {
+        'primary': '0 4px 14px 0 var(--dynamic-primary, #22c55e)',
+        'primary-sm': '0 2px 7px 0 var(--dynamic-primary, #22c55e)',
+        'primary-lg': '0 10px 25px 0 var(--dynamic-primary, #22c55e)',
+      },
+      ringColor: {
+        primary: 'var(--dynamic-primary, #22c55e)',
+      },
+      ringWidth: {
+        primary: '2px',
       }
     }
   },
