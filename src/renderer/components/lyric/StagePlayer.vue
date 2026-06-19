@@ -10,9 +10,13 @@
       >
         <!-- 背景层：封面模糊 + 烟雾 -->
         <div class="background-cover" :style="backgroundCoverStyle"></div>
-        <div class="background-smoke" :style="smokeStyle1"></div>
+        <div class="background-smoke smoke-1" :style="smokeStyle1"></div>
         <div class="background-smoke smoke-2" :style="smokeStyle2"></div>
+        <div class="background-smoke smoke-3" :style="smokeStyle3"></div>
+        <div class="background-smoke smoke-4" :style="smokeStyle4"></div>
         <div class="background-vignette"></div>
+        <!-- 浮动粒子 -->
+        <div class="particles-container" ref="particlesContainer"></div>
 
         <!-- 左上角：关闭按钮 -->
         <transition name="close-fade">
@@ -283,11 +287,19 @@ const backgroundCoverStyle = computed(() => {
 });
 
 const smokeStyle1 = computed(() => ({
-  background: `radial-gradient(ellipse at 30% 70%, ${smokeColor.value} 0%, transparent 55%)`
+  background: `radial-gradient(ellipse at 25% 75%, ${smokeColor.value} 0%, transparent 55%)`
 }));
 
 const smokeStyle2 = computed(() => ({
-  background: `radial-gradient(ellipse at 70% 30%, ${smokeColor2.value} 0%, transparent 55%)`
+  background: `radial-gradient(ellipse at 75% 25%, ${smokeColor2.value} 0%, transparent 50%)`
+}));
+
+const smokeStyle3 = computed(() => ({
+  background: `radial-gradient(ellipse at 50% 50%, ${smokeColor.value} 0%, transparent 45%)`
+}));
+
+const smokeStyle4 = computed(() => ({
+  background: `radial-gradient(ellipse at 80% 80%, ${smokeColor2.value} 0%, transparent 40%)`
 }));
 
 // ==================== 歌词样式（响应式字号） ====================
@@ -328,8 +340,10 @@ const lyricStyle = computed(() => ({
 
 const isFullScreen = ref(false);
 const lyricRef = ref<HTMLElement | null>(null);
+const particlesContainer = ref<HTMLElement | null>(null);
 const displayText = ref('');
 let currentTimeline: gsap.core.Timeline | null = null;
+let particleInterval: ReturnType<typeof setInterval> | null = null;
 
 // ==================== 动画模式检测 ====================
 
@@ -559,6 +573,7 @@ function handleFullScreenChange() {
 onMounted(() => {
   resetHideTimer();
   document.addEventListener('fullscreenchange', handleFullScreenChange);
+  startParticles();
 });
 
 onBeforeUnmount(() => {
@@ -566,11 +581,56 @@ onBeforeUnmount(() => {
     clearTimeout(hideTimer);
     hideTimer = null;
   }
+  if (particleInterval) {
+    clearInterval(particleInterval);
+    particleInterval = null;
+  }
   document.removeEventListener('fullscreenchange', handleFullScreenChange);
   if (document.fullscreenElement) {
     document.exitFullscreen();
   }
 });
+
+// ==================== 粒子系统 ====================
+
+function startParticles() {
+  if (particleInterval) clearInterval(particleInterval);
+  particleInterval = setInterval(() => {
+    if (!particlesContainer.value) return;
+    createParticle();
+  }, 800);
+}
+
+function createParticle() {
+  if (!particlesContainer.value) return;
+  const particle = document.createElement('div');
+  particle.className = 'particle';
+  
+  // 随机大小 2-6px
+  const size = Math.random() * 4 + 2;
+  // 随机水平位置
+  const startX = Math.random() * 100;
+  // 随机动画时长 8-15秒
+  const duration = Math.random() * 7 + 8;
+  // 随机延迟
+  const delay = Math.random() * 2;
+  
+  particle.style.cssText = `
+    width: ${size}px;
+    height: ${size}px;
+    left: ${startX}%;
+    bottom: -10px;
+    animation: particleFloat ${duration}s ${delay}s linear infinite;
+    opacity: 0;
+  `;
+  
+  particlesContainer.value.appendChild(particle);
+  
+  // 15秒后移除粒子
+  setTimeout(() => {
+    particle.remove();
+  }, (duration + delay) * 1000);
+}
 </script>
 
 <style scoped lang="scss">
@@ -615,29 +675,120 @@ onBeforeUnmount(() => {
   background-position: center;
   pointer-events: none;
   will-change: transform;
+  animation: coverPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes coverPulse {
+  0% { transform: scale(1.15); filter: blur(50px) brightness(0.9) saturate(1.4); }
+  100% { transform: scale(1.25); filter: blur(50px) brightness(1.1) saturate(1.6); }
 }
 
 .background-smoke {
   position: absolute;
-  inset: 0;
+  inset: -20%;
   pointer-events: none;
   will-change: transform;
   transition: background 2s ease;
   mix-blend-mode: screen;
 }
 
-.smoke-2 { animation: smokeDrift 25s ease-in-out infinite alternate; }
+.smoke-1 {
+  animation: smoke1Drift 18s ease-in-out infinite alternate,
+             smokeBreath 6s ease-in-out infinite;
+}
 
-@keyframes smokeDrift {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(4%, -3%) scale(1.08); }
+.smoke-2 {
+  animation: smoke2Drift 22s ease-in-out infinite alternate,
+             smokeBreath 8s ease-in-out infinite 2s;
+}
+
+.smoke-3 {
+  animation: smoke3Drift 28s ease-in-out infinite alternate,
+             smokeBreath 10s ease-in-out infinite 4s;
+}
+
+.smoke-4 {
+  animation: smoke4Drift 25s ease-in-out infinite alternate,
+             smokeBreath 7s ease-in-out infinite 1s;
+}
+
+@keyframes smoke1Drift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(5%, -4%) scale(1.1) rotate(8deg); }
+}
+
+@keyframes smoke2Drift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(-4%, 5%) scale(1.15) rotate(-6deg); }
+}
+
+@keyframes smoke3Drift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(3%, 3%) scale(1.08) rotate(10deg); }
+}
+
+@keyframes smoke4Drift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(-3%, -5%) scale(1.12) rotate(-8deg); }
+}
+
+@keyframes smokeBreath {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 .background-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%);
+  animation: vignettePulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes vignettePulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+// ==================== 粒子 ====================
+
+.particles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+    transform: translateY(-10vh) translateX(5px) scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: translateY(-50vh) translateX(-10px) scale(0.8);
+  }
+  90% {
+    opacity: 0.1;
+    transform: translateY(-90vh) translateX(15px) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) translateX(0) scale(0);
+  }
 }
 
 // ==================== 控制按钮 ====================
