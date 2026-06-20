@@ -103,6 +103,33 @@ export function initializeFileManager() {
     return result;
   });
 
+  // 选择歌词文件
+  ipcMain.handle('select-file', async (_, options?: { filters?: Array<{ name: string; extensions: string[] }> }) => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      title: '选择歌词文件',
+      filters: options?.filters || [
+        { name: '歌词文件', extensions: ['lrc', 'ttml', 'txt'] },
+        { name: '所有文件', extensions: ['*'] }
+      ]
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      return null;
+    }
+    return result.filePaths[0];
+  });
+
+  // 读取文件内容
+  ipcMain.handle('read-file', async (_, filePath: string) => {
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      return content;
+    } catch (error) {
+      console.error('读取文件失败:', error);
+      return null;
+    }
+  });
+
   // 通用的打开目录处理
   ipcMain.on('open-directory', (_, filePath) => {
     try {
@@ -503,7 +530,7 @@ async function downloadMusic(
     const sanitizedFilename = sanitizeFilename(formattedFilename);
 
     // 创建临时文件路径 (在系统临时目录中创建)
-    const tempDir = path.join(os.tmpdir(), 'AlgerMusicPlayerTemp');
+    const tempDir = path.join(os.tmpdir(), 'ThymosMusicPlayerTemp');
 
     // 确保临时目录存在
     if (!fs.existsSync(tempDir)) {

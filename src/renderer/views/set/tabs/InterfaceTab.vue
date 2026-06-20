@@ -13,6 +13,59 @@
     </setting-item>
   </setting-section>
 
+  <!-- 本地歌词文件指定 -->
+  <div class="mt-4">
+    <div class="mb-2">
+      <div class="text-base font-medium text-gray-900 dark:text-white">
+        本地歌词文件
+      </div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="sidebar-item" v-if="currentSongId">
+        <div class="sidebar-item-left">
+          <i class="ri-file-music-line sidebar-item-icon"></i>
+          <div class="sidebar-item-name">
+            <div class="text-sm font-medium">{{ currentSongName }}</div>
+            <div class="text-xs text-gray-400">{{ localLyricPath || '未指定歌词文件' }}</div>
+          </div>
+        </div>
+        <div class="sidebar-item-right">
+          <button class="sidebar-btn" @click="selectLocalLyric" title="选择歌词文件">
+            <i class="ri-folder-open-line"></i>
+          </button>
+          <button v-if="localLyricPath" class="sidebar-btn" @click="clearLocalLyric" title="清除">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+      </div>
+      <div v-else class="text-sm text-gray-400 italic">请先播放一首歌曲</div>
+
+      <!-- 已绑定歌词列表 -->
+      <div v-if="boundLyrics.length > 0" class="mt-3">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">已绑定的歌词文件</div>
+        <div class="space-y-1">
+          <div v-for="(item, index) in boundLyrics" :key="item.songId" class="sidebar-item">
+            <div class="sidebar-item-left">
+              <i class="ri-music-2-line sidebar-item-icon text-xs"></i>
+              <div class="sidebar-item-name">
+                <div class="text-xs">{{ item.songName }}</div>
+                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">{{ item.filePath.split(/[/\\]/).pop() }}</div>
+              </div>
+            </div>
+            <div class="sidebar-item-right">
+              <button class="sidebar-btn" @click="removeBoundLyric(item.songId)" title="解除绑定">
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 侧边栏项目排序（独立区域） -->
   <div class="mt-4">
     <div class="mb-2">
@@ -68,16 +121,107 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed } from 'vue';
+import { inject, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { SETTINGS_DATA_KEY } from '../keys';
 import SettingItem from '../SettingItem.vue';
 import SettingSection from '../SettingSection.vue';
 import SSelect from '../SSelect.vue';
+import { usePlayerStore } from '@/store/modules/player';
+import {
+  getLocalLyricMap,
+  getLocalLyricPath,
+  setLocalLyricPath,
+  removeLocalLyricPath,
+  selectLyricFile,
+  readLocalLyricFile
+} from '@/utils/localLyricStorage';
+import { parseLyrics } from '@/utils/yrcParser';
+import { parseTtml } from '@/utils/ttmlParser';
 
 const { t } = useI18n();
 const setData = inject(SETTINGS_DATA_KEY)!;
+const playerStore = usePlayerStore();
+
+// 本地歌词相关
+const currentSongId = computed(() => playerStore.playMusic?.id?.toString() || '');
+const currentSongName = computed(() => playerStore.playMusic?.name || '');
+
+const localLyricPath = computed(() => {
+  if (!currentSongId.value) return null;
+  return getLocalLyricPath(currentSongId.value);
+});
+
+// 所有已绑定的歌词列表
+const boundLyrics = computed(() => {
+  const map = getLocalLyricMap();
+  const playerStore = usePlayerStore();
+  return Object.entries(map).map(([songId, filePath]) => {
+    // 尝试从播放列表中获取歌曲名
+    let songName = `歌曲 ${songId}`;
+    const playList = playerStore.playList;
+    if (playList) {
+      const found = playList.find((item: any) => item.id?.toString() === songId);
+      if (found) songName = found.name || songName;
+    }
+    return { songId, songName, filePath };
+  });
+});
+
+async function selectLocalLyric() {
+  if (!currentSongId.value) return;
+  const filePath = await selectLyricFile();
+  if (filePath) {
+    setLocalLyricPath(currentSongId.value, filePath);
+    // 重新加载歌词
+    await reloadCurrentLyric();
+  }
+}
+
+function clearLocalLyric() {
+  if (!currentSongId.value) return;
+  removeLocalLyricPath(currentSongId.value);
+}
+
+function removeBoundLyric(songId: string) {
+  removeLocalLyricPath(songId);
+}
+
+async function reloadCurrentLyric() {
+  if (!currentSongId.value) return;
+  const filePath = getLocalLyricPath(currentSongId.value);
+  if (!filePath) return;
+
+  const content = await readLocalLyricFile(filePath);
+  if (!content) return;
+
+  // 根据文件扩展名判断格式
+  const isTtml = filePath.toLowerCase().endsWith('.ttml');
+  if (isTtml) {
+    const ttmlLines = parseTtml(content);
+    // 触发歌词更新
+    playerStore.playMusic.lyric = {
+      lrcArray: ttmlLines,
+      lrcTimeArray: ttmlLines.map(l => l.startTime || 0)
+    };
+  } else {
+    // LRC 格式
+    const { lyrics } = parseLyrics(content);
+    const lrcArray = lyrics.map(l => ({
+      text: l.fullText,
+      trText: '',
+      words: l.words?.map(w => ({ text: w.text, startTime: w.startTime, duration: w.duration })),
+      hasWordByWord: l.words && l.words.length > 1,
+      startTime: l.startTime,
+      duration: l.duration
+    }));
+    playerStore.playMusic.lyric = {
+      lrcArray,
+      lrcTimeArray: lrcArray.map(l => l.startTime || 0)
+    };
+  }
+}
 
 // 所有侧边栏项目定义
 const allSidebarRoutes = [

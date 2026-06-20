@@ -34,6 +34,10 @@
           <basic-tab />
         </div>
 
+        <div v-show="currentSection === 'interface'" class="animate-fade-in">
+          <interface-tab />
+        </div>
+
         <div v-show="currentSection === 'playback'" class="animate-fade-in">
           <playback-tab />
         </div>
@@ -52,10 +56,6 @@
 
         <div v-show="currentSection === 'about'" class="animate-fade-in">
           <about-tab />
-        </div>
-
-        <div v-show="currentSection === 'donation'" class="animate-fade-in">
-          <donation-tab />
         </div>
 
         <div class="h-20"></div>
@@ -81,7 +81,7 @@ import { SETTINGS_DATA_KEY, SETTINGS_DIALOG_KEY, SETTINGS_MESSAGE_KEY } from './
 import AboutTab from './tabs/AboutTab.vue';
 import ApplicationTab from './tabs/ApplicationTab.vue';
 import BasicTab from './tabs/BasicTab.vue';
-import DonationTab from './tabs/DonationTab.vue';
+import InterfaceTab from './tabs/InterfaceTab.vue';
 import NetworkTab from './tabs/NetworkTab.vue';
 import PlaybackTab from './tabs/PlaybackTab.vue';
 import SystemTab from './tabs/SystemTab.vue';
@@ -138,12 +138,12 @@ type SettingSectionConfig = {
 
 const settingSections: SettingSectionConfig[] = [
   { id: 'basic' },
+  { id: 'interface' },
   { id: 'playback' },
   { id: 'application', electron: true },
   { id: 'network', electron: true },
   { id: 'system', electron: true },
-  { id: 'about' },
-  { id: 'donation' }
+  { id: 'about' }
 ];
 
 const navSections = computed(() => {

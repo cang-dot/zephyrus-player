@@ -26,6 +26,7 @@
       @play-next="handlePlayNext"
       @download="downloadMusic(item)"
       @download-lyric="downloadLyric(item)"
+      @bind-local-lyric="bindLocalLyric"
       @toggle-favorite="toggleFavorite"
       @toggle-dislike="toggleDislike"
       @remove="$emit('remove-song', $event)"
@@ -39,6 +40,14 @@ import type { SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
 
 import SongItemDropdown from './SongItemDropdown.vue';
+import {
+  setLocalLyricPath,
+  selectLyricFile,
+  readLocalLyricFile
+} from '@/utils/localLyricStorage';
+import { parseLyrics } from '@/utils/yrcParser';
+import { parseTtml } from '@/utils/ttmlParser';
+import { usePlayerStore } from '@/store/modules/player';
 
 const props = defineProps<{
   item: SongResult;
@@ -49,7 +58,9 @@ const props = defineProps<{
   index?: number;
 }>();
 
-const emits = defineEmits(['play', 'select', 'remove-song']);
+const emits = defineEmits(['play', 'select', 'remove-song', 'bind-local-lyric']);
+
+const playerStore = usePlayerStore();
 
 // 使用公共逻辑
 const {
@@ -86,6 +97,47 @@ const imageLoad = async (event: Event) => {
 // 切换选择状态
 const toggleSelect = () => {
   emits('select', props.item.id, !props.selected);
+};
+
+// 绑定本地歌词文件
+const bindLocalLyric = async () => {
+  if (!isElectron) return;
+  const songId = props.item.id?.toString();
+  if (!songId) return;
+
+  const filePath = await selectLyricFile();
+  if (!filePath) return;
+
+  setLocalLyricPath(songId, filePath);
+
+  // 如果当前正在播放这首歌，立即重新加载歌词
+  if (playerStore.playMusic?.id?.toString() === songId) {
+    const content = await readLocalLyricFile(filePath);
+    if (content) {
+      const isTtml = filePath.toLowerCase().endsWith('.ttml');
+      if (isTtml) {
+        const ttmlLines = parseTtml(content);
+        playerStore.playMusic.lyric = {
+          lrcArray: ttmlLines,
+          lrcTimeArray: ttmlLines.map(l => l.startTime || 0)
+        };
+      } else {
+        const { lyrics } = parseLyrics(content);
+        const lrcArray = lyrics.map(l => ({
+          text: l.fullText,
+          trText: '',
+          words: l.words?.map(w => ({ text: w.text, startTime: w.startTime, duration: w.duration })),
+          hasWordByWord: l.words && l.words.length > 1,
+          startTime: l.startTime,
+          duration: l.duration
+        }));
+        playerStore.playMusic.lyric = {
+          lrcArray,
+          lrcTimeArray: lrcArray.map(l => l.startTime || 0)
+        };
+      }
+    }
+  }
 };
 
 // 把图片处理、艺术家处理等公共方法暴露给子组件

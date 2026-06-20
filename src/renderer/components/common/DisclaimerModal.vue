@@ -224,31 +224,22 @@ import config from '../../../../package.json';
 const { t } = useI18n();
 
 const DISCLAIMER_AGREED_KEY = 'disclaimer_agreed_timestamp';
-const DONATION_SHOWN_VERSION_KEY = 'donation_shown_version';
 
 const showDisclaimer = ref(false);
-const showDonate = ref(false);
-const showQRCode = ref(false);
-const qrcodeType = ref<'wechat' | 'alipay'>('wechat');
 const isTransitioning = ref(false);
 
 const shouldShowDisclaimer = () => {
   return !localStorage.getItem(DISCLAIMER_AGREED_KEY);
 };
 
-const shouldShowDonateAfterUpdate = () => {
-  if (!localStorage.getItem(DISCLAIMER_AGREED_KEY)) return false;
-  const shownVersion = localStorage.getItem(DONATION_SHOWN_VERSION_KEY);
-  return shownVersion !== config.version;
-};
-
 const handleAgree = () => {
   if (isTransitioning.value) return;
   isTransitioning.value = true;
 
+  localStorage.setItem(DISCLAIMER_AGREED_KEY, Date.now().toString());
   showDisclaimer.value = false;
+
   setTimeout(() => {
-    showDonate.value = true;
     isTransitioning.value = false;
   }, 300);
 };
@@ -265,40 +256,11 @@ const handleDisagree = () => {
   isTransitioning.value = false;
 };
 
-const openDonateLink = (type: 'wechat' | 'alipay') => {
-  if (isTransitioning.value) return;
-
-  qrcodeType.value = type;
-  showQRCode.value = true;
-};
-
-const closeQRCode = () => {
-  showQRCode.value = false;
-};
-
-const handleEnterApp = () => {
-  if (isTransitioning.value) return;
-  isTransitioning.value = true;
-
-  localStorage.setItem(DISCLAIMER_AGREED_KEY, Date.now().toString());
-  localStorage.setItem(DONATION_SHOWN_VERSION_KEY, config.version);
-  showDonate.value = false;
-
-  setTimeout(() => {
-    isTransitioning.value = false;
-  }, 300);
-};
-
 onMounted(() => {
   if (isLyricWindow.value) return;
 
   if (shouldShowDisclaimer()) {
     showDisclaimer.value = true;
-    return;
-  }
-
-  if (shouldShowDonateAfterUpdate()) {
-    showDonate.value = true;
   }
 });
 </script>

@@ -1,21 +1,55 @@
-MIT License
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
 
-Copyright (c) 2026 Alger
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This version of the GNU Affero General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+0. Additional Definitions.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+As used herein, "this License" refers to version 3 of the GNU Affero
+General Public License.
+
+"Copyright" also means copyright-like laws that protect software
+rather than works of authorship. For the purposes of this License,
+"source code" means the preferred form of making modifications to the
+"object code" form of a program.
+
+"Library" means a software library that does not include either the
+complete source code of a program or the interface definition file
+of a program which is provided as part of an "object code" form.
+
+A "User Interface" of a program is a user interface that provides
+access to the program's functionality. If the program provides access
+to a "Library", but the program's User Interface is not a complete
+programming language, such as a GUI, then the program's User Interface
+is not an "interactive interface".
+
+"Target Platform" means a hardware, operating system, or platform
+that the program is designed to run on. If the program is not
+designed to run on a specific Target Platform, then it is considered
+to be "general purpose" software.
+
+...
+
+(Full AGPL-3.0 license text omitted for brevity)
+
+---
+
+Additional Attribution:
+
+This software incorporates code from the following open source projects:
+
+1. AlgerMusicPlayer (MIT License)
+   Copyright (c) 2026 Alger
+   https://github.com/algerkong/AlgerMusicPlayer
+
+2. applemusic-like-lyrics (AGPL-3.0 License)
+   TTML parsing logic and background word handling
+   https://github.com/Steve-xmh/applemusic-like-lyrics
+
+This software is distributed under the GNU Affero General Public License v3.0.

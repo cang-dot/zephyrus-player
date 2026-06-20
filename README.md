@@ -122,6 +122,22 @@ src/
 
 ## 📝 更新日志
 
+### v1.0.4 (2026.06.20)
+
+#### ✅ 新增
+- **TTML 歌词解析** - 支持 TTML 格式歌词，含 background words (`isBG`) 渲染
+- **本地歌词绑定** - 右键歌曲可绑定本地 TTML/LRC 歌词文件
+- **设置页本地歌词管理** - 界面设置中可查看/选择/清除已绑定歌词
+
+#### 🔧 修复
+- 修复舞台模式歌词动画属性残留（字体缩小、模糊卡住）
+- 修复舞台模式歌词重复显示问题
+- 修复设置页启动默认页下拉菜单无法正常显示的问题
+- 修复右键菜单"绑定本地歌词文件"点击无响应的问题（emit 未触发）
+- 移除捐赠模块
+
+---
+
 ### v1.0.2 (2026.06.19)
 
 #### ✅ 新增
@@ -179,7 +195,7 @@ src/
 
 ## 📜 许可证
 
-[MIT License](LICENSE) - 基于 [AlgerMusicPlayer](https://github.com/algerkong/AlgerMusicPlayer) 修改
+[AGPL-3.0 License](LICENSE) - 基于 [AlgerMusicPlayer](https://github.com/algerkong/AlgerMusicPlayer) 修改
 
 ---
 

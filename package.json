@@ -1,10 +1,10 @@
 {
-  "name": "AlgerMusicPlayer",
-  "version": "5.1.0",
-  "description": "Alger Music Player",
-  "author": "Alger <algerkc@qq.com>",
+  "name": "ThymosMusicPlayer",
+  "version": "1.0.4",
+  "description": "Thymos Music Player",
+  "author": "Thymos <WEISTUDIOWEI@126.com>",
   "main": "./out/main/index.js",
-  "homepage": "https://github.com/algerkong/AlgerMusicPlayer",
+  "homepage": "https://github.com/cang-dot/thymos-music-player",
   "scripts": {
     "prepare": "husky",
     "format": "prettier --write ./src",
@@ -118,13 +118,13 @@
     "vue-tsc": "^2.2.12"
   },
   "build": {
-    "appId": "com.alger.music",
-    "productName": "AlgerMusicPlayer",
+    "appId": "com.thymos.music",
+    "productName": "ThymosMusicPlayer",
     "publish": [
       {
         "provider": "github",
-        "owner": "algerkong",
-        "repo": "AlgerMusicPlayer"
+        "owner": "cang-dot",
+        "repo": "thymos-music-player"
       }
     ],
     "extraResources": [
@@ -149,7 +149,7 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "AlgerMusicPlayer needs access to the microphone for audio visualization.",
+        "NSMicrophoneUsageDescription": "ThymosMusicPlayer needs access to the microphone for audio visualization.",
         "NSCameraUsageDescription": "Application requests access to the device's camera.",
         "NSDocumentsFolderUsageDescription": "Application requests access to the user's Documents folder.",
         "NSDownloadsFolderUsageDescription": "Application requests access to the user's Downloads folder."
@@ -158,7 +158,7 @@
       "identity": null,
       "type": "distribution",
       "binaries": [
-        "Contents/MacOS/AlgerMusicPlayer"
+        "Contents/MacOS/ThymosMusicPlayer"
       ]
     },
     "win": {
@@ -203,7 +203,7 @@
       ],
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
       "category": "Audio",
-      "maintainer": "Alger <algerkc@qq.com>"
+      "maintainer": "Thymos <WEISTUDIOWEI@126.com>"
     },
     "nsis": {
       "oneClick": false,
@@ -212,10 +212,10 @@
       "uninstallerIcon": "resources/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "AlgerMusicPlayer",
+      "shortcutName": "ThymosMusicPlayer",
       "include": "build/installer.nsh",
       "deleteAppDataOnUninstall": true,
-      "uninstallDisplayName": "AlgerMusicPlayer"
+      "uninstallDisplayName": "ThymosMusicPlayer"
     }
   },
   "pnpm": {

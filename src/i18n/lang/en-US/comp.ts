@@ -75,18 +75,6 @@ export default {
     agree: 'I have read and agree',
     disagree: 'Disagree and Exit'
   },
-  donate: {
-    title: 'Support Developer',
-    subtitle: 'Your support is my motivation',
-    tip: 'Donation is completely voluntary. All functions can be used normally without donation. Thank you for your understanding and support!',
-    wechat: 'WeChat',
-    alipay: 'Alipay',
-    wechatQR: 'WeChat QR Code',
-    alipayQR: 'Alipay QR Code',
-    scanTip: 'Please use your phone to scan the QR code above to donate',
-    enterApp: 'Enter App',
-    noForce: 'No forced donation, click to enter'
-  },
   coffee: {
     title: 'Buy me a coffee',
     alipay: 'Alipay',
@@ -95,7 +83,7 @@ export default {
     wechatQR: 'Wechat QR code',
     coffeeDesc: 'A cup of coffee, a support',
     coffeeDescLinkText: 'View more',
-    groupText: 'Wechat Public Account: AlgerMusic',
+    groupText: 'Wechat Public Account: ThymosMusic',
     messages: {
       copySuccess: 'Copied to clipboard'
     },

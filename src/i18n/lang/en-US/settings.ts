@@ -10,7 +10,6 @@ export default {
     application: 'Application Settings',
     network: 'Network Settings',
     system: 'System Management',
-    donation: 'Donation',
     about: 'About'
   },
   basic: {

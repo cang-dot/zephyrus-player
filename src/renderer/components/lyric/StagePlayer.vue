@@ -65,6 +65,17 @@
 
         <!-- 中央：歌词显示区 -->
         <div class="lyric-container">
+          <!-- 背景词层 -->
+          <transition name="bg-fade">
+            <div
+              v-if="backgroundLine?.text"
+              class="background-lyric"
+              :style="lyricStyle"
+            >
+              {{ backgroundLine.text }}
+            </div>
+          </transition>
+          <!-- 主歌词层 -->
           <div
             ref="lyricRef"
             class="single-lyric"
@@ -120,8 +131,6 @@ import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
 import LyricSettings from './LyricSettings.vue';
 
-const animationSelector = new AnimationSelector(7);
-
 // 从 localStorage 读取动画强度设置
 const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {
   try {
@@ -141,6 +150,13 @@ const currentAnimations = computed(() => {
     case 'power': return powerAnimations;
     default: return normalAnimations;
   }
+});
+
+let animationSelector = new AnimationSelector(currentAnimations.value.length);
+
+// 动画强度变更时重建选择器，确保总数匹配
+watch(animationIntensity, () => {
+  animationSelector = new AnimationSelector(currentAnimations.value.length);
 });
 
 // ==================== Props & Emits ====================
@@ -164,9 +180,19 @@ const isVisible = computed({
 const currentLine = computed<ILyricText | undefined>(() => lrcArray.value[nowIndex.value]);
 const currentLineKey = computed(() => `${nowIndex.value}-${currentLine.value?.text}`);
 
+// 背景词：查找当前歌词的下一行 isBG 为 true 的歌词
+const backgroundLine = computed(() => {
+  if (nowIndex.value < 0) return undefined;
+  const nextIdx = nowIndex.value + 1;
+  if (nextIdx < lrcArray.value.length) {
+    const nextLine = lrcArray.value[nextIdx];
+    if (nextLine?.isBG) return nextLine;
+  }
+  return undefined;
+});
+
 const controlsVisible = ref(true);
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
-let prevLineIndex = -1;
 
 // ==================== 播放器样式切换 ====================
 
@@ -327,6 +353,7 @@ let currentTimeline: gsap.core.Timeline | null = null;
 let particleInterval: ReturnType<typeof setInterval> | null = null;
 let lastProcessedIndex = -1;
 let pendingRafId: number | null = null;
+let animationCycleId = 0;
 
 // ==================== 歌词动画 ====================
 
@@ -385,19 +412,31 @@ watch(
   }
 );
 
-// 动画方向映射：根据动画索引和强度决定初始位置
+// 动画方向映射：根据动画索引和强度决定初始位置/缩放/模糊
 function getAnimationDirection(animIndex: number): { x?: number; y?: number; scale?: number; blur?: number } {
   const intensity = animationIntensity.value;
   const mult = intensity === 'power' ? 1.8 : intensity === 'soft' ? 0.5 : 1;
+
+  // 索引 0-4 在所有强度下含义相同
   const dirs: Record<number, { x?: number; y?: number; scale?: number; blur?: number }> = {
-    0: { x: Math.round(80 * mult) },   // slideRight
-    1: { x: Math.round(-80 * mult) },  // slideLeft
-    2: { y: Math.round(-50 * mult) },  // slideTop
-    3: { y: Math.round(50 * mult) },   // slideBottom
-    4: {},                               // fadeIn
-    5: { scale: intensity === 'power' ? 0.3 : intensity === 'soft' ? 0.8 : 0.5 }, // scaleIn
-    6: { blur: intensity === 'power' ? 20 : intensity === 'soft' ? 5 : 12 },       // blurIn
+    0: { x: Math.round(80 * mult) },
+    1: { x: Math.round(-80 * mult) },
+    2: { y: Math.round(-50 * mult) },
+    3: { y: Math.round(50 * mult) },
+    4: {},
   };
+
+  if (intensity === 'normal') {
+    // 普通模式: 5=scaleIn, 6=blurIn
+    dirs[5] = { scale: 0.5 };
+    dirs[6] = { blur: 12 };
+  } else {
+    // 力量/柔和模式: 5=wordByWord(无需方向), 6=scaleIn, 7=blurIn
+    dirs[5] = {};
+    dirs[6] = { scale: intensity === 'power' ? 0.3 : 0.8 };
+    dirs[7] = { blur: intensity === 'power' ? 20 : 5 };
+  }
+
   return dirs[animIndex] || {};
 }
 
@@ -405,7 +444,6 @@ watch(
   () => nowIndex.value,
   (newIndex, oldIndex) => {
     if (newIndex === oldIndex) return;
-    prevLineIndex = newIndex;
 
     const el = lyricRef.value;
     if (!el) return;
@@ -422,16 +460,29 @@ watch(
       currentTimeline = null;
     }
 
+    // 递增动画周期ID，防止旧周期的回调在新周期中执行
+    const cycleId = ++animationCycleId;
+
     const animIndex = animationSelector.select(newIndex);
     const direction = getAnimationDirection(animIndex);
+    const newText = currentLine.value?.text || '';
+
+    // 立即更新 displayText，防止快速切歌词时重复显示旧文字
+    if (displayText.value !== newText) {
+      displayText.value = newText;
+    }
+    lastProcessedIndex = newIndex;
 
     // 划入动画（索引0-3）使用直接隐藏，其他使用渐隐
     const isSlideIn = animIndex >= 0 && animIndex <= 3;
-    const hasCurrentText = displayText.value.length > 0;
+    const hadPreviousText = oldIndex >= 0 && oldIndex < lrcArray.value.length;
 
-    if (hasCurrentText) {
-      if (isSlideIn) {
-        // 滑入动画：先重置所有属性，然后隐藏
+    if (hadPreviousText && !isSlideIn) {
+      // 非滑入动画：先退场淡出，再入场（用 onComplete + cycleId 取代 .call()）
+      const exitTl = gsap.timeline();
+      exitTl.to(el, { autoAlpha: 0, duration: 0.25, ease: 'power2.in' });
+      exitTl.eventCallback('onComplete', () => {
+        if (animationCycleId !== cycleId) return;
         gsap.set(el, {
           x: 0,
           y: 0,
@@ -442,49 +493,28 @@ watch(
           clearProps: 'transform'
         });
         nextTick(() => {
-          // 检查索引是否仍是最新的
-          if (nowIndex.value !== newIndex) return;
-          const text = currentLine.value?.text || '';
-          displayText.value = text;
-          lastProcessedIndex = newIndex;
-          pendingRafId = requestAnimationFrame(() => {
-            if (nowIndex.value !== newIndex) return;
-            applyEnterAnimation(el, text, animIndex, direction);
-          });
+          if (animationCycleId !== cycleId) return;
+          applyEnterAnimation(el, newText, animIndex, direction);
         });
-      } else {
-        const exitTl = gsap.timeline();
-        exitTl.to(el, { autoAlpha: 0, duration: 0.25, ease: 'power2.in' });
-        exitTl.call(() => {
-          // 退出动画完成后，重置所有属性
-          gsap.set(el, {
-            x: 0,
-            y: 0,
-            scale: 1,
-            rotation: 0,
-            filter: 'none',
-            autoAlpha: 0,
-            clearProps: 'transform'
-          });
-        });
-        exitTl.call(() => {
-          nextTick(() => {
-            // 检查索引是否仍是最新的
-            if (nowIndex.value !== newIndex) return;
-            const text = currentLine.value?.text || '';
-            lastProcessedIndex = newIndex;
-            applyEnterAnimation(el, text, animIndex, direction);
-          });
-        });
-        currentTimeline = exitTl;
-      }
+      });
+      currentTimeline = exitTl;
     } else {
+      // 滑入动画或无前文：直接重置后入场
+      gsap.set(el, {
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        filter: 'none',
+        autoAlpha: 0,
+        clearProps: 'transform'
+      });
       nextTick(() => {
-        // 检查索引是否仍是最新的
-        if (nowIndex.value !== newIndex) return;
-        const text = currentLine.value?.text || '';
-        lastProcessedIndex = newIndex;
-        applyEnterAnimation(el, text, animIndex, direction);
+        if (animationCycleId !== cycleId) return;
+        pendingRafId = requestAnimationFrame(() => {
+          if (animationCycleId !== cycleId) return;
+          applyEnterAnimation(el, newText, animIndex, direction);
+        });
       });
     }
   }
@@ -496,18 +526,18 @@ function applyEnterAnimation(
   animIndex: number,
   direction: { x?: number; y?: number; scale?: number; blur?: number }
 ) {
-  // 强制重置所有可能被动画设置的属性到默认值
-  // 注意：不设置 autoAlpha，由动画本身控制
+  // 强制重置所有属性，并设为不可见（防止 Vue 渲染文字后闪帧）
   gsap.set(el, {
     x: 0,
     y: 0,
     scale: 1,
     rotation: 0,
     filter: 'none',
+    autoAlpha: 0,
     clearProps: 'transform'
   });
 
-  // 设置位置/缩放/模糊（不动画透明度，由动画本身控制）
+  // 设置位置/缩放/模糊
   const initProps: gsap.TweenVars = { duration: 0 };
   if (direction.x !== undefined) initProps.x = direction.x;
   if (direction.y !== undefined) initProps.y = direction.y;
@@ -518,7 +548,7 @@ function applyEnterAnimation(
   // 更新文字
   displayText.value = text;
 
-  // 下一帧执行入场动画（动画内部会从 autoAlpha:0 → autoAlpha:1）
+  // 下一帧执行入场动画
   requestAnimationFrame(() => {
     const animFn = currentAnimations.value[animIndex];
     if (animFn && typeof animFn === 'function') {
@@ -660,6 +690,10 @@ function createParticle() {
 
 .tr-fade-enter-active, .tr-fade-leave-active { transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
 .tr-fade-enter-from, .tr-fade-leave-to { opacity: 0; }
+
+.bg-fade-enter-active { transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
+.bg-fade-leave-active { transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+.bg-fade-enter-from, .bg-fade-leave-to { opacity: 0; }
 
 // ==================== 容器 ====================
 
@@ -883,6 +917,19 @@ function createParticle() {
   pointer-events: none;
 }
 
+// 背景词样式：40% 透明度，70% 字号，位于主歌词后面
+.background-lyric {
+  position: absolute;
+  font-size: 0.7em;
+  opacity: 0.4;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
 .single-lyric {
   font-size: clamp(32px, 5vw, 56px);
   font-weight: 700;
@@ -893,12 +940,10 @@ function createParticle() {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .lyric-word {
   display: inline-block;
-  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .lyric-translation {

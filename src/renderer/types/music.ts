@@ -33,6 +33,7 @@ export interface ILyricText {
   hasWordByWord?: boolean;
   startTime?: number;
   duration?: number;
+  isBG?: boolean;
 }
 
 export interface ILyric {

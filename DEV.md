@@ -1,4 +1,4 @@
-# Alger Music Player 开发文档
+# Thymos Music Player 开发文档
 
 ## 项目结构
 
@@ -21,7 +21,7 @@
 ### 项目结构
 
 ```
-AlgerMusicPlayer/
+ThymosMusicPlayer/
 ├── build/                  # 构建相关文件
 ├── docs/                   # 项目文档
 ├── node_modules/           # 依赖包

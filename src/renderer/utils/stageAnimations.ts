@@ -360,6 +360,13 @@ export const wordVibrate: AnimationFn = (element, options = {}) => {
     ease: 'power2.out',
   })
 
+  tl.eventCallback('onComplete', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
+
   return tl
 }
 
@@ -543,6 +550,12 @@ export const powerScaleIn: AnimationFn = (element, options = {}) => {
   tl.fromTo(element, { scale: scaleFrom, autoAlpha: 0 }, {
     scale: 1, autoAlpha: 1, duration, ease: 'elastic.out(1, 0.4)',
   })
+  tl.eventCallback('onComplete', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
   return tl
 }
 
@@ -558,7 +571,10 @@ export const powerBlurIn: AnimationFn = (element, options = {}) => {
     filter: 'blur(0px)', autoAlpha: 1, duration, ease: 'power5.out',
   })
   tl.eventCallback('onComplete', () => {
-    gsap.set(element, { clearProps: 'filter' })
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
   })
   return tl
 }
@@ -591,6 +607,12 @@ export const powerWordVibrate: AnimationFn = (element, options = {}) => {
     x: `+=${vibrateAmount}`, duration: duration * 0.05, ease: 'none', repeat: vibrateCount, yoyo: true,
   })
   tl.to(element, { x: 0, duration: duration * 0.05, ease: 'power4.out' })
+  tl.eventCallback('onComplete', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
   return tl
 }
 
@@ -698,6 +720,12 @@ export const softScaleIn: AnimationFn = (element, options = {}) => {
   tl.fromTo(element, { scale: scaleFrom, autoAlpha: 0 }, {
     scale: 1, autoAlpha: 1, duration, ease: 'power1.out',
   })
+  tl.eventCallback('onComplete', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
+  })
   return tl
 }
 
@@ -710,7 +738,10 @@ export const softBlurIn: AnimationFn = (element, options = {}) => {
     filter: 'blur(0px)', autoAlpha: 1, duration, ease: 'power1.out',
   })
   tl.eventCallback('onComplete', () => {
-    gsap.set(element, { clearProps: 'filter' })
+    gsap.set(element, { clearProps: 'all' })
+  })
+  tl.eventCallback('onInterrupt', () => {
+    gsap.set(element, { clearProps: 'all' })
   })
   return tl
 }

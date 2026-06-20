@@ -633,7 +633,6 @@ export const getLrcIndex = (time: number): number => {
   // 处理最后一句歌词的情况
   const lastIndex = lrcTimeArray.value.length - 1;
   if (correctedTime >= lrcTimeArray.value[lastIndex]) {
-    nowIndex.value = lastIndex;
     return lastIndex;
   }
 
@@ -643,7 +642,6 @@ export const getLrcIndex = (time: number): number => {
     const nextTime = lrcTimeArray.value[i + 1];
 
     if (correctedTime >= currentTime && correctedTime < nextTime) {
-      nowIndex.value = i;
       return i;
     }
   }

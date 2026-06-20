@@ -42,6 +42,7 @@ const emits = defineEmits([
   'play-next',
   'download',
   'download-lyric',
+  'bind-local-lyric',
   'add-to-playlist',
   'toggle-favorite',
   'toggle-dislike',
@@ -160,6 +161,11 @@ const dropdownOptions = computed<MenuOption[]>(() => {
       icon: () => h('i', { class: 'iconfont ri-file-text-line' })
     },
     {
+      label: '绑定本地歌词文件',
+      key: 'bindLocalLyric',
+      icon: () => h('i', { class: 'iconfont ri-link' })
+    },
+    {
       label: t('songItem.menu.addToPlaylist'),
       key: 'addToPlaylist',
       icon: () => h('i', { class: 'iconfont ri-folder-add-line' }),
@@ -226,6 +232,9 @@ const handleSelect = (key: string | number) => {
       break;
     case 'remove':
       emits('remove', props.item.id);
+      break;
+    case 'bindLocalLyric':
+      emits('bind-local-lyric');
       break;
     case 'dislike':
       emits('toggle-dislike');
