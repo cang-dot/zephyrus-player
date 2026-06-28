@@ -184,7 +184,8 @@ const checkTargetUser = () => {
   return checkLoginStatus();
 };
 
-// 妫€鏌ョ櫥褰曠姸鎬?const checkLoginStatus = () => {
+// 检查登录状态
+const checkLoginStatus = () => {
   const loginInfo = checkAuthStatus();
   if (!loginInfo.isLoggedIn) {
     router.push('/login');
