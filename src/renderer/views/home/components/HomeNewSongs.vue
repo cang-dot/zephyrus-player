@@ -22,7 +22,7 @@
       <div v-for="i in 10" :key="i" class="h-20 skeleton-shimmer rounded-xl md:rounded-2xl" />
     </div>
 
-    <!-- Songs Grid (Even columns: 1鈫?鈫?鈫?鈫?) -->
+    <!-- Songs Grid (Even columns: 1鈫?鈫?鈫?鈫') -->
     <div v-else class="songs-grid grid gap-2 md:gap-3" :class="gridClass">
       <song-item
         v-for="(song, index) in songs"

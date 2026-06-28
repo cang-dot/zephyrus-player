@@ -188,7 +188,8 @@ const playlistStore = usePlaylistStore();
 const playerStore = usePlayerStore();
 const userStore = useUserStore();
 
-// 鏈湴鐘舵€?const currentRadio = ref<DjRadio | null>(null);
+// 鏈湴鐘舵€
+    const currentRadio = ref<DjRadio | null>(null);
 const currentPrograms = ref<DjProgram[]>([]);
 const subscribedRadioIds = ref<Set<number>>(new Set());
 const isLoading = ref(false);
@@ -307,13 +308,15 @@ const handleSubscribe = async () => {
   try {
     await subscribeDj(radioId.value, isSubed ? 0 : 1);
 
-    // 鏇存柊鏈湴璁㈤槄鐘舵€?    if (isSubed) {
+    // 鏇存柊鏈湴璁㈤槄鐘舵€
+    if (isSubed) {
       subscribedRadioIds.value.delete(radioId.value);
     } else {
       subscribedRadioIds.value.add(radioId.value);
     }
 
-    // 鏇存柊鐢靛彴璁㈤槄鏁?    if (currentRadio.value && currentRadio.value.subCount !== undefined) {
+    // 鏇存柊鐢靛彴璁㈤槄鏁
+    if (currentRadio.value && currentRadio.value.subCount !== undefined) {
       currentRadio.value.subCount = Math.max(0, currentRadio.value.subCount + (isSubed ? -1 : 1));
     }
 

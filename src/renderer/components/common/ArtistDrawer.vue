@@ -122,7 +122,8 @@ const artistInfo = ref<IArtist>();
 const songs = ref<any[]>([]);
 const albums = ref<any[]>([]);
 
-// 鍔犺浇鐘舵€?const songLoading = ref(false);
+// 鍔犺浇鐘舵€
+    const songLoading = ref(false);
 const albumLoading = ref(false);
 
 // 鍒嗛〉鍙傛暟
@@ -261,7 +262,8 @@ const handleAlbumScroll = (e: { target: any }) => {
   }
 };
 
-// 鏍煎紡鍖栧彂甯冩椂闂?const formatPublishTime = (time: number) => {
+// 鏍煎紡鍖栧彂甯冩椂闂
+    const formatPublishTime = (time: number) => {
   return useDateFormat(time, 'YYYY-MM-DD').value;
 };
 

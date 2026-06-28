@@ -328,7 +328,8 @@ const loadUserData = async () => {
     recordList.value = [];
     hasRecordPermission.value = true;
 
-    // 鑾峰彇鐢ㄦ埛璇︽儏鍜屾瓕鍗曞垪琛?    try {
+    // 鑾峰彇鐢ㄦ埛璇︽儏鍜屾瓕鍗曞垪琛
+    try {
       const [userDetailRes, playlistRes] = await Promise.all([
         getUserDetail(userId.value),
         getUserPlaylist(userId.value)

@@ -128,7 +128,8 @@ const { t } = useI18n();
 const message = useMessage();
 const playerStore = usePlayerStore();
 
-// 鐘舵€?const availableDates = ref<string[]>([]);
+// 鐘舵€
+    const availableDates = ref<string[]>([]);
 const selectedDate = ref<string>('');
 const songs = ref<SongResult[]>([]);
 const loadingDates = ref(false);
@@ -137,11 +138,13 @@ const isCompactLayout = ref(
   isMobile.value ? false : localStorage.getItem('musicListLayout') === 'compact'
 );
 
-// 鍙樉绀烘渶杩戠殑10涓棩鏈?const displayedDates = computed(() => {
+// 鍙樉绀烘渶杩戠殑10涓棩鏈
+    const displayedDates = computed(() => {
   return availableDates.value.slice(0, 10);
 });
 
-// 鏍煎紡鍖栨棩鏈熸樉绀?const formatDate = (dateStr: string) => {
+// 鏍煎紡鍖栨棩鏈熸樉绀
+    const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   const today = new Date();
   const yesterday = new Date(today);
@@ -154,12 +157,14 @@ const isCompactLayout = ref(
     return t('common.yesterday');
   }
 
-  // 鏍煎紡鍖栦负 MM鏈圖D鏃?  const month = date.getMonth() + 1;
+  // 鏍煎紡鍖栦负 MM鏈圖D鏃
+    const month = date.getMonth() + 1;
   const day = date.getDate();
-  return `${month}鏈?{day}鏃;
+  return `${month}月${day}日`;
 };
 
-// 鏍煎紡鍖栨瓕鏇叉暟鎹?const formatSong = (item: any) => {
+// 鏍煎紡鍖栨瓕鏇叉暟鎹
+    const formatSong = (item: any) => {
   if (!item) return null;
   return {
     ...item,
@@ -179,7 +184,8 @@ const fetchAvailableDates = async () => {
     const { data } = await getHistoryRecommendDates();
     if (data?.data?.dates) {
       availableDates.value = data.data.dates;
-      // 榛樿閫夋嫨绗竴涓棩鏈燂紙鏈€杩戠殑鏃ユ湡锛?      if (availableDates.value.length > 0) {
+      // 榛樿閫夋嫨绗竴涓棩鏈燂紙鏈€杩戠殑鏃ユ湡锛
+    if (availableDates.value.length > 0) {
         selectedDate.value = availableDates.value[0];
         await fetchSongsByDate(selectedDate.value);
       }
@@ -223,7 +229,8 @@ const toggleLayout = () => {
   localStorage.setItem('musicListLayout', isCompactLayout.value ? 'compact' : 'normal');
 };
 
-// 娣诲姞鍒版挱鏀惧垪琛ㄦ湯灏?const addToPlaylist = () => {
+// 娣诲姞鍒版挱鏀惧垪琛ㄦ湯灏
+    const addToPlaylist = () => {
   if (songs.value.length === 0) return;
 
   // 鑾峰彇褰撳墠鎾斁鍒楄〃
@@ -237,7 +244,8 @@ const toggleLayout = () => {
     return;
   }
 
-  // 鍚堝苟鍒板綋鍓嶆挱鏀惧垪琛ㄦ湯灏?  const newList = [...currentList, ...newSongs.map(formatSong)];
+  // 鍚堝苟鍒板綋鍓嶆挱鏀惧垪琛ㄦ湯灏
+    const newList = [...currentList, ...newSongs.map(formatSong)];
   playerStore.setPlayList(newList);
 
   message.success(t('comp.musicList.addToPlaylistSuccess', { count: newSongs.length }));
@@ -256,7 +264,8 @@ const handlePlayAll = () => {
   playerStore.setPlay(formatSong(songs.value[0]));
 };
 
-// 缁勪欢鎸傝浇鏃惰幏鍙栨暟鎹?onMounted(() => {
+// 缁勪欢鎸傝浇鏃惰幏鍙栨暟鎹
+    onMounted(() => {
   fetchAvailableDates();
 });
 </script>

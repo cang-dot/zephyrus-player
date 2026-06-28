@@ -276,7 +276,8 @@ function handleRemoveFolder(folder: string): void {
  */
 async function handleScan(): Promise<void> {
   if (localMusicStore.folderPaths.length === 0) {
-    // 娌℃湁閰嶇疆鏂囦欢澶规椂锛屽紩瀵肩敤鎴峰厛娣诲姞鏂囦欢澶?    await handleAddFolder();
+    // 娌℃湁閰嶇疆鏂囦欢澶规椂锛屽紩瀵肩敤鎴峰厛娣诲姞鏂囦欢澶
+    await handleAddFolder();
     return;
   }
   await localMusicStore.scanFolders();

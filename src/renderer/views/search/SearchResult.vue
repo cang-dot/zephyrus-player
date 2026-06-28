@@ -221,7 +221,7 @@
                   <span
                     class="text-xs text-neutral-400 font-medium tracking-widest uppercase opacity-50"
                   >
-                    鈥?{{ t('search.noMore') }} 鈥?                  </span>
+                    「{{ t('search.noMore') }}」</span>
                 </div>
               </div>
             </template>

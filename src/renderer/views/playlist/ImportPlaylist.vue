@@ -335,7 +335,8 @@ const tabs = computed(() => [
   { id: 'local', label: t('comp.playlist.import.localTab'), icon: 'ri-file-list-3-line' }
 ]);
 
-// 璁＄畻 Tab 鎸囩ず鍣ㄤ綅缃?const tabIndicatorStyle = computed(() => {
+// 璁＄畻 Tab 鎸囩ず鍣ㄤ綅缃
+    const tabIndicatorStyle = computed(() => {
   const index = tabs.value.findIndex((tab) => tab.id === currentTab.value);
   // 鍋囪姣忎釜 tab 瀹藉害澶ф涓€鑷达紝杩欓噷绠€鍗曡绠楃櫨鍒嗘瘮
   // 鍦ㄧ湡瀹為」鐩腑鍙兘闇€瑕佽幏鍙?DOM 鍏冪礌瀹藉害
@@ -361,7 +362,8 @@ const removeLinkRow = (index: number) => {
   linkInputs.value.splice(index, 1);
 };
 
-// 鍏冩暟鎹浉鍏冲嚱鏁?const addMetadataRow = () => {
+// 鍏冩暟鎹浉鍏冲嚱鏁
+    const addMetadataRow = () => {
   localMetadata.value.push({ name: '', artist: '', album: '' });
 };
 

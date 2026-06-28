@@ -130,7 +130,8 @@ onMounted(() => {
   recommendStore.refreshIfStale();
 });
 
-// keep-alive 婵€娲绘椂妫€鏌ユ槸鍚﹁法澶╅渶瑕佸埛鏂?onActivated(() => {
+// keep-alive 婵€娲绘椂妫€鏌ユ槸鍚﹁法澶╅渶瑕佸埛鏂
+    onActivated(() => {
   recommendStore.refreshIfStale();
 });
 

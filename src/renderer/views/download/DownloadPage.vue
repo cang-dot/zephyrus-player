@@ -494,7 +494,8 @@ const downloadedList = ref<DownloadedItem[]>(
 
 const downList = computed(() => downloadedList.value);
 
-// 璁＄畻鎬昏繘搴?const totalProgress = computed(() => {
+// 璁＄畻鎬昏繘搴
+    const totalProgress = computed(() => {
   if (downloadList.value.length === 0) return 0;
   const total = downloadList.value.reduce((sum, item) => sum + item.progress, 0);
   return total / downloadList.value.length;
@@ -506,7 +507,8 @@ watch(totalProgress, (newVal) => {
   }
 });
 
-// 鑾峰彇鐘舵€佹枃鏈?const getStatusText = (item: DownloadItem) => {
+// 鑾峰彇鐘舵€佹枃鏈
+    const getStatusText = (item: DownloadItem) => {
   switch (item.status) {
     case 'downloading':
       return t('download.status.downloading');
@@ -519,7 +521,8 @@ watch(totalProgress, (newVal) => {
   }
 };
 
-// 鏍煎紡鍖栨枃浠跺ぇ灏?const formatSize = (bytes: number) => {
+// 鏍煎紡鍖栨枃浠跺ぇ灏
+    const formatSize = (bytes: number) => {
   if (!bytes) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -540,16 +543,19 @@ const copyPath = (path: string) => {
     });
 };
 
-// 鏍煎紡鍖栬矾寰?const shortenPath = (path: string) => {
+// 鏍煎紡鍖栬矾寰
+    const shortenPath = (path: string) => {
   if (!path) return '';
 
   // 鑾峰彇鏂囦欢鍚嶅拰鐩綍
   const parts = path.split(/[/\\]/);
   const fileName = parts.pop() || '';
 
-  // 濡傛灉璺緞寰堢煭锛岀洿鎺ヨ繑鍥?  if (path.length < 30) return path;
+  // 濡傛灉璺緞寰堢煭锛岀洿鎺ヨ繑鍥
+    if (path.length < 30) return path;
 
-  // 淇濈暀寮€澶寸殑閮ㄥ垎鐩綍鍜岀粨灏剧殑鏂囦欢鍚?  if (parts.length <= 2) return path;
+  // 淇濈暀寮€澶寸殑閮ㄥ垎鐩綍鍜岀粨灏剧殑鏂囦欢鍚
+    if (parts.length <= 2) return path;
 
   const start = parts.slice(0, 1).join('/');
   const end = parts.slice(-1).join('/');
@@ -572,14 +578,16 @@ const openDirectory = (path: string) => {
 // 鎾斁闊充箰
 const handlePlayMusic = async (item: DownloadedItem) => {
   try {
-    // 鍏堟鏌ユ枃浠舵槸鍚﹀瓨鍦?    const fileExists = await window.electron.ipcRenderer.invoke('check-file-exists', item.path);
+    // 鍏堟鏌ユ枃浠舵槸鍚﹀瓨鍦
+    const fileExists = await window.electron.ipcRenderer.invoke('check-file-exists', item.path);
 
     if (!fileExists) {
       message.error(t('download.delete.fileNotFound', { name: item.displayName || item.filename }));
       return;
     }
 
-    // 杞崲涓嬭浇椤逛负鎾斁鎵€闇€鐨勬瓕鏇插璞?    const song: SongResult = {
+    // 杞崲涓嬭浇椤逛负鎾斁鎵€闇€鐨勬瓕鏇插璞
+    const song: SongResult = {
       id: item.id,
       name: item.displayName || item.filename,
       ar:
@@ -678,26 +686,30 @@ const clearDownloadRecords = async () => {
   }
 };
 
-// 娣诲姞鍔犺浇鐘舵€?const isLoadingDownloaded = ref(false);
+// 娣诲姞鍔犺浇鐘舵€
+    const isLoadingDownloaded = ref(false);
 
-// 鏍煎紡鍖栨瓕鏇插悕绉帮紝搴旂敤鐢ㄦ埛璁剧疆鐨勬牸寮?const formatSongName = (songInfo) => {
+// 鏍煎紡鍖栨瓕鏇插悕绉帮紝搴旂敤鐢ㄦ埛璁剧疆鐨勬牸寮
+    const formatSongName = (songInfo) => {
   if (!songInfo) return '';
 
   // 鑾峰彇鏍煎紡璁剧疆
   const nameFormat = downloadSettings.value.nameFormat || '{songName} - {artistName}';
 
   // 鍑嗗鏇挎崲鍙橀噺
-  const artistName = songInfo.ar?.map((a) => a.name).join('/') || '鏈煡鑹烘湳瀹?;
+  const artistName = songInfo.ar?.map((a) => a.name).join('/') || '鏈煡鑹烘湳瀹';
   const songName = songInfo.name || songInfo.filename || '鏈煡姝屾洸';
   const albumName = songInfo.al?.name || '鏈煡涓撹緫';
 
-  // 搴旂敤鑷畾涔夋牸寮?  return nameFormat
+  // 搴旂敤鑷畾涔夋牸寮
+    return nameFormat
     .replace(/\{songName\}/g, songName)
     .replace(/\{artistName\}/g, artistName)
     .replace(/\{albumName\}/g, albumName);
 };
 
-// 鑾峰彇宸蹭笅杞介煶涔愬垪琛?const refreshDownloadedList = async () => {
+// 鑾峰彇宸蹭笅杞介煶涔愬垪琛
+    const refreshDownloadedList = async () => {
   if (isLoadingDownloaded.value) return; // 闃叉閲嶅鍔犺浇
 
   try {
@@ -775,7 +787,8 @@ watch(
   }
 );
 
-// 鍒濆鍖?onMounted(() => {
+// 鍒濆鍖
+    onMounted(() => {
   refreshDownloadedList();
 
   // 璁板綍宸插鐞嗙殑涓嬭浇椤癸紝閬垮厤閲嶅瑙﹀彂浜嬩欢
@@ -785,7 +798,8 @@ watch(
   window.electron.ipcRenderer.on('music-download-progress', (_, data) => {
     const existingItem = downloadList.value.find((item) => item.filename === data.filename);
 
-    // 濡傛灉杩涘害涓?00%锛屽皢鐘舵€佽缃负宸插畬鎴?    if (data.progress === 100) {
+    // 濡傛灉杩涘害涓?00%锛屽皢鐘舵€佽缃负宸插畬鎴
+    if (data.progress === 100) {
       data.status = 'completed';
     }
 
@@ -810,7 +824,8 @@ watch(
 
   // 鐩戝惉涓嬭浇瀹屾垚
   window.electron.ipcRenderer.on('music-download-complete', async (_, data) => {
-    // 濡傛灉宸茬粡澶勭悊杩囨鏂囦欢鐨勫畬鎴愪簨浠讹紝鍒欒烦杩?    if (processedDownloads.has(data.filename)) {
+    // 濡傛灉宸茬粡澶勭悊杩囨鏂囦欢鐨勫畬鎴愪簨浠讹紝鍒欒烦杩
+    if (processedDownloads.has(data.filename)) {
       return;
     }
 
@@ -822,7 +837,8 @@ watch(
       // 浠庝笅杞藉垪琛ㄤ腑绉婚櫎
       downloadList.value = downloadList.value.filter((item) => item.filename !== data.filename);
 
-      // 寤惰繜鍒锋柊宸蹭笅杞藉垪琛紝閬垮厤鏂囦欢绯荤粺鏈畬鍏ㄥ啓鍏?      setTimeout(() => refreshDownloadedList(), 500);
+      // 寤惰繜鍒锋柊宸蹭笅杞藉垪琛紝閬垮厤鏂囦欢绯荤粺鏈畬鍏ㄥ啓鍏
+    setTimeout(() => refreshDownloadedList(), 500);
 
       // 鍙湪涓嬭浇椤甸潰鏄剧ず涓€娆′笅杞芥垚鍔熼€氱煡
       message.success(t('download.message.downloadComplete', { filename: data.filename }));
@@ -930,11 +946,13 @@ watch(
   { deep: true }
 );
 
-// 鐩戝惉鍒嗛殧绗﹀彉鍖栨洿鏂版牸寮?watch(
+// 鐩戝惉鍒嗛殧绗﹀彉鍖栨洿鏂版牸寮
+    watch(
   () => downloadSettings.value.separator,
   (newSeparator) => {
     if (formatComponents.value.length > 1) {
-      // 閲嶆柊鏋勫缓鏍煎紡瀛楃涓?      let format = '';
+      // 閲嶆柊鏋勫缓鏍煎紡瀛楃涓
+    let format = '';
       formatComponents.value.forEach((component, index) => {
         format += `{${component.type}}`;
         if (index < formatComponents.value.length - 1) {
@@ -951,7 +969,7 @@ const formatNamePreview = computed(() => {
   const format = downloadSettings.value.nameFormat;
   return format
     .replace(/\{songName\}/g, '鑾け鑾繕')
-    .replace(/\{artistName\}/g, '棣欒湝娌夋矇鐑闇?)
+    .replace(/\{artistName\}/g, '棣欒湝娌夋矇鐑闇')
     .replace(/\{albumName\}/g, '鐢佃鍓у師澹板甫');
 });
 
@@ -974,7 +992,8 @@ const openDownloadPath = () => {
 
 // 淇濆瓨涓嬭浇璁剧疆
 const saveDownloadSettings = () => {
-  // 淇濆瓨鍒伴厤缃?  window.electron.ipcRenderer.send(
+  // 淇濆瓨鍒伴厤缃
+    window.electron.ipcRenderer.send(
     'set-store-value',
     'set.downloadPath',
     downloadSettings.value.path
@@ -995,7 +1014,8 @@ const saveDownloadSettings = () => {
     downloadSettings.value.saveLyric
   );
 
-  // 濡傛灉鏄湪宸蹭笅杞介〉闈紝鍒锋柊鍒楄〃浠ユ洿鏂版樉绀?  if (tabName.value === 'downloaded') {
+  // 濡傛灉鏄湪宸蹭笅杞介〉闈紝鍒锋柊鍒楄〃浠ユ洿鏂版樉绀
+    if (tabName.value === 'downloaded') {
     refreshDownloadedList();
   }
 
@@ -1003,7 +1023,8 @@ const saveDownloadSettings = () => {
   showSettingsDrawer.value = false;
 };
 
-// 鍒濆鍖栦笅杞借缃?const initDownloadSettings = async () => {
+// 鍒濆鍖栦笅杞借缃
+    const initDownloadSettings = async () => {
   // 鑾峰彇褰撳墠閰嶇疆
   const path = await window.electron.ipcRenderer.invoke('get-store-value', 'set.downloadPath');
   const nameFormat = await window.electron.ipcRenderer.invoke(
@@ -1052,7 +1073,8 @@ const updateFormatComponents = () => {
 // 鐩戝惉鏍煎紡鍙樺寲鏇存柊缁勪欢
 watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
 
-// 鐩戝惉鍛藉悕鏍煎紡鍙樺寲锛屾洿鏂板凡涓嬭浇鏂囦欢鐨勬樉绀哄悕绉?watch(
+// 鐩戝惉鍛藉悕鏍煎紡鍙樺寲锛屾洿鏂板凡涓嬭浇鏂囦欢鐨勬樉绀哄悕绉
+    watch(
   () => downloadSettings.value.nameFormat,
   () => {
     if (downloadedList.value.length > 0) {
@@ -1067,7 +1089,8 @@ watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
   }
 );
 
-// 鍒濆鍖?onMounted(() => {
+// 鍒濆鍖
+    onMounted(() => {
   initDownloadSettings();
 });
 </script>
@@ -1099,14 +1122,16 @@ watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
 .action-btn-pill {
   @apply transition-all border-neutral-200 dark:border-neutral-800;
   &:hover:not(:disabled) {
-    @apply border-[var(--accent-color)]/30 bg-[var(--accent-color)]/5;
+    border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+    background-color: color-mix(in srgb, var(--accent-color) 5%, transparent);
   }
 }
 
 .action-btn-icon {
   @apply transition-all;
   &:hover {
-    @apply scale-110 text-[var(--accent-color)] bg-[var(--accent-color)]/10;
+    @apply scale-110 text-[var(--accent-color)];
+    background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
   }
 }
 

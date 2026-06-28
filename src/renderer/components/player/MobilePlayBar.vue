@@ -89,7 +89,8 @@ function handlePrev() {
   playerStore.prevPlay();
 }
 
-// 鍏ㄥ睆鎾斁鍣?const MusicFullRef = ref<any>(null);
+// 鍏ㄥ睆鎾斁鍣
+    const MusicFullRef = ref<any>(null);
 
 // 璁剧疆musicFull
 const setMusicFull = () => {
@@ -102,7 +103,8 @@ const setMusicFull = () => {
 watch(
   () => playerStore.musicFull,
   (_newVal) => {
-    // 鐘舵€佹爮鏍峰紡鏇存柊宸插湪 Web 鐜涓嬬鐢?  }
+    // 鐘舵€佹爮鏍峰紡鏇存柊宸插湪 Web 鐜涓嬬鐢
+    }
 );
 
 // 鎵撳紑鎾斁鍒楄〃鎶藉眽
@@ -174,7 +176,8 @@ watch(
     @apply h-14 py-0;
   }
 
-  // 杩涘害鏉?  .music-progress-bar {
+  // 杩涘害鏉
+  .music-progress-bar {
     @apply flex items-center justify-between px-4 py-2 relative z-10;
 
     .current-time,
