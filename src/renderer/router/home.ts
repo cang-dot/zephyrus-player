@@ -107,7 +107,7 @@ const layoutRouter = [
     path: '/user',
     name: 'user',
     meta: {
-      title: 'comp.user',
+      title: 'comp.my',
       icon: 'icon-Profile',
       keepAlive: true,
       noScroll: true,

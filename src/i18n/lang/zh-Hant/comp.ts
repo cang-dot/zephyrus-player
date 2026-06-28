@@ -88,7 +88,7 @@ export default {
     wechatQR: '微信收款碼',
     coffeeDesc: '一杯咖啡，一份支持',
     coffeeDescLinkText: '查看更多',
-    groupText: '微信公众号：ThymosMusic',
+    groupText: '微信公众号：ZephyrusMusic',
     messages: {
       copySuccess: '已複製到剪貼簿'
     },
@@ -283,7 +283,7 @@ export default {
     }
   },
   settings: '設定',
-  user: '使用者',
+  my: '我的',
   toplist: '排行榜',
   history: '收藏歷史',
   list: '播放清單',

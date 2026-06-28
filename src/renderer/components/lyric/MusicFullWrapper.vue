@@ -8,6 +8,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
 import StagePlayer from '@/components/lyric/StagePlayer.vue';
+import TypographicPlayer from '@/components/lyric/TypographicPlayer.vue';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { isMobile } from '@/utils';
 
@@ -54,6 +55,7 @@ onUnmounted(() => {
 
 const componentToUse = computed(() => {
   if (playerStyle.value === 'stage') return StagePlayer;
+  if (playerStyle.value === 'magazine') return TypographicPlayer;
   return isMobile.value ? MusicFullMobile : MusicFull;
 });
 

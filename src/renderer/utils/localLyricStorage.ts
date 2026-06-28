@@ -5,7 +5,7 @@
  * 支持 TTML 和 LRC 格式
  */
 
-const STORAGE_KEY = 'thymos-local-lyrics';
+const STORAGE_KEY = 'zephyrus-local-lyrics';
 
 export interface LocalLyricMapping {
   [songId: string]: string; // 歌曲ID → 歌词文件路径

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container h-full w-full" :class="{ mobile: isMobile, noElectron: !isElectron }">
-    <n-config-provider :theme="theme === 'dark' ? darkTheme : lightTheme">
+    <n-config-provider :theme="theme === 'dark' ? darkTheme : lightTheme" :theme-overrides="themeOverrides">
       <n-dialog-provider>
         <n-message-provider>
           <router-view></router-view>
@@ -29,7 +29,7 @@ import { isElectron, isLyricWindow } from '@/utils';
 import { checkLoginStatus } from '@/utils/auth';
 
 import { initAudioListeners, initMusicHook } from './hooks/MusicHook';
-import { initCoverColor } from './hooks/useCoverColor';
+import { initCoverColor, useCoverColor } from './hooks/useCoverColor';
 import { audioService } from './services/audioService';
 import { initLxMusicRunner } from './services/LxMusicSourceRunner';
 import { isMobile } from './utils';
@@ -41,6 +41,16 @@ const playerStore = usePlayerStore();
 const playerCoreStore = usePlayerCoreStore();
 const userStore = useUserStore();
 const router = useRouter();
+const { primaryColor } = useCoverColor();
+
+// naive-ui 主题覆盖：进度条/强调色跟随封面取色
+const themeOverrides = computed(() => ({
+  Slider: {
+    fillColor: primaryColor.value || '#22c55e',
+    fillColorHover: primaryColor.value || '#22c55e',
+    handleColor: primaryColor.value || '#22c55e',
+  }
+}));
 
 // 监听语言变化
 watch(

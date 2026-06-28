@@ -95,7 +95,7 @@ export default {
     wechatQR: 'WeChat QRコード',
     coffeeDesc: '一杯のコーヒー、一つのサポート',
     coffeeDescLinkText: 'もっと見る',
-    groupText: '微信公众号：ThymosMusic',
+    groupText: '微信公众号：ZephyrusMusic',
     messages: {
       copySuccess: 'クリップボードにコピーしました'
     },
@@ -291,7 +291,7 @@ export default {
     }
   },
   settings: '設定',
-  user: 'ユーザー',
+  my: 'マイ',
   toplist: 'ランキング',
   history: 'お気に入り履歴',
   list: 'プレイリスト',

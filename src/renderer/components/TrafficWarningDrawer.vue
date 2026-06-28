@@ -9,7 +9,7 @@
     :mask-closable="false"
   >
     <n-drawer-content
-      title="欢迎使用 ThymosMusicPlayer"
+      title="欢迎使用 ZephyrusPlayer"
       closable
       :native-scrollbar="false"
       class="mac-style-drawer"

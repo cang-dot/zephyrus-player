@@ -169,7 +169,7 @@ const handleUpdate = async () => {
   const version = updateInfo.value.latestVersion;
 
   // Android APK 下载地址
-  const downloadUrl = `https://github.com/cang-dot/thymos-music-player/releases/download/v${version}/ThymosMusicPlayer-${version}.apk`;
+  const downloadUrl = `https://github.com/cang-dot/zephyrus-player/releases/download/v${version}/ZephyrusPlayer-${version}.apk`;
 
   try {
     // 获取代理节点
@@ -189,7 +189,7 @@ const handleUpdate = async () => {
     // 回退到直接打开 GitHub Releases
     const releaseUrl =
       updateInfo.value.releaseInfo?.html_url ||
-      'https://github.com/cang-dot/thymos-music-player/releases/latest';
+      'https://github.com/cang-dot/zephyrus-player/releases/latest';
     window.open(releaseUrl, '_blank');
     closeModal();
   }

@@ -121,6 +121,7 @@ import {
   setAudioTime
 } from '@/hooks/MusicHook';
 import { usePlayerStore } from '@/store/modules/player';
+import { useClimaxStore } from '@/store/modules/climax';
 import type { IWordData, ILyricText } from '@/types/music';
 import { getImgUrl } from '@/utils';
 
@@ -199,7 +200,8 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null;
 const playerStyles = [
   { key: 'default' as const, icon: 'ri-music-2-line', label: '默认' },
   { key: 'classic' as const, icon: 'ri-disc-line', label: '经典' },
-  { key: 'stage' as const, icon: 'ri-live-line', label: '舞台' }
+  { key: 'stage' as const, icon: 'ri-live-line', label: '舞台' },
+  { key: 'magazine' as const, icon: 'ri-layout-masonry-line', label: '杂志' }
 ];
 
 const currentStyleIndex = computed(() => {
@@ -232,6 +234,22 @@ const accentColor = ref('rgb(220, 200, 170)');
 const accentColorRgb = ref('220, 200, 170');
 const smokeColor = ref('#c8b896');
 const smokeColor2 = ref('#b8a886');
+
+// ==================== 高潮段落 ====================
+
+const climaxStore = useClimaxStore();
+
+// 当前是否在高潮段落内
+const isInClimax = computed(() => {
+  const t = nowTime.value;
+  return climaxStore.segments.some((seg) => t >= seg.start && t <= seg.end);
+});
+
+// 高潮时增强烟雾效果
+const smokeIntensity = computed(() => isInClimax.value ? 1.2 : 1);
+
+// 高潮时增强歌词动画
+const climaxAnimationBoost = computed(() => isInClimax.value ? 1.5 : 1);
 
 watch(
   () => playMusic.value?.picUrl,
@@ -294,19 +312,23 @@ const backgroundCoverStyle = computed(() => {
 });
 
 const smokeStyle1 = computed(() => ({
-  background: `radial-gradient(ellipse at 25% 75%, ${smokeColor.value} 0%, transparent 55%)`
+  background: `radial-gradient(ellipse at 25% 75%, ${smokeColor.value} 0%, transparent 55%)`,
+  opacity: smokeIntensity.value,
 }));
 
 const smokeStyle2 = computed(() => ({
-  background: `radial-gradient(ellipse at 75% 25%, ${smokeColor2.value} 0%, transparent 50%)`
+  background: `radial-gradient(ellipse at 75% 25%, ${smokeColor2.value} 0%, transparent 50%)`,
+  opacity: smokeIntensity.value,
 }));
 
 const smokeStyle3 = computed(() => ({
-  background: `radial-gradient(ellipse at 50% 50%, ${smokeColor.value} 0%, transparent 45%)`
+  background: `radial-gradient(ellipse at 50% 50%, ${smokeColor.value} 0%, transparent 45%)`,
+  opacity: smokeIntensity.value,
 }));
 
 const smokeStyle4 = computed(() => ({
-  background: `radial-gradient(ellipse at 80% 80%, ${smokeColor2.value} 0%, transparent 40%)`
+  background: `radial-gradient(ellipse at 80% 80%, ${smokeColor2.value} 0%, transparent 40%)`,
+  opacity: smokeIntensity.value,
 }));
 
 // ==================== 歌词样式（响应式字号） ====================
@@ -359,7 +381,7 @@ let animationCycleId = 0;
 
 // ==================== 歌词动画触发 ====================
 
-// 切歌时清空歌词显示
+// 切歌时清空歌词显示并加载高潮数据
 let prevSongId: string | undefined;
 watch(
   () => playMusic.value?.id,
@@ -368,6 +390,12 @@ watch(
       prevSongId = newId;
       displayText.value = '';
       lastProcessedIndex = -1;
+      // 加载高潮段落
+      if (newId) {
+        climaxStore.loadSegments(String(newId));
+      } else {
+        climaxStore.clear();
+      }
       const el = lyricRef.value;
       if (el) {
         gsap.set(el, {

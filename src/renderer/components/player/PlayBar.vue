@@ -4,21 +4,38 @@
     :class="[
       setAnimationClass('animate__bounceInUp'),
       musicFullVisible ? 'play-bar-opcity' : '',
+      musicFullVisible && isMagazineMode ? 'play-bar-magazine' : '',
+      musicFullVisible && playBarCollapsed ? 'play-bar-collapsed' : '',
       musicFullVisible && MusicFullRef?.musicFullRef?.config?.hidePlayBar
         ? 'animate__animated animate__slideOutDown'
         : ''
     ]"
+    @mousemove="handlePlayBarMouseMove"
     :style="{
-      color: musicFullVisible
-        ? textColors.theme === 'dark'
-          ? '#000000'
-          : '#ffffff'
-        : settingsStore.theme === 'dark'
-          ? '#ffffff'
-          : '#000000'
+      color: musicFullVisible && isMagazineMode
+        ? '#000000'
+        : musicFullVisible
+          ? textColors.theme === 'dark'
+            ? '#000000'
+            : '#ffffff'
+          : settingsStore.theme === 'dark'
+            ? '#ffffff'
+            : '#000000'
     }"
   >
     <div class="music-time custom-slider">
+      <div class="climax-track" v-if="climaxStore.hasSegments && allTime > 0">
+        <div
+          v-for="(seg, i) in climaxStore.segments"
+          :key="'climax-' + i"
+          class="climax-segment"
+          :class="{ 'climax-active': nowTime >= seg.start && nowTime <= seg.end }"
+          :style="{
+            left: (seg.start / allTime * 100) + '%',
+            width: Math.max(0.5, (seg.end - seg.start) / allTime * 100) + '%'
+          }"
+        ></div>
+      </div>
       <n-slider
         v-model:value="timeSlider"
         :step="1"
@@ -155,6 +172,19 @@
       <!-- 高级控制菜单按钮（整合了 EQ、定时关闭、播放速度） -->
       <advanced-controls-popover />
 
+      <!-- 高潮标记按钮 -->
+      <n-tooltip trigger="hover" :z-index="9999999" v-if="isElectron">
+        <template #trigger>
+          <i
+            class="iconfont ri-soundcloud-fill text-2xl hover:text-green-500 transition-colors cursor-pointer"
+            :class="{ 'disabled-icon': !playMusic?.id }"
+            @click="playMusic?.id && (showClimaxEditor = true)"
+          ></i>
+        </template>
+        标记高潮
+      </n-tooltip>
+      <climax-editor v-model="showClimaxEditor" />
+
       <n-tooltip trigger="hover" :z-index="9999999">
         <template #trigger>
           <i
@@ -173,10 +203,11 @@
 <script lang="ts" setup>
 import { useThrottleFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
+import ClimaxEditor from '@/components/ClimaxEditor.vue';
 import AdvancedControlsPopover from '@/components/player/AdvancedControlsPopover.vue';
 import ReparsePopover from '@/components/player/ReparsePopover.vue';
 import {
@@ -190,16 +221,20 @@ import {
 } from '@/hooks/MusicHook';
 import { useArtist } from '@/hooks/useArtist';
 import { useFavorite } from '@/hooks/useFavorite';
+import { useCoverColor } from '@/hooks/useCoverColor';
 import { usePlaybackControl } from '@/hooks/usePlaybackControl';
 import { usePlayMode } from '@/hooks/usePlayMode';
 import { useVolumeControl } from '@/hooks/useVolumeControl';
 import { audioService } from '@/services/audioService';
 import { usePlayerStore } from '@/store/modules/player';
+import { useClimaxStore } from '@/store/modules/climax';
 import { useSettingsStore } from '@/store/modules/settings';
 import { getImgUrl, isElectron, isMobile, secondToMinute, setAnimationClass } from '@/utils';
 
 const playerStore = usePlayerStore();
+const climaxStore = useClimaxStore();
 const settingsStore = useSettingsStore();
+const { primaryColor: accentColor } = useCoverColor();
 const { t } = useI18n();
 
 // 播放控制
@@ -234,6 +269,19 @@ watch(
     }
   },
   { immediate: true, deep: true }
+);
+
+// 加载当前歌曲的高潮段落
+watch(
+  () => playMusic.value?.id,
+  async (newId) => {
+    if (newId) {
+      climaxStore.loadSegments(String(newId));
+    } else {
+      climaxStore.clear();
+    }
+  },
+  { immediate: true }
 );
 
 // 节流版本的 seek 函数
@@ -274,6 +322,7 @@ const formatTooltip = (value: number) => {
 
 const MusicFullRef = ref<any>(null);
 const showSliderTooltip = ref(false);
+const showClimaxEditor = ref(false);
 
 const musicFullVisible = computed({
   get: () => playerStore.musicFull,
@@ -289,6 +338,54 @@ const setMusicFull = () => {
     settingsStore.showArtistDrawer = false;
   }
 };
+
+// ==================== 播放栏自动收起 ====================
+
+const playBarCollapsed = ref(false);
+let collapseTimer: ReturnType<typeof setTimeout> | null = null;
+const COLLAPSE_DELAY = 5000; // 5秒无操作后收起
+
+function resetCollapseTimer() {
+  if (collapseTimer) clearTimeout(collapseTimer);
+  playBarCollapsed.value = false;
+  collapseTimer = setTimeout(() => {
+    playBarCollapsed.value = true;
+  }, COLLAPSE_DELAY);
+}
+
+// 检测是否在排版播放器模式
+const isMagazineMode = computed(() => {
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    if (saved) {
+      const config = JSON.parse(saved);
+      return config.playerStyle === 'magazine';
+    }
+  } catch {}
+  return false;
+});
+
+// 排版模式下启用自动收起
+watch(musicFullVisible, (visible) => {
+  if (visible && isMagazineMode.value) {
+    resetCollapseTimer();
+  } else {
+    if (collapseTimer) clearTimeout(collapseTimer);
+    playBarCollapsed.value = false;
+  }
+});
+
+// 鼠标移动重置计时器
+const handlePlayBarMouseMove = () => {
+  if (isMagazineMode.value && musicFullVisible.value) {
+    resetCollapseTimer();
+  }
+};
+
+// 清理定时器
+onUnmounted(() => {
+  if (collapseTimer) clearTimeout(collapseTimer);
+});
 
 const openLyricWindow = () => {
   openLyric();
@@ -320,6 +417,51 @@ const openPlayListDrawer = () => {
   &.play-bar-opcity {
     @apply bg-transparent !important;
     box-shadow: 0 0 20px 5px #0000001d;
+    color: #000000;
+
+    // 杂志模式：强制所有子元素继承黑色
+    &.play-bar-magazine {
+      * {
+        color: #000000 !important;
+      }
+    }
+
+    // 各元素悬停时变强调色
+    .music-content-title,
+    .music-content-name,
+    .music-buttons-prev,
+    .music-buttons-next,
+    .music-buttons-play,
+    .audio-button .iconfont {
+      transition: color 0.2s ease;
+      &:hover {
+        color: var(--accent-color, #22c55e) !important;
+      }
+    }
+  }
+
+// 排版模式收起状态：只显示进度条
+  &.play-bar-collapsed {
+    height: 6px !important;
+    padding: 0 !important;
+    background: rgba(0, 0, 0, 0.1) !important;
+    transition: height 0.3s ease;
+    --play-bar-height: 6px;
+
+    .music-time {
+      width: 100%;
+      padding: 0 4px;
+      height: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .play-bar-img-wrapper,
+    .music-content,
+    .music-buttons,
+    .audio-button {
+      display: none !important;
+    }
   }
 
   &.animate__slideOutDown {
@@ -466,9 +608,10 @@ const openPlayListDrawer = () => {
     --n-rail-height: 4px;
     --n-rail-color: theme('colors.gray.200');
     --n-rail-color-dark: theme('colors.gray.700');
-    --n-fill-color: theme('colors.green.500');
+    --n-fill-color: var(--accent-color, #22c55e);
+    --n-fill-color-hover: var(--accent-color, #22c55e);
     --n-handle-size: 12px;
-    --n-handle-color: theme('colors.green.500');
+    --n-handle-color: var(--accent-color, #22c55e);
 
     &.n-slider--vertical {
       height: 100%;
@@ -574,6 +717,30 @@ const openPlayListDrawer = () => {
   left: 0;
   padding: 0;
   border-radius: 0;
+}
+
+// 高潮段落标记
+.climax-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.climax-segment {
+  position: absolute;
+  height: 100%;
+  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.4);
+  border-radius: 2px;
+  transition: background-color 0.3s;
+}
+
+.climax-segment.climax-active {
+  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.8);
+  box-shadow: 0 0 6px rgba(var(--accent-color-rgb, 34, 197, 94), 0.5);
 }
 
 .music-eq {

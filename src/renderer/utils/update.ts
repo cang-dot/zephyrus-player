@@ -132,7 +132,7 @@ export const getLatestReleaseInfo = async (): Promise<GithubReleaseInfo | null> 
     // 构建 API URL 列表
     const apiUrls = [
       // 原始地址
-      'https://api.github.com/repos/cang-dot/thymos-music-player/releases/latest',
+      'https://api.github.com/repos/cang-dot/zephyrus-player/releases/latest',
 
       // 使用代理节点
       'http://music.alger.fun/package.json'
@@ -159,7 +159,7 @@ export const getLatestReleaseInfo = async (): Promise<GithubReleaseInfo | null> 
           return {
             tag_name: response.data.version,
             body: changelogResponse.data,
-            html_url: 'https://github.com/cang-dot/thymos-music-player/releases/latest',
+            html_url: 'https://github.com/cang-dot/zephyrus-player/releases/latest',
             assets: []
           } as unknown as GithubReleaseInfo;
         }

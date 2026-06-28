@@ -1,4 +1,4 @@
-# Thymos Music Player 开发文档
+# Zephyrus Player 开发文档
 
 ## 项目结构
 

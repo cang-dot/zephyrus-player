@@ -315,7 +315,7 @@ export const usePlayerCoreStore = defineStore(
           ''
         )}`;
       }
-      document.title = 'ThymosMusic - ' + title;
+      document.title = 'Zephyrus - ' + title;
 
       try {
         // 添加到历史记录

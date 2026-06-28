@@ -71,7 +71,7 @@ const { t } = useI18n();
 
 const message = useMessage();
 const copyText = () => {
-  navigator.clipboard.writeText('ThymosMusic');
+  navigator.clipboard.writeText('ZephyrusMusic');
   message.success(t('common.copySuccess'));
 };
 

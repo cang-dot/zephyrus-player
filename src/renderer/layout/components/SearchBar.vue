@@ -436,7 +436,7 @@ watchEffect(() => {
 const restartApp = () => window.electron.ipcRenderer.send('restart');
 const toLogin = () => router.push('/user');
 const toGithubRelease = () => {
-  window.location.href = 'https://cang-dot.github.io/thymos-music-player/download';
+  window.location.href = 'https://cang-dot.github.io/zephyrus-player/download';
 };
 
 const isDark = computed({

@@ -83,7 +83,7 @@ export default {
     wechatQR: 'Wechat QR code',
     coffeeDesc: 'A cup of coffee, a support',
     coffeeDescLinkText: 'View more',
-    groupText: 'Wechat Public Account: ThymosMusic',
+    groupText: 'Wechat Public Account: ZephyrusMusic',
     messages: {
       copySuccess: 'Copied to clipboard'
     },
@@ -279,7 +279,7 @@ export default {
     }
   },
   settings: 'Settings',
-  user: 'User',
+  my: 'My',
   toplist: 'Toplist',
   history: 'History',
   list: 'Playlist',

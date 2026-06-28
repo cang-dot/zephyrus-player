@@ -233,7 +233,7 @@ const allSidebarRoutes = [
   { path: '/podcast', icon: 'ri-radio-fill', nameKey: 'podcast.podcast' },
   { path: '/history', icon: 'icon-a-TicketStar', nameKey: 'comp.history' },
   { path: '/local-music', icon: 'ri-folder-music-fill', nameKey: 'comp.localMusic' },
-  { path: '/user', icon: 'icon-Profile', nameKey: 'comp.user' },
+  { path: '/user', icon: 'icon-Profile', nameKey: 'comp.my' },
   { path: '/set', icon: 'ri-settings-3-fill', nameKey: 'comp.settings' }
 ];
 
@@ -247,7 +247,7 @@ const defaultPageOptions = computed(() => [
   { label: t('podcast.podcast'), value: '/podcast' },
   { label: t('comp.history'), value: '/history' },
   { label: t('comp.localMusic'), value: '/local-music' },
-  { label: t('comp.user'), value: '/user' },
+  { label: t('comp.my'), value: '/user' },
   { label: t('comp.settings'), value: '/set' }
 ]);
 

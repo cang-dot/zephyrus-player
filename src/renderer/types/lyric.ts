@@ -13,7 +13,7 @@ export interface LyricConfig {
   hideMiniPlayBar: boolean;
   hideLyrics: boolean;
   contentWidth: number; // 内容区域宽度百分比
-  playerStyle: 'default' | 'classic' | 'stage';
+  playerStyle: 'default' | 'classic' | 'stage' | 'magazine';
   animationIntensity: 'soft' | 'normal' | 'power'; // 舞台模式歌词动画幅度
   // 移动端配置
   mobileLayout: 'default' | 'ios' | 'android';

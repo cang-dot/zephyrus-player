@@ -530,7 +530,7 @@ async function downloadMusic(
     const sanitizedFilename = sanitizeFilename(formattedFilename);
 
     // 创建临时文件路径 (在系统临时目录中创建)
-    const tempDir = path.join(os.tmpdir(), 'ThymosMusicPlayerTemp');
+    const tempDir = path.join(os.tmpdir(), 'ZephyrusPlayerTemp');
 
     // 确保临时目录存在
     if (!fs.existsSync(tempDir)) {

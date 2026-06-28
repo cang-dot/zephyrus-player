@@ -43,6 +43,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import icon from '@/assets/icon.png';
+import { useCoverColor } from '@/hooks/useCoverColor';
 import { useSettingsStore } from '@/store';
 import { isMobile } from '@/utils';
 
@@ -57,7 +58,7 @@ const props = defineProps({
   },
   selectColor: {
     type: String,
-    default: '#22c55e'
+    default: undefined
   },
   menus: {
     type: Array as any,
@@ -68,6 +69,7 @@ const props = defineProps({
 const route = useRoute();
 const path = ref(route.path);
 const settingsStore = useSettingsStore();
+const { primaryColor } = useCoverColor();
 watch(
   () => route.path,
   async (newParams) => {
@@ -81,10 +83,12 @@ const isChecked = (index: number) => {
   return path.value === props.menus[index].path;
 };
 
+const activeColor = computed(() => props.selectColor || primaryColor.value || '#22c55e');
+
 const iconStyle = (index: number) => {
   const style = {
     fontSize: props.size,
-    color: isChecked(index) ? props.selectColor : props.color
+    color: isChecked(index) ? activeColor.value : props.color
   };
   return style;
 };
