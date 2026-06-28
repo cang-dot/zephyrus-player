@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="h-full w-full bg-white dark:bg-neutral-900 transition-colors duration-500">
     <n-scrollbar class="h-full">
       <div class="w-full pb-32">
@@ -116,7 +116,7 @@
               v-else-if="followList.length > 0"
               class="text-center text-sm text-neutral-400 dark:text-neutral-500 py-8"
             >
-              鈥?{{ t('common.noMore') || '娌℃湁鏇村浜? }} 鈥?            </div>
+              「{{ t('common.noMore') || '没有更多了' }}」
           </section>
         </template>
       </div>
