@@ -104,95 +104,99 @@
           </div>
         </div>
 
-        <!-- ===== 宸茬櫥褰? 绉佷汉FM (Right Card) ===== -->
+        <!-- ===== 宸茬櫥褰? 绉佷汉FM (Full Width) ===== -->
         <div v-if="isLoggedIn" class="hero-card" :style="{ animationDelay: '0.22s' }">
           <div
-            class="fm-card group relative cursor-pointer overflow-hidden rounded-2xl shadow-sm transition-all duration-300 ease-out hover:shadow-xl"
+            class="fm-card fm-card--expanded group relative cursor-pointer overflow-hidden rounded-2xl shadow-sm transition-all duration-300 ease-out hover:shadow-xl"
             :style="{ background: fmCardBg }"
-            @click="handleFmPlay"
           >
-            <!-- Background blur image 鈥?flows when playing -->
+            <!-- Background blur image -->
             <img
               v-if="fmCurrentCover"
               ref="fmCoverRef"
               :src="getImgUrl(fmCurrentCover, '512y512')"
               alt=""
-              class="absolute inset-0 h-full w-full scale-150 object-cover opacity-30 blur-2xl"
+              class="absolute inset-0 h-full w-full scale-150 object-cover opacity-20 blur-3xl"
               :class="isFmPlaying ? 'fm-bg-flow' : ''"
               crossorigin="anonymous"
               @load="extractFmColor"
             />
-            <div class="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30" />
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
 
             <!-- Content -->
-            <div class="relative flex h-full items-center gap-4 p-5">
-              <!-- Album Cover -->
-              <div
-                class="fm-cover relative aspect-square flex-shrink-0 overflow-hidden rounded-xl shadow-lg transition-transform duration-500 group-hover:scale-[1.03]"
-              >
-                <img
-                  v-if="fmCurrentCover"
-                  :src="getImgUrl(fmCurrentCover, '256y256')"
-                  alt=""
-                  class="h-full w-full object-cover"
-                />
-                <div v-else class="flex h-full w-full items-center justify-center bg-white/10">
-                  <i class="ri-radio-fill text-3xl text-white/40" />
-                </div>
-                <!-- Playing equalizer overlay on cover -->
-                <div v-if="isFmPlaying" class="absolute bottom-2 right-2 flex items-end gap-[2px]">
-                  <span
-                    v-for="i in 3"
-                    :key="i"
-                    class="eq-bar"
-                    :style="{ animationDelay: `${(i - 1) * 0.15}s` }"
+            <div class="relative flex h-full gap-6 p-6">
+              <!-- Left: Cover + Song Info -->
+              <div class="flex flex-col items-center gap-3 flex-shrink-0">
+                <!-- Album Cover -->
+                <div
+                  class="fm-cover-lg relative w-28 h-28 md:w-36 md:h-36 overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+                >
+                  <img
+                    v-if="fmCurrentCover"
+                    :src="getImgUrl(fmCurrentCover, '512y512')"
+                    alt=""
+                    class="h-full w-full object-cover"
                   />
+                  <div v-else class="flex h-full w-full items-center justify-center bg-white/10">
+                    <i class="ri-radio-fill text-4xl text-white/40" />
+                  </div>
+                  <!-- Playing equalizer overlay -->
+                  <div v-if="isFmPlaying" class="absolute bottom-2 right-2 flex items-end gap-[2px]">
+                    <span
+                      v-for="i in 3"
+                      :key="i"
+                      class="eq-bar"
+                      :style="{ animationDelay: `${(i - 1) * 0.15}s`, '--eq-color': primaryColor || '#22c55e' }"
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <!-- Song Info & Controls -->
-              <div class="flex min-w-0 flex-1 flex-col justify-between self-stretch py-0.5">
-                <div class="min-w-0">
-                  <h3 class="truncate text-base font-bold text-white md:text-lg">
+                <!-- Song Info -->
+                <div class="text-center max-w-[180px]">
+                  <h3 class="truncate text-sm font-bold text-white">
                     {{ fmCurrentSong?.name || t('comp.homeHero.discoverMusic') }}
                   </h3>
-                  <p class="mt-0.5 truncate text-sm text-white/60">
+                  <p class="mt-0.5 truncate text-xs text-white/50">
                     {{ fmCurrentArtist }}
                   </p>
                 </div>
-                <div class="flex items-center justify-between">
-                  <!-- Playback Controls -->
-                  <div class="flex items-center gap-3">
-                    <button
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white"
-                      :title="t('comp.homeHero.fmTrash')"
-                      @click.stop="handleFmTrash"
-                    >
-                      <i class="ri-thumb-down-line text-lg" />
-                    </button>
-                    <button
-                      class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-300 hover:scale-110 hover:bg-white/30 active:scale-95"
-                      @click.stop="handleFmPlay"
-                    >
-                      <i
-                        :class="isFmPlaying ? 'ri-pause-fill' : 'ri-play-fill ml-0.5'"
-                        class="text-xl"
-                      />
-                    </button>
-                    <button
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white"
-                      :title="t('comp.homeHero.fmNext')"
-                      @click.stop="handleFmNext"
-                    >
-                      <i class="ri-skip-forward-fill text-lg" />
-                    </button>
-                  </div>
+              </div>
 
-                  <!-- FM Badge -->
-                  <span class="flex items-center gap-1 text-xs font-semibold text-white/50">
-                    <i class="ri-radio-fill" />
-                    {{ t('comp.homeHero.personalFm') }}
-                  </span>
+              <!-- Center: Lyrics -->
+              <HomeFmLyrics class="flex-1 min-w-0" />
+
+              <!-- Right: Controls + Badge -->
+              <div class="flex flex-col items-end justify-between flex-shrink-0">
+                <!-- FM Badge -->
+                <span class="flex items-center gap-1 text-xs font-semibold text-white/50">
+                  <i class="ri-radio-fill" />
+                  {{ t('comp.homeHero.personalFm') }}
+                </span>
+
+                <!-- Playback Controls -->
+                <div class="flex items-center gap-3">
+                  <button
+                    class="flex h-9 w-9 items-center justify-center rounded-full text-white/50 transition-colors hover:text-white"
+                    :title="t('comp.homeHero.fmTrash')"
+                    @click.stop="handleFmTrash"
+                  >
+                    <i class="ri-thumb-down-line text-lg" />
+                  </button>
+                  <button
+                    class="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white/30 active:scale-95"
+                    @click.stop="handleFmPlay"
+                  >
+                    <i
+                      :class="isFmPlaying ? 'ri-pause-fill' : 'ri-play-fill ml-0.5'"
+                      class="text-xl"
+                    />
+                  </button>
+                  <button
+                    class="flex h-9 w-9 items-center justify-center rounded-full text-white/50 transition-colors hover:text-white"
+                    :title="t('comp.homeHero.fmNext')"
+                    @click.stop="handleFmNext"
+                  >
+                    <i class="ri-skip-forward-fill text-lg" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -275,6 +279,8 @@ import { useRouter } from 'vue-router';
 import { getHotSinger, getPersonalFM, getPersonalizedPlaylist } from '@/api/home';
 import { fmTrash } from '@/api/music';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
+import HomeFmLyrics from '@/views/home/components/HomeFmLyrics.vue';
+import { useCoverColor } from '@/hooks/useCoverColor';
 import {
   useIntelligenceModeStore,
   usePlayerCoreStore,
@@ -290,6 +296,7 @@ const recommendStore = useRecommendStore();
 const intelligenceModeStore = useIntelligenceModeStore();
 const userStore = useUserStore();
 const playerCoreStore = usePlayerCoreStore();
+const { primaryColor } = useCoverColor();
 
 const loading = ref(false);
 
@@ -661,20 +668,31 @@ onActivated(() => {
   }
 }
 
-/* Hero grid 鈥?left wider, right narrower, equal row height */
+/* Hero grid — single column stack */
 .hero-grid {
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr;
 }
 
 /* Cards fill grid row height equally */
 .hero-grid > .hero-card {
   height: 100%;
 }
-.hero-grid > .hero-card > .daily-card,
-.hero-grid > .hero-card > .fm-card {
+.hero-grid > .hero-card > .daily-card {
   height: 100%;
   min-height: 140px;
   max-height: 180px;
+}
+.hero-grid > .hero-card > .fm-card {
+  height: 100%;
+}
+.fm-card--expanded {
+  height: 380px;
+  min-height: 380px;
+  max-height: 380px;
+}
+.hero-grid > .hero-card:has(.fm-card--expanded) {
+  height: 380px;
+  min-height: 380px;
 }
 
 /* Card animation */
@@ -711,16 +729,16 @@ onActivated(() => {
   }
 }
 
-/* FM cover 鈥?sized relative to card, leaving padding space */
-.fm-cover {
-  height: calc(100% - 6px);
+/* FM cover — sized relative to card, leaving padding space */
+.fm-cover-lg {
+  flex-shrink: 0;
 }
 
 /* FM equalizer bars */
 .eq-bar {
   width: 3px;
   border-radius: 9999px;
-  background-color: #22c55e;
+  background-color: var(--eq-color, #22c55e);
   animation: eqPulse 0.8s ease-in-out infinite;
 }
 .eq-bar:nth-child(1) {

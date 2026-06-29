@@ -31,6 +31,70 @@
             </template>
             <div v-if="!settingsStore.setData.isMenuExpanded">{{ t(item.meta.title) }}</div>
           </n-tooltip>
+
+          <!-- 歌单手风琴子菜单 -->
+          <div
+            v-if="isMenuItemPlaylist(item) && settingsStore.setData.isMenuExpanded"
+            class="app-menu-submenu"
+          >
+            <div class="app-menu-submenu-scroll">
+              <!-- 创建的歌单 -->
+              <div v-if="createdPlaylists.length > 0" class="app-menu-submenu-group">
+                <div class="app-menu-submenu-label">创建的歌单</div>
+                <div
+                  v-for="pl in createdPlaylists"
+                  :key="pl.id"
+                  class="app-menu-submenu-item"
+                  @click="navigateToPlaylist(pl.id)"
+                >
+                  <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="app-menu-submenu-cover" />
+                  <span class="app-menu-submenu-name">{{ pl.name }}</span>
+                </div>
+              </div>
+
+              <!-- 收藏的歌单 -->
+              <div v-if="collectedPlaylists.length > 0" class="app-menu-submenu-group">
+                <div class="app-menu-submenu-label">收藏的歌单</div>
+                <div
+                  v-for="pl in collectedPlaylists"
+                  :key="pl.id"
+                  class="app-menu-submenu-item"
+                  @click="navigateToPlaylist(pl.id)"
+                >
+                  <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="app-menu-submenu-cover" />
+                  <span class="app-menu-submenu-name">{{ pl.name }}</span>
+                </div>
+              </div>
+
+              <!-- 收藏的专辑 -->
+              <div v-if="collectedAlbums.length > 0" class="app-menu-submenu-group">
+                <div class="app-menu-submenu-label">收藏的专辑</div>
+                <div
+                  v-for="al in collectedAlbums"
+                  :key="al.id"
+                  class="app-menu-submenu-item"
+                  @click="navigateToAlbum(al.id)"
+                >
+                  <img
+                    :src="getImgUrl(al.picUrl || al.blurPicUrl, '64y64')"
+                    class="app-menu-submenu-cover"
+                  />
+                  <span class="app-menu-submenu-name">{{ al.name }}</span>
+                </div>
+              </div>
+
+              <div
+                v-if="
+                  createdPlaylists.length === 0 &&
+                  collectedPlaylists.length === 0 &&
+                  collectedAlbums.length === 0
+                "
+                class="app-menu-submenu-empty"
+              >
+                暂无歌单
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -38,14 +102,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import icon from '@/assets/icon.png';
 import { useCoverColor } from '@/hooks/useCoverColor';
-import { useSettingsStore } from '@/store';
-import { isMobile } from '@/utils';
+import { useSettingsStore, useUserStore } from '@/store';
+import { isMobile, getImgUrl } from '@/utils';
 
 const props = defineProps({
   size: {
@@ -67,8 +131,10 @@ const props = defineProps({
 });
 
 const route = useRoute();
+const router = useRouter();
 const path = ref(route.path);
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const { primaryColor } = useCoverColor();
 watch(
   () => route.path,
@@ -98,6 +164,33 @@ const toggleMenu = () => {
     isMenuExpanded: !settingsStore.setData.isMenuExpanded
   });
 };
+
+// 歌单子菜单相关
+const isMenuItemPlaylist = (item: any) => {
+  return item.path === '/list';
+};
+
+const createdPlaylists = computed(() => {
+  if (!userStore.user) return [];
+  return userStore.playList.filter((pl: any) => pl.creator?.userId === userStore.user?.userId);
+});
+
+const collectedPlaylists = computed(() => {
+  if (!userStore.user) return [];
+  return userStore.playList.filter((pl: any) => pl.creator?.userId !== userStore.user?.userId);
+});
+
+const collectedAlbums = computed(() => {
+  return userStore.albumList;
+});
+
+const navigateToPlaylist = (id: number) => {
+  router.push('/music-list/' + id + '?type=playlist');
+};
+
+const navigateToAlbum = (id: number) => {
+  router.push('/music-list/' + id + '?type=album');
+};
 </script>
 
 <style lang="scss" scoped>
@@ -106,10 +199,9 @@ const toggleMenu = () => {
 }
 
 .app-menu-list {
-  max-height: calc(100vh - 120px); /* 涓篽eader棰勭暀绌洪棿锛岄槻姝㈣彍鍗曢」琚伄鎸?*/
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
-  /* 鑷畾涔夋粴鍔ㄦ潯鏍峰紡 - 榛樿闅愯棌锛屾偓鍋滄椂鏄剧ず */
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   padding-bottom: 20px;
@@ -129,7 +221,6 @@ const toggleMenu = () => {
     transition: background-color 0.3s ease;
   }
 
-  /* 鎮仠鏃舵樉绀烘粴鍔ㄦ潯 */
   &:hover {
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 
@@ -144,7 +235,7 @@ const toggleMenu = () => {
 }
 
 .app-menu-expanded {
-  @apply w-[160px];
+  @apply w-[200px];
 
   .app-menu-item {
     @apply hover:bg-gray-100 dark:hover:bg-gray-800 rounded mr-4;
@@ -161,7 +252,7 @@ const toggleMenu = () => {
 }
 
 .app-menu-item-link {
-  @apply mb-6 mt-6;
+  @apply mb-2 mt-4;
 }
 
 .app-menu-item-icon {
@@ -169,6 +260,109 @@ const toggleMenu = () => {
 
   &:hover {
     @apply text-[var(--accent-color)] scale-105 !important;
+  }
+}
+
+// 歌单子菜单样式
+.app-menu-submenu {
+  width: 100%;
+  padding: 0 8px 8px 8px;
+}
+
+.app-menu-submenu-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 2px;
+  }
+
+  &:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(156, 163, 175, 0.4);
+    }
+  }
+}
+
+.app-menu-submenu-group {
+  margin-bottom: 6px;
+}
+
+.app-menu-submenu-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 8px 2px;
+  user-select: none;
+
+  .dark & {
+    color: #6b7280;
+  }
+}
+
+.app-menu-submenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .dark &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.app-menu-submenu-cover {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.app-menu-submenu-name {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666;
+
+  .dark & {
+    color: #999;
+  }
+}
+
+.app-menu-submenu-empty {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  padding: 12px 8px;
+
+  .dark & {
+    color: #6b7280;
   }
 }
 
@@ -188,8 +382,8 @@ const toggleMenu = () => {
 
     &-list {
       @apply flex justify-between px-4;
-      max-height: none !important; /* 绉诲姩绔笉闄愬埗楂樺害 */
-      overflow: visible !important; /* 绉诲姩绔笉闇€瑕佹粴鍔?*/
+      max-height: none !important;
+      overflow: visible !important;
     }
 
     &-item {
@@ -207,4 +401,3 @@ const toggleMenu = () => {
   }
 }
 </style>
-

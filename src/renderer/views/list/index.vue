@@ -1,237 +1,92 @@
 ﻿<template>
-  <sticky-tab-page
-    ref="pageRef"
-    :title="listTitle"
-    :description="t('comp.pages.list.desc')"
-    :model-value="currentType"
-    :categories="playlistCategory?.sub || []"
-    label-key="name"
-    value-key="name"
-    @change="handleTypeChange"
-    @scroll="handleScroll"
-  >
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-      <!-- Loading State -->
-      <template v-if="loading && page === 0">
-        <div v-for="i in 15" :key="`loading-${i}`" class="space-y-3">
-          <div class="aspect-square skeleton-shimmer rounded-2xl" />
-          <div class="h-4 w-3/4 skeleton-shimmer rounded-lg" />
-        </div>
-      </template>
+  <div class="my-playlist-page h-full flex flex-col bg-white dark:bg-black">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 flex-shrink-0">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">我的音乐</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          {{ domeItems.length }} 个内容 · 拖拽旋转 · Ctrl+滚轮缩放
+        </p>
+      </div>
+    </div>
 
-      <!-- Content State -->
-      <template v-else>
+    <!-- 3D Dome Gallery -->
+    <div class="flex-grow min-h-0 px-4 pb-4">
+      <DomeGallery
+        v-if="domeItems.length > 0"
+        :images="domeItems"
+        :size="domeSize"
+        @select="handleItemSelect"
+      />
+      <div
+        v-else
+        class="h-full flex flex-col items-center justify-center text-gray-400"
+      >
         <div
-          v-for="(item, index) in recommendList"
-          :key="item.id"
-          class="list-card group cursor-pointer"
-          :class="{ 'animate-item': !animatedIds.has(item.id) }"
-          :style="{
-            animationDelay: !animatedIds.has(item.id)
-              ? calculateAnimationDelay(index % TOTAL_ITEMS, 0.05)
-              : '0s'
-          }"
-          @click.stop="openPlaylist(item)"
-          @animationend="animatedIds.add(item.id)"
+          class="w-24 h-24 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center mb-4"
         >
-          <!-- Cover Image -->
-          <div
-            class="relative aspect-square overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition-all duration-500"
-          >
-            <img
-              :src="getImgUrl(item.picUrl || item.coverImgUrl, '400y400')"
-              :alt="item.name"
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              loading="lazy"
-            />
-
-            <!-- Play Overlay -->
-            <div
-              class="absolute inset-0 bg-transparent group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
-            >
-              <div
-                class="play-icon w-12 h-12 rounded-full bg-white/90 flex items-center justify-center opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 shadow-xl"
-              >
-                <i class="ri-play-fill text-2xl text-neutral-900 ml-1"></i>
-              </div>
-            </div>
-
-            <!-- Play Count Badge -->
-            <div
-              class="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white text-[10px] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <i class="ri-play-fill"></i>
-              {{ formatNumber(item.playCount) }}
-            </div>
-          </div>
-
-          <!-- Info -->
-          <div class="mt-3 space-y-1">
-            <h3
-              class="text-sm md:text-base font-bold text-neutral-900 dark:text-white line-clamp-1 group-hover:text-[var(--accent-color)] transition-colors"
-            >
-              {{ item.name }}
-            </h3>
-          </div>
+          <i class="ri-play-list-2-line text-4xl text-gray-300 dark:text-gray-600"></i>
         </div>
-      </template>
+        <p class="text-lg font-medium text-gray-500 dark:text-gray-400">暂无内容</p>
+        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">去发现更多音乐吧</p>
+      </div>
     </div>
-
-    <!-- 鍔犺浇鏇村 -->
-    <div v-if="isLoadingMore" class="flex justify-center items-center py-8">
-      <n-spin size="small" />
-      <span class="ml-2 text-neutral-500">{{ t('common.loading') }}</span>
-    </div>
-    <div v-if="!hasMore && recommendList.length > 0" class="text-center py-8 text-neutral-500">
-      {{ t('common.noMore') }}
-    </div>
-  </sticky-tab-page>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { getPlaylistCategory } from '@/api/home';
-import { getListByCat } from '@/api/list';
-import StickyTabPage from '@/components/common/StickyTabPage.vue';
-import { navigateToMusicList } from '@/components/common/MusicListNavigator';
-import type { IPlayListSort } from '@/types/playlist';
-import { calculateAnimationDelay, formatNumber, getImgUrl } from '@/utils';
+import DomeGallery from '@/components/DomeGallery.vue';
+import { useUserStore } from '@/store';
+import { isMobile } from '@/utils';
 
 defineOptions({
-  name: 'List'
+  name: 'MyPlaylist'
 });
 
-const { t } = useI18n();
-const TOTAL_ITEMS = 42;
-
-const recommendList = ref<any[]>([]);
-const page = ref(0);
-const hasMore = ref(true);
-const isLoadingMore = ref(false);
-const animatedIds = reactive(new Set<number>());
-const pageRef = ref();
-
 const router = useRouter();
+const userStore = useUserStore();
 
-const openPlaylist = (item: any) => {
-  navigateToMusicList(router, {
-    id: item.id,
-    type: 'playlist',
-    name: item.name,
-    listInfo: item,
-    canRemove: false
-  });
-};
+const domeItems = computed(() => {
+  const playlists = userStore.playList.map((pl: any) => ({
+    id: pl.id,
+    src: pl.coverImgUrl || '',
+    alt: pl.name || '未知歌单',
+    type: 'playlist' as const
+  }));
+  const albums = userStore.albumList.map((al: any) => ({
+    id: al.id,
+    src: al.picUrl || al.blurPicUrl || '',
+    alt: al.name || '未知专辑',
+    type: 'album' as const
+  }));
+  return [...playlists, ...albums];
+});
 
-const route = useRoute();
-const DEFAULT_CAT = '姣忔棩鎺ㄨ崘';
-const listTitle = ref((route.query.type as string) || t('comp.pages.list.dailyRecommend'));
+const domeSize = computed(() => (isMobile ? 70 : 110));
 
-const loading = ref(false);
-const loadList = async (type: string, isLoadMore = false) => {
-  if (!hasMore.value && isLoadMore) return;
-  if (isLoadMore) {
-    isLoadingMore.value = true;
+const handleItemSelect = (item: any) => {
+  if (item.type === 'album') {
+    router.push('/music-list/' + item.id + '?type=album');
   } else {
-    loading.value = true;
-    page.value = 0;
-    recommendList.value = [];
-    await nextTick();
-    pageRef.value?.scrollTo({ top: 0 });
+    router.push('/music-list/' + item.id + '?type=playlist');
   }
-
-  try {
-    const params = {
-      cat: type === DEFAULT_CAT ? '' : type,
-      limit: TOTAL_ITEMS,
-      offset: page.value * TOTAL_ITEMS
-    };
-    const { data } = await getListByCat(params);
-    if (isLoadMore) {
-      recommendList.value.push(...data.playlists);
-    } else {
-      recommendList.value = data.playlists;
-    }
-    hasMore.value = data.more;
-    page.value++;
-  } catch (error) {
-    console.error('鍔犺浇姝屽崟鍒楄〃澶辫触:', error);
-  } finally {
-    loading.value = false;
-    isLoadingMore.value = false;
-  }
-};
-
-const handleScroll = (e: any) => {
-  const { scrollTop, scrollHeight, clientHeight } = e.target;
-  if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoadingMore.value && hasMore.value) {
-    loadList(currentType.value, true);
-  }
-};
-
-const playlistCategory = ref<IPlayListSort>();
-const currentType = ref((route.query.type as string) || DEFAULT_CAT);
-
-const loadPlaylistCategory = async () => {
-  const { data } = await getPlaylistCategory();
-  playlistCategory.value = {
-    ...data,
-    sub: [
-      {
-        name: DEFAULT_CAT,
-        category: 0
-      },
-      ...data.sub
-    ]
-  };
-};
-
-const handleTypeChange = (type: string) => {
-  router.replace({ query: { ...route.query, type } });
 };
 
 onMounted(() => {
-  loadPlaylistCategory();
-  currentType.value = (route.query.type as string) || currentType.value;
-  loadList(currentType.value);
-});
-
-onDeactivated(() => {
-  recommendList.value.forEach((item) => animatedIds.add(item.id));
-});
-
-watch(
-  () => route.query,
-  async (newParams) => {
-    if (route.path !== '/list') return;
-    const newType = (newParams.type as string) || DEFAULT_CAT;
-    if (newType !== currentType.value) {
-      listTitle.value = newType === DEFAULT_CAT ? t('comp.pages.list.dailyRecommend') : newType;
-      currentType.value = newType;
-      loading.value = true;
-      loadList(newType);
-    }
+  if (userStore.playList.length === 0 && userStore.user) {
+    userStore.initializePlaylist();
   }
-);
+  if (userStore.albumList.length === 0 && userStore.user) {
+    userStore.initializeAlbumList();
+  }
+});
 </script>
 
 <style lang="scss" scoped>
-.animate-item {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.my-playlist-page {
+  overflow: hidden;
 }
 </style>
-

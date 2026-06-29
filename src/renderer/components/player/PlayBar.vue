@@ -353,16 +353,23 @@ function resetCollapseTimer() {
   }, COLLAPSE_DELAY);
 }
 
-// 检测是否在排版播放器模式
-const isMagazineMode = computed(() => {
+// 检测是否在排版播放器模式（ref + 监听事件，响应式更新）
+const isMagazineMode = ref(false);
+function updateMagazineMode() {
   try {
     const saved = localStorage.getItem('music-full-config');
     if (saved) {
       const config = JSON.parse(saved);
-      return config.playerStyle === 'magazine';
+      isMagazineMode.value = config.playerStyle === 'magazine';
+      return;
     }
   } catch {}
-  return false;
+  isMagazineMode.value = false;
+}
+updateMagazineMode();
+window.addEventListener('music-full-config-updated', updateMagazineMode);
+onUnmounted(() => {
+  window.removeEventListener('music-full-config-updated', updateMagazineMode);
 });
 
 // 排版模式下启用自动收起
@@ -419,20 +426,20 @@ const openPlayListDrawer = () => {
     box-shadow: 0 0 20px 5px #0000001d;
     color: #000000;
 
-    // 杂志模式：强制所有子元素继承黑色
+    // 杂志模式：强制所有子元素继承黑色（:deep 穿透子组件）
     &.play-bar-magazine {
-      * {
+      :deep(*) {
         color: #000000 !important;
       }
     }
 
     // 各元素悬停时变强调色
-    .music-content-title,
-    .music-content-name,
-    .music-buttons-prev,
-    .music-buttons-next,
-    .music-buttons-play,
-    .audio-button .iconfont {
+    :deep(.music-content-title),
+    :deep(.music-content-name),
+    :deep(.music-buttons-prev),
+    :deep(.music-buttons-next),
+    :deep(.music-buttons-play),
+    :deep(.audio-button .iconfont) {
       transition: color 0.2s ease;
       &:hover {
         color: var(--accent-color, #22c55e) !important;
