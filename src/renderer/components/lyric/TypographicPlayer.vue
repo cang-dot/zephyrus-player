@@ -137,7 +137,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const playerStore = usePlayerStore();
-const { primaryColor, primaryColorRgb } = useCoverColor();
+const { primaryColor, primaryColorRgb, averageColor } = useCoverColor();
 
 // ==================== 状态 ====================
 
@@ -208,13 +208,14 @@ watch(
 const climaxColors = computed(() => {
   const state = climax.colorState.value;
   const accent = accentColor.value;
+  const avg = averageColor.value;
 
   switch (climax.currentMode.value) {
     case 1:
-      // 模式一：文字和色块颜色在强调色和主色之间交替
+      // 模式一：文字和色块颜色在歌曲强调色和封面平均色之间交替
       return {
-        text: state.phase ? accent : '#000000',
-        block: state.phase ? '#000000' : accent,
+        text: state.phase ? accent : avg,
+        block: state.phase ? avg : accent,
         bg: '#ffffff',
       };
     case 2:
@@ -223,8 +224,8 @@ const climaxColors = computed(() => {
         ? { text: '#ffffff', block: '#ffffff', bg: accent }
         : { text: accent, block: accent, bg: '#ffffff' };
     case 3:
-      // 模式三：背景颜色在白色、强调色、主色中不断切换
-      const bgColors = ['#ffffff', accent, '#000000'];
+      // 模式三：背景颜色在白色、强调色、封面平均色中不断切换
+      const bgColors = ['#ffffff', accent, avg];
       const bg = bgColors[state.bgIndex];
       const isLight = bg === '#ffffff';
       return {

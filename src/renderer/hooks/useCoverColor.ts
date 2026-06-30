@@ -12,6 +12,9 @@ import { getImgUrl } from '@/utils';
 // 当前提取的颜色
 const primaryColor = ref('#22c55e');
 const primaryColorRgb = ref('34, 197, 94');
+// 封面原始平均色（不做暖色调整）
+const averageColor = ref('#22c55e');
+const averageColorRgb = ref('34, 197, 94');
 
 // 默认绿色的 RGB
 const DEFAULT_R = 34;
@@ -135,6 +138,8 @@ function updateCSSVariables(r: number, g: number, b: number) {
 function resetToDefault() {
   primaryColor.value = '#22c55e';
   primaryColorRgb.value = `${DEFAULT_R}, ${DEFAULT_G}, ${DEFAULT_B}`;
+  averageColor.value = '#22c55e';
+  averageColorRgb.value = `${DEFAULT_R}, ${DEFAULT_G}, ${DEFAULT_B}`;
   updateCSSVariables(DEFAULT_R, DEFAULT_G, DEFAULT_B);
 }
 
@@ -152,6 +157,10 @@ export function initCoverColor() {
 
       const color = await extractColorFromImage(picUrl);
       if (color) {
+        // 封面原始平均色（不做调整）
+        averageColor.value = `rgb(${color.r}, ${color.g}, ${color.b})`;
+        averageColorRgb.value = `${color.r}, ${color.g}, ${color.b}`;
+
         const accent = adjustForAccent(color.r, color.g, color.b);
         primaryColor.value = `rgb(${accent.r}, ${accent.g}, ${accent.b})`;
         primaryColorRgb.value = `${accent.r}, ${accent.g}, ${accent.b}`;
@@ -168,6 +177,8 @@ export function initCoverColor() {
 export function useCoverColor() {
   return {
     primaryColor,
-    primaryColorRgb
+    primaryColorRgb,
+    averageColor,
+    averageColorRgb
   };
 }
