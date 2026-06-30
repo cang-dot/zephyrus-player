@@ -175,14 +175,17 @@ const textColor = computed(() => {
   return accentColor.value;
 });
 
-const dynamicBgStyle = computed(() => ({
-  '--bg-color': bgColor.value,
-  '--text-color': textColor.value,
-  '--accent-color': accentColor.value,
-  '--accent-rgb': primaryColorRgb.value || '34, 197, 94',
-  backgroundColor: 'var(--bg-color)',
-  color: 'var(--text-color)',
-}));
+const dynamicBgStyle = computed(() => {
+  const climaxBg = climax.isInClimax.value ? climaxColors.value.bg : null;
+  return {
+    '--bg-color': climaxBg || bgColor.value,
+    '--text-color': textColor.value,
+    '--accent-color': accentColor.value,
+    '--accent-rgb': primaryColorRgb.value || '34, 197, 94',
+    backgroundColor: climaxBg || 'var(--bg-color)',
+    color: 'var(--text-color)',
+  };
+});
 
 // ==================== 高潮驱动 ====================
 
