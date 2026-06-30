@@ -210,25 +210,19 @@ function handleEdgeDrag(e: MouseEvent, segIndex: number, edge: 'start' | 'end') 
 // 添加段落
 function addSegment(start: number, end: number) {
   const newSeg: ClimaxSegment = { start, end };
-  const existing = [...climaxStore.segments];
+  const all = [...climaxStore.segments, newSeg].sort((a, b) => a.start - b.start);
 
-  const merged: ClimaxSegment[] = [];
-  let current = newSeg;
-
-  for (const seg of existing.sort((a, b) => a.start - b.start)) {
-    if (current.end < seg.start) {
-      merged.push(current);
-      current = seg;
+  const merged: ClimaxSegment[] = [{ ...all[0] }];
+  for (let i = 1; i < all.length; i++) {
+    const last = merged[merged.length - 1];
+    if (all[i].start <= last.end) {
+      last.end = Math.max(last.end, all[i].end);
     } else {
-      current = {
-        start: Math.min(current.start, seg.start),
-        end: Math.max(current.end, seg.end),
-      };
+      merged.push({ ...all[i] });
     }
   }
-  merged.push(current);
 
-  climaxStore.updateSegments(merged.sort((a, b) => a.start - b.start));
+  climaxStore.updateSegments(merged);
 }
 
 // 删除段落
