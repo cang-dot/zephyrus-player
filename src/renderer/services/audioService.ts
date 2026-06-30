@@ -238,8 +238,9 @@ class AudioService {
 
   private async disposeEQ(keepContext = false) {
     try {
-      // 断开高潮检测器
+      // 断开高潮检测器和鼓点检测器
       climaxDetector.disconnect();
+      drumDetector.disconnect();
 
       // 清理音频节点连接
       if (this.source) {
@@ -353,9 +354,9 @@ class AudioService {
         return filter;
       });
 
-      // 连接高潮检测器和鼓点检测器（只读旁路，不影响音频路径）
-      climaxDetector.connect(this.context, this.source);
-      drumDetector.connect(this.context, this.source);
+      // 连接高潮检测器和鼓点检测器（连接到 gainNode，不受 applyBypassState 断连影响）
+      climaxDetector.connect(this.context, this.gainNode);
+      drumDetector.connect(this.context, this.gainNode);
 
       // 应用EQ状态
       this.applyBypassState();
