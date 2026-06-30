@@ -259,9 +259,6 @@ const isInClimax = computed(() => {
   return climaxStore.segments.some((seg) => t >= seg.start && t <= seg.end);
 });
 
-// 高潮时增强烟雾效果
-const smokeIntensity = computed(() => isInClimax.value ? 1.2 : 1);
-
 // 高潮时增强歌词动画
 const climaxAnimationBoost = computed(() => isInClimax.value ? 1.5 : 1);
 
@@ -619,17 +616,12 @@ function handleFullScreenChange() {
 onMounted(() => {
   resetHideTimer();
   document.addEventListener('fullscreenchange', handleFullScreenChange);
-  startParticles();
 });
 
 onBeforeUnmount(() => {
   if (hideTimer) {
     clearTimeout(hideTimer);
     hideTimer = null;
-  }
-  if (particleInterval) {
-    clearInterval(particleInterval);
-    particleInterval = null;
   }
   if (pendingRafId !== null) {
     cancelAnimationFrame(pendingRafId);
@@ -641,46 +633,6 @@ onBeforeUnmount(() => {
   }
 });
 
-// ==================== 粒子系统 ====================
-
-function startParticles() {
-  if (particleInterval) clearInterval(particleInterval);
-  particleInterval = setInterval(() => {
-    if (!particlesContainer.value) return;
-    createParticle();
-  }, 800);
-}
-
-function createParticle() {
-  if (!particlesContainer.value) return;
-  const particle = document.createElement('div');
-  particle.className = 'particle';
-  
-  // 随机大小 2-6px
-  const size = Math.random() * 4 + 2;
-  // 随机水平位置
-  const startX = Math.random() * 100;
-  // 随机动画时长 8-15秒
-  const duration = Math.random() * 7 + 8;
-  // 随机延迟
-  const delay = Math.random() * 2;
-  
-  particle.style.cssText = `
-    width: ${size}px;
-    height: ${size}px;
-    left: ${startX}%;
-    bottom: -10px;
-    animation: particleFloat ${duration}s ${delay}s linear infinite;
-    opacity: 0;
-  `;
-  
-  particlesContainer.value.appendChild(particle);
-  
-  // 15秒后移除粒子
-  setTimeout(() => {
-    particle.remove();
-  }, (duration + delay) * 1000);
-}
 </script>
 
 <style scoped lang="scss">
