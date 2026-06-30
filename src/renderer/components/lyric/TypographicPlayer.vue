@@ -216,13 +216,14 @@ const climaxColors = computed(() => {
       return {
         text: state.phase ? accent : avg,
         block: state.phase ? avg : accent,
+        labelText: '#ffffff',
         bg: '#ffffff',
       };
     case 2:
       // 模式二：背景与文字和色块的颜色不断互换
       return state.inverted
-        ? { text: '#ffffff', block: '#ffffff', bg: accent }
-        : { text: accent, block: accent, bg: '#ffffff' };
+        ? { text: '#ffffff', block: '#ffffff', labelText: accent, bg: accent }
+        : { text: accent, block: accent, labelText: '#ffffff', bg: '#ffffff' };
     case 3:
       // 模式三：背景颜色在白色、强调色、封面平均色中不断切换
       const bgColors = ['#ffffff', accent, avg];
@@ -231,10 +232,11 @@ const climaxColors = computed(() => {
       return {
         text: isLight ? accent : '#ffffff',
         block: isLight ? accent : '#ffffff',
+        labelText: isLight ? '#ffffff' : accent,
         bg,
       };
     default:
-      return { text: accent, block: accent, bg: '#ffffff' };
+      return { text: accent, block: accent, labelText: '#ffffff', bg: '#ffffff' };
   }
 });
 
@@ -387,7 +389,7 @@ const bandBlockStyle = computed(() => {
     left: `${b.x}px`, top: `${b.y}px`,
     width: `${b.width}px`, height: `${b.height}px`,
     backgroundColor: colors ? colors.block : accentColor.value,
-    color: colors ? colors.text : '#ffffff',
+    color: colors ? colors.labelText : '#ffffff',
   };
 });
 
@@ -407,7 +409,7 @@ const titleBlockStyle = computed(() => {
     left: `${b.x}px`, top: `${b.y}px`,
     width: `${b.width}px`, height: `${b.height}px`,
     backgroundColor: colors ? colors.block : accentColor.value,
-    color: colors ? colors.text : '#ffffff',
+    color: colors ? colors.labelText : '#ffffff',
   };
 });
 
