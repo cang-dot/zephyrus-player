@@ -13,125 +13,95 @@ jobs:
   build-win:
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm ci
 
       - name: Build Windows
         run: npm run build:win
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: win
           path: |
             dist/*.exe
             dist/*.yml
-            dist/*.blockmap
-          if-no-files-found: error
+          retention-days: 3
 
-  build-mac-x64:
+  build-mac:
     runs-on: macos-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm ci
 
-      - name: Build macOS x64
-        run: npm run build:mac:x64
+      - name: Build Mac
+        run: npm run build:mac
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: mac-x64
+          name: mac
           path: |
             dist/*.dmg
             dist/*.zip
             dist/*.yml
-            dist/*.blockmap
-          if-no-files-found: error
+          retention-days: 3
 
-  build-mac-arm64:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build macOS arm64
-        run: npm run build:mac:arm64
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-arm64
-          path: |
-            dist/*.dmg
-            dist/*.zip
-            dist/*.yml
-            dist/*.blockmap
-          if-no-files-found: error
-
-  release:
-    needs: [build-win, build-mac-x64, build-mac-arm64]
+  build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build Linux
+        run: npm run build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+            dist/*.yml
+          retention-days: 3
+
+  release:
+    needs: [build-win, build-mac, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
-      - name: Prepare release files
-        run: |
-          mkdir -p release
-          # Copy all build artifacts
-          find artifacts -type f \( -name '*.exe' -o -name '*.dmg' -o -name '*.zip' -o -name '*.blockmap' \) -exec cp {} release/ \;
-          # Merge mac yml files
-          if [ -f artifacts/mac-x64/latest-mac.yml ] && [ -f artifacts/mac-arm64/latest-mac.yml ]; then
-            node scripts/merge_latest_mac_yml.mjs artifacts/mac-x64/latest-mac.yml artifacts/mac-arm64/latest-mac.yml release/latest-mac.yml
-          fi
-          # Copy win yml
-          if [ -f artifacts/win/latest.yml ]; then
-            cp artifacts/win/latest.yml release/latest.yml
-          fi
-          ls -la release/
-
-      - name: Publish GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: false
-          prerelease: false
           generate_release_notes: true
-          files: release/*
+          files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
