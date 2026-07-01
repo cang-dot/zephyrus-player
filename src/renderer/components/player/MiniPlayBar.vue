@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="mini-play-bar"
     :class="{ 'pure-mode': pureModeEnabled, 'mini-mode': settingsStore.isMiniMode }"
@@ -61,6 +61,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { artistList, playMusic } from '@/hooks/MusicHook';
+import { useArtist } from '@/hooks/useArtist';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
 import { getImgUrl } from '@/utils';
@@ -68,6 +69,7 @@ import { getImgUrl } from '@/utils';
 const { t } = useI18n();
 const playerStore = usePlayerStore();
 const settingsStore = useSettingsStore();
+const { navigateToArtist } = useArtist();
 
 const play = computed(() => playerStore.isPlay);
 const pureModeEnabled = computed(() => false);
@@ -96,7 +98,7 @@ const setMusicFull = () => {
 };
 
 const handleArtistClick = (id: number) => {
-  // 处理歌手点击
+  navigateToArtist(id);
 };
 </script>
 

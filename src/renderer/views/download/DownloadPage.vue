@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="download-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
     <n-scrollbar class="h-full">
       <div class="download-content pb-32">

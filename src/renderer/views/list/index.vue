@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="my-playlist-page h-full flex flex-col bg-white dark:bg-black">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 flex-shrink-0">

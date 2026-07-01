@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div>
     <!-- menu -->
     <div class="app-menu" :class="{ 'app-menu-expanded': settingsStore.setData.isMenuExpanded }">

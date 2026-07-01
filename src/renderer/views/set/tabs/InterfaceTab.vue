@@ -80,17 +80,19 @@
       <div
         v-for="(item, index) in sidebarItems"
         :key="item.path"
-        class="sidebar-item"
-        :class="{ 'is-hidden': item.hidden }"
+        class="flex items-center justify-between px-3 py-2 rounded-lg border transition-all"
+        :class="item.hidden
+          ? 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/8 opacity-50'
+          : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/8 hover:bg-gray-100 dark:hover:bg-white/8'"
       >
-        <div class="sidebar-item-left">
-          <span class="sidebar-item-index">{{ index + 1 }}</span>
-          <i :class="item.icon" class="sidebar-item-icon"></i>
-          <span class="sidebar-item-name">{{ item.name }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400 dark:text-white/40 min-w-[16px]">{{ index + 1 }}</span>
+          <i :class="item.icon" class="text-base text-gray-600 dark:text-white/80"></i>
+          <span class="text-[13px] text-gray-800 dark:text-white/90">{{ item.name }}</span>
         </div>
-        <div class="sidebar-item-right">
+        <div class="flex gap-1">
           <button
-            class="sidebar-btn"
+            class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             :disabled="index === 0"
             @click="moveUp(index)"
             title="上移"
@@ -98,7 +100,7 @@
             <i class="ri-arrow-up-s-line"></i>
           </button>
           <button
-            class="sidebar-btn"
+            class="w-7 h-7 flex items-center justify-center rounded-md text-gray-400 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-white/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             :disabled="index === sidebarItems.length - 1"
             @click="moveDown(index)"
             title="下移"
@@ -107,8 +109,10 @@
           </button>
           <button
             v-if="item.path !== '/set'"
-            class="sidebar-btn"
-            :class="{ 'is-active': !item.hidden }"
+            class="w-7 h-7 flex items-center justify-center rounded-md transition-colors"
+            :class="item.hidden
+              ? 'text-gray-400 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10'
+              : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'"
             @click="toggleHidden(item.path)"
             :title="item.hidden ? '显示' : '隐藏'"
           >
@@ -333,109 +337,5 @@ function saveOrder(order: string[]) {
   gap: 4px;
   min-width: 280px;
   max-width: 400px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-:global(.dark) .sidebar-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-item:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-:global(.dark) .sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-item.is-hidden {
-  opacity: 0.5;
-}
-
-.sidebar-item-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar-item-index {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.4);
-  min-width: 16px;
-}
-
-:global(.dark) .sidebar-item-index {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.sidebar-item-icon {
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.7);
-}
-
-:global(.dark) .sidebar-item-icon {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.sidebar-item-name {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-:global(.dark) .sidebar-item-name {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.sidebar-item-right {
-  display: flex;
-  gap: 4px;
-}
-
-.sidebar-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: rgba(0, 0, 0, 0.5);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-:global(.dark) .sidebar-btn {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.sidebar-btn:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.9);
-}
-
-:global(.dark) .sidebar-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.sidebar-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.sidebar-btn.is-active {
-  color: #10b981;
 }
 </style>

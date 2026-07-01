@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <n-modal
     v-model:show="showModal"
     preset="dialog"

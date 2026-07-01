@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="radio-detail-page h-full w-full bg-white dark:bg-black transition-colors duration-500"
   >

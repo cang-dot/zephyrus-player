@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     ref="playBarRef"
     class="mobile-play-bar"

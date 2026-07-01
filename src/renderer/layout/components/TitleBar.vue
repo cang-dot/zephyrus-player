@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     id="title-bar"
     class="flex justify-between px-6 py-2 select-none relative text-dark dark:text-white"
@@ -132,7 +132,7 @@ const rememberChoice = ref(false);
 
 const openDownloadPage = () => {
   if (!isElectron) {
-    window.open('http://donate.alger.fun/download', '_blank');
+    window.open('https://github.com/cang-dot/zephyrus-player/releases', '_blank');
   }
 };
 

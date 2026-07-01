@@ -114,8 +114,7 @@ function startServer(config: RemoteControlConfig) {
   // IP 过滤中间件
   app.use((req, res, next) => {
     const clientIp = req.ip || req.socket.remoteAddress || '';
-    const cleanIp = clientIp.replace(/^::ffff:/, ''); // 移除IPv6前缀
-    console.log('config', config);
+    const cleanIp = clientIp.replace(/^::ffff:/, '');
     if (config.allowedIps.length === 0 || config.allowedIps.includes(cleanIp)) {
       next();
     } else {
@@ -130,6 +129,16 @@ function startServer(config: RemoteControlConfig) {
   try {
     server = app.listen(config.port, () => {
       console.log(`远程控制服务已启动，监听端口: ${config.port}`);
+    });
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`远程控制服务端口 ${config.port} 被占用，尝试切换到端口 ${config.port + 1}`);
+        server = app.listen(config.port + 1, () => {
+          console.log(`远程控制服务已启动，监听端口: ${config.port + 1}`);
+        });
+      } else {
+        console.error('远程控制服务异常:', err);
+      }
     });
   } catch (error) {
     console.error('启动远程控制服务失败:', error);

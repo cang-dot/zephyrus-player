@@ -19,7 +19,7 @@ export async function reparseCurrentSong(): Promise<void> {
   audioService.stop();
   
   // 重新获取播放链接并播放
-  const url = currentSong.url;
+  const url = currentSong.playMusicUrl;
   if (url) {
     await audioService.play(url, currentSong, true);
   }

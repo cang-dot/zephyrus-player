@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="history-recommend-page">
     <!-- 澶撮儴鏍囬鍜屾搷浣滄寜閽?-->
     <div class="music-header h-12 flex items-center justify-between">

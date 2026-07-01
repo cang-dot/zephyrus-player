@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 
 import type { DjProgram, DjRadio } from '@/types/podcast';

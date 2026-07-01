@@ -136,7 +136,7 @@ const parseLyricsString = async (
         duration: line.duration
       });
 
-      lrcTimeArray.push(line.startTime);
+      lrcTimeArray.push(line.startTime / 1000);
     }
     return { lrcArray, lrcTimeArray, hasWordByWord };
   } catch (error) {

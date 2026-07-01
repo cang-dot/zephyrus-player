@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="home-song-card group flex cursor-pointer items-center gap-3 md:gap-4 rounded-xl md:rounded-2xl p-2 md:p-2.5 transition-all duration-300 hover:bg-light-200 dark:hover:bg-dark-200"
     @click="onPlayMusic"

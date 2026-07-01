@@ -65,7 +65,7 @@ export default {
   disclaimer: {
     title: 'Terms of Use',
     warning:
-      'This application is a development test version. Functions are not yet perfect, and there may be many problems and bugs. It is for learning and exchange only.',
+      'This application is a modified version based on AlgerMusicPlayer, which differs from the original project. The original developer is not responsible for this modified version.',
     item1:
       'This application is for personal learning, research and technical exchange only. Please do not use it for any commercial purposes.',
     item2:
@@ -74,20 +74,6 @@ export default {
       'By using this application, you understand and assume the relevant risks. The developer is not responsible for any loss.',
     agree: 'I have read and agree',
     disagree: 'Disagree and Exit'
-  },
-  coffee: {
-    title: 'Buy me a coffee',
-    alipay: 'Alipay',
-    wechat: 'Wechat',
-    alipayQR: 'Alipay QR code',
-    wechatQR: 'Wechat QR code',
-    coffeeDesc: 'A cup of coffee, a support',
-    coffeeDescLinkText: 'View more',
-    groupText: 'Wechat Public Account: ZephyrusMusic',
-    messages: {
-      copySuccess: 'Copied to clipboard'
-    },
-    donateList: 'Buy me a coffee'
   },
   playlistType: {
     title: 'Playlist Category',

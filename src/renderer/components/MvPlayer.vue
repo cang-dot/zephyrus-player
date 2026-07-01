@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <n-drawer
     :show="show"
     height="100%"

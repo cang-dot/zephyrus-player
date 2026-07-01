@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <base-song-item
     :item="item"
     :selectable="selectable"

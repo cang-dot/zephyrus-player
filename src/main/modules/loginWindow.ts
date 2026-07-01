@@ -36,8 +36,8 @@ const openLoginWindow = async (mainWin: BrowserWindow) => {
     autoHideMenuBar: true,
     webPreferences: {
       session: loginSession,
+      contextIsolation: true,
       sandbox: false,
-      webSecurity: false,
       preload: join(__dirname, '../../preload/index.js')
     }
   });

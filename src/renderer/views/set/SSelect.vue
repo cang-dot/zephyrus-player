@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="relative inline-block" :class="widthClass" ref="wrapperRef">
     <button
       :disabled="disabled"

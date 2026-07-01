@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="daily-recommend-section">
     <!-- Section Header -->
     <div class="section-header mb-6 md:mb-8 flex items-end justify-between">

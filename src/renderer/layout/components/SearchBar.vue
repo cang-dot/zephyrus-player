@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="flex items-center gap-2 pb-4 pr-4 pl-1">
     <!-- 左侧标签页 -->
     <transition name="tab-slide">
@@ -436,7 +436,7 @@ watchEffect(() => {
 const restartApp = () => window.electron.ipcRenderer.send('restart');
 const toLogin = () => router.push('/user');
 const toGithubRelease = () => {
-  window.location.href = 'https://cang-dot.github.io/zephyrus-player/download';
+  window.open('https://github.com/cang-dot/zephyrus-player/releases', '_blank');
 };
 
 const isDark = computed({

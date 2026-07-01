@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="w-32 h-full flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-light dark:bg-dark"
   >

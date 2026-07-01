@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="artists-section">
     <!-- Loading Skeleton -->
     <div v-if="loading" class="artists-scroll flex gap-6 md:gap-8 overflow-x-hidden pb-4">

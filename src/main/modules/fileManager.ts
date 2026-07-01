@@ -159,13 +159,13 @@ export function initializeFileManager() {
 
   // 获取存储的配置值
   ipcMain.handle('get-store-value', (_, key) => {
-    const store = new Store();
+    const store = getStore();
     return store.get(key);
   });
 
   // 设置存储的配置值
   ipcMain.on('set-store-value', (_, key, value) => {
-    const store = new Store();
+    const store = getStore();
     store.set(key, value);
   });
 
@@ -174,7 +174,7 @@ export function initializeFileManager() {
 
   // 检查文件是否已下载
   ipcMain.handle('check-music-downloaded', (_, filename: string) => {
-    const store = new Store();
+    const store = getStore();
     const downloadPath = (store.get('set.downloadPath') as string) || app.getPath('downloads');
     const filePath = path.join(downloadPath, `${filename}.mp3`);
     return fs.existsSync(filePath);
@@ -192,7 +192,7 @@ export function initializeFileManager() {
         }
 
         // 删除对应的歌曲信息
-        const store = new Store();
+        const store = getStore();
         const songInfos = store.get('downloadedSongs', {}) as Record<string, any>;
         delete songInfos[filePath];
         store.set('downloadedSongs', songInfos);
@@ -209,7 +209,7 @@ export function initializeFileManager() {
   // 获取已下载音乐列表
   ipcMain.handle('get-downloaded-music', async () => {
     try {
-      const store = new Store();
+      const store = getStore();
       const songInfos = store.get('downloadedSongs', {}) as Record<string, any>;
 
       // 异步处理文件存在性检查
@@ -252,7 +252,7 @@ export function initializeFileManager() {
 
   // 检查歌曲是否已下载并返回本地路径
   ipcMain.handle('check-song-downloaded', (_, songId: number) => {
-    const store = new Store();
+    const store = getStore();
     const songInfos = store.get('downloadedSongs', {}) as Record<string, any>;
 
     // 通过ID查找已下载的歌曲
@@ -307,24 +307,25 @@ export function initializeFileManager() {
 
   // 添加清除已下载音乐记录的处理函数
   ipcMain.handle('clear-downloaded-music', () => {
-    const store = new Store();
+    const store = getStore();
     store.set('downloadedSongs', {});
     return true;
   });
 
   // 添加清除音频缓存的处理函数
-  ipcMain.on('clear-audio-cache', () => {
+  ipcMain.on('clear-audio-cache', async () => {
     audioCacheStore.set('cache', {});
     // 清除临时音频文件目录
     const tempDir = path.join(app.getPath('userData'), 'AudioCache');
     if (fs.existsSync(tempDir)) {
       try {
-        fs.readdirSync(tempDir).forEach((file) => {
+        const files = await fs.promises.readdir(tempDir);
+        for (const file of files) {
           const filePath = path.join(tempDir, file);
           if (file.endsWith('.mp3') || file.endsWith('.m4a')) {
-            fs.unlinkSync(filePath);
+            await fs.promises.unlink(filePath);
           }
-        });
+        }
       } catch (error) {
         console.error('清除音频缓存文件失败:', error);
       }
@@ -428,7 +429,7 @@ function handleDownloadRequest(
   }
 
   // 检查是否已下载
-  const store = new Store();
+  const store = getStore();
   const songInfos = store.get('downloadedSongs', {}) as Record<string, any>;
 
   // 检查是否已下载（通过ID）
@@ -541,7 +542,7 @@ async function downloadMusic(
 
     // 先获取文件大小
     const headResponse = await axios.head(url);
-    const totalSize = parseInt(headResponse.headers['content-length'] || '0', 10);
+    const totalSize = parseInt(String(headResponse.headers['content-length'] || '0'), 10);
 
     // 开始下载到临时文件
     const response = await axios({
@@ -579,13 +580,17 @@ async function downloadMusic(
     await new Promise((resolve, reject) => {
       writer!.on('finish', () => resolve(undefined));
       writer!.on('error', (error) => reject(error));
+      response.data.on('error', (error: Error) => reject(error));
       response.data.pipe(writer!);
     });
 
-    // 验证文件是否完整下载
+    // 验证文件是否完整下载（仅在服务器返回了 content-length 时检查）
     const stats = fs.statSync(tempFilePath);
-    if (stats.size !== totalSize) {
+    if (totalSize > 0 && stats.size !== totalSize) {
       throw new Error('文件下载不完整');
+    }
+    if (stats.size === 0) {
+      throw new Error('下载的文件为空');
     }
 
     // 检测文件类型
@@ -653,8 +658,8 @@ async function downloadMusic(
     }
 
     // 将临时文件移动到最终位置
-    fs.copyFileSync(tempFilePath, finalFilePath);
-    fs.unlinkSync(tempFilePath); // 删除临时文件
+    await fs.promises.copyFile(tempFilePath, finalFilePath);
+    await fs.promises.unlink(tempFilePath); // 删除临时文件
 
     // 下载歌词
     let lyricData = null;
@@ -1006,12 +1011,16 @@ function mergeLyrics(
     }
   }
 
-  // 按时间顺序排序
-  mergedLines.sort((a, b) => {
-    const timeA = a.match(/\[\d{2}:\d{2}(\.\d{1,3})?\]/)?.[0] || '';
-    const timeB = b.match(/\[\d{2}:\d{2}(\.\d{1,3})?\]/)?.[0] || '';
-    return timeA.localeCompare(timeB);
-  });
+  // 按时间顺序排序（解析时间戳为毫秒数进行数值比较）
+  const parseTimeTag = (line: string): number => {
+    const match = line.match(/\[(\d{2}):(\d{2})(?:\.(\d{1,3}))?\]/);
+    if (!match) return 0;
+    const minutes = parseInt(match[1], 10);
+    const seconds = parseInt(match[2], 10);
+    const ms = match[3] ? parseInt(match[3].padEnd(3, '0'), 10) : 0;
+    return minutes * 60000 + seconds * 1000 + ms;
+  };
+  mergedLines.sort((a, b) => parseTimeTag(a) - parseTimeTag(b));
 
   return mergedLines.join('\n');
 }

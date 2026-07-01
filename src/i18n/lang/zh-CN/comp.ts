@@ -61,26 +61,12 @@ export default {
   },
   disclaimer: {
     title: '使用须知',
-    warning: '本应用为开发测试版本，功能尚不完善，可能存在较多问题和 Bug，仅供学习交流使用。',
+    warning: '本应用为基于 AlgerMusicPlayer 的二次开发修改版，与原项目存在差异。原项目开发者不对本修改版承担任何责任。',
     item1: '本应用仅供个人学习、研究和技术交流使用，请勿用于任何商业用途。',
     item2: '请在下载后 24 小时内删除，如需长期使用请支持正版音乐服务。',
     item3: '使用本应用即表示您理解并承担相关风险，开发者不对任何损失负责。',
     agree: '我已阅读并同意',
     disagree: '不同意并退出'
-  },
-  coffee: {
-    title: '请我喝咖啡',
-    alipay: '支付宝',
-    wechat: '微信支付',
-    alipayQR: '支付宝收款码',
-    wechatQR: '微信收款码',
-    coffeeDesc: '一杯咖啡，一份支持',
-    coffeeDescLinkText: '查看更多',
-    groupText: '微信公众号：ZephyrusMusic',
-    messages: {
-      copySuccess: '已复制到剪贴板'
-    },
-    donateList: '请我喝咖啡'
   },
   playlistType: {
     title: '歌单分类',

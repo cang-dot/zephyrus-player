@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="local-music-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
     <n-scrollbar class="h-full">
       <div class="local-music-content pb-32">

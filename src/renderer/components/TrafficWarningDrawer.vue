@@ -38,7 +38,7 @@
             >
               <i class="ri-file-text-line mr-1"></i> 查看使用文档
             </a>
-            <a href="http://donate.alger.fun/download" target="_blank" class="download-link">
+            <a href="https://github.com/cang-dot/zephyrus-player/releases" target="_blank" class="download-link">
               <i class="ri-download-2-line mr-1"></i> 立即下载
             </a>
           </div>

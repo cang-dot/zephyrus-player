@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { allTime, nowTime, playMusic } from '@/hooks/MusicHook';
 import { usePlayMode } from '@/hooks/usePlayMode';
@@ -189,31 +189,33 @@ const seekToProgress = (percentage: number) => {
   // 不立即更新 nowTime,让音频服务的回调来更新,避免不同步
 };
 
+// 鼠标拖拽处理（组件级引用，用于清理）
+let dragTarget: HTMLElement | null = null;
+
+const handleMouseMove = (moveEvent: MouseEvent) => {
+  if (isDragging.value && dragTarget) {
+    dragProgress.value = calculateProgress(moveEvent.clientX, dragTarget);
+  }
+};
+
+const handleMouseUp = () => {
+  if (isDragging.value) {
+    seekToProgress(dragProgress.value);
+    isDragging.value = false;
+  }
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('mouseup', handleMouseUp);
+  dragTarget = null;
+};
+
 // 鼠标按下开始拖拽
 const handleProgressMouseDown = (e: MouseEvent) => {
   if (e.button !== 0) return; // 只响应左键
 
   const target = e.currentTarget as HTMLElement;
+  dragTarget = target;
   isDragging.value = true;
   dragProgress.value = calculateProgress(e.clientX, target);
-
-  // 添加全局鼠标移动和释放监听
-  const handleMouseMove = (moveEvent: MouseEvent) => {
-    if (isDragging.value) {
-      dragProgress.value = calculateProgress(moveEvent.clientX, target);
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (isDragging.value) {
-      // 拖拽结束,执行跳转
-      seekToProgress(dragProgress.value);
-      isDragging.value = false;
-    }
-    // 移除事件监听
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
 
   document.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('mouseup', handleMouseUp);
@@ -231,6 +233,14 @@ const handleProgressClick = (e: MouseEvent) => {
   const percentage = calculateProgress(e.clientX, target);
   seekToProgress(percentage);
 };
+
+// 组件卸载时清理拖拽监听器
+onBeforeUnmount(() => {
+  if (isDragging.value) {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+});
 
 // 格式化时间
 const formatTime = (seconds: number) => {

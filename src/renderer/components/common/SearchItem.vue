@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     class="search-item group cursor-pointer transition-all duration-300"
     :class="[item.type === 'mv' ? 'flex flex-col' : 'flex flex-col']"

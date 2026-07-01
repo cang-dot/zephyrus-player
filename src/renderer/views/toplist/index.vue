@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="toplist-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
     <n-scrollbar class="h-full">
       <div class="toplist-content w-full pb-32 pt-6 page-padding">

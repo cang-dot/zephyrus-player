@@ -64,7 +64,7 @@ export default {
   disclaimer: {
     title: '이용 안내',
     warning:
-      '본 앱은 개발 테스트 버전으로 기능이 아직 미흡하며, 다수의 문제와 버그가 존재할 수 있습니다. 학습 및 교류 목적으로만 사용하십시오.',
+      '본 앱은 AlgerMusicPlayer를 기반으로 한 2차 개발 수정 버전이며, 원본 프로젝트와 차이가 있습니다. 원본 프로젝트 개발자는 이 수정 버전에 대해 어떠한 책임도 지지 않습니다.',
     item1:
       '본 앱은 개인의 학습, 연구 및 기술 교류 목적으로만 사용되며, 상업적 용도로 사용하지 마십시오.',
     item2:
@@ -73,32 +73,6 @@ export default {
       '본 앱을 사용함으로써 관련 위험을 이해하고 감수하는 것으로 간주합니다. 개발자는 어떠한 손실에 대해서도 책임을 지지 않습니다.',
     agree: '숙지하였으며 이에 동의합니다',
     disagree: '동의하지 않음 및 정지'
-  },
-  donate: {
-    title: '개발자 지원',
-    subtitle: '여러분의 지원이 저의 원동력입니다',
-    tip: '후원은 완전히 자율적입니다. 후원하지 않더라도 모든 기능을 정상적으로 사용할 수 있습니다. 이해와 지원에 감사드립니다!',
-    wechat: 'WeChat',
-    alipay: 'Alipay',
-    wechatQR: 'WeChat 결제 코드',
-    alipayQR: 'Alipay 결제 코드',
-    scanTip: '휴대전화로 위 QR 코드를 스캔하여 후원해 주세요',
-    enterApp: '앱 시작하기',
-    noForce: '후원은 강제가 아닙니다. 클릭하여 시작할 수 있습니다'
-  },
-  coffee: {
-    title: '커피 한 잔 사주세요',
-    alipay: '알리페이',
-    wechat: '위챗 페이',
-    alipayQR: '알리페이 결제 QR코드',
-    wechatQR: '위챗 결제 QR코드',
-    coffeeDesc: '커피 한 잔, 하나의 지원',
-    coffeeDescLinkText: '더 보기',
-    groupText: '微信公众号：ZephyrusMusic',
-    messages: {
-      copySuccess: '클립보드에 복사됨'
-    },
-    donateList: '커피 한 잔 사주세요'
   },
   playlistType: {
     title: '플레이리스트 분류',

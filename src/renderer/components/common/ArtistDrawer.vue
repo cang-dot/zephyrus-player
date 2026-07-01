@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <n-drawer
     v-model:show="modelValue"
     :width="800"

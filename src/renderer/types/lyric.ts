@@ -31,6 +31,10 @@ export interface LyricConfig {
   imageBlur: number; // 图片模糊度 (0-20px)
   imageBrightness: number; // 图片明暗度 (0-200%, 100为正常)
   customCss?: string; // 自定义 CSS 样式
+  // 杂志样式配置
+  gridRhythmClimaxBoost: boolean; // 高潮闪烁增强
+  gridRhythmSize: string; // 网格密度
+  gridRhythmColor: boolean; // 颜色反转
 }
 
 export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
@@ -66,7 +70,11 @@ export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
   backgroundImage: undefined,
   imageBlur: 0,
   imageBrightness: 100,
-  customCss: undefined
+  customCss: undefined,
+  // 杂志样式默认值
+  gridRhythmClimaxBoost: false,
+  gridRhythmSize: 'medium',
+  gridRhythmColor: false
 };
 
 export interface ILyric {

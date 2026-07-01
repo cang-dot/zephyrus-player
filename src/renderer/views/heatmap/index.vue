@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="heatmap-page">
     <div class="heatmap-header" :class="setAnimationClass('animate__fadeInDown')">
       <div class="header-left">

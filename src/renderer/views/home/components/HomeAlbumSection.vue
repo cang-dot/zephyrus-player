@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="album-section">
     <!-- Section Header -->
     <div class="mb-6 flex items-center justify-between">

@@ -28,7 +28,7 @@ const { t } = useI18n();
     <span
       class="text-xs py-0.5 px-1 rounded bg-white/70 dark:bg-neutral-800/70 shadow font-mono tracking-wider text-gray-700 dark:text-gray-200 bg-opacity-40 backdrop-blur-2xl"
     >
-      {{ props.correctionTime > 0 ? '+' : '' }}{{ props.correctionTime.toFixed(1) }}s
+      {{ props.correctionTime > 0 ? '+' : '' }}{{ (props.correctionTime ?? 0).toFixed(1) }}s
     </span>
     <n-tooltip placement="right">
       <template #trigger>

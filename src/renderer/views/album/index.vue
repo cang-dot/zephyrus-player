@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <sticky-tab-page
     ref="pageRef"
     :title="t('comp.newAlbum.title')"

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="inline-flex items-center gap-1" :class="widthClass">
     <button
       v-if="type === 'number' && showButtons"

@@ -616,12 +616,17 @@ const handleFullScreenChange = () => {
   isFullScreen.value = !!document.fullscreenElement;
 };
 
-// 添加滚动监听和全屏状态监听
+// 添加滚动监听和全屏状态监听，加载保存的配置
 onMounted(() => {
   if (lrcSider.value?.$el) {
     lrcSider.value.$el.addEventListener('scroll', handleScroll);
   }
   document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+  const savedConfig = localStorage.getItem('music-full-config');
+  if (savedConfig) {
+    config.value = { ...config.value, ...JSON.parse(savedConfig) };
+  }
 });
 
 // 移除滚动监听和全屏状态监听
@@ -670,17 +675,6 @@ watch(
     document.documentElement.style.setProperty('--lyric-line-height', newLineHeight.toString());
   }
 );
-
-// 加载保存的配置
-onMounted(() => {
-  const savedConfig = localStorage.getItem('music-full-config');
-  if (savedConfig) {
-    config.value = { ...config.value, ...JSON.parse(savedConfig) };
-  }
-  if (lrcSider.value?.$el) {
-    lrcSider.value.$el.addEventListener('scroll', handleScroll);
-  }
-});
 
 // 添加对 playMusic.id 的监听，歌曲切换时滚动到顶部
 watch(

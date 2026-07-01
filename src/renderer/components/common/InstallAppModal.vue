@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <n-modal
     v-model:show="showModal"
     preset="dialog"
@@ -76,7 +76,7 @@ onMounted(async () => {
 });
 
 const handleInstall = async (): Promise<void> => {
-  window.open('http://donate.alger.fun/download', '_blank');
+  window.open('https://github.com/cang-dot/zephyrus-player/releases', '_blank');
 };
 </script>
 

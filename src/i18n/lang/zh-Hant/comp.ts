@@ -61,38 +61,12 @@ export default {
   },
   disclaimer: {
     title: '使用說明',
-    warning: '本程式為開發測試版本，功能尚未完善，可能存在諸多問題及臭蟲，僅供學習交流使用。',
+    warning: '本程式為基於 AlgerMusicPlayer 的二次開發修改版，與原專案存在差異。原專案開發者不對本修改版承擔任何責任。',
     item1: '本程式僅供個人學習、研究及技術交流之目的，不得用於任何商業用途。',
     item2: '請在下載後 24 小時內刪除，若對您有所幫助，請支持正版音樂。',
     item3: '使用本程式即代表您已了解並同意相關風險，開發者對任何損失概不負責。',
     agree: '我已了解並同意',
     disagree: '不同意並退出'
-  },
-  donate: {
-    title: '支援開發者',
-    subtitle: '您的支援是我持續更新的動力',
-    tip: '捐贈完全採自願原則。即使不捐贈，您依然可以正常使用所有功能。感謝您的理解與支援！',
-    wechat: '微信支付',
-    alipay: '支付寶',
-    wechatQR: '微信收款碼',
-    alipayQR: '支付寶收款碼',
-    scanTip: '請使用手機 App 掃描 QR Code 進行捐贈',
-    enterApp: '進入程式',
-    noForce: '捐贈並非強制，您可以點擊按鈕直接進入'
-  },
-  coffee: {
-    title: '請我喝杯咖啡',
-    alipay: '支付寶',
-    wechat: '微信支付',
-    alipayQR: '支付寶收款碼',
-    wechatQR: '微信收款碼',
-    coffeeDesc: '一杯咖啡，一份支持',
-    coffeeDescLinkText: '查看更多',
-    groupText: '微信公众号：ZephyrusMusic',
-    messages: {
-      copySuccess: '已複製到剪貼簿'
-    },
-    donateList: '請我喝杯咖啡'
   },
   playlistType: {
     title: '播放清單分類',

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="hero-section mb-6 md:mb-10">
     <!-- Skeleton Loading -->
     <div v-if="loading" class="space-y-4">

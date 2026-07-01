@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="h-full w-full bg-white dark:bg-black transition-colors duration-500 flex flex-col">
     <!-- 椤堕儴瀵艰埅鍖?-->
     <div

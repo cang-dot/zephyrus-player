@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="mobile-header" :class="{ 'safe-area-top': hasSafeArea }">
     <!-- 宸︿晶鍖哄煙 -->
     <div class="header-left">
