@@ -25,16 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Detect pre-release
-        id: prerelease
-        run: |
-          if [[ "$GITHUB_REF" == *"-vision"* ]] || [[ "$GITHUB_REF" == *"-beta"* ]] || [[ "$GITHUB_REF" == *"-alpha"* ]] || [[ "$GITHUB_REF" == *"-rc"* ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Build
+        run: npm run build
 
-      - name: Build & Publish
+      - name: Publish
         run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +48,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build & Publish
+      - name: Build
+        run: npm run build
+
+      - name: Publish
         run: npx electron-builder --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,7 +71,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build & Publish
+      - name: Build
+        run: npm run build
+
+      - name: Publish
         run: npx electron-builder --linux --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
