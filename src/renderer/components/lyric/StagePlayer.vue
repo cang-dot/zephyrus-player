@@ -14,7 +14,7 @@
           :colorStops="auroraColorStops"
           :amplitude="auroraAmplitude"
           :blend="0.5"
-          :speed="0.8"
+          :speed="auroraSpeed"
         />
 
         <!-- 左上角：关闭按钮 -->
@@ -248,6 +248,9 @@ const auroraColorStops = computed(() => {
 
 // Aurora 振幅：高潮时增强
 const auroraAmplitude = computed(() => isInClimax.value ? 1.5 : 1.0);
+
+// Aurora 速度：高潮时加速
+const auroraSpeed = computed(() => isInClimax.value ? 1.6 : 0.8);
 
 // ==================== 高潮段落 ====================
 

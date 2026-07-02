@@ -261,83 +261,7 @@
         </div>
       </div>
 
-      <!-- 粗粝样式设置（接管原狂躁模式） -->
-      <div v-if="styleSettingsView === 'gritty'" class="space-y-2 pt-2">
-        <div class="setting-item">
-          <span>红字重点词</span>
-          <input type="checkbox" v-model="config.grittyShowRedKeywords" class="toggle-switch" />
-        </div>
-        <div class="setting-item">
-          <span>背景扫描线</span>
-          <input type="checkbox" v-model="config.grittyShowScanlines" class="toggle-switch" />
-        </div>
-
-        <div class="radio-group-divider"></div>
-
-        <div class="setting-item">
-          <span>强调字始终红色</span>
-          <input type="checkbox" :checked="config.grittyKeywordColorMode === 'red'" @change="config.grittyKeywordColorMode = $event.target.checked ? 'red' : 'cover'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.grittyKeywordColorMode !== 'red'">
-          <span>颜色跟随封面</span>
-          <input type="checkbox" :checked="config.grittyKeywordColorMode === 'cover'" @change="config.grittyKeywordColorMode = $event.target.checked ? 'cover' : 'custom'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.grittyKeywordColorMode === 'custom'">
-          <span>自定义强调色</span>
-          <input type="color" v-model="config.grittyKeywordCustomColor" class="color-picker" />
-        </div>
-
-        <div class="radio-group-divider"></div>
-
-        <div class="slider-group">
-          <label class="slider-label">故障强度</label>
-          <input type="range" v-model.number="config.grittyGlitchIntensity" min="0" max="1" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.grittyGlitchIntensity, 0, 1) }" />
-          <div class="slider-marks"><span>弱</span><span>中</span><span>强</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">红字缩放</label>
-          <input type="range" v-model.number="config.grittyRedScale" min="1" max="2" step="0.1" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.grittyRedScale, 1, 2) }" />
-          <div class="slider-marks"><span>正常</span><span>中等</span><span>夸张</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">垂直拉伸</label>
-          <input type="range" v-model.number="config.grittyVerticalStretch" min="1" max="2" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.grittyVerticalStretch, 1, 2) }" />
-          <div class="slider-marks"><span>正常</span><span>中等</span><span>拉伸</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">整体缩放</label>
-          <input type="range" v-model.number="config.grittyScale" min="0.5" max="2" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.grittyScale, 0.5, 2) }" />
-          <div class="slider-marks"><span>小</span><span>正常</span><span>大</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">字体粗细</label>
-          <input type="range" v-model.number="config.grittyFontWeight" min="100" max="900" step="100" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.grittyFontWeight, 100, 900) }" />
-          <div class="slider-marks"><span>细</span><span>正常</span><span>粗</span></div>
-        </div>
-        <div class="radio-group" style="position: relative;">
-          <label class="radio-label">字体</label>
-          <div class="font-dropdown" ref="fontDropdownRef">
-            <div class="font-dropdown__trigger" @click="showFontDropdown = !showFontDropdown">
-              <span :style="{ fontFamily: `'${config.grittyCustomFont}', sans-serif` }">{{ config.grittyCustomFont }}</span>
-              <i class="ri-arrow-down-s-line" :class="{ 'rotate-180': showFontDropdown }"></i>
-            </div>
-            <Transition name="dropdown">
-              <div v-if="showFontDropdown" class="font-dropdown__panel">
-                <div
-                  v-for="font in systemFontOptions"
-                  :key="font"
-                  class="font-dropdown__item"
-                  :class="{ active: config.grittyCustomFont === font }"
-                  :style="{ fontFamily: `'${font}', sans-serif` }"
-                  @click="selectGrittyFont(font)"
-                >{{ font }}</div>
-              </div>
-            </Transition>
-          </div>
-        </div>
-      </div>
-
-      <!-- 狂躁样式设置（初稿：白色背景、轻微故障） -->
+      <!-- 狂躁样式设置（白色背景、轻微故障） -->
       <div v-if="styleSettingsView === 'frenzy'" class="space-y-2 pt-2">
         <div class="setting-item">
           <span>红字重点词</span>
@@ -361,6 +285,21 @@
         <div class="setting-item" v-if="config.frenzyKeywordColorMode === 'custom'">
           <span>自定义强调色</span>
           <input type="color" v-model="config.frenzyKeywordCustomColor" class="color-picker" />
+        </div>
+
+        <div class="radio-group-divider"></div>
+
+        <div class="setting-item">
+          <span>背景始终白色</span>
+          <input type="checkbox" :checked="config.frenzyBackgroundColorMode === 'white'" @change="config.frenzyBackgroundColorMode = $event.target.checked ? 'white' : 'cover'" class="toggle-switch" />
+        </div>
+        <div class="setting-item" v-if="config.frenzyBackgroundColorMode !== 'white'">
+          <span>背景跟随封面</span>
+          <input type="checkbox" :checked="config.frenzyBackgroundColorMode === 'cover'" @change="config.frenzyBackgroundColorMode = $event.target.checked ? 'cover' : 'custom'" class="toggle-switch" />
+        </div>
+        <div class="setting-item" v-if="config.frenzyBackgroundColorMode === 'custom'">
+          <span>自定义背景色</span>
+          <input type="color" v-model="config.frenzyBackgroundCustomColor" class="color-picker" />
         </div>
 
         <div class="radio-group-divider"></div>
@@ -459,11 +398,6 @@ function selectFont(font: string) {
   showFontDropdown.value = false;
 }
 
-function selectGrittyFont(font: string) {
-  config.value.grittyCustomFont = font;
-  showFontDropdown.value = false;
-}
-
 function handleClickOutside(e: MouseEvent) {
   if (fontDropdownRef.value && !fontDropdownRef.value.contains(e.target as Node)) {
     showFontDropdown.value = false;
@@ -487,7 +421,6 @@ const playerStyles = computed(() => [
   { key: 'classic', label: '经典' },
   { key: 'stage', label: '舞台' },
   { key: 'magazine', label: '杂志' },
-  { key: 'gritty', label: '粗粝' },
   { key: 'frenzy', label: '狂躁' }
 ]);
 
@@ -500,7 +433,6 @@ const styleSettingsTitle = computed(() => {
     classic: '经典样式设置',
     stage: '舞台样式设置',
     magazine: '杂志样式设置',
-    gritty: '粗粝样式设置',
     frenzy: '狂躁样式设置',
   };
   return titles[styleSettingsView.value || 'default'] || '样式设置';
@@ -797,6 +729,34 @@ defineExpose({
   font-size: 11px;
   font-weight: 700;
   color: var(--accent);
+}
+
+/* 狂躁样式预览：白色背景 + 黑色文字 + 红色强调 */
+.preview-frenzy {
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+.preview-frenzy::before {
+  content: '一走了之';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 900;
+  color: #1a1a1a;
+}
+.preview-frenzy::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 42%;
+  width: 18px;
+  height: 11px;
+  background: #cc0000;
+  transform: translate(-50%, -50%) skewX(-8deg);
+  opacity: 0.9;
 }
 
 .style-card-name {

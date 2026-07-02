@@ -84,8 +84,8 @@ export const useCommunityDataStore = defineStore('communityData', () => {
     loadingClimax.value = true;
     try {
       const cached = await getClimaxCache(songId);
-      console.log('[CommunityData] loadClimax cache:', cached !== null ? 'hit' : 'miss');
-      if (cached !== null) {
+      console.log('[CommunityData] loadClimax cache:', cached != null ? 'hit' : 'miss');
+      if (cached != null) {
         climaxSegments.value = cached.segments;
         climaxContributor.value = cached.contributor;
         return;
@@ -112,14 +112,14 @@ export const useCommunityDataStore = defineStore('communityData', () => {
 
   /**
    * 加载重点词（缓存优先）
-   * 如果服务器返回 null，缓存空标记避免重复请求
+   * 不缓存 null 值，允许后续上传后重新获取
    */
   async function loadKeywords(songId: string) {
     loadingKeywords.value = true;
     try {
       const cached = await getKeywordsCache(songId);
-      console.log('[CommunityData] loadKeywords cache:', cached !== null ? 'hit' : 'miss', 'data:', cached);
-      if (cached !== undefined) {
+      console.log('[CommunityData] loadKeywords cache:', cached != null ? 'hit' : 'miss', 'data:', cached);
+      if (cached != null) {
         keywordMark.value = cached;
         return;
       }
@@ -129,7 +129,10 @@ export const useCommunityDataStore = defineStore('communityData', () => {
       console.log('[CommunityData] loadKeywords API result:', result);
       keywordMark.value = result;
 
-      await saveKeywordsCache(songId, result);
+      // 只缓存有数据的结果，不缓存 null
+      if (result) {
+        await saveKeywordsCache(songId, result);
+      }
     } catch (err) {
       console.error('[CommunityData] loadKeywords error:', err);
       keywordMark.value = null;
@@ -140,24 +143,24 @@ export const useCommunityDataStore = defineStore('communityData', () => {
 
   /**
    * 加载社区歌词（缓存优先）
-   * 如果服务器返回 null，缓存空标记避免重复请求
+   * 不缓存 null 值，允许后续上传后重新获取
    */
   async function loadCommunityLyric(songId: string) {
     loadingLyric.value = true;
     try {
-      // 尝试从缓存读取
       const cached = await getCommunityLyricCache(songId);
-      if (cached !== undefined) {
+      if (cached != null) {
         communityLyric.value = cached;
         return;
       }
 
-      // 缓存未命中，请求 API
       const result = await loadCommunityLyricForSong(songId);
       communityLyric.value = result;
 
-      // 保存到缓存（包括 null，避免重复请求不存在的数据）
-      await saveCommunityLyricCache(songId, result);
+      // 只缓存有数据的结果，不缓存 null
+      if (result) {
+        await saveCommunityLyricCache(songId, result);
+      }
     } catch (err) {
       console.error('[CommunityData] 加载社区歌词失败:', err);
       communityLyric.value = null;

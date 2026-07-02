@@ -652,6 +652,15 @@ export const getLrcIndex = (time: number): number => {
   return nowIndex.value;
 };
 
+// 根据时间获取对应歌词文本（用于进度条悬停预览）
+export const getLyricTextAtTime = (timeSec: number): string | null => {
+  const index = getLrcIndex(timeSec);
+  if (index >= 0 && index < lrcArray.value.length) {
+    return lrcArray.value[index].text || null;
+  }
+  return null;
+};
+
 // 获取当前播放歌词进度
 const currentLrcTiming = computed(() => {
   const start = lrcTimeArray.value[nowIndex.value] || 0;

@@ -1,8 +1,13 @@
 <template>
-  <div v-if="isVisible" class="frenzy-player" ref="playerRef">
+  <div v-if="isVisible" class="frenzy-player" ref="playerRef" :style="{ background: backgroundColor }">
     <!-- 关闭按钮 -->
     <div class="frenzy-player__close" @click="closePlayer">
       <i class="ri-arrow-down-s-line"></i>
+    </div>
+
+    <!-- 全屏按钮 -->
+    <div class="frenzy-player__fullscreen" @click="toggleFullScreen">
+      <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
     </div>
 
     <!-- 设置按钮 -->
@@ -56,6 +61,7 @@ import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { useCommunityDataStore } from '@/store/modules/communityData';
 import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
 import { nowTime } from '@/hooks/MusicHook';
+import { drumDetector } from '@/services/drumDetector';
 import { usePlayerStore } from '@/store/modules/player';
 import { setCurrentSongId } from '@/utils/emotionalDetector';
 
@@ -72,6 +78,27 @@ const isVisible = computed({
 
 function closePlayer() {
   isVisible.value = false;
+}
+
+// 全屏控制
+const isFullScreen = ref(false);
+
+async function toggleFullScreen() {
+  try {
+    if (!document.fullscreenElement) {
+      await playerRef.value?.requestFullscreen();
+      isFullScreen.value = true;
+    } else {
+      await document.exitFullscreen();
+      isFullScreen.value = false;
+    }
+  } catch (e) {
+    console.error('全屏切换失败:', e);
+  }
+}
+
+function handleFullScreenChange() {
+  isFullScreen.value = !!document.fullscreenElement;
 }
 
 const showSettings = ref(false);
@@ -117,6 +144,7 @@ watch(() => playerStore.currentSong?.id, (songId) => {
 
 onMounted(() => {
   window.addEventListener('music-full-config-updated', handleConfigUpdate);
+  document.addEventListener('fullscreenchange', handleFullScreenChange);
 
   styleEngine.syncFromPlayerStore();
   styleEngine.syncCoverColors();
@@ -129,8 +157,18 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('music-full-config-updated', handleConfigUpdate);
+  document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  if (document.fullscreenElement) document.exitFullscreen();
   communityData.clear();
   console.log('[FrenzyPlayer] onUnmounted, communityData cleared');
+});
+
+// 背景颜色
+const backgroundColor = computed(() => {
+  const mode = config.value.frenzyBackgroundColorMode;
+  if (mode === 'cover') return styleEngine.primaryColor;
+  if (mode === 'custom') return config.value.frenzyBackgroundCustomColor;
+  return '#ffffff';
 });
 
 // 歌词数据
@@ -143,11 +181,42 @@ const lyrics = computed(() => {
 // 当前播放时间
 const currentTime = computed(() => nowTime.value);
 
-// 故障强度（根据能量级别动态调整，基础值较低）
+// 故障强度（根据能量级别、高潮状态和鼓点动态调整）
+const beatSpike = ref(0);
+let spikeTimer: ReturnType<typeof setTimeout> | null = null;
+const SPIKE_DURATION = 120; // 鼓点峰值持续 120ms
+
+// 订阅鼓点检测
+onMounted(() => {
+  const unsubscribe = drumDetector.onBeat((info) => {
+    // 强拍峰值更大，kickEnergy 调制强度
+    const spikeAmount = info.isStrong ? 0.45 : 0.25;
+    beatSpike.value = spikeAmount * (0.6 + info.kickEnergy * 0.4);
+
+    if (spikeTimer) clearTimeout(spikeTimer);
+    spikeTimer = setTimeout(() => {
+      beatSpike.value = 0;
+    }, SPIKE_DURATION);
+  });
+
+  onUnmounted(() => {
+    unsubscribe();
+    if (spikeTimer) clearTimeout(spikeTimer);
+  });
+});
+
 const glitchIntensity = computed(() => {
   const baseIntensity = config.value.frenzyGlitchIntensity;
   const energyBoost = styleEngine.energyLevel * 0.15;
-  return Math.min(0.6, baseIntensity + energyBoost);
+  const climaxBoost = styleEngine.isInClimax ? 0.3 : 0;
+  const base = Math.min(1.0, baseIntensity + energyBoost + climaxBoost);
+
+  // 高潮时鼓点失真峰值明显，非高潮时微弱
+  const spike = styleEngine.isInClimax
+    ? beatSpike.value
+    : beatSpike.value * 0.3;
+
+  return Math.min(1.0, base + spike);
 });
 </script>
 
@@ -181,6 +250,29 @@ const glitchIntensity = computed(() => {
 }
 
 .frenzy-player__close:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.frenzy-player__fullscreen {
+  position: absolute;
+  top: 24px;
+  right: 76px;
+  z-index: 9999;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #1a1a1a;
+  font-size: 20px;
+}
+
+.frenzy-player__fullscreen:hover {
   background: rgba(0, 0, 0, 0.12);
 }
 

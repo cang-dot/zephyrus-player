@@ -23,7 +23,6 @@ import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
 import StagePlayer from '@/components/lyric/StagePlayer.vue';
 import TypographicPlayer from '@/components/lyric/TypographicPlayer.vue';
-import GrittyPlayer from '@/components/lyric/GrittyPlayer.vue';
 import FrenzyPlayer from '@/components/lyric/FrenzyPlayer.vue';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { isMobile } from '@/utils';
@@ -70,13 +69,12 @@ onUnmounted(() => {
 });
 
 const isFullScreenStyle = computed(() =>
-  playerStyle.value === 'gritty' || playerStyle.value === 'frenzy'
+  playerStyle.value === 'frenzy'
 );
 
 const componentToUse = computed(() => {
   if (playerStyle.value === 'stage') return StagePlayer;
   if (playerStyle.value === 'magazine') return TypographicPlayer;
-  if (playerStyle.value === 'gritty') return GrittyPlayer;
   if (playerStyle.value === 'frenzy') return FrenzyPlayer;
   return isMobile.value ? MusicFullMobile : MusicFull;
 });

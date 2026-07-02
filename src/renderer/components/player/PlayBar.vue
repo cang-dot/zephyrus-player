@@ -215,6 +215,7 @@ import ReparsePopover from '@/components/player/ReparsePopover.vue';
 import {
   allTime,
   artistList,
+  getLyricTextAtTime,
   isLyricWindowOpen,
   nowTime,
   openLyric,
@@ -319,7 +320,12 @@ const handleSliderDragEnd = () => {
 };
 
 const formatTooltip = (value: number) => {
-  return `${secondToMinute(value)} / ${secondToMinute(allTime.value)}`;
+  const timeStr = `${secondToMinute(value)} / ${secondToMinute(allTime.value)}`;
+  const lyric = getLyricTextAtTime(value);
+  if (lyric) {
+    return `${lyric}\n${timeStr}`;
+  }
+  return timeStr;
 };
 
 const MusicFullRef = ref<any>(null);
@@ -346,6 +352,7 @@ const setMusicFull = () => {
 const playBarCollapsed = ref(false);
 let collapseTimer: ReturnType<typeof setTimeout> | null = null;
 const COLLAPSE_DELAY = 5000; // 5秒无操作后收起
+const HOVER_ZONE = 40; // 底部 40px 触发区域
 
 function resetCollapseTimer() {
   if (collapseTimer) clearTimeout(collapseTimer);
@@ -355,10 +362,15 @@ function resetCollapseTimer() {
   }, COLLAPSE_DELAY);
 }
 
-// 检测是否在排版播放器模式（ref + 监听事件，响应式更新）
+function clearCollapseTimer() {
+  if (collapseTimer) clearTimeout(collapseTimer);
+  playBarCollapsed.value = false;
+}
+
+// 检测播放器模式（用于样式，不再限制自动收起）
 const isMagazineMode = ref(false);
 const isFrenzyMode = ref(false);
-function updateMagazineMode() {
+function updatePlayerMode() {
   try {
     const saved = localStorage.getItem('music-full-config');
     if (saved) {
@@ -371,32 +383,56 @@ function updateMagazineMode() {
   isMagazineMode.value = false;
   isFrenzyMode.value = false;
 }
-updateMagazineMode();
-window.addEventListener('music-full-config-updated', updateMagazineMode);
+updatePlayerMode();
+window.addEventListener('music-full-config-updated', updatePlayerMode);
 onUnmounted(() => {
-  window.removeEventListener('music-full-config-updated', updateMagazineMode);
+  window.removeEventListener('music-full-config-updated', updatePlayerMode);
 });
 
-// 排版模式下启用自动收起
+// 所有模式都启用自动收起（Frenzy 除外）
 watch(musicFullVisible, (visible) => {
-  if (visible && isMagazineMode.value) {
+  if (visible) {
+    // 检查当前是否为全屏样式模式
+    try {
+      const saved = localStorage.getItem('music-full-config');
+      if (saved) {
+        const cfg = JSON.parse(saved);
+        if (cfg.playerStyle === 'frenzy') {
+          playBarCollapsed.value = false;
+          return;
+        }
+      }
+    } catch {}
     resetCollapseTimer();
   } else {
-    if (collapseTimer) clearTimeout(collapseTimer);
-    playBarCollapsed.value = false;
+    clearCollapseTimer();
   }
 });
 
-// 鼠标移动重置计时器
+// 鼠标在播放栏上移动时重置计时器
 const handlePlayBarMouseMove = () => {
-  if (isMagazineMode.value && musicFullVisible.value) {
+  if (musicFullVisible.value) {
     resetCollapseTimer();
   }
 };
 
-// 清理定时器
+// 全局鼠标移动检测底部边缘
+const handleWindowMouseMove = (e: MouseEvent) => {
+  if (!musicFullVisible.value) return;
+
+  const isNearBottom = e.clientY >= window.innerHeight - HOVER_ZONE;
+  if (isNearBottom && playBarCollapsed.value) {
+    resetCollapseTimer();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('mousemove', handleWindowMouseMove);
+});
+
 onUnmounted(() => {
   if (collapseTimer) clearTimeout(collapseTimer);
+  window.removeEventListener('mousemove', handleWindowMouseMove);
 });
 
 const openLyricWindow = () => {
@@ -478,7 +514,6 @@ const openPlayListDrawer = () => {
 
   &.animate__slideOutDown {
     animation-duration: 0.3s !important;
-    pointer-events: none;
   }
 
   .music-content {

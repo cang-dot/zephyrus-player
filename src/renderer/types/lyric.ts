@@ -13,7 +13,7 @@ export interface LyricConfig {
   hideMiniPlayBar: boolean;
   hideLyrics: boolean;
   contentWidth: number; // 内容区域宽度百分比
-  playerStyle: 'default' | 'classic' | 'stage' | 'magazine' | 'gritty' | 'frenzy';
+  playerStyle: 'default' | 'classic' | 'stage' | 'magazine' | 'frenzy';
   animationIntensity: 'soft' | 'normal' | 'power'; // 舞台模式歌词动画幅度
   // 移动端配置
   mobileLayout: 'default' | 'ios' | 'android';
@@ -35,19 +35,7 @@ export interface LyricConfig {
   gridRhythmClimaxBoost: boolean; // 高潮闪烁增强
   gridRhythmSize: string; // 网格密度
   gridRhythmColor: boolean; // 颜色反转
-  // 粗粝样式配置（接管原狂躁模式）
-  grittyGlitchIntensity: number; // 故障强度 0-1
-  grittyRedScale: number; // 红字缩放 1-2
-  grittyVerticalStretch: number; // 垂直拉伸 1-2
-  grittyScale: number; // 整体缩放 0.5-2
-  grittyFontWeight: number; // 字体粗细 100-900
-  grittyCustomFont: string; // 系统字体名
-  grittyEmotionalDict: string[]; // 自定义情感词典
-  grittyShowRedKeywords: boolean; // 红字重点词开关
-  grittyShowScanlines: boolean; // 背景扫描线开关
-  grittyKeywordColorMode: 'red' | 'cover' | 'custom'; // 强调字颜色模式
-  grittyKeywordCustomColor: string; // 强调字自定义颜色
-  // 狂躁样式配置（初稿：白色背景、轻微故障、黑字可拉伸、红字正常）
+  // 狂躁样式配置（白色背景、轻微故障、黑字可拉伸、红字正常）
   frenzyGlitchIntensity: number; // 故障强度 0-1
   frenzyVerticalStretch: number; // 垂直拉伸 1-2
   frenzyScale: number; // 整体缩放 0.5-2
@@ -58,6 +46,8 @@ export interface LyricConfig {
   frenzyShowScanlines: boolean; // 背景扫描线开关
   frenzyKeywordColorMode: 'red' | 'cover' | 'custom'; // 强调字颜色模式
   frenzyKeywordCustomColor: string; // 强调字自定义颜色
+  frenzyBackgroundColorMode: 'white' | 'cover' | 'custom'; // 背景颜色模式
+  frenzyBackgroundCustomColor: string; // 背景自定义颜色
 }
 
 export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
@@ -98,19 +88,7 @@ export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
   gridRhythmClimaxBoost: false,
   gridRhythmSize: 'medium',
   gridRhythmColor: false,
-  // 粗粝样式默认值（接管原狂躁模式）
-  grittyGlitchIntensity: 0.5,
-  grittyRedScale: 1.5,
-  grittyVerticalStretch: 1.3,
-  grittyScale: 1.0,
-  grittyFontWeight: 900,
-  grittyCustomFont: 'PingFang SC',
-  grittyEmotionalDict: [],
-  grittyShowRedKeywords: true,
-  grittyShowScanlines: true,
-  grittyKeywordColorMode: 'red',
-  grittyKeywordCustomColor: '#ff0000',
-  // 狂躁样式默认值（初稿：白色背景、轻微故障）
+  // 狂躁样式默认值（白色背景、轻微故障）
   frenzyGlitchIntensity: 0.3,
   frenzyVerticalStretch: 1.3,
   frenzyScale: 1.0,
@@ -121,6 +99,8 @@ export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
   frenzyShowScanlines: true,
   frenzyKeywordColorMode: 'red',
   frenzyKeywordCustomColor: '#ff0000',
+  frenzyBackgroundColorMode: 'white',
+  frenzyBackgroundCustomColor: '#ffffff',
 };
 
 export interface ILyric {
