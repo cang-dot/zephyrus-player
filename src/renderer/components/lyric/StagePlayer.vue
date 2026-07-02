@@ -17,34 +17,16 @@
           :speed="auroraSpeed"
         />
 
-        <!-- 左上角：关闭按钮 -->
-        <transition name="close-fade">
-          <div v-show="controlsVisible" class="control-left">
-            <div class="control-btn" @click="close" title="关闭舞台">
-              <i class="ri-arrow-down-s-line"></i>
-            </div>
-          </div>
-        </transition>
-
-        <!-- 右上角：功能按钮组 -->
-        <transition name="close-fade">
-          <div v-show="controlsVisible" class="control-right">
-            <n-popover trigger="click" placement="bottom-end" :z-index="99999" raw to="body">
-              <template #trigger>
-                <div class="control-btn">
-                  <i class="ri-settings-3-line"></i>
-                </div>
-              </template>
-              <LyricSettings />
-            </n-popover>
-            <div class="control-btn" @click="cyclePlayerStyle" :title="playerStyleLabel">
-              <i :class="playerStyleIcon"></i>
-            </div>
-            <div class="control-btn" @click="toggleFullScreen">
-              <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
-            </div>
-          </div>
-        </transition>
+        <!-- 通用控件（左上关闭 + 右上设置/模式切换/全屏） -->
+        <PlayerControls
+          :isFullScreen="isFullScreen"
+          :styleIcon="playerStyleIcon"
+          :styleLabel="playerStyleLabel"
+          :autoHide="true"
+          @close="close"
+          @cycleStyle="cyclePlayerStyle"
+          @toggleFullscreen="toggleFullScreen"
+        />
 
         <!-- 顶部：歌曲信息 -->
         <transition name="info-fade">
@@ -130,7 +112,9 @@ import { AnimationSelector } from '@/utils/animationSelector';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
 import LyricSettings from './LyricSettings.vue';
+import PlayerControls from './PlayerControls.vue';
 import Aurora from '@/components/Aurora.vue';
+import { useStyleContext } from '@/playerStyles';
 
 // 从 localStorage 读取动画强度设置
 const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {

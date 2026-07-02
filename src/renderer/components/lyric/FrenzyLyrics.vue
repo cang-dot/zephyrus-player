@@ -60,24 +60,23 @@ const props = defineProps<Props>();
 const playerStore = usePlayerStore();
 const styleEngine = useStyleEngineStore();
 
-const frenzyConfig = ref<Pick<LyricConfig, 'frenzyVerticalStretch' | 'frenzyScale' | 'frenzyFontWeight' | 'frenzyCustomFont' | 'frenzyShowRedKeywords' | 'frenzyKeywordColorMode' | 'frenzyKeywordCustomColor'>>({
+const frenzyConfig = ref<Pick<LyricConfig, 'frenzyVerticalStretch' | 'frenzyScale' | 'frenzyFontWeight' | 'frenzyCustomFont' | 'frenzyShowRedKeywords' | 'frenzyUseCoverColor' | 'frenzyKeywordCustomColor'>>({
   frenzyVerticalStretch: 1.3,
   frenzyScale: 1.0,
   frenzyFontWeight: 900,
   frenzyCustomFont: 'PingFang SC',
   frenzyShowRedKeywords: true,
-  frenzyKeywordColorMode: 'red',
+  frenzyUseCoverColor: true,
   frenzyKeywordCustomColor: '#ff0000'
 });
 
 const showRedKeywords = computed(() => frenzyConfig.value.frenzyShowRedKeywords !== false);
 
-// 强调字颜色
+// 强调字颜色（级联：始终红色 → 跟随封面取色 → 自定义）
 const keywordColor = computed(() => {
-  const mode = frenzyConfig.value.frenzyKeywordColorMode;
-  if (mode === 'cover') return styleEngine.primaryColor;
-  if (mode === 'custom') return frenzyConfig.value.frenzyKeywordCustomColor;
-  return '#cc0000'; // 默认红色
+  if (frenzyConfig.value.frenzyShowRedKeywords !== false) return '#cc0000';
+  if (frenzyConfig.value.frenzyUseCoverColor !== false) return styleEngine.primaryColor;
+  return frenzyConfig.value.frenzyKeywordCustomColor;
 });
 
 // 整体缩放（仅缩放，不拉伸）
@@ -202,7 +201,7 @@ onMounted(() => {
       frenzyFontWeight: parsed.frenzyFontWeight ?? 900,
       frenzyCustomFont: parsed.frenzyCustomFont || 'PingFang SC',
       frenzyShowRedKeywords: parsed.frenzyShowRedKeywords !== false,
-      frenzyKeywordColorMode: parsed.frenzyKeywordColorMode || 'red',
+      frenzyUseCoverColor: parsed.frenzyUseCoverColor !== false,
       frenzyKeywordCustomColor: parsed.frenzyKeywordCustomColor || '#ff0000'
     };
   }
@@ -219,7 +218,7 @@ const handleConfigUpdate = () => {
       frenzyFontWeight: parsed.frenzyFontWeight ?? 900,
       frenzyCustomFont: parsed.frenzyCustomFont || 'PingFang SC',
       frenzyShowRedKeywords: parsed.frenzyShowRedKeywords !== false,
-      frenzyKeywordColorMode: parsed.frenzyKeywordColorMode || 'red',
+      frenzyUseCoverColor: parsed.frenzyUseCoverColor !== false,
       frenzyKeywordCustomColor: parsed.frenzyKeywordCustomColor || '#ff0000'
     };
   }

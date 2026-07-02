@@ -208,144 +208,28 @@
       </div>
 
       <!-- 舞台样式设置 -->
-      <div v-if="styleSettingsView === 'stage'" class="space-y-2 pt-2">
-        <div class="setting-item">
-          <span>{{ t('settings.lyricSettings.showTranslation') }}</span>
-          <input type="checkbox" v-model="config.showTranslation" class="toggle-switch" />
-        </div>
-        <div class="radio-group">
-          <label class="radio-label">歌词动画幅度</label>
-          <div class="flex gap-1 p-1 bg-black/20 rounded-xl">
-            <button
-              v-for="opt in intensityOptions"
-              :key="opt.value"
-              @click="config.animationIntensity = opt.value"
-              :class="[
-                'flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200',
-                config.animationIntensity === opt.value
-                  ? 'text-white shadow-lg'
-                  : 'hover:bg-white/5 text-white/60'
-              ]"
-              :style="config.animationIntensity === opt.value ? { background: primaryColor, boxShadow: `0 4px 12px ${primaryColor}40` } : ''"
-            >{{ opt.label }}</button>
-          </div>
-        </div>
-      </div>
+      <SettingRenderer
+        v-if="styleSettingsView === 'stage'"
+        :settings="currentStyleSettings"
+        :config="config"
+        @update:config="config = $event"
+      />
 
       <!-- 杂志样式设置 -->
-      <div v-if="styleSettingsView === 'magazine'" class="space-y-2 pt-2">
-        <div class="setting-item">
-          <span>高潮闪烁增强</span>
-          <input type="checkbox" v-model="config.gridRhythmClimaxBoost" class="toggle-switch" />
-        </div>
-        <div class="radio-group">
-          <label class="radio-label">网格密度</label>
-          <div class="flex gap-1 p-1 bg-black/20 rounded-xl">
-            <button
-              v-for="opt in gridDensityOptions"
-              :key="opt.value"
-              @click="config.gridRhythmSize = opt.value"
-              :class="[
-                'flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200',
-                config.gridRhythmSize === opt.value
-                  ? 'text-white shadow-lg'
-                  : 'hover:bg-white/5 text-white/60'
-              ]"
-              :style="config.gridRhythmSize === opt.value ? { background: primaryColor, boxShadow: `0 4px 12px ${primaryColor}40` } : ''"
-            >{{ opt.label }}</button>
-          </div>
-        </div>
-        <div class="setting-item">
-          <span>颜色反转</span>
-          <input type="checkbox" v-model="config.gridRhythmColor" class="toggle-switch" />
-        </div>
-      </div>
+      <SettingRenderer
+        v-if="styleSettingsView === 'magazine'"
+        :settings="currentStyleSettings"
+        :config="config"
+        @update:config="config = $event"
+      />
 
-      <!-- 狂躁样式设置（白色背景、轻微故障） -->
-      <div v-if="styleSettingsView === 'frenzy'" class="space-y-2 pt-2">
-        <div class="setting-item">
-          <span>红字重点词</span>
-          <input type="checkbox" v-model="config.frenzyShowRedKeywords" class="toggle-switch" />
-        </div>
-        <div class="setting-item">
-          <span>背景扫描线</span>
-          <input type="checkbox" v-model="config.frenzyShowScanlines" class="toggle-switch" />
-        </div>
-
-        <div class="radio-group-divider"></div>
-
-        <div class="setting-item">
-          <span>强调字始终红色</span>
-          <input type="checkbox" :checked="config.frenzyKeywordColorMode === 'red'" @change="config.frenzyKeywordColorMode = $event.target.checked ? 'red' : 'cover'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.frenzyKeywordColorMode !== 'red'">
-          <span>颜色跟随封面</span>
-          <input type="checkbox" :checked="config.frenzyKeywordColorMode === 'cover'" @change="config.frenzyKeywordColorMode = $event.target.checked ? 'cover' : 'custom'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.frenzyKeywordColorMode === 'custom'">
-          <span>自定义强调色</span>
-          <input type="color" v-model="config.frenzyKeywordCustomColor" class="color-picker" />
-        </div>
-
-        <div class="radio-group-divider"></div>
-
-        <div class="setting-item">
-          <span>背景始终白色</span>
-          <input type="checkbox" :checked="config.frenzyBackgroundColorMode === 'white'" @change="config.frenzyBackgroundColorMode = $event.target.checked ? 'white' : 'cover'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.frenzyBackgroundColorMode !== 'white'">
-          <span>背景跟随封面</span>
-          <input type="checkbox" :checked="config.frenzyBackgroundColorMode === 'cover'" @change="config.frenzyBackgroundColorMode = $event.target.checked ? 'cover' : 'custom'" class="toggle-switch" />
-        </div>
-        <div class="setting-item" v-if="config.frenzyBackgroundColorMode === 'custom'">
-          <span>自定义背景色</span>
-          <input type="color" v-model="config.frenzyBackgroundCustomColor" class="color-picker" />
-        </div>
-
-        <div class="radio-group-divider"></div>
-
-        <div class="slider-group">
-          <label class="slider-label">故障强度</label>
-          <input type="range" v-model.number="config.frenzyGlitchIntensity" min="0" max="1" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.frenzyGlitchIntensity, 0, 1) }" />
-          <div class="slider-marks"><span>弱</span><span>中</span><span>强</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">垂直拉伸</label>
-          <input type="range" v-model.number="config.frenzyVerticalStretch" min="1" max="2" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.frenzyVerticalStretch, 1, 2) }" />
-          <div class="slider-marks"><span>正常</span><span>中等</span><span>拉伸</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">整体缩放</label>
-          <input type="range" v-model.number="config.frenzyScale" min="0.5" max="2" step="0.05" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.frenzyScale, 0.5, 2) }" />
-          <div class="slider-marks"><span>小</span><span>正常</span><span>大</span></div>
-        </div>
-        <div class="slider-group">
-          <label class="slider-label">字体粗细</label>
-          <input type="range" v-model.number="config.frenzyFontWeight" min="100" max="900" step="100" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.frenzyFontWeight, 100, 900) }" />
-          <div class="slider-marks"><span>细</span><span>正常</span><span>粗</span></div>
-        </div>
-        <div class="radio-group" style="position: relative;">
-          <label class="radio-label">字体</label>
-          <div class="font-dropdown" ref="fontDropdownRef">
-            <div class="font-dropdown__trigger" @click="showFontDropdown = !showFontDropdown">
-              <span :style="{ fontFamily: `'${config.frenzyCustomFont}', sans-serif` }">{{ config.frenzyCustomFont }}</span>
-              <i class="ri-arrow-down-s-line" :class="{ 'rotate-180': showFontDropdown }"></i>
-            </div>
-            <Transition name="dropdown">
-              <div v-if="showFontDropdown" class="font-dropdown__panel">
-                <div
-                  v-for="font in systemFontOptions"
-                  :key="font"
-                  class="font-dropdown__item"
-                  :class="{ active: config.frenzyCustomFont === font }"
-                  :style="{ fontFamily: `'${font}', sans-serif` }"
-                  @click="selectFont(font)"
-                >{{ font }}</div>
-              </div>
-            </Transition>
-          </div>
-        </div>
-      </div>
+      <!-- 狂躁样式设置 -->
+      <SettingRenderer
+        v-if="styleSettingsView === 'frenzy'"
+        :settings="currentStyleSettings"
+        :config="config"
+        @update:config="config = $event"
+      />
     </div>
   </div>
 </template>
@@ -356,6 +240,8 @@ import { useI18n } from 'vue-i18n';
 
 import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { getAllStyles, getStyle } from '@/playerStyles';
+import SettingRenderer from './SettingRenderer.vue';
 
 const { t } = useI18n();
 const { primaryColor, primaryColorRgb } = useCoverColor();
@@ -416,31 +302,27 @@ onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
 });
 
-const playerStyles = computed(() => [
-  { key: 'default', label: '默认' },
-  { key: 'classic', label: '经典' },
-  { key: 'stage', label: '舞台' },
-  { key: 'magazine', label: '杂志' },
-  { key: 'frenzy', label: '狂躁' }
-]);
+const playerStyles = computed(() => {
+  return getAllStyles().map(s => ({ key: s.key, label: s.label }));
+});
 
 // 样式设置视图：null=主视图，其他=样式设置
 const styleSettingsView = ref<string | null>(null);
 
 const styleSettingsTitle = computed(() => {
-  const titles: Record<string, string> = {
-    default: '默认样式设置',
-    classic: '经典样式设置',
-    stage: '舞台样式设置',
-    magazine: '杂志样式设置',
-    frenzy: '狂躁样式设置',
-  };
-  return titles[styleSettingsView.value || 'default'] || '样式设置';
+  const style = getStyle(styleSettingsView.value || 'default');
+  return style ? `${style.label}样式设置` : '样式设置';
 });
 
 const openStyleSettings = (styleKey: string) => {
   styleSettingsView.value = styleKey;
 };
+
+// 当前选中模式的设置项
+const currentStyleSettings = computed(() => {
+  const style = getStyle(styleSettingsView.value || 'default');
+  return style?.settings || [];
+});
 
 const gradientDirectionOptions = computed(() => [
   { label: t('settings.lyricSettings.background.directionOptions.toBottom'), value: 'to bottom' },

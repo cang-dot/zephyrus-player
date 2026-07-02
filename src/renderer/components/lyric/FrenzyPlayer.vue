@@ -1,30 +1,13 @@
 <template>
   <div v-if="isVisible" class="frenzy-player" ref="playerRef" :style="{ background: backgroundColor }">
-    <!-- 关闭按钮 -->
-    <div class="frenzy-player__close" @click="closePlayer">
-      <i class="ri-arrow-down-s-line"></i>
-    </div>
-
-    <!-- 全屏按钮 -->
-    <div class="frenzy-player__fullscreen" @click="toggleFullScreen">
-      <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
-    </div>
-
-    <!-- 设置按钮 -->
-    <div class="frenzy-player__settings">
-      <div class="frenzy-player__settings-btn" @click="toggleSettings">
-        <i class="ri-settings-3-line"></i>
-      </div>
-    </div>
-
-    <!-- 设置面板 Teleport 到 body 避免 z-index 问题 -->
-    <Teleport to="body">
-      <div v-if="showSettings" class="frenzy-settings-overlay" @click.self="showSettings = false">
-        <div class="frenzy-settings-panel">
-          <lyric-settings />
-        </div>
-      </div>
-    </Teleport>
+    <!-- 通用控件（左上关闭 + 右上设置/全屏） -->
+    <PlayerControls
+      :isFullScreen="isFullScreen"
+      :showStyleSwitch="false"
+      theme="dark"
+      @close="closePlayer"
+      @toggleFullscreen="toggleFullScreen"
+    />
 
     <!-- 背景层：白色故障效果 -->
     <GlitchBackground
@@ -56,14 +39,14 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import GlitchBackground from './GlitchBackground.vue';
 import FrenzyLyrics from './FrenzyLyrics.vue';
-import LyricSettings from './LyricSettings.vue';
+import PlayerControls from './PlayerControls.vue';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { useCommunityDataStore } from '@/store/modules/communityData';
 import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
-import { nowTime } from '@/hooks/MusicHook';
 import { drumDetector } from '@/services/drumDetector';
 import { usePlayerStore } from '@/store/modules/player';
 import { setCurrentSongId } from '@/utils/emotionalDetector';
+import { useStyleContext } from '@/playerStyles';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
@@ -101,14 +84,10 @@ function handleFullScreenChange() {
   isFullScreen.value = !!document.fullscreenElement;
 }
 
-const showSettings = ref(false);
-function toggleSettings() {
-  showSettings.value = !showSettings.value;
-}
-
 const styleEngine = useStyleEngineStore();
 const communityData = useCommunityDataStore();
 const playerStore = usePlayerStore();
+const { nowTime } = useStyleContext();
 
 const playerRef = ref<HTMLElement | null>(null);
 const config = ref<LyricConfig>({ ...DEFAULT_LYRIC_CONFIG });
@@ -163,12 +142,11 @@ onUnmounted(() => {
   console.log('[FrenzyPlayer] onUnmounted, communityData cleared');
 });
 
-// 背景颜色
+// 背景颜色（级联：白色背景 → 跟随封面背景 → 自定义）
 const backgroundColor = computed(() => {
-  const mode = config.value.frenzyBackgroundColorMode;
-  if (mode === 'cover') return styleEngine.primaryColor;
-  if (mode === 'custom') return config.value.frenzyBackgroundCustomColor;
-  return '#ffffff';
+  if (config.value.frenzyUseWhiteBackground !== false) return '#ffffff';
+  if (config.value.frenzyUseCoverBackground !== false) return styleEngine.primaryColor;
+  return config.value.frenzyBackgroundCustomColor;
 });
 
 // 歌词数据
@@ -226,74 +204,10 @@ const glitchIntensity = computed(() => {
   inset: 0;
   z-index: 9998;
   overflow: hidden;
-  background: #ffffff;
   font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-.frenzy-player__close {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  z-index: 9999;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  transition: background 0.2s ease;
-  color: #1a1a1a;
-  font-size: 24px;
-}
-
-.frenzy-player__close:hover {
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.frenzy-player__fullscreen {
-  position: absolute;
-  top: 24px;
-  right: 76px;
-  z-index: 9999;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  transition: background 0.2s ease;
-  color: #1a1a1a;
-  font-size: 20px;
-}
-
-.frenzy-player__fullscreen:hover {
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.frenzy-player__settings {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 9999;
-}
-
-.frenzy-player__settings-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  transition: background 0.2s ease;
+.frenzy-player__lyrics {
   color: #1a1a1a;
   font-size: 24px;
 }
@@ -310,19 +224,5 @@ const glitchIntensity = computed(() => {
   justify-content: center;
   z-index: 10;
   pointer-events: none;
-}
-</style>
-
-<style>
-.frenzy-settings-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10001;
-}
-.frenzy-settings-panel {
-  position: fixed;
-  top: 72px;
-  right: 24px;
-  z-index: 10001;
 }
 </style>

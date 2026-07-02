@@ -1,0 +1,8 @@
+[
+  { "key": "showTranslation", "type": "boolean", "label": "显示翻译", "default": true },
+  { "key": "animationIntensity", "type": "radio", "label": "歌词动画幅度", "options": [
+    { "value": "soft", "label": "柔和" },
+    { "value": "normal", "label": "正常" },
+    { "value": "power", "label": "力量" }
+  ], "default": "normal" }
+]

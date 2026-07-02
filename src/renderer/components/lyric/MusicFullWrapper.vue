@@ -21,11 +21,9 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
-import StagePlayer from '@/components/lyric/StagePlayer.vue';
-import TypographicPlayer from '@/components/lyric/TypographicPlayer.vue';
-import FrenzyPlayer from '@/components/lyric/FrenzyPlayer.vue';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { isMobile } from '@/utils';
+import { getStyle } from '@/playerStyles';
 
 // 响应式配置状态
 const playerStyle = ref<string>(DEFAULT_LYRIC_CONFIG.playerStyle);
@@ -46,14 +44,14 @@ function loadConfig() {
 // 初始化加载
 loadConfig();
 
-// 监听 localStorage 变化（storage 事件只在其他标签页触发）
+// 监听 localStorage 变化
 function handleStorageChange(e: StorageEvent) {
   if (e.key === 'music-full-config') {
     loadConfig();
   }
 }
 
-// 自定义事件监听（同页面内的配置变化通知）
+// 自定义事件监听
 function handleConfigUpdate() {
   loadConfig();
 }
@@ -68,14 +66,14 @@ onUnmounted(() => {
   window.removeEventListener('music-full-config-updated', handleConfigUpdate);
 });
 
-const isFullScreenStyle = computed(() =>
-  playerStyle.value === 'frenzy'
-);
+const isFullScreenStyle = computed(() => {
+  const style = getStyle(playerStyle.value);
+  return style?.isFullScreen ?? false;
+});
 
 const componentToUse = computed(() => {
-  if (playerStyle.value === 'stage') return StagePlayer;
-  if (playerStyle.value === 'magazine') return TypographicPlayer;
-  if (playerStyle.value === 'frenzy') return FrenzyPlayer;
+  const style = getStyle(playerStyle.value);
+  if (style) return style.component;
   return isMobile.value ? MusicFullMobile : MusicFull;
 });
 

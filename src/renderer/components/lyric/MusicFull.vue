@@ -16,34 +16,13 @@
       :style="backgroundImageStyle"
     ></div>
     <div id="drawer-target" :class="[config.theme]" class="relative z-10">
-      <!-- 左侧关闭按钮 -->
-      <div
-        class="control-left absolute top-8 left-8 z-[9999]"
-        :class="{ 'pure-mode': config.pureModeEnabled }"
-      >
-        <div class="control-btn" @click="closeMusicFull">
-          <i class="ri-arrow-down-s-line"></i>
-        </div>
-      </div>
-
-      <!-- 右侧功能按钮组 -->
-      <div
-        class="control-right absolute top-8 right-8 z-[9999]"
-        :class="{ 'pure-mode': config.pureModeEnabled }"
-      >
-        <n-popover trigger="click" placement="bottom" raw>
-          <template #trigger>
-            <div class="control-btn">
-              <i class="ri-settings-3-line"></i>
-            </div>
-          </template>
-          <lyric-settings ref="lyricSettingsRef" />
-        </n-popover>
-
-        <div class="control-btn" @click="toggleFullScreen">
-          <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
-        </div>
-      </div>
+      <!-- 通用控件（左上关闭 + 右上设置/全屏） -->
+      <PlayerControls
+        :isFullScreen="isFullScreen"
+        @close="closeMusicFull"
+        @toggleFullscreen="toggleFullScreen"
+        :showStyleSwitch="false"
+      />
 
       <div class="content-wrapper" :style="{ width: `${config.contentWidth}%` }">
         <!-- 左侧：封面区域 -->
@@ -188,6 +167,7 @@ import { useI18n } from 'vue-i18n';
 import Cover3D from '@/components/cover/Cover3D.vue';
 import LyricCorrectionControl from '@/components/lyric/LyricCorrectionControl.vue';
 import LyricSettings from '@/components/lyric/LyricSettings.vue';
+import PlayerControls from '@/components/lyric/PlayerControls.vue';
 import SimplePlayBar from '@/components/player/SimplePlayBar.vue';
 import {
   adjustCorrectionTime,
