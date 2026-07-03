@@ -23,6 +23,9 @@ import { startMusicApi } from './server';
 
 // 忽略自签名证书验证（开发环境）
 app.commandLine.appendSwitch('ignore-certificate-errors');
+// 启用 MediaSessionService 以支持 SMTC，禁用 MediaRouter 避免冲突
+app.commandLine.appendSwitch('enable-features', 'MediaSessionService');
+app.commandLine.appendSwitch('disable-features', 'MediaRouterMediaSink');
 
 // 导入所有图标
 const iconPath = join(__dirname, '../../resources');
@@ -120,7 +123,7 @@ if (!isSingleInstance) {
   // 应用程序准备就绪时的处理
   app.whenReady().then(() => {
     // 设置应用ID
-    electronApp.setAppUserModelId('com.alger.music');
+    electronApp.setAppUserModelId('cang-dot.ZephyrusPlayer');
 
     // 监听窗口创建事件
     app.on('browser-window-created', (_, window) => {

@@ -129,7 +129,7 @@ class AudioService {
         : track.song.artists?.map((a) => a.name);
       const album = track.al ? track.al.name : track.song.album.name;
       const artwork = ['96', '128', '192', '256', '384', '512'].map((size) => ({
-        src: `${track.picUrl}?param=${size}y${size}`,
+        src: `${track.picUrl?.replace(/^http:/, 'https:')}?param=${size}y${size}`,
         type: 'image/jpg',
         sizes: `${size}x${size}`
       }));
@@ -812,6 +812,9 @@ class AudioService {
 
             soundInstance.on('end', () => {
               if (this.currentSound === soundInstance) {
+                if ('mediaSession' in navigator) {
+                  navigator.mediaSession.playbackState = 'none';
+                }
                 this.emit('end');
               }
             });
