@@ -47,6 +47,7 @@
         :show-tooltip="showSliderTooltip"
         @mouseenter="showSliderTooltip = true"
         @mouseleave="showSliderTooltip = false"
+        @mousemove="handleSliderMouseMove"
         @dragstart="handleSliderDragStart"
         @dragend="handleSliderDragEnd"
       ></n-slider>
@@ -319,9 +320,9 @@ const handleSliderDragEnd = () => {
   nowTime.value = dragValue.value;
 };
 
-const formatTooltip = (value: number) => {
-  const timeStr = `${secondToMinute(value)} / ${secondToMinute(allTime.value)}`;
-  const lyric = getLyricTextAtTime(value);
+const formatTooltip = () => {
+  const timeStr = `${secondToMinute(hoverTimeSec.value)} / ${secondToMinute(allTime.value)}`;
+  const lyric = getLyricTextAtTime(hoverTimeSec.value);
   if (lyric) {
     return `${lyric}\n${timeStr}`;
   }
@@ -331,6 +332,14 @@ const formatTooltip = (value: number) => {
 const MusicFullRef = ref<any>(null);
 const showSliderTooltip = ref(false);
 const showClimaxEditor = ref(false);
+const hoverTimeSec = ref(0);
+
+const handleSliderMouseMove = (e: MouseEvent) => {
+  const target = e.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  hoverTimeSec.value = percent * allTime.value;
+};
 
 const musicFullVisible = computed({
   get: () => playerStore.musicFull,
