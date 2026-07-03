@@ -38,21 +38,22 @@
           }"
         ></div>
       </div>
-      <div class="slider-wrapper" @mousemove="handleSliderMouseMove" @mouseenter="showSliderTooltip = true" @mouseleave="showSliderTooltip = false">
-        <div v-if="showSliderTooltip" class="slider-hover-tooltip" :style="{ left: tooltipX + 'px' }">
-          <div v-if="hoverLyric" class="slider-hover-lyric">{{ hoverLyric }}</div>
-          <div class="slider-hover-time">{{ hoverTimeStr }}</div>
-        </div>
-        <n-slider
-          v-model:value="timeSlider"
-          :step="1"
-          :max="allTime"
-          :min="0"
-          :show-tooltip="false"
-          @dragstart="handleSliderDragStart"
-          @dragend="handleSliderDragEnd"
-        ></n-slider>
+      <div class="slider-hover-tooltip" v-if="showSliderTooltip" :style="{ left: tooltipX + 'px' }">
+        <div v-if="hoverLyric" class="slider-hover-lyric">{{ hoverLyric }}</div>
+        <div class="slider-hover-time">{{ hoverTimeStr }}</div>
       </div>
+      <n-slider
+        v-model:value="timeSlider"
+        :step="1"
+        :max="allTime"
+        :min="0"
+        :show-tooltip="false"
+        @mouseenter="showSliderTooltip = true"
+        @mouseleave="showSliderTooltip = false"
+        @mousemove="handleSliderMouseMove"
+        @dragstart="handleSliderDragStart"
+        @dragend="handleSliderDragEnd"
+      ></n-slider>
     </div>
     <div class="play-bar-img-wrapper" @click="setMusicFull">
       <n-image
@@ -461,11 +462,6 @@ const openPlayListDrawer = () => {
 
 <style lang="scss" scoped>
 .text-ellipsis {
-  width: 100%;
-}
-
-.slider-wrapper {
-  position: relative;
   width: 100%;
 }
 
