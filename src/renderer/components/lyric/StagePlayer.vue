@@ -114,7 +114,7 @@ import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import LyricSettings from './LyricSettings.vue';
 import PlayerControls from './PlayerControls.vue';
 import Aurora from '@/components/Aurora.vue';
-import { useStyleContext } from '@/playerStyles';
+import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 // 从 localStorage 读取动画强度设置
 const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {

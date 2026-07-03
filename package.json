@@ -1,6 +1,6 @@
 {
   "name": "ZephyrusPlayer",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Zephyrus Player",
   "author": "Zephyrus <WEISTUDIOWEI@126.com>",
   "main": "./out/main/index.js",

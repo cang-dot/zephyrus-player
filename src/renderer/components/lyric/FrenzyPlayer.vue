@@ -46,7 +46,7 @@ import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
 import { drumDetector } from '@/services/drumDetector';
 import { usePlayerStore } from '@/store/modules/player';
 import { setCurrentSongId } from '@/utils/emotionalDetector';
-import { useStyleContext } from '@/playerStyles';
+import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
