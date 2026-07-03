@@ -38,19 +38,21 @@
           }"
         ></div>
       </div>
-      <n-slider
-        v-model:value="timeSlider"
-        :step="1"
-        :max="allTime"
-        :min="0"
-        :format-tooltip="formatTooltip"
-        :show-tooltip="showSliderTooltip"
-        @mouseenter="showSliderTooltip = true"
-        @mouseleave="showSliderTooltip = false"
-        @mousemove="handleSliderMouseMove"
-        @dragstart="handleSliderDragStart"
-        @dragend="handleSliderDragEnd"
-      ></n-slider>
+      <div class="slider-wrapper" @mousemove="handleSliderMouseMove" @mouseenter="showSliderTooltip = true" @mouseleave="showSliderTooltip = false">
+        <div v-if="showSliderTooltip" class="slider-hover-tooltip" :style="{ left: tooltipX + 'px' }">
+          <div v-if="hoverLyric" class="slider-hover-lyric">{{ hoverLyric }}</div>
+          <div class="slider-hover-time">{{ hoverTimeStr }}</div>
+        </div>
+        <n-slider
+          v-model:value="timeSlider"
+          :step="1"
+          :max="allTime"
+          :min="0"
+          :show-tooltip="false"
+          @dragstart="handleSliderDragStart"
+          @dragend="handleSliderDragEnd"
+        ></n-slider>
+      </div>
     </div>
     <div class="play-bar-img-wrapper" @click="setMusicFull">
       <n-image
@@ -320,25 +322,22 @@ const handleSliderDragEnd = () => {
   nowTime.value = dragValue.value;
 };
 
-const formatTooltip = () => {
-  const timeStr = `${secondToMinute(hoverTimeSec.value)} / ${secondToMinute(allTime.value)}`;
-  const lyric = getLyricTextAtTime(hoverTimeSec.value);
-  if (lyric) {
-    return `${lyric}\n${timeStr}`;
-  }
-  return timeStr;
-};
-
 const MusicFullRef = ref<any>(null);
 const showSliderTooltip = ref(false);
 const showClimaxEditor = ref(false);
 const hoverTimeSec = ref(0);
+const tooltipX = ref(0);
+const hoverLyric = ref<string | null>(null);
+const hoverTimeStr = ref('');
 
 const handleSliderMouseMove = (e: MouseEvent) => {
   const target = e.currentTarget as HTMLElement;
   const rect = target.getBoundingClientRect();
   const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   hoverTimeSec.value = percent * allTime.value;
+  tooltipX.value = e.clientX - rect.left;
+  hoverTimeStr.value = secondToMinute(hoverTimeSec.value);
+  hoverLyric.value = getLyricTextAtTime(hoverTimeSec.value);
 };
 
 const musicFullVisible = computed({
@@ -463,6 +462,40 @@ const openPlayListDrawer = () => {
 <style lang="scss" scoped>
 .text-ellipsis {
   width: 100%;
+}
+
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.slider-hover-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 6px 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  text-align: center;
+
+  .slider-hover-lyric {
+    font-size: 12px;
+    color: #fff;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .slider-hover-time {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: monospace;
+  }
 }
 
 .music-play-bar {
