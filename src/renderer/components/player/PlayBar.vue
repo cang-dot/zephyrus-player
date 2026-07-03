@@ -898,3 +898,9 @@ const openPlayListDrawer = () => {
   vertical-align: 1px;
 }
 </style>
+
+<style>
+.n-slider-tooltip {
+  display: none !important;
+}
+</style>
