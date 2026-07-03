@@ -49,7 +49,7 @@
         :min="0"
         :show-tooltip="false"
         @mouseenter="showSliderTooltip = true"
-        @mouseleave="showSliderTooltip = false"
+        @mouseleave="!isDragging && (showSliderTooltip = false)"
         @mousemove="handleSliderMouseMove"
         @dragstart="handleSliderDragStart"
         @dragend="handleSliderDragEnd"
@@ -315,10 +315,14 @@ const timeSlider = computed({
 const handleSliderDragStart = () => {
   isDragging.value = true;
   dragValue.value = nowTime.value;
+  showSliderTooltip.value = true;
+  document.addEventListener('mousemove', handleGlobalMouseMove);
 };
 
 const handleSliderDragEnd = () => {
   isDragging.value = false;
+  document.removeEventListener('mousemove', handleGlobalMouseMove);
+  showSliderTooltip.value = false;
   audioService.seek(dragValue.value);
   nowTime.value = dragValue.value;
 };
@@ -337,6 +341,17 @@ const handleSliderMouseMove = (e: MouseEvent) => {
   const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   hoverTimeSec.value = percent * allTime.value;
   tooltipX.value = e.clientX - rect.left;
+  hoverTimeStr.value = `${secondToMinute(hoverTimeSec.value)} / ${secondToMinute(allTime.value)}`;
+  hoverLyric.value = getLyricTextAtTime(hoverTimeSec.value);
+};
+
+const handleGlobalMouseMove = (e: MouseEvent) => {
+  const sliderEl = document.querySelector('.music-time .n-slider') as HTMLElement;
+  if (!sliderEl) return;
+  const rect = sliderEl.getBoundingClientRect();
+  const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  hoverTimeSec.value = percent * allTime.value;
+  tooltipX.value = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
   hoverTimeStr.value = `${secondToMinute(hoverTimeSec.value)} / ${secondToMinute(allTime.value)}`;
   hoverLyric.value = getLyricTextAtTime(hoverTimeSec.value);
 };
