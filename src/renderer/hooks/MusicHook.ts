@@ -53,20 +53,32 @@ export const textColors = ref<any>(getTextColors());
 export let playMusic: ComputedRef<SongResult>;
 export let artistList: ComputedRef<Artist[]>;
 
-export const musicDB = await useIndexedDB(
-  'musicDB',
-  [
-    { name: 'music', keyPath: 'id' },
-    { name: 'music_lyric', keyPath: 'id' },
-    { name: 'api_cache', keyPath: 'id' },
-    { name: 'music_url_cache', keyPath: 'id' },
-    { name: 'music_failed_cache', keyPath: 'id' },
-    { name: 'climax_cache', keyPath: 'id' },
-    { name: 'keywords_cache', keyPath: 'id' },
-    { name: 'community_lyric_cache', keyPath: 'id' }
-  ],
-  4
-);
+let _musicDB: Awaited<ReturnType<typeof useIndexedDB>> | null = null;
+let _musicDBInitPromise: Promise<Awaited<ReturnType<typeof useIndexedDB>>> | null = null;
+
+export async function getMusicDB(): Promise<Awaited<ReturnType<typeof useIndexedDB>>> {
+  if (_musicDB) return _musicDB;
+  if (!_musicDBInitPromise) {
+    _musicDBInitPromise = useIndexedDB(
+      'musicDB',
+      [
+        { name: 'music', keyPath: 'id' },
+        { name: 'music_lyric', keyPath: 'id' },
+        { name: 'api_cache', keyPath: 'id' },
+        { name: 'music_url_cache', keyPath: 'id' },
+        { name: 'music_failed_cache', keyPath: 'id' },
+        { name: 'climax_cache', keyPath: 'id' },
+        { name: 'keywords_cache', keyPath: 'id' },
+        { name: 'community_lyric_cache', keyPath: 'id' }
+      ],
+      4
+    ).then(db => {
+      _musicDB = db;
+      return db;
+    });
+  }
+  return _musicDBInitPromise;
+}
 
 // 键盘事件处理器，在初始化后设置
 const setupKeyboardListeners = () => {

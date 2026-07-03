@@ -1,12 +1,10 @@
-import { musicDB } from '@/hooks/MusicHook';
+import { getMusicDB } from '@/hooks/MusicHook';
 import { useSettingsStore, useUserStore } from '@/store';
 import type { ILyric } from '@/types/lyric';
 import type { SongResult } from '@/types/music';
 import request from '@/utils/request';
 
 import { MusicParser, type MusicParseResult } from './musicParser';
-
-const { addData, getData, deleteData } = musicDB;
 
 // 将 FM 歌曲移至垃圾桶（不喜欢）
 export const fmTrash = (id: number) => {
@@ -62,10 +60,11 @@ export const getMusicDetail = (ids: Array<number>) => {
 // 根据音乐Id获取音乐歌词
 export const getMusicLrc = async (id: number) => {
   const TEN_DAYS_MS = 10 * 24 * 60 * 60 * 1000; // 10天的毫秒数
+  const db = await getMusicDB();
 
   try {
     // 尝试获取缓存的歌词
-    const cachedLyric = await getData('music_lyric', id);
+    const cachedLyric = await db.getData('music_lyric', id);
     if (cachedLyric?.createTime && Date.now() - cachedLyric.createTime < TEN_DAYS_MS) {
       return { ...cachedLyric };
     }
@@ -76,9 +75,9 @@ export const getMusicLrc = async (id: number) => {
     // 只有在成功获取新数据后才删除旧缓存并添加新缓存
     if (res?.data) {
       if (cachedLyric) {
-        await deleteData('music_lyric', id);
+        await db.deleteData('music_lyric', id);
       }
-      addData('music_lyric', { id, data: res.data, createTime: Date.now() });
+      db.addData('music_lyric', { id, data: res.data, createTime: Date.now() });
     }
 
     return res;

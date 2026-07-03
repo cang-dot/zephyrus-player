@@ -59,21 +59,6 @@
         --animate-delay: 0.5s;
       }
     </style>
-    <!-- 生产构建调试：捕获模块加载错误 -->
-    <script>
-      window.onerror = function(msg, src, line, col, err) {
-        document.title = 'ERR:' + msg;
-        document.body.innerHTML = '<pre style="position:fixed;inset:0;z-index:99999;background:red;color:white;padding:20px;font-size:16px;white-space:pre-wrap;overflow:auto;">[ERROR] ' + msg + '\n' + src + ':' + line + ':' + col + '\n' + (err && err.stack || '') + '</pre>';
-      };
-      window.addEventListener('unhandledrejection', function(e) {
-        document.body.innerHTML = '<pre style="position:fixed;inset:0;z-index:99999;background:darkred;color:white;padding:20px;font-size:16px;white-space:pre-wrap;overflow:auto;">[PROMISE] ' + e.reason + '\n' + (e.reason && e.reason.stack || '') + '</pre>';
-      });
-      window.addEventListener('error', function(e) {
-        if (e.target && e.target.tagName) {
-          document.body.innerHTML = '<pre style="position:fixed;inset:0;z-index:99999;background:orange;color:black;padding:20px;font-size:16px;white-space:pre-wrap;overflow:auto;">[RESOURCE FAIL] ' + e.target.tagName + ' ' + (e.target.src || e.target.href || 'unknown') + '</pre>';
-        }
-      }, true);
-    </script>
   </head>
 
   <body>

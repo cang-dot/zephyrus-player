@@ -6,7 +6,7 @@
  * 注意: 缓存包含 null 值，避免重复请求不存在的数据
  */
 
-import { musicDB } from '@/hooks/MusicHook';
+import { getMusicDB } from '@/hooks/MusicHook';
 import type { ClimaxSegment } from '@/api/climax';
 import type { KeywordMark } from '@/api/keywords';
 import type { CommunityLyric } from '@/api/communityLyric';
@@ -31,7 +31,8 @@ function isCacheValid<T>(entry: CacheEntry<T> | undefined): entry is CacheEntry<
  */
 async function saveCache<T>(storeName: string, key: string, data: T): Promise<void> {
   try {
-    await musicDB.saveData(storeName as any, {
+    const db = await getMusicDB();
+    await db.saveData(storeName as any, {
       id: key,
       data,
       cachedAt: Date.now()
@@ -47,7 +48,8 @@ async function saveCache<T>(storeName: string, key: string, data: T): Promise<vo
  */
 async function getCache<T>(storeName: string, key: string): Promise<T | null | undefined> {
   try {
-    const entry = await musicDB.getData(storeName as any, key) as CacheEntry<T> | undefined;
+    const db = await getMusicDB();
+    const entry = await db.getData(storeName as any, key) as CacheEntry<T> | undefined;
     if (!entry) return undefined; // 缓存未命中
     if (!isCacheValid(entry)) return undefined; // 缓存过期
     return entry.data; // 返回 data（可能为 null）
@@ -61,7 +63,8 @@ async function getCache<T>(storeName: string, key: string): Promise<T | null | u
  */
 async function deleteCache(storeName: string, key: string): Promise<void> {
   try {
-    await musicDB.deleteData(storeName as any, key);
+    const db = await getMusicDB();
+    await db.deleteData(storeName as any, key);
   } catch (err) {
     console.error(`[CacheService] 删除缓存失败 (${storeName}):`, err);
   }

@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 
-import { musicDB } from '@/hooks/MusicHook';
+import { getMusicDB } from '@/hooks/MusicHook';
 import { SongSourceConfigManager } from '@/services/SongSourceConfigManager';
 import { useSettingsStore } from '@/store';
 import type { SongResult } from '@/types/music';
@@ -11,8 +11,6 @@ import type { ParsedMusicResult } from './gdmusic';
 import { parseFromGDMusic } from './gdmusic';
 import { LxMusicStrategy } from './lxMusicStrategy';
 import { parseFromCustomApi } from './parseFromCustomApi';
-
-const { saveData, getData, deleteData } = musicDB;
 
 /**
  * 音乐解析结果接口
@@ -58,7 +56,8 @@ export class CacheManager {
     musicSources?: string[]
   ): Promise<MusicParseResult | null> {
     try {
-      const cached = await getData('music_url_cache', id);
+      const db = await getMusicDB();
+      const cached = await db.getData('music_url_cache', id);
       if (
         cached?.createTime &&
         Date.now() - cached.createTime < CACHE_CONFIG.MUSIC_URL_CACHE_TIME
@@ -70,7 +69,7 @@ export class CacheManager {
         // 如果音源配置不一致，清除缓存
         if (JSON.stringify(cachedSources.sort()) !== JSON.stringify(currentSources.sort())) {
           console.log(`音源配置已变更，清除歌曲 ${id} 的缓存`);
-          await deleteData('music_url_cache', id);
+          await db.deleteData('music_url_cache', id);
           return null;
         }
 
@@ -79,7 +78,7 @@ export class CacheManager {
       }
       // 清理过期缓存
       if (cached) {
-        await deleteData('music_url_cache', id);
+        await db.deleteData('music_url_cache', id);
       }
     } catch (error) {
       console.warn('获取缓存失败:', error);
@@ -97,7 +96,8 @@ export class CacheManager {
   ): Promise<void> {
     try {
       // 深度克隆数据，确保可以被 IndexedDB 存储
-      await saveData('music_url_cache', {
+      const db = await getMusicDB();
+      await db.saveData('music_url_cache', {
         id,
         data: cloneDeep(result),
         musicSources: cloneDeep(musicSources || []),
@@ -158,8 +158,9 @@ export class CacheManager {
    */
   static async clearMusicCache(id: number): Promise<void> {
     try {
+      const db = await getMusicDB();
       // 清除URL缓存
-      await deleteData('music_url_cache', id);
+      await db.deleteData('music_url_cache', id);
       console.log(`清除歌曲 ${id} 的URL缓存`);
 
       // 清除失败缓存 - 需要遍历所有策略
@@ -167,7 +168,7 @@ export class CacheManager {
       for (const strategy of strategies) {
         const cacheKey = `${id}_${strategy}`;
         try {
-          await deleteData('music_failed_cache', cacheKey);
+          await db.deleteData('music_failed_cache', cacheKey);
         } catch {
           // 忽略删除不存在缓存的错误
         }
