@@ -900,7 +900,7 @@ const openPlayListDrawer = () => {
 </style>
 
 <style>
-.n-slider-tooltip {
+.n-slider-handle-indicator {
   display: none !important;
 }
 </style>
