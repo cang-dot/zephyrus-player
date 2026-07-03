@@ -38,7 +38,7 @@
           }"
         ></div>
       </div>
-      <div class="slider-hover-tooltip" v-if="showSliderTooltip && !isDragging" :style="{ left: tooltipX + 'px' }">
+      <div class="slider-hover-tooltip" v-if="showSliderTooltip" :style="{ left: tooltipX + 'px' }">
         <div v-if="hoverLyric" class="slider-hover-lyric">{{ hoverLyric }}</div>
         <div class="slider-hover-time">{{ hoverTimeStr }}</div>
       </div>
