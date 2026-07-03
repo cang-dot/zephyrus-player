@@ -28,10 +28,20 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
-        run: npx electron-builder --win --publish always
+      - name: Package
+        run: npx electron-builder --win --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: win
+          path: |
+            dist/*.exe
+            dist/*.yml
+            dist/*.blockmap
+          if-no-files-found: error
 
   build-macos:
     runs-on: macos-latest
@@ -51,10 +61,21 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
-        run: npx electron-builder --mac --publish always
+      - name: Package
+        run: npx electron-builder --mac --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
+          if-no-files-found: error
 
   build-linux:
     runs-on: ubuntu-latest
@@ -74,7 +95,45 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
-        run: npx electron-builder --linux --publish always
+      - name: Package
+        run: npx electron-builder --linux --publish never
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+            dist/*.yml
+            dist/*.blockmap
+          if-no-files-found: error
+
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -la release/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release/*
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
