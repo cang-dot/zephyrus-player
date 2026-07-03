@@ -38,7 +38,7 @@
           }"
         ></div>
       </div>
-      <div class="slider-hover-tooltip" v-if="showSliderTooltip" :style="{ left: tooltipX + 'px' }">
+      <div class="slider-hover-tooltip" v-if="showSliderTooltip && !isDragging" :style="{ left: tooltipX + 'px' }">
         <div v-if="hoverLyric" class="slider-hover-lyric">{{ hoverLyric }}</div>
         <div class="slider-hover-time">{{ hoverTimeStr }}</div>
       </div>
@@ -337,7 +337,7 @@ const handleSliderMouseMove = (e: MouseEvent) => {
   const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   hoverTimeSec.value = percent * allTime.value;
   tooltipX.value = e.clientX - rect.left;
-  hoverTimeStr.value = secondToMinute(hoverTimeSec.value);
+  hoverTimeStr.value = `${secondToMinute(hoverTimeSec.value)} / ${secondToMinute(allTime.value)}`;
   hoverLyric.value = getLyricTextAtTime(hoverTimeSec.value);
 };
 
@@ -738,6 +738,10 @@ const openPlayListDrawer = () => {
       @apply bg-dark-200 text-white text-xs py-1 px-2 rounded;
       z-index: 999999;
     }
+  }
+
+  :deep(.n-slider-handle .n-slider-tooltip) {
+    display: none !important;
   }
 }
 
