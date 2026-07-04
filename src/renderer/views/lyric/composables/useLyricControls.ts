@@ -65,6 +65,14 @@ export function useLyricControls(lyricSetting: Ref<LyricSettings>) {
     windowData.electron.ipcRenderer.send('close-lyric');
   };
 
+  const skipForward = () => {
+    windowData.electron.ipcRenderer.send('control-back', 'seek-forward');
+  };
+
+  const skipBackward = () => {
+    windowData.electron.ipcRenderer.send('control-back', 'seek-backward');
+  };
+
   const cycleDisplayMode = () => {
     const modes: Array<'scroll' | 'single' | 'double'> = ['scroll', 'single', 'double'];
     const current = modes.indexOf(lyricSetting.value.displayMode);
@@ -99,6 +107,8 @@ export function useLyricControls(lyricSetting: Ref<LyricSettings>) {
     handleNext,
     handleLock,
     handleClose,
+    skipForward,
+    skipBackward,
     cycleDisplayMode,
     checkTheme
   };
