@@ -163,7 +163,7 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
       win.loadURL(`file://${distPath}/index.html#/lyric`);
     }
 
-    win.setMinimumSize(600, 200);
+    win.setMinimumSize(200, 60);
     win.setSkipTaskbar(true);
 
     win.once('ready-to-show', () => {
@@ -189,6 +189,16 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     }
   });
 
+  ipcMain.on('send-cover-color', (_, color) => {
+    if (lyricWindow && !lyricWindow.isDestroyed()) {
+      try {
+        lyricWindow.webContents.send('receive-cover-color', color);
+      } catch (error) {
+        console.error('Error processing cover color:', error);
+      }
+    }
+  });
+
   ipcMain.on('top-lyric', (_, data) => {
     if (lyricWindow && !lyricWindow.isDestroyed()) {
       lyricWindow.setAlwaysOnTop(data);
@@ -205,20 +215,7 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     }
   });
 
-  // 处理鼠标事件
-  ipcMain.on('mouseenter-lyric', () => {
-    if (lyricWindow && !lyricWindow.isDestroyed()) {
-      lyricWindow.setIgnoreMouseEvents(true);
-    }
-  });
-
-  ipcMain.on('mouseleave-lyric', () => {
-    if (lyricWindow && !lyricWindow.isDestroyed()) {
-      lyricWindow.setIgnoreMouseEvents(false);
-    }
-  });
-
-  // 开始拖动时设置标志
+  // 处理鼠标穿透事件
   ipcMain.on('lyric-drag-start', () => {
     isDragging = true;
     if (lyricWindow && !lyricWindow.isDestroyed()) {
@@ -231,10 +228,6 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
   // 结束拖动时清除标志
   ipcMain.on('lyric-drag-end', () => {
     isDragging = false;
-    if (lyricWindow && !lyricWindow.isDestroyed()) {
-      // 确保窗口大小恢复原样
-      lyricWindow.setSize(originalSize.width, originalSize.height);
-    }
   });
 
   // 处理拖动移动

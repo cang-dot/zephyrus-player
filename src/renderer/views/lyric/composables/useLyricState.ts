@@ -1,6 +1,8 @@
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type { Ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+
 import { SongResult } from '@/types/music';
+
 import type { LyricSettings } from './useLyricSettings';
 
 const windowData = window as any;
@@ -19,14 +21,40 @@ export interface LyricLine {
 export function useLyricState(lyricSetting: Ref<LyricSettings>) {
   const containerRef = ref<HTMLElement | null>(null);
   const containerHeight = ref(0);
+  const containerWidth = ref(0);
   const fontSizeStep = 2;
   const animationFrameId = ref<number | null>(null);
   const lastUpdateTime = ref(performance.now());
 
   const fontSize = ref(24);
 
+  const maxLineLength = computed(() => {
+    const arr = staticData.value.lrcArray;
+    if (!arr || arr.length === 0) return 0;
+    return Math.max(...arr.map((l: LyricLine) => (l.text || '').length));
+  });
+
+  const scrollFontSize = computed(() => {
+    const cw = containerWidth.value;
+    const ch = containerHeight.value;
+    const mll = maxLineLength.value;
+    if (!cw || !ch || !mll) return fontSize.value;
+    const charWidth = 0.6;
+    const maxByWidth = (cw - 40) / (mll * charWidth);
+    const maxByHeight = ch / (4 * 2.5);
+    const base = Math.round(Math.min(maxByWidth, maxByHeight));
+    return Math.max(12, Math.min(base, 48));
+  });
+
   const lineHeight = computed(() => {
     const baseLineHeight = fontSize.value * 2.5;
+    const maxAllowedHeight = containerHeight.value / 3;
+    return Math.min(maxAllowedHeight, Math.max(40, baseLineHeight));
+  });
+
+  const effectiveLineHeight = computed(() => {
+    if (displayMode.value !== 'scroll') return lineHeight.value;
+    const baseLineHeight = scrollFontSize.value * 2.5;
     const maxAllowedHeight = containerHeight.value / 3;
     return Math.min(maxAllowedHeight, Math.max(40, baseLineHeight));
   });
@@ -55,13 +83,13 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
 
   const hasTranslation = computed(() => staticData.value.lrcArray.some((line) => line.trText));
 
-  const currentGroupIndex = computed(() => Math.floor(currentIndex.value / 2));
-
   const currentGroupLines = computed(() => {
-    const start = currentGroupIndex.value * 2;
-    return staticData.value.lrcArray
-      .slice(start, start + 2)
-      .map((line, i) => ({ ...line, index: start + i }));
+    const idx = currentIndex.value;
+    const arr = staticData.value.lrcArray;
+    return [
+      arr[idx] ? { ...arr[idx], index: idx } : null,
+      arr[idx + 1] ? { ...arr[idx + 1], index: idx + 1 } : null
+    ].filter(Boolean) as Array<{ index: number; text: string; trText: string; hasWordByWord?: boolean; words?: Array<{ text: string; startTime: number; duration: number; space?: boolean }> }>;
   });
 
   const displayMode = computed(() => lyricSetting.value.displayMode);
@@ -70,7 +98,7 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
   const isGroupTransitioning = ref(false);
   let groupFadeTimer: ReturnType<typeof setTimeout> | null = null;
 
-  watch(currentGroupIndex, () => {
+  watch(currentIndex, () => {
     if (displayMode.value !== 'double') return;
     if (groupFadeTimer !== null) clearTimeout(groupFadeTimer);
     isGroupTransitioning.value = true;
@@ -83,12 +111,11 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
   const currentProgress = computed(() => {
     const times = staticData.value.lrcTimeArray;
     const idx = currentIndex.value;
-    const startTimeMs = times[idx];
-    const endTimeMs = times[idx + 1];
-    if (startTimeMs === undefined || endTimeMs === undefined || endTimeMs <= startTimeMs) return 0;
-    const currentTimeMs = actualTime.value * 1000;
-    const elapsed = currentTimeMs - startTimeMs;
-    const duration = endTimeMs - startTimeMs;
+    const startTime = times[idx];
+    const endTime = times[idx + 1];
+    if (startTime === undefined || endTime === undefined || endTime <= startTime) return 0;
+    const elapsed = actualTime.value - startTime;
+    const duration = endTime - startTime;
     return Math.min(Math.max(elapsed / duration, 0), 1);
   });
 
@@ -150,9 +177,10 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
   };
 
   const getDynamicLineStyle = (line: LyricLine, withTranslation = true) => {
-    const defaultHeight = lineHeight.value;
+    const defaultHeight = effectiveLineHeight.value;
+    const sz = displayMode.value === 'scroll' ? scrollFontSize.value : fontSize.value;
     if (withTranslation && line.trText) {
-      const extraHeight = Math.round(fontSize.value * 0.6 * 1.4);
+      const extraHeight = Math.round(sz * 0.6 * 1.4);
       return { height: `${defaultHeight + extraHeight}px` };
     }
     return { height: `${defaultHeight}px` };
@@ -165,9 +193,9 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
     }
     const containerCenter = containerHeight.value / 2;
     const getLineHeight = (line: LyricLine) => {
-      const baseHeight = lineHeight.value;
+      const baseHeight = effectiveLineHeight.value;
       if (showTranslation.value && line.trText) {
-        const extraHeight = Math.round(fontSize.value * 0.6 * 1.4);
+        const extraHeight = Math.round(scrollFontSize.value * 0.6 * 1.4);
         return baseHeight + extraHeight;
       }
       return baseHeight;
@@ -177,13 +205,13 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
       if (i < staticData.value.lrcArray.length) {
         accumulatedHeight += getLineHeight(staticData.value.lrcArray[i]);
       } else {
-        accumulatedHeight += lineHeight.value;
+        accumulatedHeight += effectiveLineHeight.value;
       }
     }
     const currentLineHeight =
       currentIndex.value < staticData.value.lrcArray.length
         ? getLineHeight(staticData.value.lrcArray[currentIndex.value])
-        : lineHeight.value;
+        : effectiveLineHeight.value;
     accumulatedHeight += currentLineHeight;
     const targetOffset = containerCenter - accumulatedHeight;
     let contentHeight = containerHeight.value * 0.4;
@@ -202,6 +230,7 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
   const updateContainerHeight = () => {
     if (!containerRef.value) return;
     containerHeight.value = containerRef.value.clientHeight;
+    containerWidth.value = containerRef.value.clientWidth;
   };
 
   const saveFontSize = () => {
@@ -316,6 +345,12 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
       }
     });
 
+    windowData.electron.ipcRenderer.on('receive-cover-color', (_: any, color: string) => {
+      if (color) {
+        document.documentElement.style.setProperty('--highlight-color', color);
+      }
+    });
+
     windowData.electron.ipcRenderer.send('lyric-ready');
   });
 
@@ -352,14 +387,15 @@ export function useLyricState(lyricSetting: Ref<LyricSettings>) {
     dynamicData,
     currentIndex,
     fontSize,
+    scrollFontSize,
     lineHeight,
     containerRef,
     containerHeight,
+    containerWidth,
     handleDataUpdate,
     updateContainerHeight,
     hasTranslation,
     currentGroupLines,
-    currentGroupIndex,
     isGroupTransitioning,
     displayMode,
     showTranslation,
