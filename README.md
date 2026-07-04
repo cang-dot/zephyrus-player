@@ -336,7 +336,7 @@ IndexedDB 缓存 → API 请求 → 缓存
 
 ## 许可证
 
-[AGPL-3.0 License](LICENSE) -- 基于 [AlgerMusicPlayer](https://github.com/algerkong/AlgerMusicPlayer) 修改
+[MIT License](LICENSE) -- 基于 [AlgerMusicPlayer](https://github.com/algerkong/AlgerMusicPlayer) 修改
 
 ---
 
