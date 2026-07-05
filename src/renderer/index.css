@@ -145,6 +145,50 @@
   }
 }
 
+/* naive-ui 组件强制跟随 accent-color */
+.n-switch {
+  --n-color: var(--accent-color);
+  --n-color-active: var(--accent-color);
+}
+.n-button--primary-type {
+  --n-color: var(--accent-color);
+  --n-color-hover: var(--accent-color);
+  --n-color-pressed: var(--accent-color-dark);
+  --n-color-focus: var(--accent-color);
+  --n-border-color: var(--accent-color);
+  --n-border-color-hover: var(--accent-color);
+  --n-border-color-pressed: var(--accent-color-dark);
+  --n-border-color-focus: var(--accent-color);
+  --n-text-color: white;
+  --n-text-color-hover: white;
+  --n-text-color-pressed: white;
+  --n-text-color-focus: white;
+  --n-text-color-disabled: white;
+}
+.n-slider {
+  --n-fill-color: var(--accent-color);
+  --n-fill-color-hover: var(--accent-color);
+  --n-handle-color: var(--accent-color);
+}
+.n-tag--success-type {
+  --n-color: var(--accent-color);
+  --n-text-color: white;
+  --n-border-color: var(--accent-color);
+}
+.n-tag--success-bordered {
+  --n-text-color: var(--accent-color);
+  --n-border-color: var(--accent-color);
+}
+.n-progress--line .n-progress-indicator {
+  --n-indicator-color: var(--accent-color);
+}
+.n-progress--circle .n-progress-indicator {
+  --n-indicator-text-color: var(--accent-color);
+}
+.n-badge--dot .n-badge-dot {
+  background-color: var(--accent-color);
+}
+
 /* 骨架屏 shimmer 动画 */
 .skeleton-shimmer {
   position: relative;
