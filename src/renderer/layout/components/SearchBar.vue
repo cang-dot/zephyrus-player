@@ -16,7 +16,8 @@
     <div class="search-wrap">
       <n-popover
         trigger="manual"
-        placement="bottom-end"
+        placement="bottom-start"
+        width="trigger"
         :show="showSuggestions"
         :show-arrow="false"
         style="margin-top: 6px"
