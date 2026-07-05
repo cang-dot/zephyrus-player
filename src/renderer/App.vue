@@ -59,8 +59,8 @@ const themeOverrides = computed(() => {
       fillColor: pc,
       fillColorHover: pc,
       handleColor: pc,
-      dotColorActive: pc,
-      dotColorDisabled: pc
+      dotColor: pc,
+      dotColorActive: pc
     },
     Switch: {
       railColorActive: pc
@@ -74,8 +74,11 @@ const themeOverrides = computed(() => {
       textColorFocus: '#fff'
     },
     Radio: {
+      colorActive: 'transparent',
       dotColorActive: pc,
-      boxShadowFocus: `0 0 0 2px ${pc}33`
+      boxShadowActive: `inset 0 0 0 1px ${pc}`,
+      boxShadowFocus: `inset 0 0 0 1px ${pc}`,
+      boxShadowHover: `inset 0 0 0 1px ${pc}`
     },
     RadioButton: {
       colorActive: pc,
