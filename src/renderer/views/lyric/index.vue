@@ -111,7 +111,12 @@ const { handleMouseDown } = useLyricDrag(lyricSetting);
 const songName = computed(() => staticData.value.playMusic?.name || '');
 
 // ── 歌词样式 IPC ──
-function applyStyle(config: { fontFamily?: string; textColor?: string; strokeColor?: string; useCoverColor?: boolean }) {
+function applyStyle(config: {
+  fontFamily?: string;
+  textColor?: string;
+  strokeColor?: string;
+  useCoverColor?: boolean;
+}) {
   const root = document.documentElement;
 
   if (config.fontFamily) {
@@ -158,7 +163,9 @@ onMounted(() => {
 
   const cached = localStorage.getItem('lyricStyleConfig');
   if (cached) {
-    try { applyStyle(JSON.parse(cached)); } catch {}
+    try {
+      applyStyle(JSON.parse(cached));
+    } catch {}
   }
 });
 
@@ -273,23 +280,33 @@ body,
   // ── 响应式精简控制栏 ──
   // 隐藏顺序：±0.5s → 明暗 → 排列方式 → 翻译 → ±字号
   @media (max-width: 600px) {
-    :deep(.ctrl-skip) { display: none; }
+    :deep(.ctrl-skip) {
+      display: none;
+    }
   }
 
   @media (max-width: 500px) {
-    :deep(.ctrl-theme) { display: none; }
+    :deep(.ctrl-theme) {
+      display: none;
+    }
   }
 
   @media (max-width: 400px) {
-    :deep(.ctrl-display) { display: none; }
+    :deep(.ctrl-display) {
+      display: none;
+    }
   }
 
   @media (max-width: 350px) {
-    :deep(.ctrl-translate) { display: none; }
+    :deep(.ctrl-translate) {
+      display: none;
+    }
   }
 
   @media (max-width: 300px) {
-    :deep(.ctrl-font) { display: none; }
+    :deep(.ctrl-font) {
+      display: none;
+    }
   }
 }
 </style>

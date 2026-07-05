@@ -39,7 +39,11 @@
             <div class="style-card-preview" :class="'preview-' + style.key"></div>
             <div class="style-card-name">{{ style.label }}</div>
             <button class="style-settings-btn" @click.stop="openStyleSettings(style.key)">
-              <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 12.44a.49.49 0 00.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 12.44a.49.49 0 00.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -74,7 +78,15 @@
         </div>
         <div class="slider-group">
           <label class="slider-label">{{ t('settings.lyricSettings.contentWidth') }}</label>
-          <input type="range" v-model.number="config.contentWidth" min="50" max="100" step="5" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.contentWidth, 50, 100) }" />
+          <input
+            type="range"
+            v-model.number="config.contentWidth"
+            min="50"
+            max="100"
+            step="5"
+            class="slider-emerald"
+            :style="{ '--val-pct': sliderPct(config.contentWidth, 50, 100) }"
+          />
           <div class="slider-marks"><span>50%</span><span>75%</span><span>100%</span></div>
         </div>
 
@@ -83,7 +95,15 @@
         <!-- 文字设置 -->
         <div class="slider-group">
           <label class="slider-label">{{ t('settings.lyricSettings.fontSize') }}</label>
-          <input type="range" v-model.number="config.fontSize" min="12" max="32" step="1" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.fontSize, 12, 32) }" />
+          <input
+            type="range"
+            v-model.number="config.fontSize"
+            min="12"
+            max="32"
+            step="1"
+            class="slider-emerald"
+            :style="{ '--val-pct': sliderPct(config.fontSize, 12, 32) }"
+          />
           <div class="slider-marks">
             <span>{{ t('settings.lyricSettings.fontSizeMarks.small') }}</span>
             <span>{{ t('settings.lyricSettings.fontSizeMarks.medium') }}</span>
@@ -92,7 +112,15 @@
         </div>
         <div class="slider-group">
           <label class="slider-label">{{ t('settings.lyricSettings.letterSpacing') }}</label>
-          <input type="range" v-model.number="config.letterSpacing" min="-2" max="10" step="0.2" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.letterSpacing, -2, 10) }" />
+          <input
+            type="range"
+            v-model.number="config.letterSpacing"
+            min="-2"
+            max="10"
+            step="0.2"
+            class="slider-emerald"
+            :style="{ '--val-pct': sliderPct(config.letterSpacing, -2, 10) }"
+          />
           <div class="slider-marks">
             <span>{{ t('settings.lyricSettings.letterSpacingMarks.compact') }}</span>
             <span>{{ t('settings.lyricSettings.letterSpacingMarks.default') }}</span>
@@ -101,7 +129,15 @@
         </div>
         <div class="slider-group">
           <label class="slider-label">{{ t('settings.lyricSettings.fontWeight') }}</label>
-          <input type="range" v-model.number="config.fontWeight" min="100" max="900" step="100" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.fontWeight, 100, 900) }" />
+          <input
+            type="range"
+            v-model.number="config.fontWeight"
+            min="100"
+            max="900"
+            step="100"
+            class="slider-emerald"
+            :style="{ '--val-pct': sliderPct(config.fontWeight, 100, 900) }"
+          />
           <div class="slider-marks">
             <span>{{ t('settings.lyricSettings.fontWeightMarks.thin') }}</span>
             <span>{{ t('settings.lyricSettings.fontWeightMarks.normal') }}</span>
@@ -110,7 +146,15 @@
         </div>
         <div class="slider-group">
           <label class="slider-label">{{ t('settings.lyricSettings.lineHeight') }}</label>
-          <input type="range" v-model.number="config.lineHeight" min="1" max="3" step="0.1" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.lineHeight, 1, 3) }" />
+          <input
+            type="range"
+            v-model.number="config.lineHeight"
+            min="1"
+            max="3"
+            step="0.1"
+            class="slider-emerald"
+            :style="{ '--val-pct': sliderPct(config.lineHeight, 1, 3) }"
+          />
           <div class="slider-marks">
             <span>{{ t('settings.lyricSettings.lineHeightMarks.compact') }}</span>
             <span>{{ t('settings.lyricSettings.lineHeightMarks.default') }}</span>
@@ -129,86 +173,227 @@
         <div v-if="!config.useCustomBackground" class="radio-group">
           <label class="radio-label">{{ t('settings.lyricSettings.backgroundTheme') }}</label>
           <div class="space-y-2">
-            <label class="radio-item"><input type="radio" v-model="config.theme" value="default" class="radio-input" /><span>{{ t('settings.lyricSettings.themeOptions.default') }}</span></label>
-            <label class="radio-item"><input type="radio" v-model="config.theme" value="light" class="radio-input" /><span>{{ t('settings.lyricSettings.themeOptions.light') }}</span></label>
-            <label class="radio-item"><input type="radio" v-model="config.theme" value="dark" class="radio-input" /><span>{{ t('settings.lyricSettings.themeOptions.dark') }}</span></label>
+            <label class="radio-item"
+              ><input
+                type="radio"
+                v-model="config.theme"
+                value="default"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.themeOptions.default') }}</span></label
+            >
+            <label class="radio-item"
+              ><input
+                type="radio"
+                v-model="config.theme"
+                value="light"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.themeOptions.light') }}</span></label
+            >
+            <label class="radio-item"
+              ><input
+                type="radio"
+                v-model="config.theme"
+                value="dark"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.themeOptions.dark') }}</span></label
+            >
           </div>
         </div>
 
         <div v-if="config.useCustomBackground" class="radio-group">
-          <label class="radio-label">{{ t('settings.lyricSettings.background.backgroundMode') }}</label>
+          <label class="radio-label">{{
+            t('settings.lyricSettings.background.backgroundMode')
+          }}</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="radio-item-compact"><input type="radio" v-model="config.backgroundMode" value="solid" class="radio-input" /><span>{{ t('settings.lyricSettings.background.modeOptions.solid') }}</span></label>
-            <label class="radio-item-compact"><input type="radio" v-model="config.backgroundMode" value="gradient" class="radio-input" /><span>{{ t('settings.lyricSettings.background.modeOptions.gradient') }}</span></label>
-            <label class="radio-item-compact"><input type="radio" v-model="config.backgroundMode" value="image" class="radio-input" /><span>{{ t('settings.lyricSettings.background.modeOptions.image') }}</span></label>
-            <label class="radio-item-compact"><input type="radio" v-model="config.backgroundMode" value="css" class="radio-input" /><span>{{ t('settings.lyricSettings.background.modeOptions.css') }}</span></label>
+            <label class="radio-item-compact"
+              ><input
+                type="radio"
+                v-model="config.backgroundMode"
+                value="solid"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.background.modeOptions.solid') }}</span></label
+            >
+            <label class="radio-item-compact"
+              ><input
+                type="radio"
+                v-model="config.backgroundMode"
+                value="gradient"
+                class="radio-input"
+              /><span>{{
+                t('settings.lyricSettings.background.modeOptions.gradient')
+              }}</span></label
+            >
+            <label class="radio-item-compact"
+              ><input
+                type="radio"
+                v-model="config.backgroundMode"
+                value="image"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.background.modeOptions.image') }}</span></label
+            >
+            <label class="radio-item-compact"
+              ><input
+                type="radio"
+                v-model="config.backgroundMode"
+                value="css"
+                class="radio-input"
+              /><span>{{ t('settings.lyricSettings.background.modeOptions.css') }}</span></label
+            >
           </div>
         </div>
 
         <!-- 纯色 -->
-        <div v-if="config.useCustomBackground && config.backgroundMode === 'solid'" class="color-picker-group">
-          <label class="color-picker-label">{{ t('settings.lyricSettings.background.solidColor') }}</label>
+        <div
+          v-if="config.useCustomBackground && config.backgroundMode === 'solid'"
+          class="color-picker-group"
+        >
+          <label class="color-picker-label">{{
+            t('settings.lyricSettings.background.solidColor')
+          }}</label>
           <input type="color" v-model="config.solidColor" class="color-picker" />
         </div>
 
         <!-- 渐变 -->
-        <div v-if="config.useCustomBackground && config.backgroundMode === 'gradient'" class="space-y-3">
-          <label class="color-picker-label">{{ t('settings.lyricSettings.background.gradientEditor') }}</label>
+        <div
+          v-if="config.useCustomBackground && config.backgroundMode === 'gradient'"
+          class="space-y-3"
+        >
+          <label class="color-picker-label">{{
+            t('settings.lyricSettings.background.gradientEditor')
+          }}</label>
           <div class="flex flex-wrap gap-2">
             <div v-for="(_, index) in config.gradientColors.colors" :key="index" class="relative">
-              <input type="color" v-model="config.gradientColors.colors[index]" class="color-picker-small" />
-              <button v-if="config.gradientColors.colors.length > 2" @click="removeGradientColor(index)" class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600 transition-colors">
+              <input
+                type="color"
+                v-model="config.gradientColors.colors[index]"
+                class="color-picker-small"
+              />
+              <button
+                v-if="config.gradientColors.colors.length > 2"
+                @click="removeGradientColor(index)"
+                class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600 transition-colors"
+              >
                 <i class="ri-close-line"></i>
               </button>
             </div>
           </div>
-          <button v-if="config.gradientColors.colors.length < 5" @click="addGradientColor" class="w-full py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2 text-white/90" :style="{ background: `${primaryColor}33` }" @mouseenter="$event.target.style.background = `${primaryColor}4d`" @mouseleave="$event.target.style.background = `${primaryColor}33`">
+          <button
+            v-if="config.gradientColors.colors.length < 5"
+            @click="addGradientColor"
+            class="w-full py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2 text-white/90"
+            :style="{ background: `${primaryColor}33` }"
+            @mouseenter="$event.target.style.background = `${primaryColor}4d`"
+            @mouseleave="$event.target.style.background = `${primaryColor}33`"
+          >
             <i class="ri-add-line"></i>{{ t('settings.lyricSettings.background.addColor') }}
           </button>
           <div class="select-group">
-            <label class="select-label">{{ t('settings.lyricSettings.background.gradientDirection') }}</label>
+            <label class="select-label">{{
+              t('settings.lyricSettings.background.gradientDirection')
+            }}</label>
             <select v-model="config.gradientColors.direction" class="select-input">
-              <option v-for="opt in gradientDirectionOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              <option v-for="opt in gradientDirectionOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
             </select>
           </div>
         </div>
 
         <!-- 图片 -->
-        <div v-if="config.useCustomBackground && config.backgroundMode === 'image'" class="space-y-3">
-          <label class="color-picker-label">{{ t('settings.lyricSettings.background.imageUpload') }}</label>
-          <input type="file" accept="image/*" @change="handleImageChange" class="hidden" ref="fileInput" />
-          <button @click="fileInput?.click()" class="w-full py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2 text-white/90" :style="{ background: `${primaryColor}33` }" @mouseenter="$event.target.style.background = `${primaryColor}4d`" @mouseleave="$event.target.style.background = `${primaryColor}33`">
-            <i class="ri-image-add-line"></i>{{ t('settings.lyricSettings.background.imageUpload') }}
+        <div
+          v-if="config.useCustomBackground && config.backgroundMode === 'image'"
+          class="space-y-3"
+        >
+          <label class="color-picker-label">{{
+            t('settings.lyricSettings.background.imageUpload')
+          }}</label>
+          <input
+            type="file"
+            accept="image/*"
+            @change="handleImageChange"
+            class="hidden"
+            ref="fileInput"
+          />
+          <button
+            @click="fileInput?.click()"
+            class="w-full py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2 text-white/90"
+            :style="{ background: `${primaryColor}33` }"
+            @mouseenter="$event.target.style.background = `${primaryColor}4d`"
+            @mouseleave="$event.target.style.background = `${primaryColor}33`"
+          >
+            <i class="ri-image-add-line"></i
+            >{{ t('settings.lyricSettings.background.imageUpload') }}
           </button>
           <div v-if="config.backgroundImage" class="space-y-3">
             <div class="relative rounded-lg overflow-hidden border border-white/10">
-              <img :src="config.backgroundImage" class="w-full max-h-40 object-cover" alt="Preview" />
-              <button @click="clearBackgroundImage" class="absolute top-2 right-2 p-2 rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"><i class="ri-delete-bin-line"></i></button>
+              <img
+                :src="config.backgroundImage"
+                class="w-full max-h-40 object-cover"
+                alt="Preview"
+              />
+              <button
+                @click="clearBackgroundImage"
+                class="absolute top-2 right-2 p-2 rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"
+              >
+                <i class="ri-delete-bin-line"></i>
+              </button>
             </div>
             <div class="slider-group">
-              <label class="slider-label">{{ t('settings.lyricSettings.background.imageBlur') }}</label>
-              <input type="range" v-model.number="config.imageBlur" min="0" max="20" step="1" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.imageBlur, 0, 20) }" />
+              <label class="slider-label">{{
+                t('settings.lyricSettings.background.imageBlur')
+              }}</label>
+              <input
+                type="range"
+                v-model.number="config.imageBlur"
+                min="0"
+                max="20"
+                step="1"
+                class="slider-emerald"
+                :style="{ '--val-pct': sliderPct(config.imageBlur, 0, 20) }"
+              />
               <div class="slider-marks"><span>0</span><span>10</span><span>20px</span></div>
             </div>
             <div class="slider-group">
-              <label class="slider-label">{{ t('settings.lyricSettings.background.imageBrightness') }}</label>
-              <input type="range" v-model.number="config.imageBrightness" min="0" max="200" step="5" class="slider-emerald" :style="{ '--val-pct': sliderPct(config.imageBrightness, 0, 200) }" />
+              <label class="slider-label">{{
+                t('settings.lyricSettings.background.imageBrightness')
+              }}</label>
+              <input
+                type="range"
+                v-model.number="config.imageBrightness"
+                min="0"
+                max="200"
+                step="5"
+                class="slider-emerald"
+                :style="{ '--val-pct': sliderPct(config.imageBrightness, 0, 200) }"
+              />
               <div class="slider-marks"><span>暗</span><span>正常</span><span>亮</span></div>
             </div>
           </div>
-          <p class="text-xs text-white/50">{{ t('settings.lyricSettings.background.fileSizeLimit') }}</p>
+          <p class="text-xs text-white/50">
+            {{ t('settings.lyricSettings.background.fileSizeLimit') }}
+          </p>
         </div>
 
         <!-- CSS -->
         <div v-if="config.useCustomBackground && config.backgroundMode === 'css'" class="space-y-2">
-          <label class="color-picker-label">{{ t('settings.lyricSettings.background.customCss') }}</label>
-          <textarea v-model="config.customCss" :placeholder="t('settings.lyricSettings.background.customCssPlaceholder')" rows="4" class="w-full px-3 py-2 bg-black/20 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 font-mono text-white/90" :style="{ '--tw-ring-color': `${primaryColor}80` }"></textarea>
-          <p class="text-xs text-white/50">{{ t('settings.lyricSettings.background.customCssHelp') }}</p>
+          <label class="color-picker-label">{{
+            t('settings.lyricSettings.background.customCss')
+          }}</label>
+          <textarea
+            v-model="config.customCss"
+            :placeholder="t('settings.lyricSettings.background.customCssPlaceholder')"
+            rows="4"
+            class="w-full px-3 py-2 bg-black/20 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 font-mono text-white/90"
+            :style="{ '--tw-ring-color': `${primaryColor}80` }"
+          ></textarea>
+          <p class="text-xs text-white/50">
+            {{ t('settings.lyricSettings.background.customCssHelp') }}
+          </p>
         </div>
       </div>
 
       <!-- 舞台样式设置 -->
-      <SettingRenderer
+      <setting-renderer
         v-if="styleSettingsView === 'stage'"
         :settings="currentStyleSettings"
         :config="config"
@@ -216,7 +401,7 @@
       />
 
       <!-- 杂志样式设置 -->
-      <SettingRenderer
+      <setting-renderer
         v-if="styleSettingsView === 'magazine'"
         :settings="currentStyleSettings"
         :config="config"
@@ -224,8 +409,16 @@
       />
 
       <!-- 狂躁样式设置 -->
-      <SettingRenderer
+      <setting-renderer
         v-if="styleSettingsView === 'frenzy'"
+        :settings="currentStyleSettings"
+        :config="config"
+        @update:config="config = $event"
+      />
+
+      <!-- 通用样式设置（folia 等动态注册的样式） -->
+      <setting-renderer
+        v-if="styleSettingsView && !['default', 'stage', 'magazine', 'frenzy'].includes(styleSettingsView) && currentStyleSettings.length > 0"
         :settings="currentStyleSettings"
         :config="config"
         @update:config="config = $event"
@@ -238,9 +431,10 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
 import { useCoverColor } from '@/hooks/useCoverColor';
 import { getAllStyles, getStyle } from '@/playerStyles';
+import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
+
 import SettingRenderer from './SettingRenderer.vue';
 
 const { t } = useI18n();
@@ -303,7 +497,7 @@ onMounted(async () => {
 });
 
 const playerStyles = computed(() => {
-  return getAllStyles().map(s => ({ key: s.key, label: s.label }));
+  return getAllStyles().map((s) => ({ key: s.key, label: s.label }));
 });
 
 // 样式设置视图：null=主视图，其他=样式设置
@@ -536,7 +730,7 @@ defineExpose({
   top: 30%;
   font-size: 7px;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.05em;
 }
 
@@ -550,7 +744,7 @@ defineExpose({
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(200,160,120,0.2) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 40%, rgba(200, 160, 120, 0.2) 0%, transparent 60%);
 }
 .preview-classic::after {
   content: 'ZephyrusPlayer';
@@ -560,7 +754,7 @@ defineExpose({
   transform: translate(-50%, -50%);
   font-size: 9px;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* 舞台样式预览：深色渐变 + 温暖光效 */
@@ -573,7 +767,7 @@ defineExpose({
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 60%, rgba(255,200,100,0.3) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 60%, rgba(255, 200, 100, 0.3) 0%, transparent 50%);
 }
 .preview-stage::after {
   content: 'ZephyrusPlayer';
@@ -583,7 +777,7 @@ defineExpose({
   transform: translate(-50%, -50%);
   font-size: 8px;
   font-weight: 600;
-  color: rgba(255,255,255,0.95);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 /* 杂志样式预览：白色背景 + 色块 + 分散文字 */
@@ -668,13 +862,21 @@ defineExpose({
   transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   z-index: 2;
 }
-.style-card:hover .style-settings-btn { opacity: 1; }
+.style-card:hover .style-settings-btn {
+  opacity: 1;
+}
 .style-settings-btn:hover {
   background: rgba(255, 255, 255, 1);
   transform: scale(1.08);
 }
-.style-settings-btn:active { transform: scale(0.95); }
-.style-settings-btn svg { width: 12px; height: 12px; fill: #666; }
+.style-settings-btn:active {
+  transform: scale(0.95);
+}
+.style-settings-btn svg {
+  width: 12px;
+  height: 12px;
+  fill: #666;
+}
 
 /* 滑块 */
 .slider-group {
@@ -701,7 +903,13 @@ defineExpose({
   border-radius: 2px;
   outline: none;
   appearance: none;
-  background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--val-pct, 50%), rgba(255,255,255,0.1) var(--val-pct, 50%), rgba(255,255,255,0.1) 100%);
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--val-pct, 50%),
+    rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
+    rgba(255, 255, 255, 0.1) 100%
+  );
 }
 
 .slider-emerald::-webkit-slider-thumb {
@@ -973,7 +1181,9 @@ defineExpose({
 /* 下拉动画 */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

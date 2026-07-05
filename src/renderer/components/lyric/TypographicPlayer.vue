@@ -26,7 +26,7 @@
                   <i class="ri-settings-3-line"></i>
                 </div>
               </template>
-              <LyricSettings />
+              <lyric-settings />
             </n-popover>
             <div class="control-btn" @click="cyclePlayerStyle" :title="playerStyleLabel">
               <i :class="playerStyleIcon"></i>
@@ -34,7 +34,11 @@
             <div class="control-btn" @click="toggleColorInversion" title="颜色反转">
               <i class="ri-contrast-2-line"></i>
             </div>
-            <div v-if="climax.isInClimax.value" class="control-btn climax-btn" @click="climax.cycleMode()">
+            <div
+              v-if="climax.isInClimax.value"
+              class="control-btn climax-btn"
+              @click="climax.cycleMode()"
+            >
               <span class="climax-mode-num">{{ climax.currentMode.value }}</span>
             </div>
             <div class="control-btn" @click="toggleFullScreen">
@@ -50,7 +54,11 @@
             class="color-block permanent-block"
             :style="bandBlockStyle"
           >
-            <span class="block-text band-name" :style="{ fontSize: (bandBlock?.fontSize || bandTextFontSize) + 'px' }">{{ bandName }}</span>
+            <span
+              class="block-text band-name"
+              :style="{ fontSize: (bandBlock?.fontSize || bandTextFontSize) + 'px' }"
+              >{{ bandName }}</span
+            >
           </div>
         </transition>
 
@@ -61,7 +69,9 @@
             class="color-block permanent-block"
             :style="titleBlockStyle"
           >
-            <span class="block-text song-title" :style="{ fontSize: songTextFontSize + 'px' }">{{ songTitle }}</span>
+            <span class="block-text song-title" :style="{ fontSize: songTextFontSize + 'px' }">{{
+              songTitle
+            }}</span>
           </div>
         </transition>
 
@@ -96,34 +106,28 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import {
-  artistList,
-  lrcArray,
-  nowIndex,
-  playMusic,
-} from '@/hooks/MusicHook';
-import { useCoverColor } from '@/hooks/useCoverColor';
-import { usePlayerStore } from '@/store/modules/player';
-import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { loadClimaxForSong } from '@/api/climax';
-
+import { artistList, lrcArray, nowIndex, playMusic } from '@/hooks/MusicHook';
+import { useCoverColor } from '@/hooks/useCoverColor';
+import { createClimaxDriver } from '@/lib/climaxDriver';
 import {
-  splitLyrics,
-  scoreWords,
+  type ColorBlock,
+  createBandNameBlock,
+  createSongTitleBlock,
+  generateColorBlocks,
+  getSlideInTransform
+} from '@/lib/colorBlockEngine';
+import {
   calculateFontSize,
   GridLayout,
   layoutWords,
+  scoreWords,
+  splitLyrics,
   type WordItem,
-  type WordLayout,
+  type WordLayout
 } from '@/lib/layoutEngine';
-import {
-  generateColorBlocks,
-  createBandNameBlock,
-  createSongTitleBlock,
-  getSlideInTransform,
-  type ColorBlock,
-} from '@/lib/colorBlockEngine';
-import { createClimaxDriver } from '@/lib/climaxDriver';
+import { usePlayerStore } from '@/store/modules/player';
+import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
 import LyricSettings from './LyricSettings.vue';
 
@@ -131,7 +135,7 @@ import LyricSettings from './LyricSettings.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  background: { type: String, default: '' },
+  background: { type: String, default: '' }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -143,7 +147,7 @@ const { primaryColor, primaryColorRgb, averageColor } = useCoverColor();
 
 const isVisible = computed({
   get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v),
+  set: (v) => emit('update:modelValue', v)
 });
 
 const controlsVisible = ref(true);
@@ -183,7 +187,7 @@ const dynamicBgStyle = computed(() => {
     '--accent-color': accentColor.value,
     '--accent-rgb': primaryColorRgb.value || '34, 197, 94',
     backgroundColor: climaxBg || 'var(--bg-color)',
-    color: 'var(--text-color)',
+    color: 'var(--text-color)'
   };
 });
 
@@ -220,7 +224,7 @@ const climaxColors = computed(() => {
         text: state.phase ? accent : avg,
         block: state.phase ? avg : accent,
         labelText: '#ffffff',
-        bg: '#ffffff',
+        bg: '#ffffff'
       };
     case 2:
       // 模式二：背景与文字和色块的颜色不断互换
@@ -236,7 +240,7 @@ const climaxColors = computed(() => {
         text: isLight ? accent : '#ffffff',
         block: isLight ? accent : '#ffffff',
         labelText: isLight ? '#ffffff' : accent,
-        bg,
+        bg
       };
     default:
       return { text: accent, block: accent, labelText: '#ffffff', bg: '#ffffff' };
@@ -259,7 +263,14 @@ const bandTextFontSize = computed(() => Math.min(window.innerHeight * 0.04, 45))
 const songTextFontSize = computed(() => Math.min(window.innerHeight * 0.035, 36));
 
 const bandBlock = computed(() =>
-  bandName.value ? createBandNameBlock(bandName.value, window.innerWidth, window.innerHeight, bandBlockSize.value) : null
+  bandName.value
+    ? createBandNameBlock(
+        bandName.value,
+        window.innerWidth,
+        window.innerHeight,
+        bandBlockSize.value
+      )
+    : null
 );
 // 播放栏高度（动态跟踪）
 const playBarHeight = ref(80);
@@ -285,7 +296,15 @@ onBeforeUnmount(() => {
 
 // 歌曲名色块位置：对齐播放栏顶部
 const titleBlock = computed(() =>
-  songTitle.value ? createSongTitleBlock(songTitle.value, window.innerWidth, window.innerHeight, songTitleBlockSize.value, playBarHeight.value) : null
+  songTitle.value
+    ? createSongTitleBlock(
+        songTitle.value,
+        window.innerWidth,
+        window.innerHeight,
+        songTitleBlockSize.value,
+        playBarHeight.value
+      )
+    : null
 );
 
 // 重新布局当前歌词
@@ -311,7 +330,7 @@ function relayoutLyric(index: number) {
   const items: WordItem[] = words.map((text, i) => ({
     text,
     importance: scores[i],
-    fontSize: calculateFontSize(scores[i], 28, 64),
+    fontSize: calculateFontSize(scores[i], 28, 64)
   }));
 
   // 创建网格
@@ -357,15 +376,18 @@ watch(nowIndex, (index) => {
 });
 
 // 切歌时清空歌词并重置状态
-watch(() => playMusic.value?.id, () => {
-  currentWords.value = [];
-  decorBlocks.value = [];
-  prevLyricIndex = -1;
-  // 下一帧重新布局（等 lrcArray 更新后）
-  nextTick(() => {
-    relayoutLyric(nowIndex.value);
-  });
-});
+watch(
+  () => playMusic.value?.id,
+  () => {
+    currentWords.value = [];
+    decorBlocks.value = [];
+    prevLyricIndex = -1;
+    // 下一帧重新布局（等 lrcArray 更新后）
+    nextTick(() => {
+      relayoutLyric(nowIndex.value);
+    });
+  }
+);
 
 // 窗口尺寸变化时重新布局
 function handleResize() {
@@ -382,17 +404,21 @@ const bandBlockStyle = computed(() => {
   // 反转时：色块白色，文字强调色
   if (isColorInverted.value) {
     return {
-      left: `${b.x}px`, top: `${b.y}px`,
-      width: `${b.width}px`, height: `${b.height}px`,
+      left: `${b.x}px`,
+      top: `${b.y}px`,
+      width: `${b.width}px`,
+      height: `${b.height}px`,
       backgroundColor: '#ffffff',
-      color: accentColor.value,
+      color: accentColor.value
     };
   }
   return {
-    left: `${b.x}px`, top: `${b.y}px`,
-    width: `${b.width}px`, height: `${b.height}px`,
+    left: `${b.x}px`,
+    top: `${b.y}px`,
+    width: `${b.width}px`,
+    height: `${b.height}px`,
     backgroundColor: colors ? colors.block : accentColor.value,
-    color: colors ? colors.labelText : '#ffffff',
+    color: colors ? colors.labelText : '#ffffff'
   };
 });
 
@@ -402,30 +428,36 @@ const titleBlockStyle = computed(() => {
   const colors = climax.isInClimax.value ? climaxColors.value : null;
   if (isColorInverted.value) {
     return {
-      left: `${b.x}px`, top: `${b.y}px`,
-      width: `${b.width}px`, height: `${b.height}px`,
+      left: `${b.x}px`,
+      top: `${b.y}px`,
+      width: `${b.width}px`,
+      height: `${b.height}px`,
       backgroundColor: '#ffffff',
-      color: accentColor.value,
+      color: accentColor.value
     };
   }
   return {
-    left: `${b.x}px`, top: `${b.y}px`,
-    width: `${b.width}px`, height: `${b.height}px`,
+    left: `${b.x}px`,
+    top: `${b.y}px`,
+    width: `${b.width}px`,
+    height: `${b.height}px`,
     backgroundColor: colors ? colors.block : accentColor.value,
-    color: colors ? colors.labelText : '#ffffff',
+    color: colors ? colors.labelText : '#ffffff'
   };
 });
 
 function decorBlockStyle(block: ColorBlock) {
   const colors = climax.isInClimax.value ? climaxColors.value : null;
-  const bgColor = isColorInverted.value ? '#ffffff' : (colors ? colors.block : accentColor.value);
+  const bgColor = isColorInverted.value ? '#ffffff' : colors ? colors.block : accentColor.value;
   return {
-    left: `${block.x}px`, top: `${block.y}px`,
-    width: `${block.width}px`, height: `${block.height}px`,
+    left: `${block.x}px`,
+    top: `${block.y}px`,
+    width: `${block.width}px`,
+    height: `${block.height}px`,
     backgroundColor: bgColor,
     transform: getSlideInTransform(block.edge),
     animationDelay: `${block.delay}ms`,
-    '--slide-from': getSlideInTransform(block.edge),
+    '--slide-from': getSlideInTransform(block.edge)
   };
 }
 
@@ -436,7 +468,7 @@ function wordStyle(word: WordLayout) {
     top: `${word.y}px`,
     fontSize: `${word.fontSize}px`,
     color: colors ? colors.text : textColor.value,
-    animationDelay: `${word.delay}ms`,
+    animationDelay: `${word.delay}ms`
   };
 }
 
@@ -446,7 +478,7 @@ const playerStyles = [
   { key: 'default', icon: 'ri-music-2-line', label: '默认' },
   { key: 'classic', icon: 'ri-disc-line', label: '经典' },
   { key: 'stage', icon: 'ri-live-line', label: '舞台' },
-  { key: 'magazine', icon: 'ri-layout-masonry-line', label: '杂志' },
+  { key: 'magazine', icon: 'ri-layout-masonry-line', label: '杂志' }
 ];
 
 const currentStyleIndex = computed(() => {
@@ -455,13 +487,19 @@ const currentStyleIndex = computed(() => {
     try {
       const parsed = JSON.parse(saved);
       return playerStyles.findIndex((s) => s.key === (parsed.playerStyle || 'default'));
-    } catch { return 0; }
+    } catch {
+      return 0;
+    }
   }
   return 0;
 });
 
-const playerStyleIcon = computed(() => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon);
-const playerStyleLabel = computed(() => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label);
+const playerStyleIcon = computed(
+  () => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon
+);
+const playerStyleLabel = computed(
+  () => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label
+);
 
 function cyclePlayerStyle() {
   const next = (currentStyleIndex.value + 1) % playerStyles.length;
@@ -511,7 +549,9 @@ function handleMouseLeave() {
 
 function resetHideTimer() {
   if (hideTimer) clearTimeout(hideTimer);
-  hideTimer = setTimeout(() => { controlsVisible.value = false; }, 3000);
+  hideTimer = setTimeout(() => {
+    controlsVisible.value = false;
+  }, 3000);
 }
 
 // ==================== 生命周期 ====================
@@ -523,7 +563,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
   document.removeEventListener('fullscreenchange', handleFullScreenChange);
   window.removeEventListener('resize', handleResize);
   climax.stopListening();
@@ -532,19 +575,32 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-.typo-fade-enter-active { transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
-.typo-fade-leave-active { transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-.typo-fade-enter-from, .typo-fade-leave-to { opacity: 0; }
+.typo-fade-enter-active {
+  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.typo-fade-leave-active {
+  transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.typo-fade-enter-from,
+.typo-fade-leave-to {
+  opacity: 0;
+}
 
 .ctrl-fade-enter-active {
-  transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 .ctrl-fade-leave-active {
-  transition: opacity 0.2s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    opacity 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.ctrl-fade-enter-from, .ctrl-fade-leave-to { opacity: 0; transform: translateY(-16px); }
+.ctrl-fade-enter-from,
+.ctrl-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-16px);
+}
 
 .magazine-player {
   position: fixed;
@@ -587,13 +643,17 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 
-  i { font-size: 18px; }
+  i {
+    font-size: 18px;
+  }
 
   &:hover {
     background: rgba(var(--accent-rgb), 0.2);
     transform: scale(1.1);
   }
-  &:active { transform: scale(0.95); }
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .climax-btn {
@@ -619,7 +679,9 @@ onBeforeUnmount(() => {
 
 .permanent-block {
   padding: 12px 20px;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 .block-text {
@@ -653,10 +715,20 @@ onBeforeUnmount(() => {
 }
 
 // 装饰色块入场动画
-.block-enter-enter-active { transition: all 0.6s cubic-bezier(0.32, 0.72, 0, 1); }
-.block-enter-leave-active { transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
-.block-enter-enter-from { opacity: 0; transform: translateX(-30px); }
-.block-enter-leave-to { opacity: 0; transform: translateX(30px); }
+.block-enter-enter-active {
+  transition: all 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.block-enter-leave-active {
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.block-enter-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.block-enter-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
 
 .decor-block {
   transition: background-color 0.3s;
@@ -664,8 +736,14 @@ onBeforeUnmount(() => {
 }
 
 @keyframes block-slide-in {
-  from { transform: var(--slide-from); opacity: 0; }
-  to { transform: translate(0, 0); opacity: 1; }
+  from {
+    transform: var(--slide-from);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
 }
 
 .block-slide-enter-active {

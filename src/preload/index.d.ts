@@ -1,5 +1,6 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
 
+import type { InstalledPlugin, PluginStoreItem } from '../renderer/types/plugin';
 import type { AppUpdateState } from '../shared/appUpdate';
 
 interface API {
@@ -16,6 +17,7 @@ interface API {
   resizeMiniWindow: (showPlaylist: boolean) => void;
   openLyric: () => void;
   sendLyric: (data: any) => void;
+  sendCoverColor: (color: string) => void;
   sendSong: (data: any) => void;
   unblockMusic: (id: number, data: any, enabledSources?: string[]) => Promise<any>;
   onLyricWindowClosed: (callback: () => void) => void;
@@ -44,6 +46,17 @@ interface API {
   parseLocalMusicMetadata: (
     filePaths: string[]
   ) => Promise<import('../renderer/types/localMusic').LocalMusicMeta[]>;
+
+  /** 插件商店 API */
+  plugin: {
+    getRegistry: () => Promise<PluginStoreItem[]>;
+    getInstalled: () => Promise<Record<string, InstalledPlugin>>;
+    install: (_item: PluginStoreItem) => Promise<InstalledPlugin>;
+    uninstall: (_pluginId: string) => Promise<boolean>;
+    toggleEnabled: (_pluginId: string, _enabled: boolean) => Promise<boolean>;
+    importFile: (_type: string) => Promise<{ name: string; content: string; filePath: string } | null>;
+    refreshRegistry: () => Promise<PluginStoreItem[]>;
+  };
 }
 
 // 自定义IPC渲染进程通信接口

@@ -14,18 +14,16 @@
         v-for="(item, index) in images"
         :key="item.id || index"
         class="dome-frame"
-        :class="{ 'dome-frame--focused': focusIndex === index, 'dome-frame--hover': hoverIndex === index }"
+        :class="{
+          'dome-frame--focused': focusIndex === index,
+          'dome-frame--hover': hoverIndex === index
+        }"
         :style="getElementStyle(index)"
         @click.stop="onElementClick(index)"
         @pointerenter="hoverIndex = index"
         @pointerleave="hoverIndex = -1"
       >
-        <img
-          :src="item.src"
-          :alt="item.alt || ''"
-          class="dome-image"
-          draggable="false"
-        />
+        <img :src="item.src" :alt="item.alt || ''" class="dome-image" draggable="false" />
         <div v-if="hoverIndex === index || focusIndex === index" class="dome-label">
           {{ item.alt }}
         </div>
@@ -195,10 +193,7 @@ const startInertia = () => {
   const threshold = 0.1;
 
   const animate = () => {
-    if (
-      Math.abs(velocity.value.x) < threshold &&
-      Math.abs(velocity.value.y) < threshold
-    ) {
+    if (Math.abs(velocity.value.x) < threshold && Math.abs(velocity.value.y) < threshold) {
       inertiaRAF = null;
       return;
     }
@@ -207,10 +202,7 @@ const startInertia = () => {
     velocity.value.y *= friction;
 
     targetRotationY.value += velocity.value.x;
-    targetRotationX.value = Math.max(
-      -60,
-      Math.min(30, targetRotationX.value - velocity.value.y)
-    );
+    targetRotationX.value = Math.max(-60, Math.min(30, targetRotationX.value - velocity.value.y));
     rotationY.value = targetRotationY.value;
     rotationX.value = targetRotationX.value;
 

@@ -349,4 +349,3 @@ onMounted(async () => {
   @apply bg-transparent;
 }
 </style>
-

@@ -1,6 +1,7 @@
 import FrenzyPlayer from '@/components/lyric/FrenzyPlayer.vue';
-import settings from './settings.json';
+
 import { registerStyle } from '../registry';
+import settings from './settings.json';
 
 export default registerStyle({
   key: 'frenzy',

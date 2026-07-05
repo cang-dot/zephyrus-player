@@ -182,8 +182,16 @@
                   <span
                     class="flex items-center gap-1 text-xs font-semibold text-white/50 cursor-pointer hover:text-white/80 transition-colors"
                   >
-                    <i :class="activeMode === 'intelligence' ? 'ri-heart-pulse-fill' : 'ri-radio-fill'" />
-                    {{ activeMode === 'intelligence' ? t('comp.homeHero.intelligenceMode') : t('comp.homeHero.personalFm') }}
+                    <i
+                      :class="
+                        activeMode === 'intelligence' ? 'ri-heart-pulse-fill' : 'ri-radio-fill'
+                      "
+                    />
+                    {{
+                      activeMode === 'intelligence'
+                        ? t('comp.homeHero.intelligenceMode')
+                        : t('comp.homeHero.personalFm')
+                    }}
                     <i class="ri-arrow-down-s-line text-[10px]" />
                   </span>
                 </n-dropdown>
@@ -198,10 +206,15 @@
                     v-if="activeMode === 'intelligence'"
                     class="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
                     :class="isFavorite ? 'text-red-500' : 'text-white/50 hover:text-white'"
-                    :title="isFavorite ? t('comp.songItem.unfavorite') : t('comp.songItem.favorite')"
+                    :title="
+                      isFavorite ? t('comp.songItem.unfavorite') : t('comp.songItem.favorite')
+                    "
                     @click.stop="toggleFavorite"
                   >
-                    <i :class="isFavorite ? 'ri-heart-3-fill' : 'ri-heart-3-line'" class="text-lg" />
+                    <i
+                      :class="isFavorite ? 'ri-heart-3-fill' : 'ri-heart-3-line'"
+                      class="text-lg"
+                    />
                   </button>
                   <button
                     v-else
@@ -302,15 +315,16 @@
 </template>
 
 <script setup lang="ts">
+import type { MenuOption } from 'naive-ui';
 import { computed, h, onActivated, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import type { MenuOption } from 'naive-ui';
 
 import { getHotSinger, getPersonalFM, getPersonalizedPlaylist } from '@/api/home';
 import { fmTrash } from '@/api/music';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { useFavorite } from '@/hooks/useFavorite';
 import {
   useIntelligenceModeStore,
   usePlayerCoreStore,
@@ -318,7 +332,6 @@ import {
   useRecommendStore,
   useUserStore
 } from '@/store';
-import { useFavorite } from '@/hooks/useFavorite';
 import { getImgUrl } from '@/utils';
 import { getImageBackground } from '@/utils/linearColor';
 import HomeFmLyrics from '@/views/home/components/HomeFmLyrics.vue';
@@ -362,11 +375,21 @@ const fmCurrentArtist = computed(() => {
 });
 
 const isCookieUser = computed(() => !!userStore.user && userStore.loginType === 'cookie');
-const activeMode = computed(() => intelligenceModeStore.isIntelligenceMode ? 'intelligence' : 'fm');
+const activeMode = computed(() =>
+  intelligenceModeStore.isIntelligenceMode ? 'intelligence' : 'fm'
+);
 
 const modeOptions = computed<MenuOption[]>(() => [
-  { key: 'fm', label: t('comp.homeHero.personalFm'), icon: () => h('i', { class: 'ri-radio-fill' }) },
-  { key: 'intelligence', label: t('comp.homeHero.intelligenceMode'), icon: () => h('i', { class: 'ri-heart-pulse-fill' }) }
+  {
+    key: 'fm',
+    label: t('comp.homeHero.personalFm'),
+    icon: () => h('i', { class: 'ri-radio-fill' })
+  },
+  {
+    key: 'intelligence',
+    label: t('comp.homeHero.intelligenceMode'),
+    icon: () => h('i', { class: 'ri-heart-pulse-fill' })
+  }
 ]);
 
 const displaySong = computed(() => {
@@ -374,7 +397,10 @@ const displaySong = computed(() => {
   return fmCurrentSong.value;
 });
 const displayCover = computed(() => {
-  if (activeMode.value === 'intelligence') return playerCoreStore.currentSong?.al?.picUrl || playerCoreStore.currentSong?.album?.picUrl || '';
+  if (activeMode.value === 'intelligence')
+    return (
+      playerCoreStore.currentSong?.al?.picUrl || playerCoreStore.currentSong?.album?.picUrl || ''
+    );
   return fmCurrentCover.value;
 });
 const displayArtist = computed(() => {

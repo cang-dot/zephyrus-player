@@ -6,10 +6,10 @@
  * 注意: 缓存包含 null 值，避免重复请求不存在的数据
  */
 
-import { getMusicDB } from '@/hooks/MusicHook';
 import type { ClimaxSegment } from '@/api/climax';
-import type { KeywordMark } from '@/api/keywords';
 import type { CommunityLyric } from '@/api/communityLyric';
+import type { KeywordMark } from '@/api/keywords';
+import { getMusicDB } from '@/hooks/MusicHook';
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 

@@ -10,7 +10,9 @@
           <div class="px-5 md:px-8 xl:px-16 -mt-8 relative z-20 max-w-7xl mx-auto">
             <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
               <div class="grid grid-cols-1 md:grid-cols-2">
-                <div class="p-5 md:p-6 space-y-4 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800">
+                <div
+                  class="p-5 md:p-6 space-y-4 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800"
+                >
                   <div class="flex gap-2">
                     <div class="h-9 w-16 skeleton-shimmer rounded-lg" />
                     <div class="h-9 w-16 skeleton-shimmer rounded-lg" />
@@ -61,7 +63,9 @@
             >
               <div class="flex items-end justify-between">
                 <div class="flex items-center gap-4 md:gap-5">
-                  <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shrink-0 ring-2 ring-white/40 shadow-xl">
+                  <div
+                    class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shrink-0 ring-2 ring-white/40 shadow-xl"
+                  >
                     <img
                       :src="getImgUrl(userDetail.profile.avatarUrl, '200y200')"
                       :alt="userDetail.profile.nickname"
@@ -70,7 +74,9 @@
                   </div>
                   <div class="text-white">
                     <div v-if="isArtist(userDetail.profile)" class="mb-1">
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white/90 text-[11px] font-semibold">
+                      <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white/90 text-[11px] font-semibold"
+                      >
                         <i class="ri-verified-badge-fill text-xs" />
                         音乐人
                       </span>
@@ -91,17 +97,25 @@
                     <span class="text-lg md:text-xl font-bold block leading-none font-mono">
                       {{ formatNumber(userDetail.profile.followeds) }}
                     </span>
-                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.followers') }}</span>
+                    <span class="text-xs text-white/60 mt-1 block">{{
+                      t('user.profile.followers')
+                    }}</span>
                   </button>
                   <button class="text-center" @click="showFollowList">
                     <span class="text-lg md:text-xl font-bold block leading-none font-mono">
                       {{ formatNumber(userDetail.profile.follows) }}
                     </span>
-                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.following') }}</span>
+                    <span class="text-xs text-white/60 mt-1 block">{{
+                      t('user.profile.following')
+                    }}</span>
                   </button>
                   <div class="text-center">
-                    <span class="text-lg md:text-xl font-bold block leading-none font-mono">Lv.{{ userDetail.level }}</span>
-                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.level') }}</span>
+                    <span class="text-lg md:text-xl font-bold block leading-none font-mono"
+                      >Lv.{{ userDetail.level }}</span
+                    >
+                    <span class="text-xs text-white/60 mt-1 block">{{
+                      t('user.profile.level')
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -113,15 +127,19 @@
             <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
               <div class="grid grid-cols-1 md:grid-cols-2">
                 <!-- Left: Playlists -->
-                <div class="p-5 md:p-6 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800">
+                <div
+                  class="p-5 md:p-6 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800"
+                >
                   <div class="flex gap-1.5 p-1.5 bg-neutral-100 dark:bg-neutral-800/60 rounded-2xl">
                     <button
                       v-for="plTab in playlistTabs"
                       :key="plTab.key"
                       class="flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200"
-                      :class="activePlTab === plTab.key
-                        ? 'bg-white dark:bg-gray-700 text-neutral-900 dark:text-white shadow-sm'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'"
+                      :class="
+                        activePlTab === plTab.key
+                          ? 'bg-white dark:bg-gray-700 text-neutral-900 dark:text-white shadow-sm'
+                          : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
+                      "
                       @click="activePlTab = plTab.key"
                     >
                       {{ plTab.label }}
@@ -131,16 +149,21 @@
                   <div class="mt-3 space-y-1">
                     <div
                       v-if="activePlTab === 'created' && isElectron"
-                      class="flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer
-                             bg-neutral-50 dark:bg-neutral-800/40 hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors duration-200"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer bg-neutral-50 dark:bg-neutral-800/40 hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors duration-200"
                       @click="goToImportPlaylist"
                     >
-                      <div class="w-14 h-14 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                      <div
+                        class="w-14 h-14 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0"
+                      >
                         <i class="ri-add-line text-xl text-neutral-400 dark:text-neutral-500" />
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">{{ t('comp.playlist.import.button') }}</p>
-                        <p class="text-xs text-neutral-400 dark:text-neutral-500">{{ t('comp.playlist.import.description') }}</p>
+                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">
+                          {{ t('comp.playlist.import.button') }}
+                        </p>
+                        <p class="text-xs text-neutral-400 dark:text-neutral-500">
+                          {{ t('comp.playlist.import.description') }}
+                        </p>
                       </div>
                     </div>
 
@@ -150,7 +173,9 @@
                       class="flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
                       @click="openPlaylist(item)"
                     >
-                      <div class="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm">
+                      <div
+                        class="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm"
+                      >
                         <img
                           :src="getImgUrl(item.coverImgUrl, '100y100')"
                           :alt="item.name"
@@ -159,7 +184,11 @@
                         />
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{{ item.name }}</p>
+                        <p
+                          class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate"
+                        >
+                          {{ item.name }}
+                        </p>
                         <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
                           {{ item.trackCount }}首，播放{{ formatNumber(item.playCount) }}次
                         </p>
@@ -178,15 +207,22 @@
 
                 <!-- Right: Records -->
                 <div class="p-5 md:p-6" v-if="hasRecordPermission && recordList.length > 0">
-                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">
+                    {{ t('user.ranking.title') }}
+                  </h2>
                   <div class="space-y-0.5">
                     <div
                       v-for="(item, index) in recordList"
                       :key="item.id"
                       class="flex items-center gap-3 px-2.5 py-2 rounded-2xl cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800/50 group transition-colors duration-200"
                     >
-                      <span class="w-6 text-xs text-neutral-400 dark:text-neutral-500 font-mono text-right shrink-0">{{ index + 1 }}</span>
-                      <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm">
+                      <span
+                        class="w-6 text-xs text-neutral-400 dark:text-neutral-500 font-mono text-right shrink-0"
+                        >{{ index + 1 }}</span
+                      >
+                      <div
+                        class="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm"
+                      >
                         <img
                           :src="getImgUrl(item.picUrl, '100y100')"
                           :alt="item.name"
@@ -195,15 +231,25 @@
                         />
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{{ item.name }}</p>
-                        <p class="text-xs text-neutral-400 dark:text-neutral-500 truncate">{{ getArtistNames(item) }}</p>
+                        <p
+                          class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate"
+                        >
+                          {{ item.name }}
+                        </p>
+                        <p class="text-xs text-neutral-400 dark:text-neutral-500 truncate">
+                          {{ getArtistNames(item) }}
+                        </p>
                       </div>
-                      <div class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div
+                        class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
                         <button
                           class="w-7 h-7 flex items-center justify-center rounded-full text-base transition-all duration-200"
-                          :class="isFavorited(item.id)
-                            ? 'ri-heart-fill text-red-500'
-                            : 'ri-heart-line text-neutral-400 hover:text-red-500 hover:bg-red-500/10'"
+                          :class="
+                            isFavorited(item.id)
+                              ? 'ri-heart-fill text-red-500'
+                              : 'ri-heart-line text-neutral-400 hover:text-red-500 hover:bg-red-500/10'
+                          "
                           @click="toggleFavorite(item.id)"
                         />
                         <button
@@ -217,15 +263,27 @@
                   </div>
                 </div>
                 <div v-else-if="!hasRecordPermission" class="p-5 md:p-6">
-                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
-                  <div class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500">
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">
+                    {{ t('user.ranking.title') }}
+                  </h2>
+                  <div
+                    class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500"
+                  >
                     <i class="ri-lock-line text-4xl mb-3 opacity-40" />
-                    <p class="text-sm">{{ t('user.detail.noRecordPermission', { name: userDetail.profile.nickname }) }}</p>
+                    <p class="text-sm">
+                      {{
+                        t('user.detail.noRecordPermission', { name: userDetail.profile.nickname })
+                      }}
+                    </p>
                   </div>
                 </div>
                 <div v-else class="p-5 md:p-6">
-                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
-                  <div class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500">
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">
+                    {{ t('user.ranking.title') }}
+                  </h2>
+                  <div
+                    class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500"
+                  >
                     <i class="ri-music-2-line text-4xl mb-3 opacity-40" />
                     <p class="text-sm">{{ t('user.detail.noRecords') }}</p>
                   </div>
@@ -282,7 +340,7 @@ const activePlTab = ref('created');
 const playlistTabs = computed(() => [
   { key: 'created', label: t('user.tabs.created') },
   { key: 'favorite', label: t('user.tabs.favorite') },
-  { key: 'album', label: t('user.tabs.album') },
+  { key: 'album', label: t('user.tabs.album') }
 ]);
 
 const createdPlaylists = computed(() =>
@@ -312,7 +370,7 @@ const loadUserData = async () => {
     try {
       const [userDetailRes, playlistRes] = await Promise.all([
         getUserDetail(userId.value),
-        getUserPlaylist(userId.value),
+        getUserPlaylist(userId.value)
       ]);
       userDetail.value = userDetailRes.data;
       playList.value = playlistRes.data.playlist;
@@ -327,7 +385,7 @@ const loadUserData = async () => {
         recordList.value = recordRes.data.allData.map((item: any) => ({
           ...item,
           ...item.song,
-          picUrl: item.song.al.picUrl,
+          picUrl: item.song.al.picUrl
         }));
       }
     } catch (error: any) {
@@ -363,7 +421,7 @@ const openPlaylist = (item: any) => {
     type: 'playlist',
     name: item.name,
     listInfo: item,
-    canRemove: false,
+    canRemove: false
   });
 };
 
@@ -396,7 +454,7 @@ const showFollowList = () => {
   if (!userDetail.value) return;
   router.push({
     path: '/user/follows',
-    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname },
+    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname }
   });
 };
 
@@ -404,7 +462,7 @@ const showFollowerList = () => {
   if (!userDetail.value) return;
   router.push({
     path: '/user/followers',
-    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname },
+    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname }
   });
 };
 

@@ -45,4 +45,3 @@ const handleClick = (sectionId: string) => {
   emit('navigate', sectionId);
 };
 </script>
-

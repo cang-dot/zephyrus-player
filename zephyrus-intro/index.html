@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zephyrus Player - 为音乐而生</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/splash.css">
+  <link rel="stylesheet" href="styles/frenzy.css">
+  <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       PHASE 1: SPLASH (scroll-driven, pinned)
+       ========================================== -->
+  <div class="splash-stage" id="splashStage">
+    <div class="splash-viewport" id="splashViewport">
+      <div class="sp-bar-left" id="spLeft">
+        <span class="sp-bar-left-text" id="spLeftText">基于AlgerMusicPlayer修改</span>
+      </div>
+      <div class="sp-bar-right" id="spRight">
+        <span class="sp-bar-right-title">西风播放器</span>
+        <span class="sp-bar-right-sub">cang-dot</span>
+      </div>
+      <div class="sp-bar-bottom" id="spBottom"></div>
+      <div class="sp-center">
+        <div class="sp-name-top" id="spNameTop">Zephyrus</div>
+        <div class="sp-divider" id="spDivider"></div>
+        <div class="sp-name-bottom" id="spNameBottom">Player</div>
+      </div>
+      <div class="sp-exit-left" id="spExitL"></div>
+      <div class="sp-exit-right" id="spExitR"></div>
+      <div class="sp-fade-overlay" id="spFade"></div>
+      <div class="sp-scroll-hint hidden" id="scrollHint">
+        <div class="sp-scroll-hint-arrow"></div>
+        <span class="sp-scroll-hint-text">向下滚动</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PHASE 2: CONTENT
+       ========================================== -->
+  <div class="content-stage">
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-badge">v0.9.7 · MIT License · 开源免费</div>
+      <h1>为耳朵造一座<em>剧场</em></h1>
+      <p class="hero-desc">多音源聚合 · 杂志歌词 · 10段均衡器 · 私人FM<br>一个轻量桌面应用，从头为音乐体验构建。</p>
+      <div class="hero-actions">
+        <a href="https://github.com/cang-dot/zephyrus-player/releases" class="btn btn-primary">下载 Zephyrus</a>
+        <a href="https://github.com/cang-dot/zephyrus-player" class="btn btn-ghost">查看源码 <span class="btn-arrow">→</span></a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+      <header class="section-header">
+        <h2>为每一个听歌场景设计</h2>
+      </header>
+      <div class="features-grid">
+        <div class="feature-card card-wide card-search">
+          <div class="card-ambient"></div>
+          <div class="card-content">
+            <h3>多音源聚合搜索</h3>
+            <p>内置多个音乐源接口，一个搜索框覆盖全网曲库。</p>
+          </div>
+          <span class="card-tag">AGGREGATION</span>
+        </div>
+        <div class="feature-card card-fm">
+          <div class="card-content">
+            <h3>私人FM</h3>
+            <p>基于听歌历史的智能推荐。</p>
+          </div>
+          <span class="card-tag">RECOMMEND</span>
+        </div>
+        <div class="feature-card card-lyrics">
+          <div class="card-lyric-dots">
+            <span></span><span></span><span></span>
+            <span></span><span class="active"></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="card-content">
+            <h3>杂志模式歌词</h3>
+            <p>每个词独立成块，跟随节拍和高潮动态排列。</p>
+          </div>
+          <span class="card-tag">LYRICS</span>
+        </div>
+        <div class="feature-card card-wide card-eq">
+          <div class="card-eq-bars">
+            <span></span><span></span><span></span>
+            <span></span><span class="tall"></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="card-content">
+            <h3>10段图形均衡器</h3>
+            <p>Web Audio API 实时调节，多种预设可选。</p>
+          </div>
+          <span class="card-tag">AUDIO ENGINE</span>
+        </div>
+        <div class="feature-card card-theme">
+          <div class="card-content">
+            <h3>明暗主题</h3>
+            <p>深色与浅色一键切换。</p>
+          </div>
+          <span class="card-tag">THEME</span>
+        </div>
+        <div class="feature-card card-perf">
+          <div class="card-content">
+            <h3>轻量·快速·稳定</h3>
+            <p>Electron + Vue 3 + TypeScript，冷启动迅速，内存可控。</p>
+          </div>
+          <span class="card-tag">PERFORMANCE</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Horizontal Scroll -->
+    <section class="hscroll-section" id="hscrollSection">
+      <header class="section-header scroll-header">
+        <h2>不只是播放器</h2>
+      </header>
+      <div class="hscroll-track" id="hscrollTrack">
+        <div class="hscroll-card">
+          <div class="hscroll-num">01</div>
+          <h3>高潮段落检测</h3>
+          <p>自动分析歌曲结构，标记副歌和高潮段落。</p>
+        </div>
+        <div class="hscroll-card">
+          <div class="hscroll-num">02</div>
+          <h3>鼓点同步</h3>
+          <p>频谱通量鼓点检测，BPM 实时计算。</p>
+        </div>
+        <div class="hscroll-card">
+          <div class="hscroll-num">03</div>
+          <h3>动态色块引擎</h3>
+          <p>从专辑封面提取主色调，自动生成匹配布局。</p>
+        </div>
+        <div class="hscroll-card">
+          <div class="hscroll-num">04</div>
+          <h3>中文精准分词</h3>
+          <p>基于 Intl.Segmenter，歌词文字独立呈现。</p>
+        </div>
+        <div class="hscroll-card">
+          <div class="hscroll-num">05</div>
+          <h3>无缝播放</h3>
+          <p>交叉淡入淡出，歌曲过渡如呼吸般自然。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="tech" id="tech">
+      <div class="tech-visual">
+        <div class="tech-grid"></div>
+        <span class="tech-label">ARCHITECTURE</span>
+      </div>
+      <div class="tech-content">
+        <h2>现代技术栈</h2>
+        <p>每一层选用经过验证的技术，确保性能与可维护性。</p>
+        <ul class="tech-list">
+          <li><span class="tech-dot"></span> Electron 跨平台桌面框架</li>
+          <li><span class="tech-dot"></span> Vue 3 Composition API + TypeScript</li>
+          <li><span class="tech-dot"></span> Vite + electron-vite</li>
+          <li><span class="tech-dot"></span> Pinia 状态管理</li>
+          <li><span class="tech-dot"></span> Naive UI 组件库</li>
+          <li><span class="tech-dot"></span> Web Audio API</li>
+          <li><span class="tech-dot"></span> GSAP 动画引擎</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <section class="metrics" id="metrics">
+      <div class="metric">
+        <span class="metric-val">10<span class="metric-plus">+</span></span>
+        <span class="metric-label">均衡器频段</span>
+      </div>
+      <div class="metric">
+        <span class="metric-val">3</span>
+        <span class="metric-label">高潮检测模式</span>
+      </div>
+      <div class="metric">
+        <span class="metric-val">6</span>
+        <span class="metric-label">播放器样式</span>
+      </div>
+      <div class="metric">
+        <span class="metric-val">0</span>
+        <span class="metric-label">广告与推送</span>
+      </div>
+    </section>
+
+    <!-- Player Styles -->
+    <section class="styles" id="stylesShowcase">
+      <header class="section-header">
+        <h2>6 种沉浸式播放体验</h2>
+      </header>
+      <div class="styles-grid">
+        <div class="style-card" data-style="default">
+          <div class="style-preview style-default">
+            <div class="style-preview-cover"></div>
+            <div class="style-preview-lyrics">
+              <div class="lyric-line"></div>
+              <div class="lyric-line active"></div>
+              <div class="lyric-line"></div>
+            </div>
+          </div>
+          <h3>默认</h3>
+          <p>标准分栏播放界面</p>
+        </div>
+        <div class="style-card" data-style="classic">
+          <div class="style-preview style-classic">
+            <div class="style-preview-cover"></div>
+            <div class="style-preview-lyrics">
+              <div class="lyric-line"></div>
+              <div class="lyric-line active"></div>
+              <div class="lyric-line"></div>
+            </div>
+          </div>
+          <h3>经典</h3>
+          <p>深色主题播放界面</p>
+        </div>
+        <div class="style-card" data-style="stage">
+          <div class="style-preview style-stage">
+            <div class="style-preview-particles"></div>
+            <div class="style-preview-lyrics">
+              <div class="lyric-line large"></div>
+            </div>
+          </div>
+          <h3>Stage</h3>
+          <p>沉浸式舞台界面</p>
+        </div>
+        <div class="style-card" data-style="typographic">
+          <div class="style-preview style-typographic">
+            <div class="style-preview-blocks">
+              <div class="text-block"></div>
+              <div class="text-block accent"></div>
+              <div class="text-block"></div>
+            </div>
+          </div>
+          <h3>杂志排版</h3>
+          <p>散落式文字布局</p>
+        </div>
+        <div class="style-card" data-style="gritty">
+          <div class="style-preview style-gritty">
+            <div class="style-preview-glitch"></div>
+            <div class="style-preview-lyrics">
+              <div class="lyric-line dual"></div>
+            </div>
+          </div>
+          <h3>Gritty</h3>
+          <p>暗色故障效果</p>
+        </div>
+        <div class="style-card" data-style="frenzy">
+          <div class="style-preview style-frenzy">
+            <div class="style-preview-scanlines"></div>
+            <div class="style-preview-lyrics">
+              <div class="lyric-line dual"></div>
+            </div>
+          </div>
+          <h3>Frenzy</h3>
+          <p>白色狂躁模式</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="finalCta">
+      <h2>纯粹为音乐而生</h2>
+      <p>免费 · 开源 · 无广告</p>
+      <a href="https://github.com/cang-dot/zephyrus-player/releases" class="btn btn-primary">下载 Zephyrus Player</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-brand"><b>Zephyrus</b> Player</div>
+      <div class="footer-links">
+        <a href="https://github.com/cang-dot/zephyrus-player">GitHub</a>
+        <a href="https://github.com/cang-dot/zephyrus-player/releases">更新日志</a>
+        <a href="https://github.com/cang-dot/zephyrus-player/issues">反馈</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="scripts/main.js"></script>
+</body>
+</html>

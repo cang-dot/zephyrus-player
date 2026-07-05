@@ -187,7 +187,9 @@ withDefaults(defineProps<Props>(), {
 
 .lyric-scroll {
   .lyric-line {
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
 
     &.lyric-line-current {
       opacity: 1;

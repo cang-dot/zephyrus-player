@@ -9,8 +9,8 @@
  * RGB 通道偏移、扫描线、块状像素错位
  * 根据能量级别调整故障强度
  */
+import { Mesh, Program, Renderer, Triangle } from 'ogl';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Renderer, Program, Mesh, Triangle } from 'ogl';
 
 interface Props {
   baseColor?: string;

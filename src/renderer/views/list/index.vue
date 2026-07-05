@@ -12,16 +12,13 @@
 
     <!-- 3D Dome Gallery -->
     <div class="flex-grow min-h-0 px-4 pb-4">
-      <DomeGallery
+      <dome-gallery
         v-if="domeItems.length > 0"
         :images="domeItems"
         :size="domeSize"
         @select="handleItemSelect"
       />
-      <div
-        v-else
-        class="h-full flex flex-col items-center justify-center text-gray-400"
-      >
+      <div v-else class="h-full flex flex-col items-center justify-center text-gray-400">
         <div
           class="w-24 h-24 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center mb-4"
         >

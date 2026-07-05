@@ -12,17 +12,18 @@
     ]"
     @mousemove="handlePlayBarMouseMove"
     :style="{
-      color: musicFullVisible && isFrenzyMode
-        ? '#000000'
-        : musicFullVisible && isMagazineMode
+      color:
+        musicFullVisible && isFrenzyMode
           ? '#000000'
-          : musicFullVisible
-            ? textColors.theme === 'dark'
-              ? '#000000'
-              : '#ffffff'
-            : settingsStore.theme === 'dark'
-              ? '#ffffff'
-              : '#000000'
+          : musicFullVisible && isMagazineMode
+            ? '#000000'
+            : musicFullVisible
+              ? textColors.theme === 'dark'
+                ? '#000000'
+                : '#ffffff'
+              : settingsStore.theme === 'dark'
+                ? '#ffffff'
+                : '#000000'
     }"
   >
     <div class="music-time custom-slider">
@@ -33,8 +34,8 @@
           class="climax-segment"
           :class="{ 'climax-active': nowTime >= seg.start && nowTime <= seg.end }"
           :style="{
-            left: (seg.start / allTime * 100) + '%',
-            width: Math.max(0.5, (seg.end - seg.start) / allTime * 100) + '%'
+            left: (seg.start / allTime) * 100 + '%',
+            width: Math.max(0.5, ((seg.end - seg.start) / allTime) * 100) + '%'
           }"
         ></div>
       </div>
@@ -212,8 +213,8 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
 import ClimaxEditor from '@/components/ClimaxEditor.vue';
+import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
 import AdvancedControlsPopover from '@/components/player/AdvancedControlsPopover.vue';
 import ReparsePopover from '@/components/player/ReparsePopover.vue';
 import {
@@ -227,14 +228,14 @@ import {
   textColors
 } from '@/hooks/MusicHook';
 import { useArtist } from '@/hooks/useArtist';
-import { useFavorite } from '@/hooks/useFavorite';
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { useFavorite } from '@/hooks/useFavorite';
 import { usePlaybackControl } from '@/hooks/usePlaybackControl';
 import { usePlayMode } from '@/hooks/usePlayMode';
 import { useVolumeControl } from '@/hooks/useVolumeControl';
 import { audioService } from '@/services/audioService';
-import { usePlayerStore } from '@/store/modules/player';
 import { useClimaxStore } from '@/store/modules/climax';
+import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
 import { getImgUrl, isElectron, isMobile, secondToMinute, setAnimationClass } from '@/utils';
 
@@ -541,7 +542,7 @@ const openPlayListDrawer = () => {
     }
   }
 
-// 排版模式收起状态：只显示进度条
+  // 排版模式收起状态：只显示进度条
   &.play-bar-collapsed {
     height: 6px !important;
     padding: 0 !important;

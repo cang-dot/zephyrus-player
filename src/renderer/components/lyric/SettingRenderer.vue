@@ -60,11 +60,17 @@
       </div>
 
       <!-- 字体选择 -->
-      <div v-else-if="item.type === 'font' && isSettingVisible(item)" class="radio-group" style="position: relative;">
+      <div
+        v-else-if="item.type === 'font' && isSettingVisible(item)"
+        class="radio-group"
+        style="position: relative"
+      >
         <label class="radio-label">{{ item.label }}</label>
         <div class="font-dropdown" ref="fontDropdownRef">
           <div class="font-dropdown__trigger" @click="showFontDropdown = !showFontDropdown">
-            <span :style="{ fontFamily: `'${getConfigValue(item.key!)}', sans-serif` }">{{ getConfigValue(item.key!) }}</span>
+            <span :style="{ fontFamily: `'${getConfigValue(item.key!)}', sans-serif` }">{{
+              getConfigValue(item.key!)
+            }}</span>
             <i class="ri-arrow-down-s-line" :class="{ 'rotate-180': showFontDropdown }"></i>
           </div>
           <Transition name="dropdown">
@@ -75,8 +81,13 @@
                 class="font-dropdown__item"
                 :class="{ active: getConfigValue(item.key!) === font }"
                 :style="{ fontFamily: `'${font}', sans-serif` }"
-                @click="setConfigValue(item.key!, font); showFontDropdown = false"
-              >{{ font }}</div>
+                @click="
+                  setConfigValue(item.key!, font);
+                  showFontDropdown = false;
+                "
+              >
+                {{ font }}
+              </div>
             </div>
           </Transition>
         </div>
@@ -88,8 +99,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import type { LyricConfig } from '@/types/lyric';
 import type { SettingItem } from '@/playerStyles/registry';
+import type { LyricConfig } from '@/types/lyric';
 
 interface Props {
   settings: SettingItem[];
@@ -137,7 +148,10 @@ function isSettingVisible(item: SettingItem): boolean {
   return checkCondition(item.showWhen);
 }
 
-function isOptionVisible(item: SettingItem, opt: { showWhen?: { key: string; is?: string; not?: string } }): boolean {
+function isOptionVisible(
+  item: SettingItem,
+  opt: { showWhen?: { key: string; is?: string; not?: string } }
+): boolean {
   if (!opt.showWhen) return true;
   return checkCondition(opt.showWhen);
 }
@@ -235,7 +249,13 @@ function checkCondition(condition: { key: string; is?: string; not?: string }): 
   border-radius: 2px;
   outline: none;
   appearance: none;
-  background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--val-pct, 50%), rgba(255,255,255,0.1) var(--val-pct, 50%), rgba(255,255,255,0.1) 100%);
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--val-pct, 50%),
+    rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
+    rgba(255, 255, 255, 0.1) 100%
+  );
 }
 
 .slider-emerald::-webkit-slider-thumb {
@@ -371,7 +391,9 @@ function checkCondition(condition: { key: string; is?: string; not?: string }): 
 /* Dropdown transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

@@ -13,7 +13,7 @@
  * - 乐队名/歌曲名色块: 根据文本长度动态计算尺寸
  */
 
-import type { WordLayout, ColorBlock } from './layoutEngine';
+import type { ColorBlock,WordLayout } from './layoutEngine';
 import { GridLayout } from './layoutEngine';
 
 /** 边缘方向 */

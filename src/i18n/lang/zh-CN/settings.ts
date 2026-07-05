@@ -10,6 +10,7 @@ export default {
     application: '应用设置',
     network: '网络设置',
     system: '系统管理',
+    plugins: '插件商店',
     about: '关于'
   },
   basic: {
@@ -519,5 +520,18 @@ export default {
     info: {
       length: '当前长度：{length} 字符'
     }
+  },
+  plugins: {
+    tabs: {
+      browse: '浏览商店',
+      installed: '已安装',
+      import: '导入',
+      localDev: '本地开发'
+    },
+    repo: '仓库',
+    install: '安装',
+    installed: '已安装',
+    empty: '暂无可用插件',
+    comingSoon: '正在开发中，敬请期待'
   }
 };

@@ -5,10 +5,10 @@
  * 驱动排版播放器的三种高潮颜色模式
  */
 
-import { ref, watch, type Ref } from 'vue';
+import { type Ref,ref, watch } from 'vue';
 
 import { nowTime } from '@/hooks/MusicHook';
-import { drumDetector, type BeatInfo } from '@/services/drumDetector';
+import { type BeatInfo,drumDetector } from '@/services/drumDetector';
 
 /** 高潮模式 */
 export type ClimaxMode = 1 | 2 | 3;

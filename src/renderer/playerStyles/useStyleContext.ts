@@ -1,14 +1,23 @@
 import { computed } from 'vue';
 
-import { useStyleEngineStore } from '@/store/modules/styleEngine';
-import { usePlayerStore } from '@/store/modules/player';
-import { useClimaxStore } from '@/store/modules/climax';
-import { useCoverColor } from '@/hooks/useCoverColor';
-import { nowTime, lrcArray, lrcTimeArray, nowIndex } from '@/hooks/MusicHook';
 import type { KeywordWord } from '@/api/keywords';
+import { lrcArray, lrcTimeArray, nowIndex,nowTime } from '@/hooks/MusicHook';
+import { useCoverColor } from '@/hooks/useCoverColor';
+import { useClimaxStore } from '@/store/modules/climax';
+import { usePlayerStore } from '@/store/modules/player';
+import { useStyleEngineStore } from '@/store/modules/styleEngine';
+import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import type { ILyricText } from '@/types/music';
 
 // ==================== 自定义函数 ====================
+
+function readConfig(): Record<string, any> {
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    if (saved) return { ...DEFAULT_LYRIC_CONFIG, ...JSON.parse(saved) };
+  } catch { /* ignore */ }
+  return { ...DEFAULT_LYRIC_CONFIG };
+}
 
 export function useStyleContext() {
   const styleEngine = useStyleEngineStore();
@@ -88,6 +97,10 @@ export function useStyleContext() {
     return styleEngine.currentLineKeywords;
   }
 
+  function getConfigValue(key: string): any {
+    return readConfig()[key];
+  }
+
   return {
     // 歌词
     getCurrentLyric,
@@ -100,6 +113,8 @@ export function useStyleContext() {
     getClimaxState,
     // 重点词
     getCurrentLineKeywords,
+    // 配置
+    getConfigValue,
     // 直接访问响应式状态
     nowTime,
     nowIndex,

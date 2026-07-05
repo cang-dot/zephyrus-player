@@ -10,6 +10,7 @@ export default {
     application: 'Application Settings',
     network: 'Network Settings',
     system: 'System Management',
+    plugins: 'Plugin Store',
     about: 'About'
   },
   basic: {
@@ -523,5 +524,18 @@ export default {
     info: {
       length: 'Current length: {length} characters'
     }
+  },
+  plugins: {
+    tabs: {
+      browse: 'Browse',
+      installed: 'Installed',
+      import: 'Import',
+      localDev: 'Local Dev'
+    },
+    repo: 'Repo',
+    install: 'Install',
+    installed: 'Installed',
+    empty: 'No plugins available',
+    comingSoon: 'Coming soon'
   }
 };

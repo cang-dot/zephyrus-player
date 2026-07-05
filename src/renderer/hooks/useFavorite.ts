@@ -9,17 +9,25 @@ import { usePlayerStore } from '@/store/modules/player';
 export function useFavorite() {
   const playerStore = usePlayerStore();
 
+  const songId = computed(() => {
+    const id = playMusic.value?.id;
+    if (!id) return null;
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  });
+
   const isFavorite = computed(() => {
-    if (!playMusic.value?.id) return false;
-    return playerStore.favoriteList.includes(playMusic.value.id);
+    const id = songId.value;
+    if (!id) return false;
+    return playerStore.favoriteList.includes(id);
   });
 
   const toggleFavorite = () => {
-    if (!playMusic.value?.id) return;
+    const id = songId.value;
+    if (!id) return;
     if (isFavorite.value) {
-      playerStore.removeFromFavorite(playMusic.value.id);
+      playerStore.removeFromFavorite(id);
     } else {
-      playerStore.addToFavorite(playMusic.value.id);
+      playerStore.addToFavorite(id);
     }
   };
 

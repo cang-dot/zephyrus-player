@@ -1,8 +1,9 @@
 /**
  * 播放控制器服务
  */
-import { audioService } from './audioService';
 import { usePlayerStore } from '@/store/modules/player';
+
+import { audioService } from './audioService';
 
 /**
  * 重新解析当前歌曲

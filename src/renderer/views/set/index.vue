@@ -34,6 +34,9 @@
           <div v-show="currentSection === 'about'" class="animate-fade-in">
             <about-tab />
           </div>
+          <div v-show="currentSection === 'plugins'" class="animate-fade-in">
+            <plugin-store-tab />
+          </div>
           <div class="h-20"></div>
           <play-bottom />
         </div>
@@ -62,6 +65,7 @@ import BasicTab from './tabs/BasicTab.vue';
 import InterfaceTab from './tabs/InterfaceTab.vue';
 import NetworkTab from './tabs/NetworkTab.vue';
 import PlaybackTab from './tabs/PlaybackTab.vue';
+import PluginStoreTab from './tabs/PluginStoreTab.vue';
 import SystemTab from './tabs/SystemTab.vue';
 
 const settingsStore = useSettingsStore();
@@ -121,6 +125,7 @@ const settingSections: SettingSectionConfig[] = [
   { id: 'application', electron: true },
   { id: 'network', electron: true },
   { id: 'system', electron: true },
+  { id: 'plugins' },
   { id: 'about' }
 ];
 

@@ -131,7 +131,7 @@ onMounted(() => {
 });
 
 // keep-alive 婵€娲绘椂妫€鏌ユ槸鍚﹁法澶╅渶瑕佸埛鏂
-    onActivated(() => {
+onActivated(() => {
   recommendStore.refreshIfStale();
 });
 
@@ -210,4 +210,3 @@ const playAll = async () => {
   -webkit-backface-visibility: hidden;
 }
 </style>
-

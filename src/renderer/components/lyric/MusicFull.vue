@@ -17,7 +17,7 @@
     ></div>
     <div id="drawer-target" :class="[config.theme]" class="relative z-10">
       <!-- 通用控件（左上关闭 + 右上设置/全屏） -->
-      <PlayerControls
+      <player-controls
         :isFullScreen="isFullScreen"
         @close="closeMusicFull"
         @toggleFullscreen="toggleFullScreen"

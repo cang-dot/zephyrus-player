@@ -80,9 +80,7 @@
           </span>
         </div>
         <div v-if="!hasMore && !initLoading" class="text-center">
-          <span
-            class="text-xs text-neutral-400 font-medium tracking-widest uppercase opacity-50"
-          >
+          <span class="text-xs text-neutral-400 font-medium tracking-widest uppercase opacity-50">
             {{ t('comp.pages.mv.noMore') }}
           </span>
         </div>
@@ -226,7 +224,8 @@ const loadMvList = async () => {
       area: selectedCategory.value === '鍏ㄩ儴' ? '' : selectedCategory.value
     };
 
-    const res = selectedCategory.value === '鍏ㄩ儴' ? await getTopMv(params) : await getAllMv(params);
+    const res =
+      selectedCategory.value === '鍏ㄩ儴' ? await getTopMv(params) : await getAllMv(params);
 
     const { data } = res.data;
     mvList.value.push(...data);
@@ -264,4 +263,3 @@ const isPrevDisabled = computed(() => currentIndex.value === 0);
   }
 }
 </style>
-

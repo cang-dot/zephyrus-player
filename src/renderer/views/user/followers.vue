@@ -116,7 +116,8 @@
               v-else-if="followerList.length > 0"
               class="text-center text-sm text-neutral-400 dark:text-neutral-500 py-8"
             >
-              「{{ t('common.noMore') || '没有更多了' }}」</div>
+              「{{ t('common.noMore') || '没有更多了' }}」
+            </div>
           </section>
         </template>
       </div>
@@ -275,4 +276,3 @@ button:focus-visible {
   box-shadow: 0 0 0 2px var(--primary-color);
 }
 </style>
-

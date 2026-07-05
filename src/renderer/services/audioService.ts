@@ -3,6 +3,7 @@ import { Howl, Howler } from 'howler';
 import type { AudioOutputDevice } from '@/types/audio';
 import type { SongResult } from '@/types/music';
 import { isElectron } from '@/utils'; // 导入isElectron常量
+
 import { climaxDetector } from './climaxDetector';
 import { drumDetector } from './drumDetector';
 

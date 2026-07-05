@@ -5,7 +5,10 @@
     @mouseenter="pauseAutoScroll = true"
     @mouseleave="resumeAutoScroll"
   >
-    <div v-if="lyricLines.length === 0" class="flex items-center justify-center h-full text-white/30 text-sm">
+    <div
+      v-if="lyricLines.length === 0"
+      class="flex items-center justify-center h-full text-white/30 text-sm"
+    >
       暂无歌词
     </div>
     <div v-else ref="listRef" class="home-fm-lyrics-list">
@@ -50,22 +53,19 @@ watch(
 );
 
 // Auto scroll to current line
-watch(
-  nowIndex,
-  (idx) => {
-    if (pauseAutoScroll.value) return;
-    nextTick(() => {
-      const el = document.getElementById(`home-fm-lrc-${idx}`);
-      if (el && listRef.value) {
-        const container = listRef.value;
-        const elTop = el.offsetTop;
-        const containerHeight = container.clientHeight;
-        const scrollTo = elTop - containerHeight / 2 + el.clientHeight / 2;
-        container.scrollTo({ top: scrollTo, behavior: 'smooth' });
-      }
-    });
-  }
-);
+watch(nowIndex, (idx) => {
+  if (pauseAutoScroll.value) return;
+  nextTick(() => {
+    const el = document.getElementById(`home-fm-lrc-${idx}`);
+    if (el && listRef.value) {
+      const container = listRef.value;
+      const elTop = el.offsetTop;
+      const containerHeight = container.clientHeight;
+      const scrollTo = elTop - containerHeight / 2 + el.clientHeight / 2;
+      container.scrollTo({ top: scrollTo, behavior: 'smooth' });
+    }
+  });
+});
 
 const resumeAutoScroll = () => {
   if (resumeTimer) clearTimeout(resumeTimer);
@@ -91,13 +91,7 @@ onUnmounted(() => {
   height: 100%;
   overflow-y: auto;
   scrollbar-width: none;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,

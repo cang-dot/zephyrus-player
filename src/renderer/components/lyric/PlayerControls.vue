@@ -17,9 +17,14 @@
             <i class="ri-settings-3-line"></i>
           </div>
         </template>
-        <LyricSettings />
+        <lyric-settings />
       </n-popover>
-      <div v-if="showStyleSwitch" class="player-controls__btn" @click="$emit('cycleStyle')" :title="styleLabel">
+      <div
+        v-if="showStyleSwitch"
+        class="player-controls__btn"
+        @click="$emit('cycleStyle')"
+        :title="styleLabel"
+      >
         <i :class="styleIcon"></i>
       </div>
       <div class="player-controls__btn" @click="$emit('toggleFullscreen')">
@@ -141,7 +146,9 @@ onUnmounted(() => {
 /* 过渡动画 */
 .controls-fade-enter-active,
 .controls-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 .controls-fade-enter-from,
 .controls-fade-leave-to {

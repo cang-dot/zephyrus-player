@@ -38,7 +38,10 @@
         class="artist-name text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5"
       >
         <template v-for="(artist, index) in artists" :key="index">
-          <span class="cursor-pointer hover:text-[var(--accent-color)]" @click.stop="onArtistClick(artist.id)">
+          <span
+            class="cursor-pointer hover:text-[var(--accent-color)]"
+            @click.stop="onArtistClick(artist.id)"
+          >
             {{ artist.name }}
           </span>
           <span v-if="index < artists.length - 1"> / </span>
@@ -140,5 +143,3 @@ const onMenuClick = (event: MouseEvent) => handleMenuClick(event);
   // 样式已在模板中通过 Tailwind 类定义
 }
 </style>
-
-

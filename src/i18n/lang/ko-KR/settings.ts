@@ -9,6 +9,7 @@ export default {
     application: '애플리케이션 설정',
     network: '네트워크 설정',
     system: '시스템 관리',
+    plugins: '플러그인 스토어',
     about: '정보'
   },
   basic: {
@@ -516,5 +517,18 @@ export default {
     info: {
       length: '현재 길이: {length} 문자'
     }
+  },
+  plugins: {
+    tabs: {
+      browse: '스토어',
+      installed: '설치됨',
+      import: '가져오기',
+      localDev: '로컬 개발'
+    },
+    repo: '저장소',
+    install: '설치',
+    installed: '설치됨',
+    empty: '사용 가능한 플러그인이 없습니다',
+    comingSoon: '준비 중입니다'
   }
 };

@@ -45,11 +45,7 @@
       <!-- 右侧功能按钮 -->
       <div class="function-buttons">
         <div class="function-button">
-          <i
-            class="iconfont"
-            :class="play ? 'icon-stop' : 'icon-play'"
-            @click="playMusicEvent"
-          ></i>
+          <i class="iconfont" :class="play ? 'icon-stop' : 'icon-play'" @click="playMusicEvent"></i>
         </div>
       </div>
     </div>

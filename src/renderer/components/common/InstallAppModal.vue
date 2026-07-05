@@ -126,4 +126,3 @@ const handleInstall = async (): Promise<void> => {
   }
 }
 </style>
-

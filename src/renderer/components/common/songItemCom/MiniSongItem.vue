@@ -37,7 +37,11 @@
     <template #content>
       <div class="song-item-content">
         <div class="song-item-content-title">
-          <n-ellipsis class="text-ellipsis" line-clamp="1" :class="{ 'text-[var(--accent-color)]': isPlaying }">
+          <n-ellipsis
+            class="text-ellipsis"
+            line-clamp="1"
+            :class="{ 'text-[var(--accent-color)]': isPlaying }"
+          >
             {{ item.name }}
           </n-ellipsis>
         </div>
@@ -115,7 +119,7 @@ const emit = defineEmits(['play', 'select', 'remove-song']);
 const baseItem = ref<InstanceType<typeof BaseSongItem>>();
 
 // 浠庡熀纭€缁勪欢鑾峰彇鍝嶅簲寮忕姸鎬
-    const play = computed(() => playerStore.isPlay);
+const play = computed(() => playerStore.isPlay);
 const isPlaying = computed(() => baseItem.value?.isPlaying || false);
 const playLoading = computed(() => baseItem.value?.playLoading || false);
 const isFavorite = computed(() => baseItem.value?.isFavorite || false);
@@ -220,8 +224,8 @@ const onPlayMusic = () => {
 
       &:hover,
       &.bg-green-600 {
-        background-color: rgb(34 197 94); /* bg-green-500 = #22c55e */
-        border-color: rgb(34 197 94);
+        background-color: var(--accent-color, rgb(34 197 94));
+        border-color: var(--accent-color, rgb(34 197 94));
         color: white;
       }
     }
@@ -259,4 +263,3 @@ const onPlayMusic = () => {
   }
 }
 </style>
-

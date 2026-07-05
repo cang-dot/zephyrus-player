@@ -24,36 +24,36 @@
 </template>
 
 <script setup lang="ts">
-import gsap from 'gsap'
-import { onMounted, onUnmounted, ref } from 'vue'
+import gsap from 'gsap';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const emit = defineEmits<{
-  finish: []
-}>()
+  finish: [];
+}>();
 
-const containerRef = ref<HTMLElement>()
-const leftBarRef = ref<HTMLElement>()
-const rightBarRef = ref<HTMLElement>()
-const bottomBarRef = ref<HTMLElement>()
-const zephyrusRef = ref<HTMLElement>()
-const centerLineRef = ref<HTMLElement>()
-const playerRef = ref<HTMLElement>()
+const containerRef = ref<HTMLElement>();
+const leftBarRef = ref<HTMLElement>();
+const rightBarRef = ref<HTMLElement>();
+const bottomBarRef = ref<HTMLElement>();
+const zephyrusRef = ref<HTMLElement>();
+const centerLineRef = ref<HTMLElement>();
+const playerRef = ref<HTMLElement>();
 
-let tl: gsap.core.Timeline | null = null
+let tl: gsap.core.Timeline | null = null;
 
 onMounted(() => {
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (reducedMotion) {
-    emit('finish')
-    return
+    emit('finish');
+    return;
   }
 
   tl = gsap.timeline({
     onComplete: () => {
-      emit('finish')
+      emit('finish');
     }
-  })
+  });
 
   // === 入场动画 ===
 
@@ -62,48 +62,68 @@ onMounted(() => {
     x: '-100%',
     duration: 0.7,
     ease: 'power3.out'
-  })
+  });
 
   // 右下横条从右下角滑入
-  tl.from(rightBarRef.value, {
-    x: '100%',
-    y: '100%',
-    duration: 0.7,
-    ease: 'power3.out'
-  }, '<0.1')
+  tl.from(
+    rightBarRef.value,
+    {
+      x: '100%',
+      y: '100%',
+      duration: 0.7,
+      ease: 'power3.out'
+    },
+    '<0.1'
+  );
 
   // 底部色块从底部滑入
-  tl.from(bottomBarRef.value, {
-    y: '100%',
-    duration: 0.6,
-    ease: 'power3.out'
-  }, '<0.1')
+  tl.from(
+    bottomBarRef.value,
+    {
+      y: '100%',
+      duration: 0.6,
+      ease: 'power3.out'
+    },
+    '<0.1'
+  );
 
   // 中央分割线展开
-  tl.from(centerLineRef.value, {
-    scaleX: 0,
-    duration: 0.5,
-    ease: 'power2.out'
-  }, '-=0.3')
+  tl.from(
+    centerLineRef.value,
+    {
+      scaleX: 0,
+      duration: 0.5,
+      ease: 'power2.out'
+    },
+    '-=0.3'
+  );
 
   // Zephyrus 从缝隙上方钻出
-  tl.from(zephyrusRef.value, {
-    y: 30,
-    autoAlpha: 0,
-    duration: 0.6,
-    ease: 'power2.out'
-  }, '-=0.2')
+  tl.from(
+    zephyrusRef.value,
+    {
+      y: 30,
+      autoAlpha: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    },
+    '-=0.2'
+  );
 
   // Player 从缝隙下方钻出
-  tl.from(playerRef.value, {
-    y: -30,
-    autoAlpha: 0,
-    duration: 0.6,
-    ease: 'power2.out'
-  }, '<')
+  tl.from(
+    playerRef.value,
+    {
+      y: -30,
+      autoAlpha: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    },
+    '<'
+  );
 
   // 停留展示
-  tl.to({}, { duration: 1.0 })
+  tl.to({}, { duration: 1.0 });
 
   // === 退场动画 ===
 
@@ -113,62 +133,82 @@ onMounted(() => {
     autoAlpha: 0,
     duration: 0.4,
     ease: 'power2.in'
-  })
+  });
 
   // Player 滑回缝隙
-  tl.to(playerRef.value, {
-    y: -30,
-    autoAlpha: 0,
-    duration: 0.4,
-    ease: 'power2.in'
-  }, '<')
+  tl.to(
+    playerRef.value,
+    {
+      y: -30,
+      autoAlpha: 0,
+      duration: 0.4,
+      ease: 'power2.in'
+    },
+    '<'
+  );
 
   // 分割线消失
   tl.to(centerLineRef.value, {
     scaleX: 0,
     duration: 0.3,
     ease: 'power2.in'
-  })
+  });
 
   // 左侧竖条文字消失
-  tl.to(leftBarRef.value?.querySelector('.splash-left-text'), {
-    autoAlpha: 0,
-    duration: 0.2
-  }, '-=0.1')
+  tl.to(
+    leftBarRef.value?.querySelector('.splash-left-text'),
+    {
+      autoAlpha: 0,
+      duration: 0.2
+    },
+    '-=0.1'
+  );
 
   // 左侧竖条扩展占满左半屏
   tl.to(leftBarRef.value, {
     width: '50vw',
     duration: 0.6,
     ease: 'power3.inOut'
-  })
+  });
 
   // 右下横条扩展占满右半屏
-  tl.to(rightBarRef.value, {
-    width: '50vw',
-    x: '-50vw',
-    duration: 0.6,
-    ease: 'power3.inOut'
-  }, '<')
+  tl.to(
+    rightBarRef.value,
+    {
+      width: '50vw',
+      x: '-50vw',
+      duration: 0.6,
+      ease: 'power3.inOut'
+    },
+    '<'
+  );
 
   // 底部色块扩展
-  tl.to(bottomBarRef.value, {
-    height: '100vh',
-    duration: 0.6,
-    ease: 'power3.inOut'
-  }, '<')
+  tl.to(
+    bottomBarRef.value,
+    {
+      height: '100vh',
+      duration: 0.6,
+      ease: 'power3.inOut'
+    },
+    '<'
+  );
 
   // 整体淡出
-  tl.to(containerRef.value, {
-    autoAlpha: 0,
-    duration: 0.4,
-    ease: 'power2.inOut'
-  }, '-=0.1')
-})
+  tl.to(
+    containerRef.value,
+    {
+      autoAlpha: 0,
+      duration: 0.4,
+      ease: 'power2.inOut'
+    },
+    '-=0.1'
+  );
+});
 
 onUnmounted(() => {
-  tl?.kill()
-})
+  tl?.kill();
+});
 </script>
 
 <style scoped>

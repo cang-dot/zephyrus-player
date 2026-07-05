@@ -19,7 +19,11 @@
             v-for="(word, index) in detectionResult.redWords"
             :key="index"
             class="frenzy-lyrics__red-word"
-            :ref="(el: any) => { if (el) redWordRefs[index] = el }"
+            :ref="
+              (el: any) => {
+                if (el) redWordRefs[index] = el;
+              }
+            "
             :style="redTextStyle"
           >
             {{ word }}
@@ -39,10 +43,14 @@
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { detectEmotionalWords, analyzeLyricsForHighFreqWords, type EmotionalDetectionResult } from '@/utils/emotionalDetector';
 import { usePlayerStore } from '@/store/modules/player';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import type { LyricConfig } from '@/types/lyric';
+import {
+  analyzeLyricsForHighFreqWords,
+  detectEmotionalWords,
+  type EmotionalDetectionResult
+} from '@/utils/emotionalDetector';
 
 interface LyricLine {
   text: string;
@@ -60,7 +68,18 @@ const props = defineProps<Props>();
 const playerStore = usePlayerStore();
 const styleEngine = useStyleEngineStore();
 
-const frenzyConfig = ref<Pick<LyricConfig, 'frenzyVerticalStretch' | 'frenzyScale' | 'frenzyFontWeight' | 'frenzyCustomFont' | 'frenzyShowRedKeywords' | 'frenzyUseCoverColor' | 'frenzyKeywordCustomColor'>>({
+const frenzyConfig = ref<
+  Pick<
+    LyricConfig,
+    | 'frenzyVerticalStretch'
+    | 'frenzyScale'
+    | 'frenzyFontWeight'
+    | 'frenzyCustomFont'
+    | 'frenzyShowRedKeywords'
+    | 'frenzyUseCoverColor'
+    | 'frenzyKeywordCustomColor'
+  >
+>({
   frenzyVerticalStretch: 1.3,
   frenzyScale: 1.0,
   frenzyFontWeight: 900,
@@ -129,7 +148,7 @@ const detectionResult = computed<EmotionalDetectionResult>(() => {
     }
 
     // 将全局 wordIndex 转换为局部索引
-    const localIndices = new Set(serverKeywords.map(k => k.wordIndex - offset));
+    const localIndices = new Set(serverKeywords.map((k) => k.wordIndex - offset));
     const redWords: string[] = [];
     const blackChars: string[] = [];
 
@@ -167,11 +186,15 @@ const currentLineIndex = computed(() => {
 });
 
 // 监听歌词加载，分析高频词
-watch(() => props.lyrics, (newLyrics) => {
-  if (newLyrics && newLyrics.length > 0) {
-    analyzeLyricsForHighFreqWords(newLyrics);
-  }
-}, { immediate: true });
+watch(
+  () => props.lyrics,
+  (newLyrics) => {
+    if (newLyrics && newLyrics.length > 0) {
+      analyzeLyricsForHighFreqWords(newLyrics);
+    }
+  },
+  { immediate: true }
+);
 
 // 监听歌词行变化
 watch(currentLineIndex, async (newIndex, oldIndex) => {

@@ -9,6 +9,7 @@ export interface IElectronAPI {
   restart: () => void;
   openLyric: () => void;
   sendLyric: (_data: string) => void;
+  sendCoverColor: (_color: string) => void;
   unblockMusic: (_id: number) => Promise<string>;
   importCustomApiPlugin: () => Promise<{ name: string; content: string } | null>;
   importLxMusicScript: () => Promise<{ name: string; content: string } | null>;
@@ -28,10 +29,4 @@ export interface IElectronAPI {
   ) => Promise<{ files: { path: string; modifiedTime: number }[]; count: number }>;
   /** 批量解析本地音乐文件元数据 */
   parseLocalMusicMetadata: (_filePaths: string[]) => Promise<LocalMusicMeta[]>;
-}
-
-declare global {
-  interface Window {
-    api: IElectronAPI;
-  }
 }

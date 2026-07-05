@@ -262,7 +262,10 @@
                   <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     {{ t('comp.playlist.import.importStatus') }}
                   </h3>
-                  <button class="text-xs text-[var(--accent-color)] hover:underline" @click="refreshStatus">
+                  <button
+                    class="text-xs text-[var(--accent-color)] hover:underline"
+                    @click="refreshStatus"
+                  >
                     {{ t('comp.playlist.import.refresh') }}
                   </button>
                 </div>
@@ -336,7 +339,7 @@ const tabs = computed(() => [
 ]);
 
 // 璁＄畻 Tab 鎸囩ず鍣ㄤ綅缃
-    const tabIndicatorStyle = computed(() => {
+const tabIndicatorStyle = computed(() => {
   const index = tabs.value.findIndex((tab) => tab.id === currentTab.value);
   // 鍋囪姣忎釜 tab 瀹藉害澶ф涓€鑷达紝杩欓噷绠€鍗曡绠楃櫨鍒嗘瘮
   // 鍦ㄧ湡瀹為」鐩腑鍙兘闇€瑕佽幏鍙?DOM 鍏冪礌瀹藉害
@@ -363,7 +366,7 @@ const removeLinkRow = (index: number) => {
 };
 
 // 鍏冩暟鎹浉鍏冲嚱鏁
-    const addMetadataRow = () => {
+const addMetadataRow = () => {
   localMetadata.value.push({ name: '', artist: '', album: '' });
 };
 
@@ -528,5 +531,3 @@ onUnmounted(() => {
   }
 }
 </style>
-
-

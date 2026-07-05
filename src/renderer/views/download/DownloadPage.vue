@@ -21,7 +21,9 @@
                 <div
                   class="cover-container relative w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-[var(--accent-color)]/10 flex items-center justify-center shadow-2xl ring-4 ring-white/50 dark:ring-neutral-800/50"
                 >
-                  <i class="ri-download-cloud-2-line text-6xl text-[var(--accent-color)] opacity-80" />
+                  <i
+                    class="ri-download-cloud-2-line text-6xl text-[var(--accent-color)] opacity-80"
+                  />
                 </div>
               </div>
 
@@ -138,7 +140,9 @@
                       </div>
                       <span
                         class="text-xs font-medium"
-                        :class="item.status === 'error' ? 'text-red-500' : 'text-[var(--accent-color)]'"
+                        :class="
+                          item.status === 'error' ? 'text-red-500' : 'text-[var(--accent-color)]'
+                        "
                       >
                         {{ getStatusText(item) }}
                       </span>
@@ -435,7 +439,9 @@
                 <p class="text-[10px] text-neutral-400 mb-1 uppercase font-bold">
                   {{ t('download.settingsPanel.preview') }}
                 </p>
-                <p class="text-sm font-medium text-[var(--accent-color)] truncate">{{ formatNamePreview }}</p>
+                <p class="text-sm font-medium text-[var(--accent-color)] truncate">
+                  {{ formatNamePreview }}
+                </p>
               </div>
             </div>
           </div>
@@ -495,7 +501,7 @@ const downloadedList = ref<DownloadedItem[]>(
 const downList = computed(() => downloadedList.value);
 
 // 璁＄畻鎬昏繘搴
-    const totalProgress = computed(() => {
+const totalProgress = computed(() => {
   if (downloadList.value.length === 0) return 0;
   const total = downloadList.value.reduce((sum, item) => sum + item.progress, 0);
   return total / downloadList.value.length;
@@ -508,7 +514,7 @@ watch(totalProgress, (newVal) => {
 });
 
 // 鑾峰彇鐘舵€佹枃鏈
-    const getStatusText = (item: DownloadItem) => {
+const getStatusText = (item: DownloadItem) => {
   switch (item.status) {
     case 'downloading':
       return t('download.status.downloading');
@@ -522,7 +528,7 @@ watch(totalProgress, (newVal) => {
 };
 
 // 鏍煎紡鍖栨枃浠跺ぇ灏
-    const formatSize = (bytes: number) => {
+const formatSize = (bytes: number) => {
   if (!bytes) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -544,7 +550,7 @@ const copyPath = (path: string) => {
 };
 
 // 鏍煎紡鍖栬矾寰
-    const shortenPath = (path: string) => {
+const shortenPath = (path: string) => {
   if (!path) return '';
 
   // 鑾峰彇鏂囦欢鍚嶅拰鐩綍
@@ -552,10 +558,10 @@ const copyPath = (path: string) => {
   const fileName = parts.pop() || '';
 
   // 濡傛灉璺緞寰堢煭锛岀洿鎺ヨ繑鍥
-    if (path.length < 30) return path;
+  if (path.length < 30) return path;
 
   // 淇濈暀寮€澶寸殑閮ㄥ垎鐩綍鍜岀粨灏剧殑鏂囦欢鍚
-    if (parts.length <= 2) return path;
+  if (parts.length <= 2) return path;
 
   const start = parts.slice(0, 1).join('/');
   const end = parts.slice(-1).join('/');
@@ -687,10 +693,10 @@ const clearDownloadRecords = async () => {
 };
 
 // 娣诲姞鍔犺浇鐘舵€
-    const isLoadingDownloaded = ref(false);
+const isLoadingDownloaded = ref(false);
 
 // 鏍煎紡鍖栨瓕鏇插悕绉帮紝搴旂敤鐢ㄦ埛璁剧疆鐨勬牸寮
-    const formatSongName = (songInfo) => {
+const formatSongName = (songInfo) => {
   if (!songInfo) return '';
 
   // 鑾峰彇鏍煎紡璁剧疆
@@ -702,14 +708,14 @@ const clearDownloadRecords = async () => {
   const albumName = songInfo.al?.name || '鏈煡涓撹緫';
 
   // 搴旂敤鑷畾涔夋牸寮
-    return nameFormat
+  return nameFormat
     .replace(/\{songName\}/g, songName)
     .replace(/\{artistName\}/g, artistName)
     .replace(/\{albumName\}/g, albumName);
 };
 
 // 鑾峰彇宸蹭笅杞介煶涔愬垪琛
-    const refreshDownloadedList = async () => {
+const refreshDownloadedList = async () => {
   if (isLoadingDownloaded.value) return; // 闃叉閲嶅鍔犺浇
 
   try {
@@ -788,7 +794,7 @@ watch(
 );
 
 // 鍒濆鍖
-    onMounted(() => {
+onMounted(() => {
   refreshDownloadedList();
 
   // 璁板綍宸插鐞嗙殑涓嬭浇椤癸紝閬垮厤閲嶅瑙﹀彂浜嬩欢
@@ -838,7 +844,7 @@ watch(
       downloadList.value = downloadList.value.filter((item) => item.filename !== data.filename);
 
       // 寤惰繜鍒锋柊宸蹭笅杞藉垪琛紝閬垮厤鏂囦欢绯荤粺鏈畬鍏ㄥ啓鍏
-    setTimeout(() => refreshDownloadedList(), 500);
+      setTimeout(() => refreshDownloadedList(), 500);
 
       // 鍙湪涓嬭浇椤甸潰鏄剧ず涓€娆′笅杞芥垚鍔熼€氱煡
       message.success(t('download.message.downloadComplete', { filename: data.filename }));
@@ -947,12 +953,12 @@ watch(
 );
 
 // 鐩戝惉鍒嗛殧绗﹀彉鍖栨洿鏂版牸寮
-    watch(
+watch(
   () => downloadSettings.value.separator,
   (newSeparator) => {
     if (formatComponents.value.length > 1) {
       // 閲嶆柊鏋勫缓鏍煎紡瀛楃涓
-    let format = '';
+      let format = '';
       formatComponents.value.forEach((component, index) => {
         format += `{${component.type}}`;
         if (index < formatComponents.value.length - 1) {
@@ -993,7 +999,7 @@ const openDownloadPath = () => {
 // 淇濆瓨涓嬭浇璁剧疆
 const saveDownloadSettings = () => {
   // 淇濆瓨鍒伴厤缃
-    window.electron.ipcRenderer.send(
+  window.electron.ipcRenderer.send(
     'set-store-value',
     'set.downloadPath',
     downloadSettings.value.path
@@ -1015,7 +1021,7 @@ const saveDownloadSettings = () => {
   );
 
   // 濡傛灉鏄湪宸蹭笅杞介〉闈紝鍒锋柊鍒楄〃浠ユ洿鏂版樉绀
-    if (tabName.value === 'downloaded') {
+  if (tabName.value === 'downloaded') {
     refreshDownloadedList();
   }
 
@@ -1024,7 +1030,7 @@ const saveDownloadSettings = () => {
 };
 
 // 鍒濆鍖栦笅杞借缃
-    const initDownloadSettings = async () => {
+const initDownloadSettings = async () => {
   // 鑾峰彇褰撳墠閰嶇疆
   const path = await window.electron.ipcRenderer.invoke('get-store-value', 'set.downloadPath');
   const nameFormat = await window.electron.ipcRenderer.invoke(
@@ -1074,7 +1080,7 @@ const updateFormatComponents = () => {
 watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
 
 // 鐩戝惉鍛藉悕鏍煎紡鍙樺寲锛屾洿鏂板凡涓嬭浇鏂囦欢鐨勬樉绀哄悕绉
-    watch(
+watch(
   () => downloadSettings.value.nameFormat,
   () => {
     if (downloadedList.value.length > 0) {
@@ -1090,7 +1096,7 @@ watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
 );
 
 // 鍒濆鍖
-    onMounted(() => {
+onMounted(() => {
   initDownloadSettings();
 });
 </script>
@@ -1140,4 +1146,3 @@ watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
-

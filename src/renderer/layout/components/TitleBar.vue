@@ -15,15 +15,25 @@
         @click="openDownloadPage"
       >
         <i class="ri-download-line"></i>
-        涓嬭浇妗岄潰鐗?      </n-button>
+        涓嬭浇妗岄潰鐗?
+      </n-button>
       <template v-if="isElectron">
-        <div class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]" @click="miniWindow">
+        <div
+          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          @click="miniWindow"
+        >
           <i class="iconfont ri-picture-in-picture-line"></i>
         </div>
-        <div class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]" @click="minimize">
+        <div
+          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          @click="minimize"
+        >
           <i class="iconfont icon-minisize"></i>
         </div>
-        <div class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]" @click="handleClose">
+        <div
+          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          @click="handleClose"
+        >
           <i class="iconfont icon-close"></i>
         </div>
       </template>
@@ -198,4 +208,3 @@ const drag = (event: MouseEvent) => {
   -webkit-app-region: no-drag;
 }
 </style>
-

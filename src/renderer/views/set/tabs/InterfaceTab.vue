@@ -14,19 +14,26 @@
   </setting-section>
 
   <!-- 本地歌词文件指定 -->
-  <setting-section title="本地歌词文件" description="为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）">
+  <setting-section
+    title="本地歌词文件"
+    description="为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）"
+  >
     <template v-if="currentSongId">
       <setting-item :title="currentSongName" :description="localLyricPath || '未指定歌词文件'">
         <div class="flex items-center gap-2">
           <button
             class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
             @click="selectLocalLyric"
-          >选择文件</button>
+          >
+            选择文件
+          </button>
           <button
             v-if="localLyricPath"
             class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
             @click="clearLocalLyric"
-          >清除</button>
+          >
+            清除
+          </button>
         </div>
       </setting-item>
     </template>
@@ -43,13 +50,18 @@
         <button
           class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
           @click="removeBoundLyric(item.songId)"
-        >解除绑定</button>
+        >
+          解除绑定
+        </button>
       </setting-item>
     </template>
   </setting-section>
 
   <!-- 桌面歌词设置 -->
-  <setting-section title="桌面歌词" description="自定义桌面歌词的字体、颜色和描边（重启歌词窗口后生效）">
+  <setting-section
+    title="桌面歌词"
+    description="自定义桌面歌词的字体、颜色和描边（重启歌词窗口后生效）"
+  >
     <!-- 字体 -->
     <setting-item title="字体" description="选择已安装的系统字体，留空使用默认">
       <div class="font-select-wrapper relative w-full max-w-[260px]">
@@ -58,9 +70,11 @@
           v-model="setData.lyricFontFamily"
           type="text"
           class="font-select-input w-full px-3 py-1.5 rounded-lg border text-sm bg-white dark:bg-white/10 outline-none transition-colors"
-          :class="fontDropdownOpen
-            ? 'font-select-input--open'
-            : 'border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30'"
+          :class="
+            fontDropdownOpen
+              ? 'font-select-input--open'
+              : 'border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30'
+          "
           placeholder="搜索字体..."
           @focus="openFontDropdown"
           @input="onFontSearchInput"
@@ -73,7 +87,9 @@
           v-if="setData.lyricFontFamily"
           class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm leading-none"
           @click="clearFont"
-        >&times;</button>
+        >
+          &times;
+        </button>
         <Transition name="fade">
           <div
             v-if="fontDropdownOpen && filteredFonts.length > 0"
@@ -111,8 +127,13 @@
         />
         <button
           class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
-          @click="setData.lyricTextColor = ''; sendLyricStyle()"
-        >重置</button>
+          @click="
+            setData.lyricTextColor = '';
+            sendLyricStyle();
+          "
+        >
+          重置
+        </button>
       </div>
     </setting-item>
 
@@ -127,8 +148,13 @@
         />
         <button
           class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
-          @click="setData.lyricStrokeColor = ''; sendLyricStyle()"
-        >重置</button>
+          @click="
+            setData.lyricStrokeColor = '';
+            sendLyricStyle();
+          "
+        >
+          重置
+        </button>
       </div>
     </setting-item>
 
@@ -139,7 +165,10 @@
   </setting-section>
 
   <!-- 侧边栏项目排序 -->
-  <setting-section :title="t('settings.interface.sidebarOrder')" :description="t('settings.interface.sidebarOrderDesc')">
+  <setting-section
+    :title="t('settings.interface.sidebarOrder')"
+    :description="t('settings.interface.sidebarOrderDesc')"
+  >
     <div class="sidebar-sorter">
       <div
         v-for="(item, index) in sidebarItems"
@@ -193,9 +222,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { NSwitch } from 'naive-ui';
+import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { usePlayerStore } from '@/store/modules/player';
 import {
@@ -519,7 +548,9 @@ function saveOrder(order: string[]) {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .fade-enter-from,
 .fade-leave-to {

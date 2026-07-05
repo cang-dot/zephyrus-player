@@ -6,19 +6,18 @@
  */
 
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { computed,ref } from 'vue';
 
-import { loadClimaxForSong, type ClimaxSegment } from '@/api/climax';
-import { loadKeywordsForSong, type KeywordMark } from '@/api/keywords';
-import { loadCommunityLyricForSong, type CommunityLyric } from '@/api/communityLyric';
+import { type ClimaxSegment,loadClimaxForSong } from '@/api/climax';
+import { type CommunityLyric,loadCommunityLyricForSong } from '@/api/communityLyric';
+import { type KeywordMark,loadKeywordsForSong } from '@/api/keywords';
 import {
   getClimaxCache,
-  saveClimaxCache,
-  getKeywordsCache,
-  saveKeywordsCache,
   getCommunityLyricCache,
-  saveCommunityLyricCache
-} from '@/services/cacheService';
+  getKeywordsCache,
+  saveClimaxCache,
+  saveCommunityLyricCache,
+  saveKeywordsCache} from '@/services/cacheService';
 
 export const useCommunityDataStore = defineStore('communityData', () => {
   // ==================== State ====================

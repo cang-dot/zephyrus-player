@@ -25,7 +25,7 @@
                   <i class="ri-settings-3-line"></i>
                 </div>
               </template>
-              <LyricSettings />
+              <lyric-settings />
             </n-popover>
             <div class="control-btn" @click="cyclePlayerStyle" :title="playerStyleLabel">
               <i :class="playerStyleIcon"></i>
@@ -40,11 +40,7 @@
           <div v-show="controlsVisible" class="song-info-top">
             <div class="song-name">{{ playMusic?.name }}</div>
             <div class="song-artist">
-              <span
-                v-for="(item, index) in artistList"
-                :key="index"
-                class="artist-name"
-              >
+              <span v-for="(item, index) in artistList" :key="index" class="artist-name">
                 {{ item.name }}{{ index < artistList.length - 1 ? ' / ' : '' }}
               </span>
             </div>
@@ -56,13 +52,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Howler } from 'howler';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import {
-  artistList,
-  playMusic,
-} from '@/hooks/MusicHook';
+import { artistList, playMusic } from '@/hooks/MusicHook';
 import { audioService } from '@/services/audioService';
 import { usePlayerStore } from '@/store/modules/player';
 
@@ -138,13 +131,19 @@ const currentStyleIndex = computed(() => {
     try {
       const parsed = JSON.parse(saved);
       return playerStyles.findIndex((s) => s.key === (parsed.playerStyle || 'default'));
-    } catch { return 0; }
+    } catch {
+      return 0;
+    }
   }
   return 0;
 });
 
-const playerStyleIcon = computed(() => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon);
-const playerStyleLabel = computed(() => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label);
+const playerStyleIcon = computed(
+  () => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon
+);
+const playerStyleLabel = computed(
+  () => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label
+);
 
 function cyclePlayerStyle() {
   const next = (currentStyleIndex.value + 1) % playerStyles.length;
@@ -180,7 +179,9 @@ function connectAudio() {
 
 function disconnectAudio() {
   if (analyser) {
-    try { analyser.disconnect(); } catch {}
+    try {
+      analyser.disconnect();
+    } catch {}
     analyser = null;
     frequencyData = null;
   }
@@ -196,14 +197,16 @@ function getFrequencyBands(): { bass: number; mid: number; treble: number } {
   const bassEnd = Math.floor(len * 0.15);
   const midEnd = Math.floor(len * 0.5);
 
-  let bass = 0, mid = 0, treble = 0;
+  let bass = 0,
+    mid = 0,
+    treble = 0;
   for (let i = 0; i < bassEnd; i++) bass += frequencyData[i];
   for (let i = bassEnd; i < midEnd; i++) mid += frequencyData[i];
   for (let i = midEnd; i < len; i++) treble += frequencyData[i];
 
   bass = bassEnd > 0 ? bass / bassEnd / 255 : 0;
-  mid = (midEnd - bassEnd) > 0 ? mid / (midEnd - bassEnd) / 255 : 0;
-  treble = (len - midEnd) > 0 ? treble / (len - midEnd) / 255 : 0;
+  mid = midEnd - bassEnd > 0 ? mid / (midEnd - bassEnd) / 255 : 0;
+  treble = len - midEnd > 0 ? treble / (len - midEnd) / 255 : 0;
 
   return { bass, mid, treble };
 }
@@ -255,9 +258,12 @@ function createParticle(): StarParticle {
   const x = Math.random() * w;
   const y = Math.random() * h;
   return {
-    x, y,
-    homeX: x, homeY: y,
-    vx: 0, vy: 0,
+    x,
+    y,
+    homeX: x,
+    homeY: y,
+    vx: 0,
+    vy: 0,
     size: 3,
     baseAlpha: 0.75 + Math.random() * 0.25,
     alpha: 0,
@@ -272,7 +278,7 @@ function createParticle(): StarParticle {
     alphaTarget: 0.75 + Math.random() * 0.25,
     alphaSpeed: 0.003 + Math.random() * 0.007,
     kickAngle: 0,
-    kickForce: 0,
+    kickForce: 0
   };
 }
 
@@ -310,8 +316,13 @@ function renderLoop() {
 }
 
 function updateParticle(
-  p: StarParticle, w: number, h: number,
-  bass: number, mid: number, treble: number, energy: number
+  p: StarParticle,
+  w: number,
+  h: number,
+  bass: number,
+  mid: number,
+  treble: number,
+  energy: number
 ) {
   const dx = p.homeX - p.x;
   const dy = p.homeY - p.y;
@@ -339,10 +350,22 @@ function updateParticle(
   p.x += p.vx;
   p.y += p.vy;
 
-  if (p.y < -20) { p.y = h + 20; p.homeY = p.y; }
-  if (p.y > h + 20) { p.y = -20; p.homeY = p.y; }
-  if (p.x < -20) { p.x = w + 20; p.homeX = p.x; }
-  if (p.x > w + 20) { p.x = -20; p.homeX = p.x; }
+  if (p.y < -20) {
+    p.y = h + 20;
+    p.homeY = p.y;
+  }
+  if (p.y > h + 20) {
+    p.y = -20;
+    p.homeY = p.y;
+  }
+  if (p.x < -20) {
+    p.x = w + 20;
+    p.homeX = p.x;
+  }
+  if (p.x > w + 20) {
+    p.x = -20;
+    p.homeX = p.x;
+  }
 
   const targetAlpha = p.baseAlpha * (0.7 + energy * 0.3);
   p.alpha += (targetAlpha - p.alpha) * 0.08;
@@ -440,7 +463,10 @@ watch(
     } else {
       disconnectAudio();
       ctx = null;
-      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
     }
   }
 );
@@ -479,8 +505,14 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   disconnectAudio();
-  if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-  if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
   window.removeEventListener('resize', updateWindowSize);
   window.removeEventListener('fullscreenchange', handleFullScreenChange);
   window.removeEventListener('music-full-config-updated', handleConfigUpdate);
@@ -489,20 +521,39 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-.stage-fade-enter-active { transition: opacity 0.6s cubic-bezier(0.32, 0.72, 0, 1); }
-.stage-fade-leave-active { transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
-.stage-fade-enter-from, .stage-fade-leave-to { opacity: 0; }
+.stage-fade-enter-active {
+  transition: opacity 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.stage-fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.stage-fade-enter-from,
+.stage-fade-leave-to {
+  opacity: 0;
+}
 
-.close-fade-enter-active, .info-fade-enter-active {
-  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+.close-fade-enter-active,
+.info-fade-enter-active {
+  transition:
+    opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.close-fade-leave-active, .info-fade-leave-active {
-  transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+.close-fade-leave-active,
+.info-fade-leave-active {
+  transition:
+    opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.close-fade-enter-from, .info-fade-enter-from { opacity: 0; transform: translateY(-20px); }
-.close-fade-leave-to, .info-fade-leave-to { opacity: 0; transform: translateY(-20px); }
+.close-fade-enter-from,
+.info-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.close-fade-leave-to,
+.info-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
 
 .starfield-player {
   position: fixed;
@@ -549,7 +600,9 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 
-  i { font-size: 18px; }
+  i {
+    font-size: 18px;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
@@ -557,7 +610,9 @@ onBeforeUnmount(() => {
     transform: scale(1.1);
   }
 
-  &:active { transform: scale(0.95); }
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .song-info-top {
@@ -583,7 +638,9 @@ onBeforeUnmount(() => {
     .artist-name {
       cursor: pointer;
       transition: color 0.2s;
-      &:hover { color: rgba(255, 255, 255, 0.8); }
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
+      }
     }
   }
 }

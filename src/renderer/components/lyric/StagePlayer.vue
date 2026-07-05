@@ -10,7 +10,7 @@
       >
         <!-- 背景层：封面模糊 + Aurora 极光 -->
         <div class="background-cover" :style="backgroundCoverStyle"></div>
-        <Aurora
+        <aurora
           :colorStops="auroraColorStops"
           :amplitude="auroraAmplitude"
           :blend="0.5"
@@ -18,7 +18,7 @@
         />
 
         <!-- 通用控件（左上关闭 + 右上设置/模式切换/全屏） -->
-        <PlayerControls
+        <player-controls
           :isFullScreen="isFullScreen"
           :styleIcon="playerStyleIcon"
           :styleLabel="playerStyleLabel"
@@ -33,11 +33,7 @@
           <div v-show="controlsVisible" class="song-info-top">
             <div class="song-name">{{ playMusic?.name }}</div>
             <div class="song-artist">
-              <span
-                v-for="(item, index) in artistList"
-                :key="index"
-                class="artist-name"
-              >
+              <span v-for="(item, index) in artistList" :key="index" class="artist-name">
                 {{ item.name }}{{ index < artistList.length - 1 ? ' / ' : '' }}
               </span>
             </div>
@@ -48,28 +44,17 @@
         <div class="lyric-container">
           <!-- 背景词层 -->
           <transition name="bg-fade">
-            <div
-              v-if="backgroundLine?.text"
-              class="background-lyric"
-              :style="lyricStyle"
-            >
+            <div v-if="backgroundLine?.text" class="background-lyric" :style="lyricStyle">
               {{ backgroundLine.text }}
             </div>
           </transition>
           <!-- 主歌词层 -->
-          <div
-            ref="lyricRef"
-            class="single-lyric"
-            :style="lyricStyle"
-          >
+          <div ref="lyricRef" class="single-lyric" :style="lyricStyle">
             {{ displayText }}
           </div>
           <!-- 翻译歌词 -->
           <transition name="tr-fade">
-            <div
-              v-if="currentLine?.trText && controlsVisible"
-              class="lyric-translation"
-            >
+            <div v-if="currentLine?.trText && controlsVisible" class="lyric-translation">
               {{ currentLine.trText }}
             </div>
           </transition>
@@ -89,9 +74,10 @@
  * - 普通/节奏两种歌词动画模式
  * - 3秒无鼠标操作自动隐藏控件
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import gsap from 'gsap';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+import Aurora from '@/components/Aurora.vue';
 import {
   allTime,
   artistList,
@@ -101,20 +87,18 @@ import {
   playMusic,
   setAudioTime
 } from '@/hooks/MusicHook';
-import { usePlayerStore } from '@/store/modules/player';
+import { useStyleContext } from '@/playerStyles/useStyleContext';
 import { useClimaxStore } from '@/store/modules/climax';
-import type { IWordData, ILyricText } from '@/types/music';
+import { usePlayerStore } from '@/store/modules/player';
+import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
+import type { ILyricText, IWordData } from '@/types/music';
 import { getImgUrl } from '@/utils';
-
+import { AnimationSelector } from '@/utils/animationSelector';
 // 舞台动画预设库
 import { normalAnimations, powerAnimations, softAnimations } from '@/utils/stageAnimations';
-import { AnimationSelector } from '@/utils/animationSelector';
-import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
 import LyricSettings from './LyricSettings.vue';
 import PlayerControls from './PlayerControls.vue';
-import Aurora from '@/components/Aurora.vue';
-import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 // 从 localStorage 读取动画强度设置
 const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {
@@ -131,9 +115,12 @@ const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {
 // 根据强度获取动画集合
 const currentAnimations = computed(() => {
   switch (animationIntensity.value) {
-    case 'soft': return softAnimations;
-    case 'power': return powerAnimations;
-    default: return normalAnimations;
+    case 'soft':
+      return softAnimations;
+    case 'power':
+      return powerAnimations;
+    default:
+      return normalAnimations;
   }
 });
 
@@ -194,13 +181,19 @@ const currentStyleIndex = computed(() => {
     try {
       const parsed = JSON.parse(saved);
       return playerStyles.findIndex((s) => s.key === (parsed.playerStyle || 'default'));
-    } catch { return 0; }
+    } catch {
+      return 0;
+    }
   }
   return 0;
 });
 
-const playerStyleIcon = computed(() => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon);
-const playerStyleLabel = computed(() => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label);
+const playerStyleIcon = computed(
+  () => playerStyles[currentStyleIndex.value]?.icon || playerStyles[0].icon
+);
+const playerStyleLabel = computed(
+  () => playerStyles[currentStyleIndex.value]?.label || playerStyles[0].label
+);
 
 function cyclePlayerStyle() {
   const next = (currentStyleIndex.value + 1) % playerStyles.length;
@@ -231,10 +224,10 @@ const auroraColorStops = computed(() => {
 });
 
 // Aurora 振幅：高潮时增强
-const auroraAmplitude = computed(() => isInClimax.value ? 1.5 : 1.0);
+const auroraAmplitude = computed(() => (isInClimax.value ? 1.5 : 1.0));
 
 // Aurora 速度：高潮时加速
-const auroraSpeed = computed(() => isInClimax.value ? 1.6 : 0.8);
+const auroraSpeed = computed(() => (isInClimax.value ? 1.6 : 0.8));
 
 // ==================== 高潮段落 ====================
 
@@ -247,7 +240,7 @@ const isInClimax = computed(() => {
 });
 
 // 高潮时增强歌词动画
-const climaxAnimationBoost = computed(() => isInClimax.value ? 1.5 : 1);
+const climaxAnimationBoost = computed(() => (isInClimax.value ? 1.5 : 1));
 
 watch(
   () => playMusic.value?.picUrl,
@@ -257,7 +250,9 @@ watch(
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = getImgUrl(picUrl, '50y50');
-      await new Promise((resolve) => { img.onload = resolve; });
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
 
       const canvas = document.createElement('canvas');
       canvas.width = 10;
@@ -268,7 +263,9 @@ watch(
       ctx.drawImage(img, 0, 0, 10, 10);
       const data = ctx.getImageData(0, 0, 10, 10).data;
 
-      let r = 0, g = 0, b = 0;
+      let r = 0,
+        g = 0,
+        b = 0;
       for (let i = 0; i < data.length; i += 4) {
         r += data[i];
         g += data[i + 1];
@@ -410,7 +407,12 @@ watch(
 );
 
 // 动画方向映射：根据动画索引和强度决定初始位置/缩放/模糊
-function getAnimationDirection(animIndex: number): { x?: number; y?: number; scale?: number; blur?: number } {
+function getAnimationDirection(animIndex: number): {
+  x?: number;
+  y?: number;
+  scale?: number;
+  blur?: number;
+} {
   const intensity = animationIntensity.value;
   const mult = intensity === 'power' ? 1.8 : intensity === 'soft' ? 0.5 : 1;
 
@@ -420,7 +422,7 @@ function getAnimationDirection(animIndex: number): { x?: number; y?: number; sca
     1: { x: Math.round(-80 * mult) },
     2: { y: Math.round(-50 * mult) },
     3: { y: Math.round(50 * mult) },
-    4: {},
+    4: {}
   };
 
   if (intensity === 'normal') {
@@ -619,33 +621,64 @@ onBeforeUnmount(() => {
     document.exitFullscreen();
   }
 });
-
 </script>
 
 <style scoped lang="scss">
 // ==================== 过渡 ====================
 
-.stage-fade-enter-active { transition: opacity 0.6s cubic-bezier(0.32, 0.72, 0, 1); }
-.stage-fade-leave-active { transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
-.stage-fade-enter-from, .stage-fade-leave-to { opacity: 0; }
-
-.close-fade-enter-active, .info-fade-enter-active {
-  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+.stage-fade-enter-active {
+  transition: opacity 0.6s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.close-fade-leave-active, .info-fade-leave-active {
-  transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
-              transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+.stage-fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
-.close-fade-enter-from, .info-fade-enter-from { opacity: 0; transform: translateY(-20px); }
-.close-fade-leave-to, .info-fade-leave-to { opacity: 0; transform: translateY(-20px); }
+.stage-fade-enter-from,
+.stage-fade-leave-to {
+  opacity: 0;
+}
 
-.tr-fade-enter-active, .tr-fade-leave-active { transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
-.tr-fade-enter-from, .tr-fade-leave-to { opacity: 0; }
+.close-fade-enter-active,
+.info-fade-enter-active {
+  transition:
+    opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.close-fade-leave-active,
+.info-fade-leave-active {
+  transition:
+    opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.close-fade-enter-from,
+.info-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.close-fade-leave-to,
+.info-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
 
-.bg-fade-enter-active { transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
-.bg-fade-leave-active { transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-.bg-fade-enter-from, .bg-fade-leave-to { opacity: 0; }
+.tr-fade-enter-active,
+.tr-fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.tr-fade-enter-from,
+.tr-fade-leave-to {
+  opacity: 0;
+}
+
+.bg-fade-enter-active {
+  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.bg-fade-leave-active {
+  transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.bg-fade-enter-from,
+.bg-fade-leave-to {
+  opacity: 0;
+}
 
 // ==================== 容器 ====================
 
@@ -672,8 +705,14 @@ onBeforeUnmount(() => {
 }
 
 @keyframes coverPulse {
-  0% { transform: scale(1.15); filter: blur(50px) brightness(0.9) saturate(1.4); }
-  100% { transform: scale(1.25); filter: blur(50px) brightness(1.1) saturate(1.6); }
+  0% {
+    transform: scale(1.15);
+    filter: blur(50px) brightness(0.9) saturate(1.4);
+  }
+  100% {
+    transform: scale(1.25);
+    filter: blur(50px) brightness(1.1) saturate(1.6);
+  }
 }
 
 .background-smoke {
@@ -717,7 +756,9 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 
-  i { font-size: 18px; }
+  i {
+    font-size: 18px;
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.35);
@@ -725,7 +766,9 @@ onBeforeUnmount(() => {
     transform: scale(1.1);
   }
 
-  &:active { transform: scale(0.95); }
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 // ==================== 顶部歌曲信息 ====================
@@ -753,7 +796,9 @@ onBeforeUnmount(() => {
     .artist-name {
       cursor: pointer;
       transition: color 0.2s;
-      &:hover { color: rgba(255, 255, 255, 0.8); }
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
+      }
     }
   }
 }

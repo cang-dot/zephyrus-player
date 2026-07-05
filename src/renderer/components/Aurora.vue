@@ -9,8 +9,8 @@
  * 使用 OGL 渲染 WebGL 极光特效
  * Props 控制颜色、振幅、混合度、速度
  */
+import { Color, Mesh, Program, Renderer, Triangle } from 'ogl';
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 
 interface Props {
   colorStops?: string[];

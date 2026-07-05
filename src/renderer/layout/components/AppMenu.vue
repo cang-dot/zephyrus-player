@@ -109,7 +109,7 @@ import { useRoute, useRouter } from 'vue-router';
 import icon from '@/assets/icon.png';
 import { useCoverColor } from '@/hooks/useCoverColor';
 import { useSettingsStore, useUserStore } from '@/store';
-import { isMobile, getImgUrl } from '@/utils';
+import { getImgUrl, isMobile } from '@/utils';
 
 const props = defineProps({
   size: {

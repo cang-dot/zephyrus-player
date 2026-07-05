@@ -181,4 +181,3 @@ onMounted(() => {
   transition: opacity 0.3s ease;
 }
 </style>
-

@@ -1,5 +1,6 @@
-import { ref, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
+import { onUnmounted,ref } from 'vue';
+
 import type { LyricSettings } from './useLyricSettings';
 
 const windowData = window as any;

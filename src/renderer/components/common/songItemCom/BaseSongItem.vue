@@ -36,18 +36,14 @@
 
 <script lang="ts" setup>
 import { useSongItem } from '@/hooks/useSongItem';
+import { usePlayerStore } from '@/store/modules/player';
 import type { SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
+import { readLocalLyricFile, selectLyricFile, setLocalLyricPath } from '@/utils/localLyricStorage';
+import { parseTtml } from '@/utils/ttmlParser';
+import { parseLyrics } from '@/utils/yrcParser';
 
 import SongItemDropdown from './SongItemDropdown.vue';
-import {
-  setLocalLyricPath,
-  selectLyricFile,
-  readLocalLyricFile
-} from '@/utils/localLyricStorage';
-import { parseLyrics } from '@/utils/yrcParser';
-import { parseTtml } from '@/utils/ttmlParser';
-import { usePlayerStore } from '@/store/modules/player';
 
 const props = defineProps<{
   item: SongResult;
@@ -119,21 +115,25 @@ const bindLocalLyric = async () => {
         const ttmlLines = parseTtml(content);
         playerStore.playMusic.lyric = {
           lrcArray: ttmlLines,
-          lrcTimeArray: ttmlLines.map(l => l.startTime || 0)
+          lrcTimeArray: ttmlLines.map((l) => l.startTime || 0)
         };
       } else {
         const { lyrics } = parseLyrics(content);
-        const lrcArray = lyrics.map(l => ({
+        const lrcArray = lyrics.map((l) => ({
           text: l.fullText,
           trText: '',
-          words: l.words?.map(w => ({ text: w.text, startTime: w.startTime, duration: w.duration })),
+          words: l.words?.map((w) => ({
+            text: w.text,
+            startTime: w.startTime,
+            duration: w.duration
+          })),
           hasWordByWord: l.words && l.words.length > 1,
           startTime: l.startTime,
           duration: l.duration
         }));
         playerStore.playMusic.lyric = {
           lrcArray,
-          lrcTimeArray: lrcArray.map(l => l.startTime || 0)
+          lrcTimeArray: lrcArray.map((l) => l.startTime || 0)
         };
       }
     }

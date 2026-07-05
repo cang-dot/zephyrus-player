@@ -9,6 +9,7 @@ export default {
     application: 'アプリケーション設定',
     network: 'ネットワーク設定',
     system: 'システム管理',
+    plugins: 'プラグインストア',
     about: 'について'
   },
   basic: {
@@ -515,5 +516,18 @@ export default {
     info: {
       length: '現在の長さ：{length} 文字'
     }
+  },
+  plugins: {
+    tabs: {
+      browse: 'ストアを閲覧',
+      installed: 'インストール済み',
+      import: 'インポート',
+      localDev: 'ローカル開発'
+    },
+    repo: 'リポジトリ',
+    install: 'インストール',
+    installed: 'インストール済み',
+    empty: '利用可能なプラグインはありません',
+    comingSoon: '準備中'
   }
 };

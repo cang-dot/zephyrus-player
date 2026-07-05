@@ -1,6 +1,5 @@
 import type { Component } from 'vue';
-
-// ==================== 类型定义 ====================
+import { reactive } from 'vue';
 
 export interface SettingItem {
   key?: string;
@@ -23,18 +22,32 @@ export interface PlayerStyleDefinition {
   theme?: 'light' | 'dark';
   showStyleSwitch?: boolean;
   settings?: SettingItem[];
+  renderMode?: 'vue' | 'dom';
+  externalId?: string;
 }
 
-// ==================== 注册表 ====================
-
-const styles: PlayerStyleDefinition[] = [];
+const styles = reactive<PlayerStyleDefinition[]>([]);
 
 export function registerStyle(def: PlayerStyleDefinition) {
-  const existing = styles.findIndex(s => s.key === def.key);
-  if (existing >= 0) {
-    styles[existing] = def;
+  const idx = styles.findIndex(s => s.key === def.key);
+  if (idx >= 0) {
+    styles[idx] = def;
   } else {
     styles.push(def);
+  }
+}
+
+export function registerExternalStyle(def: PlayerStyleDefinition) {
+  const existing = styles.find(s => s.key === def.key);
+  if (existing) return existing;
+  styles.push(def);
+  return def;
+}
+
+export function unregisterStyle(key: string) {
+  const idx = styles.findIndex(s => s.key === key);
+  if (idx >= 0) {
+    styles.splice(idx, 1);
   }
 }
 

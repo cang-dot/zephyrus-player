@@ -4,7 +4,10 @@
     <div class="text-2xl font-bold leading-tight mb-1 -mt-1 text-gray-900 dark:text-white px-1">
       <slot name="title">{{ title }}</slot>
     </div>
-    <div v-if="description || $slots.description" class="text-sm text-gray-500 dark:text-gray-400 mb-4 px-1">
+    <div
+      v-if="description || $slots.description"
+      class="text-sm text-gray-500 dark:text-gray-400 mb-4 px-1"
+    >
       <slot name="description">{{ description }}</slot>
     </div>
     <div v-else class="mb-4"></div>

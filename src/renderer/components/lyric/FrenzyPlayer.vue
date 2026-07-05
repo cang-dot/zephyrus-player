@@ -1,7 +1,12 @@
 <template>
-  <div v-if="isVisible" class="frenzy-player" ref="playerRef" :style="{ background: backgroundColor }">
+  <div
+    v-if="isVisible"
+    class="frenzy-player"
+    ref="playerRef"
+    :style="{ background: backgroundColor }"
+  >
     <!-- 通用控件（左上关闭 + 右上设置/全屏） -->
-    <PlayerControls
+    <player-controls
       :isFullScreen="isFullScreen"
       :showStyleSwitch="false"
       theme="dark"
@@ -10,7 +15,7 @@
     />
 
     <!-- 背景层：白色故障效果 -->
-    <GlitchBackground
+    <glitch-background
       baseColor="#ffffff"
       accentColor="#d0d0d0"
       :intensity="glitchIntensity"
@@ -20,12 +25,8 @@
 
     <!-- 歌词层 -->
     <div class="frenzy-player__lyrics">
-      <FrenzyLyrics
-        :lyrics="lyrics"
-        :currentTime="currentTime"
-      />
+      <frenzy-lyrics :lyrics="lyrics" :currentTime="currentTime" />
     </div>
-
   </div>
 </template>
 
@@ -37,16 +38,17 @@
  */
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import GlitchBackground from './GlitchBackground.vue';
-import FrenzyLyrics from './FrenzyLyrics.vue';
-import PlayerControls from './PlayerControls.vue';
-import { useStyleEngineStore } from '@/store/modules/styleEngine';
-import { useCommunityDataStore } from '@/store/modules/communityData';
-import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
-import { drumDetector } from '@/services/drumDetector';
-import { usePlayerStore } from '@/store/modules/player';
-import { setCurrentSongId } from '@/utils/emotionalDetector';
 import { useStyleContext } from '@/playerStyles/useStyleContext';
+import { drumDetector } from '@/services/drumDetector';
+import { useCommunityDataStore } from '@/store/modules/communityData';
+import { usePlayerStore } from '@/store/modules/player';
+import { useStyleEngineStore } from '@/store/modules/styleEngine';
+import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
+import { setCurrentSongId } from '@/utils/emotionalDetector';
+
+import FrenzyLyrics from './FrenzyLyrics.vue';
+import GlitchBackground from './GlitchBackground.vue';
+import PlayerControls from './PlayerControls.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
@@ -113,13 +115,17 @@ function handleConfigUpdate() {
 }
 
 // 同步当前歌曲 ID 到情感词检测器，并加载副歌数据
-watch(() => playerStore.currentSong?.id, (songId) => {
-  console.log('[FrenzyPlayer] watch songId:', songId);
-  if (songId) {
-    setCurrentSongId(String(songId));
-    styleEngine.loadClimaxData(String(songId));
-  }
-}, { immediate: true });
+watch(
+  () => playerStore.currentSong?.id,
+  (songId) => {
+    console.log('[FrenzyPlayer] watch songId:', songId);
+    if (songId) {
+      setCurrentSongId(String(songId));
+      styleEngine.loadClimaxData(String(songId));
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   window.addEventListener('music-full-config-updated', handleConfigUpdate);
@@ -190,9 +196,7 @@ const glitchIntensity = computed(() => {
   const base = Math.min(1.0, baseIntensity + energyBoost + climaxBoost);
 
   // 高潮时鼓点失真峰值明显，非高潮时微弱
-  const spike = styleEngine.isInClimax
-    ? beatSpike.value
-    : beatSpike.value * 0.3;
+  const spike = styleEngine.isInClimax ? beatSpike.value : beatSpike.value * 0.3;
 
   return Math.min(1.0, base + spike);
 });

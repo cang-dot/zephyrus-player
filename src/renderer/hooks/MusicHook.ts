@@ -851,35 +851,13 @@ export const openLyric = () => {
     // 立即打开窗口
     window.api.openLyric();
 
-    // 确保有歌词数据，如果没有，则使用默认的"无歌词"提示
-    if (!lrcArray.value || lrcArray.value.length === 0) {
-      // 如果当前播放的歌曲有ID但没有歌词，则尝试加载歌词
-      console.log('尝试加载歌词数据...');
-      // 发送默认的"无歌词"数据
-      const emptyLyricData = {
-        type: 'empty',
-        nowIndex: 0,
-        nowTime: nowTime.value,
-        startCurrentTime: 0,
-        nextTime: 0,
-        isPlay: getPlayerStore().play,
-        lrcArray: [{ text: '加载歌词中...', trText: '' }],
-        lrcTimeArray: [0],
-        allTime: allTime.value,
-        playMusic: playMusic.value
-      };
-      window.api.sendLyric(JSON.stringify(emptyLyricData));
-    } else {
-      // 发送完整歌词数据
-      sendLyricToWin();
-    }
-
-    // 延迟重发一次，以防窗口加载略慢
+    // 歌词数据将在 lyric-window-ready 回调中发送（窗口加载完成后）
+    // 保留 setTimeout 作为兜底，防止 lyric-window-ready 丢失
     setTimeout(() => {
       if (isLyricWindowOpen.value) {
         sendLyricToWin();
       }
-    }, 500);
+    }, 800);
 
     // 启动歌词同步
     startLyricSync();

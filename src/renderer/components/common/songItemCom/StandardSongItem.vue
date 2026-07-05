@@ -128,7 +128,7 @@ const emit = defineEmits(['play', 'select', 'remove-song']);
 const baseItem = ref<InstanceType<typeof BaseSongItem>>();
 
 // 浠巔layerStore鍜宐aseItem鑾峰彇鍝嶅簲寮忕姸鎬
-    const play = computed(() => playerStore.isPlay);
+const play = computed(() => playerStore.isPlay);
 const isPlaying = computed(() => baseItem.value?.isPlaying || false);
 const playLoading = computed(() => baseItem.value?.playLoading || false);
 const isFavorite = computed(() => baseItem.value?.isFavorite || false);
@@ -217,4 +217,3 @@ const onPlayNext = () => {
   }
 }
 </style>
-

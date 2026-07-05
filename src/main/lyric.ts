@@ -2,8 +2,8 @@ import { BrowserWindow, globalShortcut, IpcMain, screen } from 'electron';
 import Store from 'electron-store';
 import path, { join } from 'path';
 
-import { getStore } from './modules/config';
 import { normalizeShortcutAccelerator } from '../shared/shortcuts';
+import { getStore } from './modules/config';
 
 const store = new Store();
 let lyricWindow: BrowserWindow | null = null;

@@ -7,12 +7,7 @@
     ref="musicFullRef"
   />
   <Teleport v-else to="#layout-main">
-    <component
-      :is="componentToUse"
-      v-bind="$attrs"
-      :key="playerStyle"
-      ref="musicFullRef"
-    />
+    <component :is="componentToUse" v-bind="$attrs" :key="playerStyle" ref="musicFullRef" />
   </Teleport>
 </template>
 
@@ -21,9 +16,9 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
+import { getStyle } from '@/playerStyles';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { isMobile } from '@/utils';
-import { getStyle } from '@/playerStyles';
 
 // 响应式配置状态
 const playerStyle = ref<string>(DEFAULT_LYRIC_CONFIG.playerStyle);

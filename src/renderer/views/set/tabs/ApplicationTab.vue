@@ -19,11 +19,7 @@
     </setting-item>
 
     <setting-item title="桌面歌词解锁快捷键" description="歌词窗口锁定后，按下此快捷键解锁">
-      <button
-        class="shortcut-recorder"
-        :class="{ recording: isRecording }"
-        @click="startRecording"
-      >
+      <button class="shortcut-recorder" :class="{ recording: isRecording }" @click="startRecording">
         <template v-if="isRecording">按快捷键...</template>
         <template v-else>
           <kbd>{{ displayShortcut }}</kbd>
@@ -222,8 +218,13 @@ const handleShortcutsChange = (shortcuts: any) => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .shortcut-recorder kbd {

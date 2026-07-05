@@ -13,6 +13,7 @@ import { initializeLocalMusicScanner } from './modules/localMusicScanner';
 import { initializeLoginWindow } from './modules/loginWindow';
 import { initLxMusicHttp } from './modules/lxMusicHttp';
 import { initializeOtherApi } from './modules/otherApi';
+import { initializePluginManager } from './modules/pluginManager';
 import { initializeRemoteControl } from './modules/remoteControl';
 import { initializeShortcuts } from './modules/shortcuts';
 import { initializeTray, updateCurrentSong, updatePlayState, updateTrayMenu } from './modules/tray';
@@ -60,6 +61,8 @@ function initialize(configStore: any) {
   initializeLoginWindow();
   // 初始化本地音乐扫描模块
   initializeLocalMusicScanner();
+  // 初始化插件管理器
+  initializePluginManager();
 
   // 创建主窗口
   mainWindow = createMainWindow(icon);

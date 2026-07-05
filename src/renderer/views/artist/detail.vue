@@ -1050,7 +1050,9 @@ const formatSong = (item: any) => {
 
 .album-card:hover .album-cover {
   @apply shadow-2xl;
-  box-shadow: 0 10px 15px -3px rgba(var(--accent-color-rgb, 0, 0, 0), 0.1), 0 4px 6px -2px rgba(var(--accent-color-rgb, 0, 0, 0), 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(var(--accent-color-rgb, 0, 0, 0), 0.1),
+    0 4px 6px -2px rgba(var(--accent-color-rgb, 0, 0, 0), 0.05);
 }
 
 /* Mobile Optimizations */

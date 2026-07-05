@@ -107,4 +107,3 @@ const openSettings = () => {
   @apply transition-colors duration-150;
 }
 </style>
-

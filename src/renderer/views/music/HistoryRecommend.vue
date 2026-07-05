@@ -129,7 +129,7 @@ const message = useMessage();
 const playerStore = usePlayerStore();
 
 // 鐘舵€
-    const availableDates = ref<string[]>([]);
+const availableDates = ref<string[]>([]);
 const selectedDate = ref<string>('');
 const songs = ref<SongResult[]>([]);
 const loadingDates = ref(false);
@@ -139,12 +139,12 @@ const isCompactLayout = ref(
 );
 
 // 鍙樉绀烘渶杩戠殑10涓棩鏈
-    const displayedDates = computed(() => {
+const displayedDates = computed(() => {
   return availableDates.value.slice(0, 10);
 });
 
 // 鏍煎紡鍖栨棩鏈熸樉绀
-    const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   const today = new Date();
   const yesterday = new Date(today);
@@ -158,13 +158,13 @@ const isCompactLayout = ref(
   }
 
   // 鏍煎紡鍖栦负 MM鏈圖D鏃
-    const month = date.getMonth() + 1;
+  const month = date.getMonth() + 1;
   const day = date.getDate();
   return `${month}月${day}日`;
 };
 
 // 鏍煎紡鍖栨瓕鏇叉暟鎹
-    const formatSong = (item: any) => {
+const formatSong = (item: any) => {
   if (!item) return null;
   return {
     ...item,
@@ -185,7 +185,7 @@ const fetchAvailableDates = async () => {
     if (data?.data?.dates) {
       availableDates.value = data.data.dates;
       // 榛樿閫夋嫨绗竴涓棩鏈燂紙鏈€杩戠殑鏃ユ湡锛
-    if (availableDates.value.length > 0) {
+      if (availableDates.value.length > 0) {
         selectedDate.value = availableDates.value[0];
         await fetchSongsByDate(selectedDate.value);
       }
@@ -230,7 +230,7 @@ const toggleLayout = () => {
 };
 
 // 娣诲姞鍒版挱鏀惧垪琛ㄦ湯灏
-    const addToPlaylist = () => {
+const addToPlaylist = () => {
   if (songs.value.length === 0) return;
 
   // 鑾峰彇褰撳墠鎾斁鍒楄〃
@@ -245,7 +245,7 @@ const toggleLayout = () => {
   }
 
   // 鍚堝苟鍒板綋鍓嶆挱鏀惧垪琛ㄦ湯灏
-    const newList = [...currentList, ...newSongs.map(formatSong)];
+  const newList = [...currentList, ...newSongs.map(formatSong)];
   playerStore.setPlayList(newList);
 
   message.success(t('comp.musicList.addToPlaylistSuccess', { count: newSongs.length }));
@@ -265,7 +265,7 @@ const handlePlayAll = () => {
 };
 
 // 缁勪欢鎸傝浇鏃惰幏鍙栨暟鎹
-    onMounted(() => {
+onMounted(() => {
   fetchAvailableDates();
 });
 </script>
@@ -377,4 +377,3 @@ const handlePlayAll = () => {
   }
 }
 </style>
-

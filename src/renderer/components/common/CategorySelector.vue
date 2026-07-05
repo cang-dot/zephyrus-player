@@ -13,7 +13,9 @@
           :class="[
             animationClass,
             index === 0 ? 'ml-0.5' : '',
-            isActive(category) ? 'bg-[var(--accent-color)] text-white shadow-lg shadow-primary/25 scale-105' : ''
+            isActive(category)
+              ? 'bg-[var(--accent-color)] text-white shadow-lg shadow-primary/25 scale-105'
+              : ''
           ]"
           :style="getAnimationDelay(index)"
           @click="handleClickCategory(category)"
@@ -102,4 +104,3 @@ defineExpose({
   scrollbarRef
 });
 </script>
-

@@ -179,4 +179,3 @@ onMounted(() => {
   fetchPlaylists();
 });
 </script>
-

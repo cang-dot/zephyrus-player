@@ -19,6 +19,7 @@ const api = {
   resizeMiniWindow: (showPlaylist) => ipcRenderer.send('resize-mini-window', showPlaylist),
   openLyric: () => ipcRenderer.send('open-lyric'),
   sendLyric: (data) => ipcRenderer.send('send-lyric', data),
+  sendCoverColor: (color) => ipcRenderer.send('send-cover-color', color),
   sendSong: (data) => ipcRenderer.send('update-current-song', data),
   unblockMusic: (id, data, enabledSources) =>
     ipcRenderer.invoke('unblock-music', id, data, enabledSources),
@@ -82,7 +83,18 @@ const api = {
   scanLocalMusicWithStats: (folderPath: string) =>
     ipcRenderer.invoke('scan-local-music-with-stats', folderPath),
   parseLocalMusicMetadata: (filePaths: string[]) =>
-    ipcRenderer.invoke('parse-local-music-metadata', filePaths)
+    ipcRenderer.invoke('parse-local-music-metadata', filePaths),
+
+  // 插件商店
+  plugin: {
+    getRegistry: () => ipcRenderer.invoke('plugin:get-registry'),
+    getInstalled: () => ipcRenderer.invoke('plugin:get-installed'),
+    install: (item) => ipcRenderer.invoke('plugin:install', item),
+    uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
+    toggleEnabled: (pluginId, enabled) => ipcRenderer.invoke('plugin:toggle-enabled', pluginId, enabled),
+    importFile: (type) => ipcRenderer.invoke('plugin:import-file', type),
+    refreshRegistry: () => ipcRenderer.invoke('plugin:refresh-registry')
+  }
 };
 
 // 创建带类型的ipcRenderer对象，暴露给渲染进程

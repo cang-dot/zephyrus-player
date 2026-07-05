@@ -9,6 +9,7 @@ export default {
     application: '應用程式設定',
     network: '網路設定',
     system: '系統管理',
+    plugins: '外掛商店',
     about: '關於'
   },
   basic: {
@@ -508,5 +509,18 @@ export default {
     info: {
       length: '目前長度：{length} 字元'
     }
+  },
+  plugins: {
+    tabs: {
+      browse: '瀏覽商店',
+      installed: '已安裝',
+      import: '匯入',
+      localDev: '本機開發'
+    },
+    repo: '倉庫',
+    install: '安裝',
+    installed: '已安裝',
+    empty: '暫無可用外掛',
+    comingSoon: '正在開發中，敬請期待'
   }
 };

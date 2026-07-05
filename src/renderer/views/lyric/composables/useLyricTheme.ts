@@ -1,11 +1,13 @@
-import { ref } from 'vue';
 import type { Ref } from 'vue';
+import { ref } from 'vue';
+
 import {
   getCurrentLyricThemeColor,
   loadLyricThemeColor,
   saveLyricThemeColor,
   validateColor
 } from '@/utils/linearColor';
+
 import type { LyricSettings } from './useLyricSettings';
 
 function updateCSSVariable(name: string, value: string) {

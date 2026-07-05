@@ -8,14 +8,15 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
+import type { KeywordLine } from '@/api/keywords';
 import { nowTime } from '@/hooks/MusicHook';
+import { useCoverColor } from '@/hooks/useCoverColor';
 import { climaxDetector } from '@/services/climaxDetector';
-import { drumDetector, type BeatInfo } from '@/services/drumDetector';
-import { usePlayerStore } from './player';
+import { type BeatInfo,drumDetector } from '@/services/drumDetector';
+
 import { useClimaxStore } from './climax';
 import { useCommunityDataStore } from './communityData';
-import { useCoverColor } from '@/hooks/useCoverColor';
-import type { KeywordLine } from '@/api/keywords';
+import { usePlayerStore } from './player';
 
 export const useStyleEngineStore = defineStore('styleEngine', () => {
   // ==================== 播放状态 ====================

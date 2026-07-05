@@ -7,7 +7,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import { loadClimaxForSong, type ClimaxSegment } from '@/api/climax';
+import { type ClimaxSegment,loadClimaxForSong } from '@/api/climax';
 
 export const useClimaxStore = defineStore('climax', () => {
   // 当前歌曲的高潮段落

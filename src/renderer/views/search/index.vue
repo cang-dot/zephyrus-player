@@ -29,7 +29,11 @@
               >
                 <span
                   class="flex-shrink-0 w-8 text-lg font-bold italic transition-colors duration-300"
-                  :class="index < 3 ? 'text-[var(--accent-color)]' : 'text-neutral-300 dark:text-neutral-700'"
+                  :class="
+                    index < 3
+                      ? 'text-[var(--accent-color)]'
+                      : 'text-neutral-300 dark:text-neutral-700'
+                  "
                 >
                   {{ String(index + 1).padStart(2, '0') }}
                 </span>
@@ -194,4 +198,3 @@ onMounted(() => {
   }
 }
 </style>
-

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zephyrus Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #06080d;
+      --bg-elevated: #0c1018;
+      --surface: #111620;
+      --surface-hover: #181e2c;
+      --brand: #4361ee;
+      --brand-dim: #2b3db5;
+      --brand-glow: #6b83f2;
+      --accent: #f72585;
+      --ink: #e8eaf0;
+      --ink-muted: #8891a5;
+      --ink-faint: #4a5168;
+      --border: rgba(255,255,255,0.06);
+      --font-display: 'DM Sans', 'Noto Sans SC', system-ui, sans-serif;
+      --font-body: 'DM Sans', 'Noto Sans SC', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { overflow-x: hidden; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== PHASE 1: SPLASH (0-300vh, pinned) ===== */
+    .splash-stage {
+      height: 300vh;
+      position: relative;
+    }
+
+    .splash-viewport {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    /* Splash elements */
+    .sp-bar-left {
+      position: absolute;
+      left: 0; top: 0;
+      width: 72px; height: 100%;
+      background: var(--brand);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sp-bar-left-text {
+      writing-mode: vertical-rl;
+      color: #fff;
+      font-size: 12px;
+      letter-spacing: 3px;
+      opacity: 0;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .sp-bar-right {
+      position: absolute;
+      right: 0; bottom: 0;
+      width: 280px; height: 88px;
+      background: var(--brand);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .sp-bar-right-title {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      font-family: var(--font-display);
+    }
+
+    .sp-bar-right-sub {
+      color: rgba(255,255,255,0.7);
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 400;
+    }
+
+    .sp-bar-bottom {
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%; height: 52px;
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-dim) 100%);
+      z-index: 4;
+    }
+
+    .sp-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sp-name-top {
+      font-size: clamp(52px, 9vw, 110px);
+      font-weight: 800;
+      color: var(--brand);
+      letter-spacing: -2px;
+      line-height: 1;
+      font-family: var(--font-display);
+    }
+
+    .sp-divider {
+      width: clamp(200px, 40vw, 480px);
+      height: 2px;
+      background: var(--brand);
+      transform-origin: center;
+      margin: 8px 0;
+    }
+
+    .sp-name-bottom {
+      font-size: clamp(52px, 9vw, 110px);
+      font-weight: 800;
+      color: var(--brand);
+      letter-spacing: -2px;
+      line-height: 1;
+      font-family: var(--font-display);
+      align-self: flex-end;
+    }
+
+    /* Exit panels */
+    .sp-exit-left, .sp-exit-right {
+      position: absolute;
+      top: 0;
+      width: 50%; height: 100%;
+      background: var(--brand);
+      z-index: 20;
+    }
+    .sp-exit-left { left: 0; transform: scaleX(0); transform-origin: left; }
+    .sp-exit-right { right: 0; transform: scaleX(0); transform-origin: right; }
+
+    .sp-fade-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      z-index: 25;
+      opacity: 0;
+    }
+
+    /* ===== PHASE 2: CONTENT ===== */
+    .content-stage {
+      position: relative;
+      z-index: 30;
+      background: var(--bg);
+    }
+
+    /* --- Hero --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 clamp(32px, 8vw, 140px);
+      position: relative;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -20%; right: -15%;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(67,97,238,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--brand-glow);
+      margin-bottom: 28px;
+      opacity: 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 6.5vw, 88px);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      max-width: 750px;
+      text-wrap: balance;
+      opacity: 0;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-desc {
+      font-size: clamp(16px, 1.4vw, 19px);
+      color: var(--ink-muted);
+      max-width: 480px;
+      line-height: 1.65;
+      margin-top: 32px;
+      opacity: 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      margin-top: 44px;
+      opacity: 0;
+    }
+
+    .btn {
+      padding: 13px 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-family: var(--font-body);
+      border: none;
+    }
+
+    .btn-fill {
+      background: var(--brand);
+      color: #fff;
+    }
+    .btn-fill:hover { background: var(--brand-glow); transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.03); }
+
+    .hero-version {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--ink-faint);
+      margin-top: 20px;
+      letter-spacing: 1px;
+      opacity: 0;
+    }
+
+    /* --- Bento Features --- */
+    .bento {
+      padding: clamp(60px, 8vw, 120px) clamp(32px, 8vw, 140px);
+    }
+
+    .bento-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--brand-glow);
+      margin-bottom: 12px;
+    }
+
+    .bento-title {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.12;
+      max-width: 520px;
+      text-wrap: balance;
+      margin-bottom: 56px;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(180px, auto);
+      gap: 3px;
+    }
+
+    .bento-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background 0.25s, border-color 0.25s;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bento-item:hover {
+      background: var(--surface-hover);
+      border-color: rgba(67,97,238,0.2);
+    }
+
+    .bento-item.span-8 { grid-column: span 8; }
+    .bento-item.span-4 { grid-column: span 4; }
+    .bento-item.span-6 { grid-column: span 6; }
+    .bento-item.span-5 { grid-column: span 5; }
+    .bento-item.span-7 { grid-column: span 7; }
+
+    @media (max-width: 768px) {
+      .bento-item.span-8,
+      .bento-item.span-4,
+      .bento-item.span-6,
+      .bento-item.span-5,
+      .bento-item.span-7 { grid-column: span 12; }
+    }
+
+    .bento-icon {
+      width: 40px; height: 40px;
+      background: rgba(67,97,238,0.12);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .bento-item h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .bento-item p {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      max-width: 360px;
+    }
+
+    .bento-item .bento-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--ink-faint);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .bento-item .bento-visual {
+      position: absolute;
+      bottom: -20px; right: -20px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(67,97,238,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* --- Horizontal Scroll Showcase --- */
+    .hscroll-section {
+      padding: clamp(60px, 8vw, 120px) 0;
+      overflow: hidden;
+    }
+
+    .hscroll-header {
+      padding: 0 clamp(32px, 8vw, 140px);
+      margin-bottom: 48px;
+    }
+
+    .hscroll-track {
+      display: flex;
+      gap: 3px;
+      padding: 0 clamp(32px, 8vw, 140px);
+    }
+
+    .hscroll-card {
+      flex: 0 0 clamp(280px, 35vw, 420px);
+      height: clamp(320px, 40vw, 480px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hscroll-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 40%;
+      background: linear-gradient(180deg, rgba(67,97,238,0.06) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hscroll-card-num {
+      font-family: var(--font-mono);
+      font-size: 64px;
+      font-weight: 700;
+      color: rgba(67,97,238,0.12);
+      position: absolute;
+      top: 24px; right: 28px;
+      line-height: 1;
+    }
+
+    .hscroll-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .hscroll-card p {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+    }
+
+    /* --- Tech Stack --- */
+    .tech {
+      padding: clamp(60px, 8vw, 120px) clamp(32px, 8vw, 140px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(48px, 6vw, 100px);
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .tech { grid-template-columns: 1fr; }
+    }
+
+    .tech-visual {
+      aspect-ratio: 4/3;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tech-visual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px);
+      pointer-events: none;
+    }
+
+    .tech-visual-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-faint);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .tech-content .bento-label { margin-bottom: 12px; }
+
+    .tech-content h2 {
+      font-size: clamp(28px, 3vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .tech-content p {
+      font-size: 15px;
+      color: var(--ink-muted);
+      line-height: 1.65;
+      max-width: 420px;
+    }
+
+    .tech-list {
+      list-style: none;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tech-list li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .tech-list li::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: var(--brand-glow);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* --- Metrics Strip --- */
+    .metrics {
+      padding: clamp(60px, 8vw, 100px) clamp(32px, 8vw, 140px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .metric {
+      padding: 40px 24px;
+      text-align: center;
+      background: var(--surface);
+    }
+
+    .metric-val {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .metric-val span { color: var(--brand-glow); }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    /* --- Final CTA --- */
+    .final-cta {
+      padding: clamp(100px, 14vw, 220px) clamp(32px, 8vw, 140px);
+      text-align: center;
+      position: relative;
+    }
+
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(67,97,238,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .final-cta h2 {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+      text-wrap: balance;
+      position: relative;
+    }
+
+    .final-cta p {
+      font-size: 17px;
+      color: var(--ink-muted);
+      max-width: 440px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .final-cta .btn { font-size: 15px; padding: 15px 36px; position: relative; }
+
+    /* --- Footer --- */
+    .footer {
+      padding: 36px clamp(32px, 8vw, 140px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-brand {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .footer-brand b { color: var(--brand-glow); font-weight: 700; }
+
+    .footer-links { display: flex; gap: 24px; }
+
+    .footer-links a {
+      font-size: 12px;
+      color: var(--ink-faint);
+      text-decoration: none;
+      transition: color 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .footer-links a:hover { color: var(--ink); }
+
+    /* --- Reduced Motion --- */
+    @media (prefers-reduced-motion: reduce) {
+      .splash-stage { height: auto; }
+      .splash-viewport { height: 100vh; }
+      [class*="sp-"], .hero-eyebrow, .hero h1, .hero-desc, .hero-actions,
+      .hero-version, .bento-item, .hscroll-card, .tech-visual, .tech-content,
+      .metric, .final-cta h2, .final-cta p {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==========================================
+     PHASE 1: SPLASH (scroll-driven, pinned)
+     ========================================== -->
+<div class="splash-stage" id="splashStage">
+  <div class="splash-viewport" id="splashViewport">
+    <div class="sp-bar-left" id="spLeft">
+      <span class="sp-bar-left-text" id="spLeftText">基于AlgerMusicPlayer修改</span>
+    </div>
+    <div class="sp-bar-right" id="spRight">
+      <span class="sp-bar-right-title">西风播放器</span>
+      <span class="sp-bar-right-sub">cang-dot</span>
+    </div>
+    <div class="sp-bar-bottom" id="spBottom"></div>
+    <div class="sp-center">
+      <div class="sp-name-top" id="spNameTop">Zephyrus</div>
+      <div class="sp-divider" id="spDivider"></div>
+      <div class="sp-name-bottom" id="spNameBottom">Player</div>
+    </div>
+    <div class="sp-exit-left" id="spExitL"></div>
+    <div class="sp-exit-right" id="spExitR"></div>
+    <div class="sp-fade-overlay" id="spFade"></div>
+  </div>
+</div>
+
+<!-- ==========================================
+     PHASE 2: CONTENT
+     ========================================== -->
+<div class="content-stage">
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow">ELECTRON / VUE 3 / TYPESCRIPT</div>
+    <h1>为耳朵造一座<em>剧场</em></h1>
+    <p class="hero-desc">
+      Zephyrus Player 将多音源搜索、杂志式歌词、10段均衡器和私人FM
+      融入一个轻量桌面应用。每一首歌，都值得被认真对待。
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/cang-dot/zephyrus-player/releases" class="btn btn-fill">下载 v0.9.7</a>
+      <a href="https://github.com/cang-dot/zephyrus-player" class="btn btn-outline">查看源码</a>
+    </div>
+    <div class="hero-version">v0.9.7 &middot; MIT License &middot; Windows / macOS / Linux</div>
+  </section>
+
+  <!-- Bento Grid Features -->
+  <section class="bento" id="bento">
+    <div class="bento-label">Capabilities</div>
+    <h2 class="bento-title">为每一个听歌场景设计</h2>
+    <div class="bento-grid">
+      <div class="bento-item span-8">
+        <div>
+          <div class="bento-icon">♫</div>
+          <h3>多音源聚合搜索</h3>
+          <p>内置多个音乐源接口，一个搜索框覆盖全网曲库。想听什么，直接搜。</p>
+        </div>
+        <div class="bento-tag">AGGREGATION</div>
+        <div class="bento-visual"></div>
+      </div>
+      <div class="bento-item span-4">
+        <div>
+          <div class="bento-icon">◈</div>
+          <h3>私人FM</h3>
+          <p>基于听歌历史的智能推荐，发现你可能喜欢的下一首。</p>
+        </div>
+        <div class="bento-tag">RECOMMEND</div>
+      </div>
+      <div class="bento-item span-5">
+        <div>
+          <div class="bento-icon">▤</div>
+          <h3>杂志模式歌词</h3>
+          <p>歌词不再是滚动字幕。每个词独立成块，跟随节拍和高潮段落动态排列。</p>
+        </div>
+        <div class="bento-tag">LYRICS</div>
+        <div class="bento-visual"></div>
+      </div>
+      <div class="bento-item span-7">
+        <div>
+          <div class="bento-icon">⊞</div>
+          <h3>10段图形均衡器</h3>
+          <p>Web Audio API 驱动的实时均衡调节。多种预设可选，也可自定义频率响应曲线，让耳机发挥全部实力。</p>
+        </div>
+        <div class="bento-tag">AUDIO ENGINE</div>
+        <div class="bento-visual"></div>
+      </div>
+      <div class="bento-item span-4">
+        <div>
+          <div class="bento-icon">◐</div>
+          <h3>明暗主题</h3>
+          <p>深色与浅色模式一键切换，界面风格随心定制。</p>
+        </div>
+        <div class="bento-tag">THEME</div>
+      </div>
+      <div class="bento-item span-8">
+        <div>
+          <div class="bento-icon">⚡</div>
+          <h3>轻量、快速、稳定</h3>
+          <p>Electron + Vue 3 + TypeScript 构建。冷启动迅速，内存占用可控，长时间使用依然流畅。</p>
+        </div>
+        <div class="bento-tag">PERFORMANCE</div>
+        <div class="bento-visual"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Horizontal Scroll: Highlights -->
+  <section class="hscroll-section" id="hscrollSection">
+    <div class="hscroll-header">
+      <div class="bento-label">Highlights</div>
+      <h2 class="bento-title">不只是播放器</h2>
+    </div>
+    <div class="hscroll-track" id="hscrollTrack">
+      <div class="hscroll-card">
+        <div class="hscroll-card-num">01</div>
+        <h3>高潮段落检测</h3>
+        <p>自动分析歌曲结构，标记副歌和高潮段落。杂志模式下，文字会跟随高潮动态变化。</p>
+      </div>
+      <div class="hscroll-card">
+        <div class="hscroll-card-num">02</div>
+        <h3>鼓点同步</h3>
+        <p>基于频谱通量的鼓点检测算法，BPM 实时计算，让视觉节奏与音乐精准同步。</p>
+      </div>
+      <div class="hscroll-card">
+        <div class="hscroll-card-num">03</div>
+        <h3>动态色块引擎</h3>
+        <p>从专辑封面提取主色调，自动生成与音乐匹配的动态色块和排版布局。</p>
+      </div>
+      <div class="hscroll-card">
+        <div class="hscroll-card-num">04</div>
+        <h3>中文精准分词</h3>
+        <p>基于 Intl.Segmenter 的中文分词，让每个歌词文字在杂志模式下独立呈现。</p>
+      </div>
+      <div class="hscroll-card">
+        <div class="hscroll-card-num">05</div>
+        <h3>无缝播放</h3>
+        <p>交叉淡入淡出、无缝切歌，歌曲之间的过渡如呼吸般自然。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="tech" id="tech">
+    <div class="tech-visual">
+      <span class="tech-visual-label">ARCHITECTURE</span>
+    </div>
+    <div class="tech-content">
+      <div class="bento-label">Tech Stack</div>
+      <h2>现代技术栈</h2>
+      <p>每一层都选用了经过验证的技术，确保性能和可维护性。</p>
+      <ul class="tech-list">
+        <li>Electron 跨平台桌面框架</li>
+        <li>Vue 3 Composition API + TypeScript</li>
+        <li>Vite 构建 + electron-vite</li>
+        <li>Pinia 状态管理</li>
+        <li>Naive UI 组件库</li>
+        <li>Web Audio API 音频引擎</li>
+        <li>GSAP 动画驱动</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section class="metrics" id="metrics">
+    <div class="metric">
+      <div class="metric-val">10<span>+</span></div>
+      <div class="metric-label">均衡器频段</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">3</div>
+      <div class="metric-label">高潮检测模式</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">&infin;</div>
+      <div class="metric-label">主题组合</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">0</div>
+      <div class="metric-label">广告与推送</div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta" id="finalCta">
+    <h2>纯粹为音乐而生</h2>
+    <p>免费、开源、无广告。下载即用，把时间还给音乐。</p>
+    <a href="https://github.com/cang-dot/zephyrus-player/releases" class="btn btn-fill">下载 Zephyrus Player</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-brand"><b>Zephyrus</b> Player</div>
+    <div class="footer-links">
+      <a href="https://github.com/cang-dot/zephyrus-player">GitHub</a>
+      <a href="https://github.com/cang-dot/zephyrus-player/releases">更新日志</a>
+      <a href="https://github.com/cang-dot/zephyrus-player/issues">问题反馈</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!reducedMotion) {
+
+  /* ============================================
+     SPLASH ANIMATION — scrubbed to scroll
+     ============================================ */
+  const splashTl = gsap.timeline();
+
+  // --- ENTRY PHASE ---
+  // Left bar slides in
+  splashTl.from('#spLeft', { x: '-100%', duration: 8, ease: 'none' });
+
+  // Right bar slides in from bottom-right
+  splashTl.from('#spRight', { x: '100%', y: '100%', duration: 8, ease: 'none' }, 0);
+
+  // Bottom bar slides up
+  splashTl.from('#spBottom', { y: '100%', duration: 7, ease: 'none' }, 0);
+
+  // Divider expands
+  splashTl.from('#spDivider', { scaleX: 0, duration: 6, ease: 'none' }, 3);
+
+  // Zephyrus rises
+  splashTl.from('#spNameTop', { y: 40, autoAlpha: 0, duration: 7, ease: 'none' }, 4);
+
+  // Player rises
+  splashTl.from('#spNameBottom', { y: -40, autoAlpha: 0, duration: 7, ease: 'none' }, 4);
+
+  // Left text fades in
+  splashTl.to('#spLeftText', { autoAlpha: 1, duration: 4, ease: 'none' }, 6);
+
+  // --- HOLD ---
+  splashTl.to({}, { duration: 10 });
+
+  // --- EXIT PHASE ---
+  // Text retreats
+  splashTl.to('#spNameTop', { y: 40, autoAlpha: 0, duration: 5, ease: 'none' });
+  splashTl.to('#spNameBottom', { y: -40, autoAlpha: 0, duration: 5, ease: 'none' }, '<');
+  splashTl.to('#spDivider', { scaleX: 0, duration: 4, ease: 'none' }, '<');
+  splashTl.to('#spLeftText', { autoAlpha: 0, duration: 3, ease: 'none' }, '<');
+
+  // Bars expand to fill screen
+  splashTl.to('#spLeft', { width: '50vw', duration: 7, ease: 'none' });
+  splashTl.to('#spRight', { width: '50vw', x: '-50vw', duration: 7, ease: 'none' }, '<');
+  splashTl.to('#spBottom', { height: '100vh', duration: 7, ease: 'none' }, '<');
+
+  // Exit panels close in
+  splashTl.to('#spExitL', { scaleX: 1, duration: 6, ease: 'none' }, '<');
+  splashTl.to('#spExitR', { scaleX: 1, duration: 6, ease: 'none' }, '<');
+
+  // Fade to dark
+  splashTl.to('#spFade', { opacity: 1, duration: 4, ease: 'none' }, '-=3');
+
+  // Create ScrollTrigger for splash
+  ScrollTrigger.create({
+    trigger: '#splashStage',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: 0.5,
+    animation: splashTl
+  });
+
+
+  /* ============================================
+     CONTENT REVEAL ANIMATIONS
+     ============================================ */
+
+  // Hero
+  const heroTl = gsap.timeline({
+    scrollTrigger: { trigger: '#hero', start: 'top 80%', toggleActions: 'play none none reverse' }
+  });
+  heroTl.to('.hero-eyebrow', { opacity: 1, duration: 0.6, ease: 'power2.out' });
+  heroTl.from('.hero h1', { opacity: 0, y: 50, duration: 0.8, ease: 'power3.out' }, 0.1);
+  heroTl.to('.hero-desc', { opacity: 1, duration: 0.7, ease: 'power2.out' }, 0.3);
+  heroTl.to('.hero-actions', { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.45);
+  heroTl.to('.hero-version', { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.55);
+
+  // Bento cards
+  gsap.from('.bento-item', {
+    opacity: 0, y: 50,
+    duration: 0.7, stagger: 0.08,
+    ease: 'power2.out',
+    scrollTrigger: { trigger: '.bento-grid', start: 'top 85%', toggleActions: 'play none none reverse' }
+  });
+
+  // Horizontal scroll
+  const htrack = document.getElementById('hscrollTrack');
+  if (htrack) {
+    const hCards = htrack.querySelectorAll('.hscroll-card');
+    const totalScroll = htrack.scrollWidth - window.innerWidth + 128;
+
+    gsap.to(htrack, {
+      x: -totalScroll,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hscrollSection',
+        start: 'top 20%',
+        end: () => `+=${totalScroll}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1
+      }
+    });
+
+    // Cards fade in as they enter
+    hCards.forEach((card, i) => {
+      gsap.from(card, {
+        opacity: 0, y: 30,
+        duration: 0.5,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: card,
+          containerAnimation: gsap.getById ? undefined : undefined,
+          start: 'left 90%',
+          toggleActions: 'play none none reverse',
+          horizontal: true
+        }
+      });
+    });
+  }
+
+  // Tech section
+  gsap.from('.tech-visual', {
+    opacity: 0, x: -60, duration: 0.9, ease: 'power2.out',
+    scrollTrigger: { trigger: '#tech', start: 'top 75%', toggleActions: 'play none none reverse' }
+  });
+  gsap.from('.tech-content', {
+    opacity: 0, x: 60, duration: 0.9, delay: 0.15, ease: 'power2.out',
+    scrollTrigger: { trigger: '#tech', start: 'top 70%', toggleActions: 'play none none reverse' }
+  });
+
+  // Metrics
+  gsap.from('.metric', {
+    opacity: 0, y: 30, duration: 0.6, stagger: 0.1,
+    ease: 'power2.out',
+    scrollTrigger: { trigger: '#metrics', start: 'top 85%', toggleActions: 'play none none reverse' }
+  });
+
+  // Final CTA
+  const ctaTl = gsap.timeline({
+    scrollTrigger: { trigger: '#finalCta', start: 'top 80%', toggleActions: 'play none none reverse' }
+  });
+  ctaTl.from('.final-cta h2', { opacity: 0, y: 50, duration: 0.8, ease: 'power3.out' });
+  ctaTl.from('.final-cta p', { opacity: 0, y: 30, duration: 0.7, ease: 'power2.out' }, 0.15);
+  ctaTl.from('.final-cta .btn', { opacity: 0, y: 20, duration: 0.6, ease: 'power2.out' }, 0.3);
+
+} else {
+  // Reduced motion: reveal everything
+  document.querySelectorAll('.hero-eyebrow, .hero h1, .hero-desc, .hero-actions, .hero-version, .bento-item, .hscroll-card, .tech-visual, .tech-content, .metric, .final-cta h2, .final-cta p, .final-cta .btn').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}
+</script>
+</body>
+</html>

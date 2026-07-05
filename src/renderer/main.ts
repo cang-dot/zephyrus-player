@@ -2,7 +2,6 @@ import './index.css';
 import '@/assets/css/mobile.css';
 import 'animate.css';
 import 'remixicon/fonts/remixicon.css';
-
 // 触发所有播放模式自注册
 import '@/playerStyles';
 

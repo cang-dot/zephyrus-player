@@ -1,12 +1,12 @@
+<p align="center">
+  <img src="splash-expanded.png" alt="Zephyrus Player" width="600" />
+</p>
+
 <div align="center">
 
 # Zephyrus Player
 
-**西风播放器** — 一个沉浸式音乐播放器，支持动态强调色、4 种全屏播放器样式、逐字歌词、桌面歌词窗口、实时高潮检测。
-
 </div>
-
-<br>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Vue_3.5-42b883?logo=vue.js&logoColor=white" />
@@ -18,6 +18,12 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS_3.4-06b6d4?logo=tailwindcss&logoColor=white" />
   <img src="https://img.shields.io/badge/Naive_UI_2.43-18a058" />
 </p>
+
+<div align="center">
+
+**西风播放器** — 一个沉浸式音乐播放器，支持动态强调色、4 种全屏播放器样式、逐字歌词、桌面歌词窗口、实时高潮检测。
+
+</div>
 
 ---
 
