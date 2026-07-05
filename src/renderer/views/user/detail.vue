@@ -1,37 +1,44 @@
 <template>
-  <div class="h-full w-full bg-white dark:bg-neutral-900 transition-colors duration-500">
+  <div class="h-full w-full bg-[#f5f5f5] dark:bg-[#111] transition-colors duration-500">
     <n-scrollbar class="h-full">
-      <div class="w-full pb-32">
-        <!-- Loading State -->
+      <div class="w-full">
+        <!-- Loading -->
         <div v-if="loading">
-          <!-- Hero Skeleton -->
-          <div class="relative h-[300px] overflow-hidden rounded-tl-2xl">
+          <div class="relative h-[300px] overflow-hidden">
             <div class="absolute inset-0 skeleton-shimmer" />
-            <div class="relative z-10 page-padding-x pt-8 pb-6">
-              <div class="flex flex-col items-center gap-6 md:flex-row md:items-end md:gap-10">
-                <div
-                  class="h-28 w-28 md:h-40 md:w-40 skeleton-shimmer rounded-full flex-shrink-0"
-                />
-                <div class="flex-1 space-y-4 text-center md:text-left">
-                  <div class="h-8 w-40 skeleton-shimmer rounded-xl" />
-                  <div class="flex justify-center gap-6 md:justify-start">
-                    <div class="h-12 w-16 skeleton-shimmer rounded-xl" />
-                    <div class="h-12 w-16 skeleton-shimmer rounded-xl" />
-                    <div class="h-12 w-16 skeleton-shimmer rounded-xl" />
-                  </div>
-                  <div class="h-4 w-2/3 skeleton-shimmer rounded-lg" />
-                </div>
-              </div>
-            </div>
           </div>
-          <!-- Content Skeleton -->
-          <div class="mt-8 page-padding-x">
-            <div class="h-10 w-48 mb-6 skeleton-shimmer rounded-xl" />
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              <div v-for="i in 10" :key="i" class="space-y-2">
-                <div class="aspect-square w-full skeleton-shimmer rounded-2xl" />
-                <div class="h-4 w-3/4 skeleton-shimmer rounded-lg" />
-                <div class="h-3 w-1/2 skeleton-shimmer rounded-lg" />
+          <div class="px-5 md:px-8 xl:px-16 -mt-8 relative z-20 max-w-7xl mx-auto">
+            <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="p-5 md:p-6 space-y-4 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800">
+                  <div class="flex gap-2">
+                    <div class="h-9 w-16 skeleton-shimmer rounded-lg" />
+                    <div class="h-9 w-16 skeleton-shimmer rounded-lg" />
+                    <div class="h-9 w-16 skeleton-shimmer rounded-lg" />
+                  </div>
+                  <div v-for="i in 5" :key="i" class="flex items-center gap-3">
+                    <div class="w-14 h-14 skeleton-shimmer rounded-xl shrink-0" />
+                    <div class="flex-1 space-y-1.5">
+                      <div class="h-4 w-3/4 skeleton-shimmer rounded-md" />
+                      <div class="h-3 w-1/2 skeleton-shimmer rounded-md" />
+                    </div>
+                  </div>
+                </div>
+                <div class="p-5 md:p-6 space-y-3">
+                  <div class="h-6 w-24 skeleton-shimmer rounded-md" />
+                  <div v-for="i in 6" :key="i" class="flex items-center gap-3">
+                    <div class="w-8 h-4 skeleton-shimmer rounded-md shrink-0" />
+                    <div class="w-10 h-10 skeleton-shimmer rounded-xl shrink-0" />
+                    <div class="flex-1 space-y-1">
+                      <div class="h-3.5 w-2/3 skeleton-shimmer rounded-md" />
+                      <div class="h-3 w-1/3 skeleton-shimmer rounded-md" />
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                      <div class="w-7 h-7 skeleton-shimmer rounded-full" />
+                      <div class="w-7 h-7 skeleton-shimmer rounded-full" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -39,231 +46,196 @@
 
         <!-- Main Content -->
         <div v-else-if="userDetail">
-          <!-- Hero Section -->
-          <section class="hero-section relative overflow-hidden rounded-tl-2xl">
-            <!-- Background Image with Blur -->
-            <div class="absolute inset-0 -top-20">
-              <div
-                class="absolute inset-0 bg-cover bg-center scale-110 blur-2xl opacity-40 dark:opacity-30"
-                :style="{
-                  backgroundImage: `url(${getImgUrl(userDetail.profile.backgroundUrl)})`
-                }"
-              />
-              <div
-                class="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-neutral-900/80 dark:to-neutral-900"
-              />
-            </div>
-
-            <!-- Hero Content -->
-            <div class="relative z-10 page-padding-x pt-4 md:pt-8 pb-6">
-              <div class="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-end">
-                <!-- User Avatar -->
-                <div class="relative group">
-                  <div
-                    class="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/30 via-primary/10 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  />
-                  <div
-                    class="relative w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl ring-4 ring-white/50 dark:ring-neutral-800/50"
-                  >
-                    <img
-                      :src="getImgUrl(userDetail.profile.avatarUrl, '300y300')"
-                      :alt="userDetail.profile.nickname"
-                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                </div>
-
-                <!-- User Info -->
-                <div class="flex-1 text-center md:text-left">
-                  <!-- Badge -->
-                  <div class="mb-2 md:mb-3" v-if="isArtist(userDetail.profile)">
-                    <span
-                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-semibold uppercase tracking-wider"
-                    >
-                      <i class="ri-verified-badge-fill text-sm" />
-                      {{ t('user.detail.artist') }}
-                    </span>
-                  </div>
-
-                  <h1
-                    class="text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 dark:text-white tracking-tight"
-                  >
-                    {{ userDetail.profile.nickname }}
-                  </h1>
-
-                  <!-- Stats -->
-                  <div
-                    class="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4 md:mt-5"
-                  >
-                    <div
-                      class="flex flex-col items-center gap-0.5 cursor-pointer px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200"
-                      @click="showFollowerList"
-                    >
-                      <span class="text-lg font-bold text-neutral-900 dark:text-white">
-                        {{ formatNumber(userDetail.profile.followeds) }}
-                      </span>
-                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                        {{ t('user.profile.followers') }}
-                      </span>
-                    </div>
-                    <div
-                      class="flex flex-col items-center gap-0.5 cursor-pointer px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200"
-                      @click="showFollowList"
-                    >
-                      <span class="text-lg font-bold text-neutral-900 dark:text-white">
-                        {{ formatNumber(userDetail.profile.follows) }}
-                      </span>
-                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                        {{ t('user.profile.following') }}
-                      </span>
-                    </div>
-                    <div class="flex flex-col items-center gap-0.5 px-3 py-1.5">
-                      <span class="text-lg font-bold text-neutral-900 dark:text-white">
-                        Lv.{{ userDetail.level }}
-                      </span>
-                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                        {{ t('user.profile.level') }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Signature -->
-                  <p
-                    v-if="userDetail.profile.signature"
-                    class="mt-3 text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 max-w-lg"
-                  >
-                    {{ userDetail.profile.signature }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Tab Navigation -->
-          <section class="page-padding-x pt-4 md:pt-6">
+          <!-- Hero -->
+          <section class="relative w-full h-[300px] md:h-[340px] overflow-hidden">
             <div
-              class="relative flex gap-1 p-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl w-fit"
+              class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              :style="{
+                backgroundImage: `url(${getImgUrl(userDetail.profile.backgroundUrl)})`,
+                WebkitMaskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)',
+                maskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)'
+              }"
+            />
+            <div
+              class="absolute inset-x-6 md:inset-x-12 xl:inset-x-16 bottom-16 z-10 max-w-7xl mx-auto"
             >
-              <button
-                v-for="tab in tabs"
-                :key="tab.value"
-                class="relative px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
-                :class="
-                  activeTab === tab.value
-                    ? 'text-neutral-900 dark:text-white'
-                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
-                "
-                @click="activeTab = tab.value"
-              >
-                <span class="relative z-10">{{ tab.label }}</span>
-                <Transition name="tab-indicator">
-                  <div
-                    v-if="activeTab === tab.value"
-                    class="absolute inset-0 bg-white dark:bg-neutral-700 rounded-lg shadow-sm"
-                  />
-                </Transition>
-              </button>
-            </div>
-          </section>
-
-          <!-- Tab Content -->
-          <section class="page-padding-x py-6 md:py-8">
-            <!-- Playlists Tab -->
-            <div v-show="activeTab === 'playlists'">
-              <div
-                v-if="playList.length === 0"
-                class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500"
-              >
-                <i class="ri-play-list-line text-5xl mb-4 opacity-50" />
-                <p>{{ t('user.detail.noPlaylists') }}</p>
-              </div>
-              <div
-                v-else
-                class="grid grid-cols-2 gap-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-              >
-                <div
-                  v-for="(item, index) in playList"
-                  :key="item.id || index"
-                  class="group cursor-pointer"
-                  :style="{ animationDelay: `${index * 0.03}s` }"
-                  @click="openPlaylist(item)"
-                >
-                  <!-- Cover -->
-                  <div class="relative aspect-square overflow-hidden rounded-2xl shadow-lg">
-                    <n-image
-                      :src="getImgUrl(item.coverImgUrl, '300y300')"
-                      lazy
-                      preview-disabled
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              <div class="flex items-end justify-between">
+                <div class="flex items-center gap-4 md:gap-5">
+                  <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shrink-0 ring-2 ring-white/40 shadow-xl">
+                    <img
+                      :src="getImgUrl(userDetail.profile.avatarUrl, '200y200')"
+                      :alt="userDetail.profile.nickname"
+                      class="w-full h-full object-cover"
                     />
-                    <!-- Play Count Overlay -->
-                    <div
-                      class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs bg-black/50 text-white flex items-center gap-1"
-                    >
-                      <i class="ri-play-fill" />
-                      {{ formatNumber(item.playCount) }}
-                    </div>
-                    <!-- Play Overlay -->
-                    <div
-                      class="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 group-hover:bg-black/20 group-hover:opacity-100 transition-all duration-300"
-                    >
-                      <div
-                        class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-xl"
-                      >
-                        <i class="ri-play-fill text-xl text-neutral-900 ml-0.5" />
-                      </div>
-                    </div>
                   </div>
-                  <!-- Info -->
-                  <div class="mt-3">
-                    <h3
-                      class="line-clamp-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100 group-hover:text-[var(--accent-color)] dark:group-hover:text-[var(--accent-color)] transition-colors"
+                  <div class="text-white">
+                    <div v-if="isArtist(userDetail.profile)" class="mb-1">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white/90 text-[11px] font-semibold">
+                        <i class="ri-verified-badge-fill text-xs" />
+                        音乐人
+                      </span>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">
+                      {{ userDetail.profile.nickname }}
+                    </h1>
+                    <p
+                      v-if="userDetail.profile.signature"
+                      class="text-sm text-white/70 mt-0.5 max-w-md truncate"
                     >
-                      {{ item.name }}
-                    </h3>
-                    <p class="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
-                      {{ t('user.playlist.trackCount', { count: item.trackCount }) }}
+                      {{ userDetail.profile.signature }}
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Records Tab -->
-            <div v-show="activeTab === 'records'">
-              <!-- No Permission -->
-              <div
-                v-if="!hasRecordPermission"
-                class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500"
-              >
-                <i class="ri-lock-line text-5xl mb-4 opacity-50" />
-                <p>
-                  {{
-                    t('user.detail.noRecordPermission', {
-                      name: userDetail.profile.nickname
-                    })
-                  }}
-                </p>
-              </div>
-              <!-- Empty -->
-              <div
-                v-else-if="!recordList || recordList.length === 0"
-                class="flex flex-col items-center justify-center py-16 text-neutral-400 dark:text-neutral-500"
-              >
-                <i class="ri-music-2-line text-5xl mb-4 opacity-50" />
-                <p>{{ t('user.detail.noRecords') }}</p>
-              </div>
-              <!-- Record List -->
-              <div v-else class="w-full">
-                <div v-for="(item, index) in recordList" :key="item.id" class="song-item-container">
-                  <song-item :index="index" :item="item" compact @play="handlePlay" />
+                <div class="flex items-center gap-5 md:gap-7 text-white shrink-0">
+                  <button class="text-center" @click="showFollowerList">
+                    <span class="text-lg md:text-xl font-bold block leading-none font-mono">
+                      {{ formatNumber(userDetail.profile.followeds) }}
+                    </span>
+                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.followers') }}</span>
+                  </button>
+                  <button class="text-center" @click="showFollowList">
+                    <span class="text-lg md:text-xl font-bold block leading-none font-mono">
+                      {{ formatNumber(userDetail.profile.follows) }}
+                    </span>
+                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.following') }}</span>
+                  </button>
+                  <div class="text-center">
+                    <span class="text-lg md:text-xl font-bold block leading-none font-mono">Lv.{{ userDetail.level }}</span>
+                    <span class="text-xs text-white/60 mt-1 block">{{ t('user.profile.level') }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
+
+          <!-- Two-column content -->
+          <div class="px-5 md:px-8 xl:px-16 -mt-8 relative z-20 max-w-7xl mx-auto w-full pb-8">
+            <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2">
+                <!-- Left: Playlists -->
+                <div class="p-5 md:p-6 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800">
+                  <div class="flex gap-1.5 p-1.5 bg-neutral-100 dark:bg-neutral-800/60 rounded-2xl">
+                    <button
+                      v-for="plTab in playlistTabs"
+                      :key="plTab.key"
+                      class="flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-all duration-200"
+                      :class="activePlTab === plTab.key
+                        ? 'bg-white dark:bg-gray-700 text-neutral-900 dark:text-white shadow-sm'
+                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'"
+                      @click="activePlTab = plTab.key"
+                    >
+                      {{ plTab.label }}
+                    </button>
+                  </div>
+
+                  <div class="mt-3 space-y-1">
+                    <div
+                      v-if="activePlTab === 'created' && isElectron"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer
+                             bg-neutral-50 dark:bg-neutral-800/40 hover:bg-neutral-100 dark:hover:bg-neutral-700/60 transition-colors duration-200"
+                      @click="goToImportPlaylist"
+                    >
+                      <div class="w-14 h-14 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                        <i class="ri-add-line text-xl text-neutral-400 dark:text-neutral-500" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">{{ t('comp.playlist.import.button') }}</p>
+                        <p class="text-xs text-neutral-400 dark:text-neutral-500">{{ t('comp.playlist.import.description') }}</p>
+                      </div>
+                    </div>
+
+                    <div
+                      v-for="(item, index) in currentPlaylists"
+                      :key="item.id || index"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
+                      @click="openPlaylist(item)"
+                    >
+                      <div class="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm">
+                        <img
+                          :src="getImgUrl(item.coverImgUrl, '100y100')"
+                          :alt="item.name"
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{{ item.name }}</p>
+                        <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
+                          {{ item.trackCount }}首，播放{{ formatNumber(item.playCount) }}次
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      v-if="currentPlaylists.length === 0"
+                      class="flex flex-col items-center justify-center py-10 text-neutral-400 dark:text-neutral-500"
+                    >
+                      <i class="ri-play-list-line text-3xl mb-2 opacity-40" />
+                      <p class="text-xs">{{ t('user.detail.noPlaylists') }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Records -->
+                <div class="p-5 md:p-6" v-if="hasRecordPermission && recordList.length > 0">
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
+                  <div class="space-y-0.5">
+                    <div
+                      v-for="(item, index) in recordList"
+                      :key="item.id"
+                      class="flex items-center gap-3 px-2.5 py-2 rounded-2xl cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800/50 group transition-colors duration-200"
+                    >
+                      <span class="w-6 text-xs text-neutral-400 dark:text-neutral-500 font-mono text-right shrink-0">{{ index + 1 }}</span>
+                      <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-neutral-200 dark:bg-neutral-700 shadow-sm">
+                        <img
+                          :src="getImgUrl(item.picUrl, '100y100')"
+                          :alt="item.name"
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">{{ item.name }}</p>
+                        <p class="text-xs text-neutral-400 dark:text-neutral-500 truncate">{{ getArtistNames(item) }}</p>
+                      </div>
+                      <div class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button
+                          class="w-7 h-7 flex items-center justify-center rounded-full text-base transition-all duration-200"
+                          :class="isFavorited(item.id)
+                            ? 'ri-heart-fill text-red-500'
+                            : 'ri-heart-line text-neutral-400 hover:text-red-500 hover:bg-red-500/10'"
+                          @click="toggleFavorite(item.id)"
+                        />
+                        <button
+                          class="w-7 h-7 rounded-full flex items-center justify-center bg-neutral-200 dark:bg-neutral-700 hover:bg-[var(--accent-color)] hover:text-white transition-all duration-200"
+                          @click="handlePlayRecord(item)"
+                        >
+                          <i class="ri-play-fill text-sm ml-0.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-else-if="!hasRecordPermission" class="p-5 md:p-6">
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
+                  <div class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500">
+                    <i class="ri-lock-line text-4xl mb-3 opacity-40" />
+                    <p class="text-sm">{{ t('user.detail.noRecordPermission', { name: userDetail.profile.nickname }) }}</p>
+                  </div>
+                </div>
+                <div v-else class="p-5 md:p-6">
+                  <h2 class="text-base font-bold text-neutral-900 dark:text-white mb-4">{{ t('user.ranking.title') }}</h2>
+                  <div class="flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500">
+                    <i class="ri-music-2-line text-4xl mb-3 opacity-40" />
+                    <p class="text-sm">{{ t('user.detail.noRecords') }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty -->
         <div
           v-else-if="!loading"
           class="flex flex-col items-center justify-center min-h-[60vh] text-neutral-400 dark:text-neutral-500"
@@ -287,14 +259,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { getUserDetail, getUserPlaylist, getUserRecord } from '@/api/user';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import PlayBottom from '@/components/common/PlayBottom.vue';
-import SongItem from '@/components/common/SongItem.vue';
 import { usePlayerStore } from '@/store/modules/player';
 import type { IUserDetail } from '@/types/user';
-import { formatNumber, getImgUrl } from '@/utils';
+import { formatNumber, getImgUrl, isElectron } from '@/utils';
 
-defineOptions({
-  name: 'UserDetail'
-});
+defineOptions({ name: 'UserDetail' });
 
 const { t } = useI18n();
 const router = useRouter();
@@ -308,74 +277,81 @@ const playList = ref<any[]>([]);
 const recordList = ref<any[]>([]);
 const loading = ref(true);
 const hasRecordPermission = ref(true);
-const activeTab = ref('playlists');
+const activePlTab = ref('created');
 
-const tabs = computed(() => [
-  { value: 'playlists', label: t('user.detail.playlists') },
-  { value: 'records', label: t('user.detail.records') }
+const playlistTabs = computed(() => [
+  { key: 'created', label: t('user.tabs.created') },
+  { key: 'favorite', label: t('user.tabs.favorite') },
+  { key: 'album', label: t('user.tabs.album') },
 ]);
 
-// 鍔犺浇鐢ㄦ埛鏁版嵁
+const createdPlaylists = computed(() =>
+  playList.value.filter((item: any) => item.creator?.userId === userId.value)
+);
+
+const favoritePlaylists = computed(() =>
+  playList.value.filter((item: any) => item.creator?.userId !== userId.value)
+);
+
+const currentPlaylists = computed(() => {
+  if (activePlTab.value === 'created') return createdPlaylists.value;
+  if (activePlTab.value === 'favorite') return favoritePlaylists.value;
+  return [];
+});
+
 const loadUserData = async () => {
   if (!userId.value) {
     message.error(t('user.detail.invalidUserId'));
     router.back();
     return;
   }
-
   try {
     loading.value = true;
     recordList.value = [];
     hasRecordPermission.value = true;
-
-    // 鑾峰彇鐢ㄦ埛璇︽儏鍜屾瓕鍗曞垪琛
     try {
       const [userDetailRes, playlistRes] = await Promise.all([
         getUserDetail(userId.value),
-        getUserPlaylist(userId.value)
+        getUserPlaylist(userId.value),
       ]);
       userDetail.value = userDetailRes.data;
       playList.value = playlistRes.data.playlist;
     } catch (error) {
-      console.error('鍔犺浇鐢ㄦ埛鍩烘湰淇℃伅澶辫触:', error);
+      console.error('Failed to load user info:', error);
       message.error(t('user.message.loadFailed'));
       return;
     }
-
-    // 鍗曠嫭澶勭悊鍚瓕璁板綍璇锋眰
     try {
       const recordRes = await getUserRecord(userId.value);
       if (recordRes.data?.allData) {
         recordList.value = recordRes.data.allData.map((item: any) => ({
           ...item,
           ...item.song,
-          picUrl: item.song.al.picUrl
+          picUrl: item.song.al.picUrl,
         }));
       }
     } catch (error: any) {
-      console.error('鍔犺浇鍚瓕璁板綍澶辫触:', error);
+      console.error('Failed to load records:', error);
       if (error.response?.data?.code === -2 || error.data?.code === -2) {
         hasRecordPermission.value = false;
       }
     }
   } catch (error) {
-    console.error('鍔犺浇鐢ㄦ埛鏁版嵁澶辫触:', error);
+    console.error('Failed to load user data:', error);
     message.error(t('user.message.loadFailed'));
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(() => {
-  loadUserData();
-});
+onMounted(loadUserData);
 
 watch(
   () => route.params.uid,
   (newUid) => {
     if (newUid && Number(newUid) !== userId.value) {
       userId.value = Number(newUid);
-      activeTab.value = 'playlists';
+      activePlTab.value = 'created';
       loadUserData();
     }
   }
@@ -387,29 +363,53 @@ const openPlaylist = (item: any) => {
     type: 'playlist',
     name: item.name,
     listInfo: item,
-    canRemove: false
+    canRemove: false,
   });
 };
 
-const handlePlay = () => {
+const handlePlayRecord = (item: any) => {
   if (!recordList.value || recordList.value.length === 0) return;
-  playerStore.setPlayList(recordList.value);
+  const idx = recordList.value.findIndex((r: any) => r.id === item.id);
+  if (idx >= 0) {
+    playerStore.setPlayList(recordList.value);
+    playerStore.setPlay(item);
+  }
+};
+
+const isFavorited = (id: number) => playerStore.favoriteList.some((s: any) => s.id === id);
+
+const toggleFavorite = (id: number) => {
+  if (isFavorited(id)) {
+    playerStore.removeFromFavorite(id);
+  } else {
+    playerStore.addToFavorite(id);
+  }
+};
+
+const getArtistNames = (item: any) => {
+  if (item.ar) return item.ar.map((a: any) => a.name).join(' / ');
+  if (item.artists) return item.artists.map((a: any) => a.name).join(' / ');
+  return '';
 };
 
 const showFollowList = () => {
   if (!userDetail.value) return;
   router.push({
-    path: `/user/follows`,
-    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname }
+    path: '/user/follows',
+    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname },
   });
 };
 
 const showFollowerList = () => {
   if (!userDetail.value) return;
   router.push({
-    path: `/user/followers`,
-    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname }
+    path: '/user/followers',
+    query: { uid: userId.value.toString(), name: userDetail.value.profile.nickname },
   });
+};
+
+const goToImportPlaylist = () => {
+  router.push('/playlist/import');
 };
 
 const isArtist = (profile: any) => {
@@ -418,29 +418,7 @@ const isArtist = (profile: any) => {
 </script>
 
 <style lang="scss" scoped>
-.hero-section {
-  min-height: 200px;
-}
-
-.tab-indicator-enter-active,
-.tab-indicator-leave-active {
-  transition: all 0.2s ease;
-}
-
-.tab-indicator-enter-from,
-.tab-indicator-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.song-item-container {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 52px;
-}
-
-button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--primary-color);
+.record-row {
+  transition: background-color 0.2s ease;
 }
 </style>
-
