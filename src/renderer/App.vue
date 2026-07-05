@@ -58,7 +58,9 @@ const themeOverrides = computed(() => {
     Slider: {
       fillColor: pc,
       fillColorHover: pc,
-      handleColor: pc
+      handleColor: pc,
+      dotColorActive: pc,
+      dotColorDisabled: pc
     },
     Switch: {
       railColorActive: pc
@@ -70,6 +72,14 @@ const themeOverrides = computed(() => {
       textColor: '#fff',
       textColorHover: '#fff',
       textColorFocus: '#fff'
+    },
+    Radio: {
+      dotColorActive: pc,
+      boxShadowFocus: `0 0 0 2px ${pc}33`
+    },
+    RadioButton: {
+      colorActive: pc,
+      textColorActive: '#fff'
     },
     Tag: {
       colorSuccess: pc,
