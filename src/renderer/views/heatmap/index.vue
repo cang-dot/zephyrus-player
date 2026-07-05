@@ -164,7 +164,7 @@ const colorThemes: ColorTheme[] = ['green', 'blue', 'orange', 'purple', 'red'];
 const selectedColor = ref<ColorTheme>('green');
 
 // 鐑姏鍥炬暟鎹
-    interface HeatmapDataItem {
+interface HeatmapDataItem {
   timestamp: number;
   value: number;
 }
@@ -187,7 +187,7 @@ const heatmapData = ref<HeatmapDataItem[]>([]);
 const dailyDataMap = ref<DailyData>({});
 
 // 鏍煎紡鍖栨棩鏈
-    const formatDate = (timestamp: number): string => {
+const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -284,7 +284,7 @@ const processHistoryData = () => {
 };
 
 // 璁＄畻鎬绘挱鏀炬鏁
-    const totalPlays = computed(() => {
+const totalPlays = computed(() => {
   return heatmapData.value.reduce((sum, item) => sum + item.value, 0);
 });
 
@@ -335,7 +335,7 @@ const mostPlayedSong = computed<{
 });
 
 // 璁＄畻鏈€娲昏穬鐨勪竴澶
-    const mostActiveDay = computed<{ date: string; plays: number } | null>(() => {
+const mostActiveDay = computed<{ date: string; plays: number } | null>(() => {
   if (heatmapData.value.length === 0) return null;
 
   let maxDay: { date: string; plays: number } | null = null;
@@ -691,7 +691,7 @@ onMounted(() => {
         @apply cursor-pointer rounded px-2 -mx-2;
         @apply transition-all duration-200;
         &:hover {
-          background-color: rgb(34 197 94 / 0.3);
+          background-color: rgb(var(--accent-color-rgb) / 0.3);
         }
 
         .song-name {
@@ -739,4 +739,3 @@ onMounted(() => {
   }
 }
 </style>
-

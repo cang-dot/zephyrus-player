@@ -90,7 +90,7 @@ function handlePrev() {
 }
 
 // 鍏ㄥ睆鎾斁鍣
-    const MusicFullRef = ref<any>(null);
+const MusicFullRef = ref<any>(null);
 
 // 璁剧疆musicFull
 const setMusicFull = () => {
@@ -104,7 +104,7 @@ watch(
   () => playerStore.musicFull,
   (_newVal) => {
     // 鐘舵€佹爮鏍峰紡鏇存柊宸插湪 Web 鐜涓嬬鐢
-    }
+  }
 );
 
 // 鎵撳紑鎾斁鍒楄〃鎶藉眽
@@ -195,9 +195,9 @@ watch(
           --n-rail-height: 3px;
           --n-rail-color: rgba(255, 255, 255, 0.15);
           --n-rail-color-dark: rgba(255, 255, 255, 0.15);
-          --n-fill-color: #22c55e;
+          --n-fill-color: var(--accent-color);
           --n-handle-size: 0px; /* 闅愯棌婊戝潡 */
-          --n-handle-color: #22c55e;
+          --n-handle-color: var(--accent-color);
 
           &:hover {
             --n-handle-size: 10px; /* 榧犳爣鎮仠鏃舵樉绀烘粦鍧?*/
@@ -335,4 +335,3 @@ watch(
   }
 }
 </style>
-

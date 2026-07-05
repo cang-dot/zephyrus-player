@@ -59,7 +59,7 @@
           class="relative h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700"
         >
           <div
-            class="absolute inset-y-0 left-0 rounded-full bg-[var(--accent-color)] transition-all duration-300 ease-out shadow-[0_0_10px_rgba(34,197,94,0.4)]"
+            class="absolute inset-y-0 left-0 rounded-full bg-[var(--accent-color)] transition-all duration-300 ease-out shadow-[0_0_10px_rgba(var(--accent-color-rgb),0.4)]"
             :style="{ width: `${progressPercent}%` }"
           />
         </div>
@@ -405,4 +405,3 @@ onUnmounted(() => {
   background-color: rgb(64 64 64);
 }
 </style>
-

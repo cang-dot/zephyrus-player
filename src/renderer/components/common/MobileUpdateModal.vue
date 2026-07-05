@@ -275,6 +275,6 @@ onMounted(() => {
 }
 
 :deep(a) {
-  color: #22c55e;
+  color: var(--accent-color);
 }
 </style>
