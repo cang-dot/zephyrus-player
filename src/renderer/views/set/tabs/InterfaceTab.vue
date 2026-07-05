@@ -79,15 +79,52 @@
     <div class="space-y-3">
       <!-- 字体 -->
       <setting-item title="字体" description="选择已安装的系统字体，留空使用默认">
-        <n-auto-complete
-          v-model:value="setData.lyricFontFamily"
-          :options="fontOptions"
-          :input-props="{ class: 'w-full max-w-[260px]' }"
-          placeholder="搜索或输入字体名称..."
-          clearable
-          @select="onFontSelect"
-          @update:value="debouncedSendLyricStyle"
-        />
+        <div class="font-select-wrapper relative w-full max-w-[260px]">
+          <input
+            ref="fontInputRef"
+            v-model="setData.lyricFontFamily"
+            type="text"
+            class="font-select-input w-full px-3 py-1.5 rounded-lg border text-sm bg-white dark:bg-white/10 outline-none transition-colors"
+            :class="fontDropdownOpen
+              ? 'font-select-input--open'
+              : 'border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30'"
+            placeholder="搜索字体..."
+            @focus="openFontDropdown"
+            @input="onFontSearchInput"
+            @keydown.escape="fontDropdownOpen = false"
+            @keydown.enter.prevent="onFontEnter"
+            @keydown.down.prevent="onFontArrowDown"
+            @keydown.up.prevent="onFontArrowUp"
+          />
+          <button
+            v-if="setData.lyricFontFamily"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm leading-none"
+            @click="clearFont"
+          >&times;</button>
+          <Transition name="fade">
+            <div
+              v-if="fontDropdownOpen && filteredFonts.length > 0"
+              class="absolute z-50 mt-1 w-full max-h-[280px] overflow-y-auto rounded-xl border bg-white shadow-lg dark:bg-neutral-900 dark:border-neutral-700"
+            >
+              <div
+                v-for="(font, idx) in filteredFonts"
+                :key="font"
+                class="flex cursor-pointer items-center px-3 py-2 text-sm transition-colors"
+                :class="[
+                  idx === fontHighlightIndex
+                    ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5',
+                  setData.lyricFontFamily === font ? 'font-medium' : ''
+                ]"
+                :style="{ fontFamily: font }"
+                @mousedown.prevent="selectFont(font)"
+                @mouseenter="fontHighlightIndex = idx"
+              >
+                {{ font }}
+              </div>
+            </div>
+          </Transition>
+        </div>
       </setting-item>
 
       <!-- 文本颜色 -->
@@ -192,9 +229,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NAutoComplete, NSwitch } from 'naive-ui';
+import { NSwitch } from 'naive-ui';
 
 import { usePlayerStore } from '@/store/modules/player';
 import {
@@ -239,20 +276,81 @@ function onColorInput(event: Event, key: string) {
   sendLyricStyle();
 }
 
-function onFontSelect(_value: string) {
+// ── 字体选择下拉 ──
+const fontList = ref<string[]>([]);
+const fontDropdownOpen = ref(false);
+const fontSearchQuery = ref('');
+const fontHighlightIndex = ref(0);
+const fontInputRef = ref<HTMLInputElement | null>(null);
+
+const filteredFonts = computed(() => {
+  const q = fontSearchQuery.value.toLowerCase().trim();
+  if (!q) return fontList.value.slice(0, 200);
+  return fontList.value.filter((name) => name.toLowerCase().includes(q)).slice(0, 200);
+});
+
+function openFontDropdown() {
+  fontDropdownOpen.value = true;
+  fontHighlightIndex.value = 0;
+}
+
+function onFontSearchInput() {
+  fontSearchQuery.value = setData.value.lyricFontFamily || '';
+  fontDropdownOpen.value = true;
+  fontHighlightIndex.value = 0;
+  debouncedSendLyricStyle();
+}
+
+function onFontEnter() {
+  if (filteredFonts.value[fontHighlightIndex.value]) {
+    selectFont(filteredFonts.value[fontHighlightIndex.value]);
+  }
+}
+
+function onFontArrowDown() {
+  fontHighlightIndex.value = Math.min(fontHighlightIndex.value + 1, filteredFonts.value.length - 1);
+  scrollFontIntoView();
+}
+
+function onFontArrowUp() {
+  fontHighlightIndex.value = Math.max(fontHighlightIndex.value - 1, 0);
+  scrollFontIntoView();
+}
+
+function scrollFontIntoView() {
+  // 滚动到高亮项
+}
+
+function selectFont(name: string) {
+  setData.value.lyricFontFamily = name;
+  fontDropdownOpen.value = false;
+  fontSearchQuery.value = name;
   sendLyricStyle();
 }
 
-// ── 系统字体列表 ──
-const fontList = ref<string[]>([]);
-const fontOptions = computed(() =>
-  fontList.value.map((name) => ({
-    label: name,
-    value: name
-  }))
-);
-window.api.invoke('get-system-fonts').then((fonts: string[]) => {
-  fontList.value = fonts;
+function clearFont() {
+  setData.value.lyricFontFamily = '';
+  fontSearchQuery.value = '';
+  sendLyricStyle();
+  fontInputRef.value?.focus();
+}
+
+function onFontClickOutside(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (!target.closest('.font-select-wrapper')) {
+    fontDropdownOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', onFontClickOutside);
+  window.api.invoke('get-system-fonts').then((fonts: string[]) => {
+    fontList.value = fonts as string[];
+  });
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', onFontClickOutside);
 });
 
 // 本地歌词相关
@@ -444,5 +542,24 @@ function saveOrder(order: string[]) {
   gap: 4px;
   min-width: 280px;
   max-width: 400px;
+}
+
+.font-select-wrapper input {
+  padding-right: 24px;
+}
+
+.font-select-input--open {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 34, 197, 94), 0.2);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

@@ -211,12 +211,12 @@ const handleShortcutsChange = (shortcuts: any) => {
 }
 
 .shortcut-recorder:hover {
-  border-color: var(--accent-color, #1db954);
+  border-color: var(--accent-color);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .shortcut-recorder.recording {
-  border-color: var(--accent-color, #1db954);
+  border-color: var(--accent-color);
   background: rgba(255, 255, 255, 0.08);
   animation: pulse 1.2s ease-in-out infinite;
 }

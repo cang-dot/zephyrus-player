@@ -5,11 +5,29 @@
       <span class="song-name">{{ songName }}</span>
     </div>
     <div class="control-bar__center">
-      <button class="ctrl-btn" title="快退 0.5s" @click="$emit('skip-backward')">
-        <span class="skip-label">-0.5s</span>
+      <button class="ctrl-btn ctrl-display" title="显示模式" @click="$emit('cycle-display-mode')">
+        <i :class="displayModeIcon"></i>
       </button>
-      <button class="ctrl-btn" title="快进 0.5s" @click="$emit('skip-forward')">
-        <span class="skip-label">+0.5s</span>
+      <button class="ctrl-btn ctrl-font" title="字体缩小" @click="$emit('decrease-font')">
+        <span class="skip-label">A-</span>
+      </button>
+      <button class="ctrl-btn ctrl-font" title="字体放大" @click="$emit('increase-font')">
+        <span class="skip-label">A+</span>
+      </button>
+      <button
+        class="ctrl-btn ctrl-translate"
+        title="翻译"
+        :class="{ active: showTranslation }"
+        @click="$emit('toggle-translation')"
+      >
+        <i class="ri-translate-2"></i>
+      </button>
+      <button class="ctrl-btn ctrl-theme" title="主题" @click="$emit('toggle-theme')">
+        <i :class="theme === 'light' ? 'ri-moon-line' : 'ri-sun-line'"></i>
+      </button>
+      <span class="ctrl-divider"></span>
+      <button class="ctrl-btn ctrl-skip" title="快退 0.5s" @click="$emit('skip-backward')">
+        <span class="skip-label">-0.5s</span>
       </button>
       <button class="ctrl-btn" @click="$emit('prev')">
         <i class="ri-skip-back-fill"></i>
@@ -20,12 +38,15 @@
       <button class="ctrl-btn" @click="$emit('next')">
         <i class="ri-skip-forward-fill"></i>
       </button>
+      <button class="ctrl-btn ctrl-skip" title="快进 0.5s" @click="$emit('skip-forward')">
+        <span class="skip-label">+0.5s</span>
+      </button>
     </div>
     <div class="control-bar__right">
-      <button class="ctrl-btn" @click="$emit('update:isLock')">
+      <button class="ctrl-btn lock-action" @click="$emit('update:isLock')">
         <i :class="isLocked ? 'ri-lock-line' : 'ri-lock-unlock-line'"></i>
       </button>
-      <button class="ctrl-btn" @click="$emit('close')">
+      <button class="ctrl-btn lock-action" @click="$emit('close')">
         <i class="ri-close-line"></i>
       </button>
     </div>
@@ -33,24 +54,45 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface Props {
   showControls: boolean;
   isLocked: boolean;
   songName: string;
   isPlay: boolean;
+  displayMode: 'scroll' | 'single' | 'double';
+  showTranslation: boolean;
+  theme: 'light' | 'dark';
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 defineEmits<{
-  'play-pause': []
-  'prev': []
-  'next': []
-  'update:isLock': []
-  'close': []
-  'skip-forward': []
-  'skip-backward': []
+  'play-pause': [];
+  prev: [];
+  next: [];
+  'update:isLock': [];
+  close: [];
+  'skip-forward': [];
+  'skip-backward': [];
+  'cycle-display-mode': [];
+  'increase-font': [];
+  'decrease-font': [];
+  'toggle-translation': [];
+  'toggle-theme': [];
 }>();
+
+const displayModeIcon = computed(() => {
+  switch (props.displayMode) {
+    case 'scroll':
+      return 'ri-align-justify';
+    case 'single':
+      return 'ri-subtract-line';
+    case 'double':
+      return 'ri-layout-row-line';
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -76,28 +118,35 @@ defineEmits<{
   &__center {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
   }
 
   &__right {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
   }
 }
 
 .music-icon {
   font-size: 16px;
-  color: var(--highlight-color, #1db954);
+  color: var(--highlight-color, var(--accent-color));
 }
 
 .song-name {
   font-size: 13px;
-  color: var(--highlight-color, #1db954);
+  color: var(--highlight-color, var(--accent-color));
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ctrl-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
 }
 
 .ctrl-btn {
@@ -120,9 +169,30 @@ defineEmits<{
     color: #fff;
   }
 
+  &.active {
+    color: var(--highlight-color, var(--accent-color));
+  }
+
   .skip-label {
     font-size: 11px;
     font-weight: 500;
   }
+}
+
+.light .ctrl-btn {
+  color: rgba(0, 0, 0, 0.6);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #000;
+  }
+
+  &.active {
+    color: var(--highlight-color, var(--accent-color));
+  }
+}
+
+.light .ctrl-divider {
+  background: rgba(0, 0, 0, 0.15);
 }
 </style>
