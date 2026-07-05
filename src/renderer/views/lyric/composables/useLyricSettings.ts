@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue';
+
 import { validateColor } from '@/utils/linearColor';
 
 export interface LyricSettings {
@@ -8,6 +9,10 @@ export interface LyricSettings {
   highlightColor: string | undefined;
   showTranslation: boolean;
   displayMode: 'scroll' | 'single' | 'double';
+  fontFamily: string;
+  textColor: string;
+  strokeColor: string;
+  useCoverColor: boolean;
 }
 
 export function loadLyricSettings(): LyricSettings {
@@ -28,7 +33,11 @@ export function loadLyricSettings(): LyricSettings {
         showTranslation: parsed.showTranslation ?? true,
         displayMode: (['scroll', 'single', 'double'].includes(parsed.displayMode)
           ? parsed.displayMode
-          : 'scroll') as LyricSettings['displayMode']
+          : 'scroll') as LyricSettings['displayMode'],
+        fontFamily: parsed.fontFamily || '',
+        textColor: parsed.textColor || '',
+        strokeColor: parsed.strokeColor || '',
+        useCoverColor: parsed.useCoverColor !== false
       };
     }
   } catch (error) {
@@ -40,7 +49,11 @@ export function loadLyricSettings(): LyricSettings {
     isLock: false,
     highlightColor: undefined,
     showTranslation: true,
-    displayMode: 'scroll'
+    displayMode: 'scroll',
+    fontFamily: '',
+    textColor: '',
+    strokeColor: '',
+    useCoverColor: true
   };
 }
 

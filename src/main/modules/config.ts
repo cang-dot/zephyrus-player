@@ -32,6 +32,12 @@ type SetConfig = {
   diskCacheDir: string;
   diskCacheMaxSizeMB: number;
   diskCacheCleanupPolicy: 'lru' | 'fifo';
+  defaultPage: string;
+  lyricUnlockShortcut: string;
+  lyricFontFamily: string;
+  lyricTextColor: string;
+  lyricStrokeColor: string;
+  lyricUseCoverColor: boolean;
 };
 interface StoreType {
   set: SetConfig;

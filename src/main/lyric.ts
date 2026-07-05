@@ -215,12 +215,22 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
       mainWin.webContents.send('lyric-window-ready');
     }
 
-    // 发送解锁快捷键配置到歌词窗口 + 注册全局快捷键
     if (lyricWindow && !lyricWindow.isDestroyed()) {
-      const settings = getStore().get('set', {}) as Record<string, unknown>;
-      const shortcut = (settings.lyricUnlockShortcut as string) || 'CommandOrControl+L';
+      const settings = getStore().get('set');
+
+      // 解锁快捷键
+      const shortcut = settings.lyricUnlockShortcut || 'CommandOrControl+L';
       lyricWindow.webContents.send('receive-lyric-shortcut', shortcut);
       registerUnlockGlobalShortcut(shortcut);
+
+      // 歌词样式配置
+      const styleConfig = {
+        fontFamily: settings.lyricFontFamily || '',
+        textColor: settings.lyricTextColor || '',
+        strokeColor: settings.lyricStrokeColor || '',
+        useCoverColor: settings.lyricUseCoverColor !== false
+      };
+      lyricWindow.webContents.send('receive-lyric-style', styleConfig);
     }
   });
 
@@ -229,6 +239,13 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     registerUnlockGlobalShortcut(shortcut);
     if (lyricWindow && !lyricWindow.isDestroyed()) {
       lyricWindow.webContents.send('receive-lyric-shortcut', shortcut);
+    }
+  });
+
+  // 歌词样式实时更新
+  ipcMain.on('lyric-update-style', (_, styleConfig) => {
+    if (lyricWindow && !lyricWindow.isDestroyed()) {
+      lyricWindow.webContents.send('receive-lyric-style', styleConfig);
     }
   });
 

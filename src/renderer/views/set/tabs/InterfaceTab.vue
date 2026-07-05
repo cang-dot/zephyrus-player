@@ -16,9 +16,7 @@
   <!-- 本地歌词文件指定 -->
   <div class="mt-4">
     <div class="mb-2">
-      <div class="text-base font-medium text-gray-900 dark:text-white">
-        本地歌词文件
-      </div>
+      <div class="text-base font-medium text-gray-900 dark:text-white">本地歌词文件</div>
       <div class="text-sm text-gray-500 dark:text-gray-400">
         为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）
       </div>
@@ -45,14 +43,18 @@
 
       <!-- 已绑定歌词列表 -->
       <div v-if="boundLyrics.length > 0" class="mt-3">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">已绑定的歌词文件</div>
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          已绑定的歌词文件
+        </div>
         <div class="space-y-1">
           <div v-for="(item, index) in boundLyrics" :key="item.songId" class="sidebar-item">
             <div class="sidebar-item-left">
               <i class="ri-music-2-line sidebar-item-icon text-xs"></i>
               <div class="sidebar-item-name">
                 <div class="text-xs">{{ item.songName }}</div>
-                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">{{ item.filePath.split(/[/\\]/).pop() }}</div>
+                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">
+                  {{ item.filePath.split(/[/\\]/).pop() }}
+                </div>
               </div>
             </div>
             <div class="sidebar-item-right">
@@ -63,6 +65,65 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 桌面歌词设置 -->
+  <div class="mt-4">
+    <div class="mb-2">
+      <div class="text-base font-medium text-gray-900 dark:text-white">桌面歌词</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        自定义桌面歌词的字体、颜色和描边（重启歌词窗口后生效）
+      </div>
+    </div>
+    <div class="space-y-3">
+      <!-- 字体 -->
+      <setting-item title="字体" description="输入系统字体名称，留空使用默认">
+        <input
+          v-model="setData.lyricFontFamily"
+          type="text"
+          class="w-full max-w-[260px] px-3 py-1.5 rounded-lg border border-gray-300 dark:border-white/20 bg-white dark:bg-white/10 text-sm text-gray-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
+          placeholder="如: 'Noto Sans SC', sans-serif"
+          @input="debouncedSendLyricStyle"
+        />
+      </setting-item>
+
+      <!-- 文本颜色 -->
+      <setting-item title="文本颜色" description="歌词文字颜色，留空跟随主题">
+        <div class="flex items-center gap-2">
+          <input
+            type="color"
+            :value="setData.lyricTextColor || '#ffffff'"
+            class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+            @input="onColorInput($event, 'lyricTextColor')"
+          />
+          <button
+            class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+            @click="setData.lyricTextColor = ''; sendLyricStyle()"
+          >重置</button>
+        </div>
+      </setting-item>
+
+      <!-- 描边颜色 -->
+      <setting-item title="描边颜色" description="歌词文字描边/阴影颜色，留空无描边">
+        <div class="flex items-center gap-2">
+          <input
+            type="color"
+            :value="setData.lyricStrokeColor || '#000000'"
+            class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+            @input="onColorInput($event, 'lyricStrokeColor')"
+          />
+          <button
+            class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+            @click="setData.lyricStrokeColor = ''; sendLyricStyle()"
+          >重置</button>
+        </div>
+      </setting-item>
+
+      <!-- 封面取色 -->
+      <setting-item title="封面取色" description="自动跟随当前播放歌曲封面提取颜色">
+        <n-switch v-model:value="setData.lyricUseCoverColor" @update:value="sendLyricStyle" />
+      </setting-item>
     </div>
   </div>
 
@@ -81,9 +142,11 @@
         v-for="(item, index) in sidebarItems"
         :key="item.path"
         class="flex items-center justify-between px-3 py-2 rounded-lg border transition-all"
-        :class="item.hidden
-          ? 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/8 opacity-50'
-          : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/8 hover:bg-gray-100 dark:hover:bg-white/8'"
+        :class="
+          item.hidden
+            ? 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/8 opacity-50'
+            : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/8 hover:bg-gray-100 dark:hover:bg-white/8'
+        "
       >
         <div class="flex items-center gap-2">
           <span class="text-xs text-gray-400 dark:text-white/40 min-w-[16px]">{{ index + 1 }}</span>
@@ -110,9 +173,11 @@
           <button
             v-if="item.path !== '/set'"
             class="w-7 h-7 flex items-center justify-center rounded-md transition-colors"
-            :class="item.hidden
-              ? 'text-gray-400 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10'
-              : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'"
+            :class="
+              item.hidden
+                ? 'text-gray-400 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10'
+                : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+            "
             @click="toggleHidden(item.path)"
             :title="item.hidden ? '显示' : '隐藏'"
           >
@@ -125,28 +190,52 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NSwitch } from 'naive-ui';
+
+import { usePlayerStore } from '@/store/modules/player';
+import {
+  getLocalLyricMap,
+  getLocalLyricPath,
+  readLocalLyricFile,
+  removeLocalLyricPath,
+  selectLyricFile,
+  setLocalLyricPath
+} from '@/utils/localLyricStorage';
+import { parseTtml } from '@/utils/ttmlParser';
+import { parseLyrics } from '@/utils/yrcParser';
 
 import { SETTINGS_DATA_KEY } from '../keys';
 import SettingItem from '../SettingItem.vue';
 import SettingSection from '../SettingSection.vue';
 import SSelect from '../SSelect.vue';
-import { usePlayerStore } from '@/store/modules/player';
-import {
-  getLocalLyricMap,
-  getLocalLyricPath,
-  setLocalLyricPath,
-  removeLocalLyricPath,
-  selectLyricFile,
-  readLocalLyricFile
-} from '@/utils/localLyricStorage';
-import { parseLyrics } from '@/utils/yrcParser';
-import { parseTtml } from '@/utils/ttmlParser';
 
 const { t } = useI18n();
 const setData = inject(SETTINGS_DATA_KEY)!;
 const playerStore = usePlayerStore();
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+function sendLyricStyle() {
+  window.electron.ipcRenderer.send('lyric-update-style', {
+    fontFamily: setData.value.lyricFontFamily || '',
+    textColor: setData.value.lyricTextColor || '',
+    strokeColor: setData.value.lyricStrokeColor || '',
+    useCoverColor: setData.value.lyricUseCoverColor !== false
+  });
+}
+
+function debouncedSendLyricStyle() {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(sendLyricStyle, 400);
+}
+
+function onColorInput(event: Event, key: string) {
+  const target = event.target as HTMLInputElement;
+  setData.value[key] = target.value;
+  sendLyricStyle();
+}
 
 // 本地歌词相关
 const currentSongId = computed(() => playerStore.playMusic?.id?.toString() || '');
@@ -207,22 +296,22 @@ async function reloadCurrentLyric() {
     // 触发歌词更新
     playerStore.playMusic.lyric = {
       lrcArray: ttmlLines,
-      lrcTimeArray: ttmlLines.map(l => l.startTime || 0)
+      lrcTimeArray: ttmlLines.map((l) => l.startTime || 0)
     };
   } else {
     // LRC 格式
     const { lyrics } = parseLyrics(content);
-    const lrcArray = lyrics.map(l => ({
+    const lrcArray = lyrics.map((l) => ({
       text: l.fullText,
       trText: '',
-      words: l.words?.map(w => ({ text: w.text, startTime: w.startTime, duration: w.duration })),
+      words: l.words?.map((w) => ({ text: w.text, startTime: w.startTime, duration: w.duration })),
       hasWordByWord: l.words && l.words.length > 1,
       startTime: l.startTime,
       duration: l.duration
     }));
     playerStore.playMusic.lyric = {
       lrcArray,
-      lrcTimeArray: lrcArray.map(l => l.startTime || 0)
+      lrcTimeArray: lrcArray.map((l) => l.startTime || 0)
     };
   }
 }

@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 
 import LyricControlBar from './components/LyricControlBar.vue';
 import LyricDisplay from './components/LyricDisplay.vue';
@@ -64,6 +64,8 @@ import { useLyricControls } from './composables/useLyricControls';
 import { useLyricDrag } from './composables/useLyricDrag';
 import { useLyricSettings } from './composables/useLyricSettings';
 import { useLyricState } from './composables/useLyricState';
+
+const windowData = window as any;
 
 defineOptions({ name: 'Lyric' });
 
@@ -107,6 +109,62 @@ const { handleMouseDown } = useLyricDrag(lyricSetting);
 
 // ── 计算属性 ──
 const songName = computed(() => staticData.value.playMusic?.name || '');
+
+// ── 歌词样式 IPC ──
+function applyStyle(config: { fontFamily?: string; textColor?: string; strokeColor?: string; useCoverColor?: boolean }) {
+  const root = document.documentElement;
+
+  if (config.fontFamily) {
+    root.style.setProperty('--lyric-font-family', config.fontFamily);
+    lyricSetting.value.fontFamily = config.fontFamily;
+  }
+
+  if (config.textColor) {
+    root.style.setProperty('--text-color', config.textColor);
+    lyricSetting.value.textColor = config.textColor;
+  } else {
+    root.style.removeProperty('--text-color');
+    lyricSetting.value.textColor = '';
+  }
+
+  if (config.strokeColor) {
+    const strokeValue = `0 1px 3px ${config.strokeColor}, 0 0 1px ${config.strokeColor}`;
+    root.style.setProperty('--lyric-text-shadow', strokeValue);
+    lyricSetting.value.strokeColor = config.strokeColor;
+  } else {
+    root.style.removeProperty('--lyric-text-shadow');
+    lyricSetting.value.strokeColor = '';
+  }
+
+  if (config.useCoverColor !== undefined) {
+    lyricSetting.value.useCoverColor = config.useCoverColor;
+    if (config.useCoverColor && config.strokeColor) {
+      root.style.setProperty('--lyric-stroke-color', config.strokeColor);
+    } else {
+      root.style.removeProperty('--lyric-stroke-color');
+    }
+  }
+}
+
+const styleHandler = (_: any, config: any) => {
+  applyStyle(config);
+  try {
+    localStorage.setItem('lyricStyleConfig', JSON.stringify(config));
+  } catch {}
+};
+
+onMounted(() => {
+  windowData.electron.ipcRenderer.on('receive-lyric-style', styleHandler);
+
+  const cached = localStorage.getItem('lyricStyleConfig');
+  if (cached) {
+    try { applyStyle(JSON.parse(cached)); } catch {}
+  }
+});
+
+onUnmounted(() => {
+  windowData.electron.ipcRenderer.removeListener('receive-lyric-style', styleHandler);
+});
 </script>
 
 <style scoped>
@@ -131,6 +189,7 @@ body,
   user-select: none;
   overflow: hidden;
   position: relative;
+  font-family: var(--lyric-font-family, inherit);
 
   // 未锁定：保持半透明黑色背景
   &:not(.locked) {

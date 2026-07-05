@@ -44,5 +44,9 @@
     "hidden": []
   },
   "defaultPage": "/",
-  "lyricUnlockShortcut": "CommandOrControl+L"
+  "lyricUnlockShortcut": "CommandOrControl+L",
+  "lyricFontFamily": "",
+  "lyricTextColor": "",
+  "lyricStrokeColor": "",
+  "lyricUseCoverColor": true
 }

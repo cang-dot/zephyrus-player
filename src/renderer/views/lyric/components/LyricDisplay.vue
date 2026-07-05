@@ -254,6 +254,7 @@ withDefaults(defineProps<Props>(), {
   color: #fff;
   line-height: 1.2;
   text-align: center;
+  text-shadow: var(--lyric-text-shadow, none);
 }
 
 .light .lyric-text {
