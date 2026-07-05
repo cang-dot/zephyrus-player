@@ -112,9 +112,9 @@
           >
             <!-- Background blur image -->
             <img
-              v-if="fmCurrentCover"
+              v-if="displayCover"
               ref="fmCoverRef"
-              :src="getImgUrl(fmCurrentCover, '512y512')"
+              :src="getImgUrl(displayCover, '512y512')"
               alt=""
               class="absolute inset-0 h-full w-full scale-150 object-cover opacity-20 blur-3xl"
               :class="isFmPlaying ? 'fm-bg-flow' : ''"
@@ -132,8 +132,8 @@
                   class="fm-cover-lg relative w-28 h-28 md:w-36 md:h-36 overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
                 >
                   <img
-                    v-if="fmCurrentCover"
-                    :src="getImgUrl(fmCurrentCover, '512y512')"
+                    v-if="displayCover"
+                    :src="getImgUrl(displayCover, '512y512')"
                     alt=""
                     class="h-full w-full object-cover"
                   />
@@ -141,33 +141,53 @@
                     <i class="ri-radio-fill text-4xl text-white/40" />
                   </div>
                   <!-- Playing equalizer overlay -->
-                  <div v-if="isFmPlaying" class="absolute bottom-2 right-2 flex items-end gap-[2px]">
+                  <div
+                    v-if="isFmPlaying"
+                    class="absolute bottom-2 right-2 flex items-end gap-[2px]"
+                  >
                     <span
                       v-for="i in 3"
                       :key="i"
                       class="eq-bar"
-                      :style="{ animationDelay: `${(i - 1) * 0.15}s`, '--eq-color': primaryColor || '#22c55e' }"
+                      :style="{
+                        animationDelay: `${(i - 1) * 0.15}s`,
+                        '--eq-color': primaryColor || '#22c55e'
+                      }"
                     />
                   </div>
                 </div>
                 <!-- Song Info -->
                 <div class="text-center max-w-[180px]">
                   <h3 class="truncate text-sm font-bold text-white">
-                    {{ fmCurrentSong?.name || t('comp.homeHero.discoverMusic') }}
+                    {{ displaySong?.name || t('comp.homeHero.discoverMusic') }}
                   </h3>
                   <p class="mt-0.5 truncate text-xs text-white/50">
-                    {{ fmCurrentArtist }}
+                    {{ displayArtist }}
                   </p>
                 </div>
               </div>
 
               <!-- Center: Lyrics -->
-              <HomeFmLyrics class="flex-1 min-w-0" />
+              <home-fm-lyrics :key="activeMode" class="flex-1 min-w-0" />
 
               <!-- Right: Controls + Badge -->
               <div class="flex flex-col items-end justify-between flex-shrink-0">
-                <!-- FM Badge -->
-                <span class="flex items-center gap-1 text-xs font-semibold text-white/50">
+                <!-- Mode Badge / Dropdown -->
+                <n-dropdown
+                  v-if="isCookieUser"
+                  trigger="click"
+                  :options="modeOptions"
+                  @select="switchMode"
+                >
+                  <span
+                    class="flex items-center gap-1 text-xs font-semibold text-white/50 cursor-pointer hover:text-white/80 transition-colors"
+                  >
+                    <i :class="activeMode === 'intelligence' ? 'ri-heart-pulse-fill' : 'ri-radio-fill'" />
+                    {{ activeMode === 'intelligence' ? t('comp.homeHero.intelligenceMode') : t('comp.homeHero.personalFm') }}
+                    <i class="ri-arrow-down-s-line text-[10px]" />
+                  </span>
+                </n-dropdown>
+                <span v-else class="flex items-center gap-1 text-xs font-semibold text-white/50">
                   <i class="ri-radio-fill" />
                   {{ t('comp.homeHero.personalFm') }}
                 </span>
@@ -175,6 +195,16 @@
                 <!-- Playback Controls -->
                 <div class="flex items-center gap-3">
                   <button
+                    v-if="activeMode === 'intelligence'"
+                    class="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+                    :class="isFavorite ? 'text-red-500' : 'text-white/50 hover:text-white'"
+                    :title="isFavorite ? t('comp.songItem.unfavorite') : t('comp.songItem.favorite')"
+                    @click.stop="toggleFavorite"
+                  >
+                    <i :class="isFavorite ? 'ri-heart-3-fill' : 'ri-heart-3-line'" class="text-lg" />
+                  </button>
+                  <button
+                    v-else
                     class="flex h-9 w-9 items-center justify-center rounded-full text-white/50 transition-colors hover:text-white"
                     :title="t('comp.homeHero.fmTrash')"
                     @click.stop="handleFmTrash"
@@ -193,7 +223,7 @@
                   <button
                     class="flex h-9 w-9 items-center justify-center rounded-full text-white/50 transition-colors hover:text-white"
                     :title="t('comp.homeHero.fmNext')"
-                    @click.stop="handleFmNext"
+                    @click.stop="handleNext"
                   >
                     <i class="ri-skip-forward-fill text-lg" />
                   </button>
@@ -272,23 +302,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onActivated, onMounted, ref } from 'vue';
+import { computed, h, onActivated, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import type { MenuOption } from 'naive-ui';
 
 import { getHotSinger, getPersonalFM, getPersonalizedPlaylist } from '@/api/home';
 import { fmTrash } from '@/api/music';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
-import HomeFmLyrics from '@/views/home/components/HomeFmLyrics.vue';
 import { useCoverColor } from '@/hooks/useCoverColor';
 import {
   useIntelligenceModeStore,
   usePlayerCoreStore,
+  usePlayerStore,
   useRecommendStore,
   useUserStore
 } from '@/store';
+import { useFavorite } from '@/hooks/useFavorite';
 import { getImgUrl } from '@/utils';
 import { getImageBackground } from '@/utils/linearColor';
+import HomeFmLyrics from '@/views/home/components/HomeFmLyrics.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -296,6 +329,8 @@ const recommendStore = useRecommendStore();
 const intelligenceModeStore = useIntelligenceModeStore();
 const userStore = useUserStore();
 const playerCoreStore = usePlayerCoreStore();
+const playerStore = usePlayerStore();
+const { isFavorite, toggleFavorite } = useFavorite();
 const { primaryColor } = useCoverColor();
 
 const loading = ref(false);
@@ -326,13 +361,42 @@ const fmCurrentArtist = computed(() => {
   return artists?.map((a: any) => a.name).join(' / ') || '';
 });
 
-const isIntelligenceMode = computed(() => intelligenceModeStore.isIntelligenceMode);
-const isFmPlaying = computed(
-  () =>
+const isCookieUser = computed(() => !!userStore.user && userStore.loginType === 'cookie');
+const activeMode = computed(() => intelligenceModeStore.isIntelligenceMode ? 'intelligence' : 'fm');
+
+const modeOptions = computed<MenuOption[]>(() => [
+  { key: 'fm', label: t('comp.homeHero.personalFm'), icon: () => h('i', { class: 'ri-radio-fill' }) },
+  { key: 'intelligence', label: t('comp.homeHero.intelligenceMode'), icon: () => h('i', { class: 'ri-heart-pulse-fill' }) }
+]);
+
+const displaySong = computed(() => {
+  if (activeMode.value === 'intelligence') return playerCoreStore.currentSong;
+  return fmCurrentSong.value;
+});
+const displayCover = computed(() => {
+  if (activeMode.value === 'intelligence') return playerCoreStore.currentSong?.al?.picUrl || playerCoreStore.currentSong?.album?.picUrl || '';
+  return fmCurrentCover.value;
+});
+const displayArtist = computed(() => {
+  if (activeMode.value === 'intelligence') {
+    const song = playerCoreStore.currentSong;
+    if (!song) return '';
+    const artists = song.artists || song.ar;
+    return artists?.map((a: any) => a.name).join(' / ') || '';
+  }
+  return fmCurrentArtist.value;
+});
+
+const isFmPlaying = computed(() => {
+  if (activeMode.value === 'intelligence') {
+    return !!playerCoreStore.currentSong?.id && playerCoreStore.isPlaying;
+  }
+  return (
     !!fmCurrentSong.value &&
     playerCoreStore.currentSong?.id === fmCurrentSong.value.id &&
     playerCoreStore.isPlaying
-);
+  );
+});
 
 // ==================== Color extraction ====================
 
@@ -417,10 +481,16 @@ const preloadNextFm = async () => {
   }
 };
 
-/** Play/pause current FM song */
+/** Play/pause current song */
 const handleFmPlay = async () => {
+  if (activeMode.value === 'intelligence') {
+    const { usePlaylistStore } = await import('@/store/modules/playlist');
+    const playlistStore = usePlaylistStore();
+    await playlistStore.setPlay(playerCoreStore.currentSong);
+    return;
+  }
+  // FM mode
   if (!fmCurrentSong.value) return;
-  // Toggle play/pause if this FM song is already loaded
   if (playerCoreStore.currentSong?.id === fmCurrentSong.value.id) {
     const { usePlaylistStore } = await import('@/store/modules/playlist');
     const playlistStore = usePlaylistStore();
@@ -479,6 +549,15 @@ const handleFmTrash = async () => {
   await handleFmNext();
 };
 
+/** Next track --- dispatch by active mode */
+const handleNext = async () => {
+  if (activeMode.value === 'intelligence') {
+    playerStore.nextPlay();
+    return;
+  }
+  await handleFmNext();
+};
+
 // ==================== Quick Nav ====================
 
 const quickNavItems = computed(() => {
@@ -487,7 +566,7 @@ const quickNavItems = computed(() => {
       key: 'intelligence',
       label: t('comp.homeHero.intelligenceMode'),
       icon: 'ri-heart-pulse-fill',
-      active: isIntelligenceMode.value,
+      active: intelligenceModeStore.isIntelligenceMode,
       action: toggleIntelligenceMode,
       show: isLoggedIn.value
     },
@@ -624,8 +703,16 @@ const playDayRecommend = async () => {
   }
 };
 
+const switchMode = (key: string) => {
+  if (key === 'intelligence') {
+    intelligenceModeStore.playIntelligenceMode();
+  } else {
+    intelligenceModeStore.clearIntelligenceMode();
+  }
+};
+
 const toggleIntelligenceMode = () => {
-  if (isIntelligenceMode.value) {
+  if (intelligenceModeStore.isIntelligenceMode) {
     intelligenceModeStore.clearIntelligenceMode();
   } else {
     intelligenceModeStore.playIntelligenceMode();
@@ -790,4 +877,3 @@ onActivated(() => {
   }
 }
 </style>
-
