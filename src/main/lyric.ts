@@ -1,12 +1,49 @@
-import { BrowserWindow, IpcMain, screen } from 'electron';
+import { BrowserWindow, globalShortcut, IpcMain, screen } from 'electron';
 import Store from 'electron-store';
 import path, { join } from 'path';
+
+import { getStore } from './modules/config';
+import { normalizeShortcutAccelerator } from '../shared/shortcuts';
 
 const store = new Store();
 let lyricWindow: BrowserWindow | null = null;
 
 // 跟踪拖动状态
 let isDragging = false;
+
+// 锁定状态悬停检测轮询
+let hoverCheckInterval: NodeJS.Timeout | null = null;
+
+// 已注册的解锁全局快捷键
+let registeredUnlockShortcut: string | null = null;
+
+function registerUnlockGlobalShortcut(accelerator: string) {
+  if (registeredUnlockShortcut) {
+    try { globalShortcut.unregister(registeredUnlockShortcut); } catch {}
+    registeredUnlockShortcut = null;
+  }
+
+  const normalized = normalizeShortcutAccelerator(accelerator);
+  if (!normalized) return;
+
+  try {
+    globalShortcut.register(normalized, () => {
+      if (lyricWindow && !lyricWindow.isDestroyed()) {
+        lyricWindow.webContents.send('lyric-unlock');
+      }
+    });
+    registeredUnlockShortcut = normalized;
+  } catch (error) {
+    console.error('[Lyric] 注册解锁快捷键失败:', error);
+  }
+}
+
+function unregisterUnlockGlobalShortcut() {
+  if (registeredUnlockShortcut) {
+    try { globalShortcut.unregister(registeredUnlockShortcut); } catch {}
+    registeredUnlockShortcut = null;
+  }
+}
 
 // 添加窗口大小变化防护
 let originalSize = { width: 0, height: 0 };
@@ -177,6 +214,22 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     if (mainWin && !mainWin.isDestroyed()) {
       mainWin.webContents.send('lyric-window-ready');
     }
+
+    // 发送解锁快捷键配置到歌词窗口 + 注册全局快捷键
+    if (lyricWindow && !lyricWindow.isDestroyed()) {
+      const settings = getStore().get('set', {}) as Record<string, unknown>;
+      const shortcut = (settings.lyricUnlockShortcut as string) || 'CommandOrControl+L';
+      lyricWindow.webContents.send('receive-lyric-shortcut', shortcut);
+      registerUnlockGlobalShortcut(shortcut);
+    }
+  });
+
+  // 解锁快捷键实时更新
+  ipcMain.on('lyric-update-shortcut', (_, shortcut) => {
+    registerUnlockGlobalShortcut(shortcut);
+    if (lyricWindow && !lyricWindow.isDestroyed()) {
+      lyricWindow.webContents.send('receive-lyric-shortcut', shortcut);
+    }
   });
 
   ipcMain.on('send-lyric', (_, data) => {
@@ -206,6 +259,11 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
   });
 
   ipcMain.on('close-lyric', () => {
+    unregisterUnlockGlobalShortcut();
+    if (hoverCheckInterval) {
+      clearInterval(hoverCheckInterval);
+      hoverCheckInterval = null;
+    }
     if (lyricWindow && !lyricWindow.isDestroyed()) {
       lyricWindow.webContents.send('lyric-window-close');
       mainWin.webContents.send('lyric-control-back', 'close');
@@ -281,6 +339,37 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     if (!lyricWindow || lyricWindow.isDestroyed()) return;
 
     lyricWindow.setIgnoreMouseEvents(shouldIgnore, { forward: true });
+  });
+
+  // 锁定状态悬停检测轮询
+  ipcMain.on('set-lock-state', (_, isLocked) => {
+    if (!lyricWindow || lyricWindow.isDestroyed()) return;
+
+    if (hoverCheckInterval) {
+      clearInterval(hoverCheckInterval);
+      hoverCheckInterval = null;
+    }
+
+    if (isLocked) {
+      hoverCheckInterval = setInterval(() => {
+        if (!lyricWindow || lyricWindow.isDestroyed()) {
+          if (hoverCheckInterval) {
+            clearInterval(hoverCheckInterval);
+            hoverCheckInterval = null;
+          }
+          return;
+        }
+        const cursorPoint = screen.getCursorScreenPoint();
+        const bounds = lyricWindow.getBounds();
+        const isHovering = (
+          cursorPoint.x >= bounds.x &&
+          cursorPoint.x <= bounds.x + bounds.width &&
+          cursorPoint.y >= bounds.y &&
+          cursorPoint.y <= bounds.y + bounds.height
+        );
+        lyricWindow.webContents.send('lyric-hover-state', isHovering);
+      }, 100);
+    }
   });
 
   // 添加播放控制处理

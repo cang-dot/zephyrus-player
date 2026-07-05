@@ -44,6 +44,14 @@
       @update:is-lock="handleLock"
       @close="handleClose"
     />
+
+    <!-- 锁定状态悬浮提示 -->
+    <div v-if="lyricSetting.isLock" class="lock-overlay" :class="{ visible: isHovering }">
+      <div class="lock-hint">
+        <i class="ri-lock-line"></i>
+        <span>按下 {{ unlockShortcutDisplay }} 解锁</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -80,6 +88,8 @@ const {
 } = useLyricState(lyricSetting);
 const {
   showControls,
+  isHovering,
+  unlockShortcutDisplay,
   handlePlayPause,
   handlePrev,
   handleNext,
@@ -134,11 +144,12 @@ body,
     border-color: transparent;
   }
 
-  // 锁定 + 悬停：半透明黑色背景
+  // 锁定 + 悬停：半透明黑色背景 + 阴影
   &.locked:hover {
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(12px);
     border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
   }
 
   // 浅色主题
@@ -150,29 +161,54 @@ body,
   &.light.locked:hover {
     background: rgba(255, 255, 255, 0.85);
     border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
   }
 
-  // 锁定时控制栏默认隐藏
+  // 锁定时控制栏始终隐藏
   &.locked .control-bar {
     opacity: 0;
     pointer-events: none;
   }
 
-  // 锁定 + 悬停：显示控制栏
-  &.locked:hover .control-bar.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  // 锁定 + 悬停：只有解锁/关闭按钮可点击
-  &.locked:hover .control-bar .ctrl-btn:not(.lock-action) {
-    pointer-events: none;
-    opacity: 0.3;
-  }
-
   // 未锁定：控制栏始终可见
   &:not(.locked) .control-bar {
     opacity: 1;
+  }
+
+  // 锁定提示悬浮层
+  .lock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 5;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
+  .lock-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(12px);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .light .lock-hint {
+    background: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.85);
   }
 
   // ── 响应式精简控制栏 ──

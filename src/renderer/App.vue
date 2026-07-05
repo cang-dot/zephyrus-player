@@ -12,7 +12,7 @@
         </n-message-provider>
       </n-dialog-provider>
     </n-config-provider>
-    <splash-screen v-if="showSplash" @finish="showSplash = false" />
+    <splash-screen v-if="!isLyricWindow && showSplash" @finish="showSplash = false" />
   </div>
 </template>
 

@@ -43,5 +43,6 @@
     "order": ["/", "/search", "/list", "/album", "/toplist", "/podcast", "/history", "/local-music", "/user", "/set"],
     "hidden": []
   },
-  "defaultPage": "/"
+  "defaultPage": "/",
+  "lyricUnlockShortcut": "CommandOrControl+L"
 }
