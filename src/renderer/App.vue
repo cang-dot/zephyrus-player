@@ -1,6 +1,9 @@
 <template>
   <div class="app-container h-full w-full" :class="{ mobile: isMobile, noElectron: !isElectron }">
-    <n-config-provider :theme="theme === 'dark' ? darkTheme : lightTheme" :theme-overrides="themeOverrides">
+    <n-config-provider
+      :theme="theme === 'dark' ? darkTheme : lightTheme"
+      :theme-overrides="themeOverrides"
+    >
       <n-dialog-provider>
         <n-message-provider>
           <router-view></router-view>
@@ -48,14 +51,33 @@ const router = useRouter();
 const { primaryColor } = useCoverColor();
 const styleEngine = useStyleEngineStore();
 
-// naive-ui 主题覆盖：进度条/强调色跟随封面取色
-const themeOverrides = computed(() => ({
-  Slider: {
-    fillColor: primaryColor.value || '#22c55e',
-    fillColorHover: primaryColor.value || '#22c55e',
-    handleColor: primaryColor.value || '#22c55e',
-  }
-}));
+// naive-ui 主题覆盖：组件强调色跟随封面取色
+const themeOverrides = computed(() => {
+  const pc = primaryColor.value || '#22c55e';
+  return {
+    Slider: {
+      fillColor: pc,
+      fillColorHover: pc,
+      handleColor: pc
+    },
+    Switch: {
+      railColorActive: pc
+    },
+    Button: {
+      color: pc,
+      colorHover: pc,
+      colorFocus: pc,
+      textColor: '#fff',
+      textColorHover: '#fff',
+      textColorFocus: '#fff'
+    },
+    Tag: {
+      colorSuccess: pc,
+      textColorSuccess: '#fff',
+      borderSuccess: pc
+    }
+  };
+});
 
 // 监听语言变化
 watch(
