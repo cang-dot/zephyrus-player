@@ -15,47 +15,64 @@
 
   <!-- 本地歌词文件指定 -->
   <setting-section title="本地歌词文件" description="为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）">
-    <div class="space-y-2">
-      <div class="sidebar-item" v-if="currentSongId">
-        <div class="sidebar-item-left">
-          <i class="ri-file-music-line sidebar-item-icon"></i>
-          <div class="sidebar-item-name">
-            <div class="text-sm font-medium">{{ currentSongName }}</div>
-            <div class="text-xs text-gray-400">{{ localLyricPath || '未指定歌词文件' }}</div>
+    <div class="space-y-3">
+      <!-- 当前歌曲 -->
+      <div v-if="currentSongId" class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center">
+            <i class="ri-music-2-line text-gray-500 dark:text-gray-400"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ currentSongName }}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ localLyricPath || '未指定歌词文件' }}</div>
           </div>
         </div>
-        <div class="sidebar-item-right">
-          <button class="sidebar-btn" @click="selectLocalLyric" title="选择歌词文件">
-            <i class="ri-folder-open-line"></i>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button
+            class="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors"
+            @click="selectLocalLyric"
+          >
+            <i class="ri-folder-open-line mr-1"></i>选择文件
           </button>
-          <button v-if="localLyricPath" class="sidebar-btn" @click="clearLocalLyric" title="清除">
+          <button
+            v-if="localLyricPath"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+            @click="clearLocalLyric"
+          >
             <i class="ri-close-line"></i>
           </button>
         </div>
       </div>
-      <div v-else class="text-sm text-gray-400 italic">请先播放一首歌曲</div>
+      <div v-else class="p-4 text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 rounded-xl border border-dashed border-gray-300 dark:border-white/20">
+        <i class="ri-music-2-line text-2xl text-gray-400 dark:text-gray-500 mb-2 block"></i>
+        请先播放一首歌曲
+      </div>
 
       <!-- 已绑定歌词列表 -->
-      <div v-if="boundLyrics.length > 0" class="mt-3">
-        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-          已绑定的歌词文件
-        </div>
-        <div class="space-y-1">
-          <div v-for="(item, index) in boundLyrics" :key="item.songId" class="sidebar-item">
-            <div class="sidebar-item-left">
-              <i class="ri-music-2-line sidebar-item-icon text-xs"></i>
-              <div class="sidebar-item-name">
-                <div class="text-xs">{{ item.songName }}</div>
-                <div class="text-[10px] text-gray-400 truncate max-w-[200px]">
-                  {{ item.filePath.split(/[/\\]/).pop() }}
-                </div>
+      <div v-if="boundLyrics.length > 0">
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-1">已绑定的歌词文件</div>
+        <div class="space-y-2">
+          <div
+            v-for="(item, index) in boundLyrics"
+            :key="item.songId"
+            class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/8 transition-colors"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                <i class="ri-file-text-line text-emerald-600 dark:text-emerald-400 text-sm"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.songName }}</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ item.filePath.split(/[/\\]/).pop() }}</div>
               </div>
             </div>
-            <div class="sidebar-item-right">
-              <button class="sidebar-btn" @click="removeBoundLyric(item.songId)" title="解除绑定">
-                <i class="ri-close-line"></i>
-              </button>
-            </div>
+            <button
+              class="flex-shrink-0 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+              @click="removeBoundLyric(item.songId)"
+              title="解除绑定"
+            >
+              <i class="ri-close-line"></i>
+            </button>
           </div>
         </div>
       </div>
