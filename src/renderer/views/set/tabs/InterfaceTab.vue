@@ -78,13 +78,15 @@
     </div>
     <div class="space-y-3">
       <!-- 字体 -->
-      <setting-item title="字体" description="输入系统字体名称，留空使用默认">
-        <input
-          v-model="setData.lyricFontFamily"
-          type="text"
-          class="w-full max-w-[260px] px-3 py-1.5 rounded-lg border border-gray-300 dark:border-white/20 bg-white dark:bg-white/10 text-sm text-gray-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
-          placeholder="如: 'Noto Sans SC', sans-serif"
-          @input="debouncedSendLyricStyle"
+      <setting-item title="字体" description="选择已安装的系统字体，留空使用默认">
+        <n-auto-complete
+          v-model:value="setData.lyricFontFamily"
+          :options="fontOptions"
+          :input-props="{ class: 'w-full max-w-[260px]' }"
+          placeholder="搜索或输入字体名称..."
+          clearable
+          @select="onFontSelect"
+          @update:value="debouncedSendLyricStyle"
         />
       </setting-item>
 
@@ -192,7 +194,7 @@
 <script setup lang="ts">
 import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NSwitch } from 'naive-ui';
+import { NAutoComplete, NSwitch } from 'naive-ui';
 
 import { usePlayerStore } from '@/store/modules/player';
 import {
@@ -236,6 +238,22 @@ function onColorInput(event: Event, key: string) {
   setData.value[key] = target.value;
   sendLyricStyle();
 }
+
+function onFontSelect(_value: string) {
+  sendLyricStyle();
+}
+
+// ── 系统字体列表 ──
+const fontList = ref<string[]>([]);
+const fontOptions = computed(() =>
+  fontList.value.map((name) => ({
+    label: name,
+    value: name
+  }))
+);
+window.api.invoke('get-system-fonts').then((fonts: string[]) => {
+  fontList.value = fonts;
+});
 
 // 本地歌词相关
 const currentSongId = computed(() => playerStore.playMusic?.id?.toString() || '');
