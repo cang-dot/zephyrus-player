@@ -14,13 +14,7 @@
   </setting-section>
 
   <!-- 本地歌词文件指定 -->
-  <div class="mt-4">
-    <div class="mb-2">
-      <div class="text-base font-medium text-gray-900 dark:text-white">本地歌词文件</div>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）
-      </div>
-    </div>
+  <setting-section title="本地歌词文件" description="为当前歌曲指定本地 TTML/LRC 歌词文件（也可右键歌曲绑定）">
     <div class="space-y-2">
       <div class="sidebar-item" v-if="currentSongId">
         <div class="sidebar-item-left">
@@ -66,116 +60,100 @@
         </div>
       </div>
     </div>
-  </div>
+  </setting-section>
 
   <!-- 桌面歌词设置 -->
-  <div class="mt-4">
-    <div class="mb-2">
-      <div class="text-base font-medium text-gray-900 dark:text-white">桌面歌词</div>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        自定义桌面歌词的字体、颜色和描边（重启歌词窗口后生效）
-      </div>
-    </div>
-    <div class="space-y-3">
-      <!-- 字体 -->
-      <setting-item title="字体" description="选择已安装的系统字体，留空使用默认">
-        <div class="font-select-wrapper relative w-full max-w-[260px]">
-          <input
-            ref="fontInputRef"
-            v-model="setData.lyricFontFamily"
-            type="text"
-            class="font-select-input w-full px-3 py-1.5 rounded-lg border text-sm bg-white dark:bg-white/10 outline-none transition-colors"
-            :class="fontDropdownOpen
-              ? 'font-select-input--open'
-              : 'border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30'"
-            placeholder="搜索字体..."
-            @focus="openFontDropdown"
-            @input="onFontSearchInput"
-            @keydown.escape="fontDropdownOpen = false"
-            @keydown.enter.prevent="onFontEnter"
-            @keydown.down.prevent="onFontArrowDown"
-            @keydown.up.prevent="onFontArrowUp"
-          />
-          <button
-            v-if="setData.lyricFontFamily"
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm leading-none"
-            @click="clearFont"
-          >&times;</button>
-          <Transition name="fade">
+  <setting-section title="桌面歌词" description="自定义桌面歌词的字体、颜色和描边（重启歌词窗口后生效）">
+    <!-- 字体 -->
+    <setting-item title="字体" description="选择已安装的系统字体，留空使用默认">
+      <div class="font-select-wrapper relative w-full max-w-[260px]">
+        <input
+          ref="fontInputRef"
+          v-model="setData.lyricFontFamily"
+          type="text"
+          class="font-select-input w-full px-3 py-1.5 rounded-lg border text-sm bg-white dark:bg-white/10 outline-none transition-colors"
+          :class="fontDropdownOpen
+            ? 'font-select-input--open'
+            : 'border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30'"
+          placeholder="搜索字体..."
+          @focus="openFontDropdown"
+          @input="onFontSearchInput"
+          @keydown.escape="fontDropdownOpen = false"
+          @keydown.enter.prevent="onFontEnter"
+          @keydown.down.prevent="onFontArrowDown"
+          @keydown.up.prevent="onFontArrowUp"
+        />
+        <button
+          v-if="setData.lyricFontFamily"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm leading-none"
+          @click="clearFont"
+        >&times;</button>
+        <Transition name="fade">
+          <div
+            v-if="fontDropdownOpen && filteredFonts.length > 0"
+            class="absolute z-50 mt-1 w-full max-h-[280px] overflow-y-auto rounded-xl border bg-white shadow-lg dark:bg-neutral-900 dark:border-neutral-700"
+          >
             <div
-              v-if="fontDropdownOpen && filteredFonts.length > 0"
-              class="absolute z-50 mt-1 w-full max-h-[280px] overflow-y-auto rounded-xl border bg-white shadow-lg dark:bg-neutral-900 dark:border-neutral-700"
+              v-for="(font, idx) in filteredFonts"
+              :key="font"
+              class="flex cursor-pointer items-center px-3 py-2 text-sm transition-colors"
+              :class="[
+                idx === fontHighlightIndex
+                  ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5',
+                setData.lyricFontFamily === font ? 'font-medium' : ''
+              ]"
+              :style="{ fontFamily: font }"
+              @mousedown.prevent="selectFont(font)"
+              @mouseenter="fontHighlightIndex = idx"
             >
-              <div
-                v-for="(font, idx) in filteredFonts"
-                :key="font"
-                class="flex cursor-pointer items-center px-3 py-2 text-sm transition-colors"
-                :class="[
-                  idx === fontHighlightIndex
-                    ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5',
-                  setData.lyricFontFamily === font ? 'font-medium' : ''
-                ]"
-                :style="{ fontFamily: font }"
-                @mousedown.prevent="selectFont(font)"
-                @mouseenter="fontHighlightIndex = idx"
-              >
-                {{ font }}
-              </div>
+              {{ font }}
             </div>
-          </Transition>
-        </div>
-      </setting-item>
-
-      <!-- 文本颜色 -->
-      <setting-item title="文本颜色" description="歌词文字颜色，留空跟随主题">
-        <div class="flex items-center gap-2">
-          <input
-            type="color"
-            :value="setData.lyricTextColor || '#ffffff'"
-            class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
-            @input="onColorInput($event, 'lyricTextColor')"
-          />
-          <button
-            class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
-            @click="setData.lyricTextColor = ''; sendLyricStyle()"
-          >重置</button>
-        </div>
-      </setting-item>
-
-      <!-- 描边颜色 -->
-      <setting-item title="描边颜色" description="歌词文字描边/阴影颜色，留空无描边">
-        <div class="flex items-center gap-2">
-          <input
-            type="color"
-            :value="setData.lyricStrokeColor || '#000000'"
-            class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
-            @input="onColorInput($event, 'lyricStrokeColor')"
-          />
-          <button
-            class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
-            @click="setData.lyricStrokeColor = ''; sendLyricStyle()"
-          >重置</button>
-        </div>
-      </setting-item>
-
-      <!-- 封面取色 -->
-      <setting-item title="封面取色" description="自动跟随当前播放歌曲封面提取颜色">
-        <n-switch v-model:value="setData.lyricUseCoverColor" @update:value="sendLyricStyle" />
-      </setting-item>
-    </div>
-  </div>
-
-  <!-- 侧边栏项目排序（独立区域） -->
-  <div class="mt-4">
-    <div class="mb-2">
-      <div class="text-base font-medium text-gray-900 dark:text-white">
-        {{ t('settings.interface.sidebarOrder') }}
+          </div>
+        </Transition>
       </div>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ t('settings.interface.sidebarOrderDesc') }}
+    </setting-item>
+
+    <!-- 文本颜色 -->
+    <setting-item title="文本颜色" description="歌词文字颜色，留空跟随主题">
+      <div class="flex items-center gap-2">
+        <input
+          type="color"
+          :value="setData.lyricTextColor || '#ffffff'"
+          class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+          @input="onColorInput($event, 'lyricTextColor')"
+        />
+        <button
+          class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+          @click="setData.lyricTextColor = ''; sendLyricStyle()"
+        >重置</button>
       </div>
-    </div>
+    </setting-item>
+
+    <!-- 描边颜色 -->
+    <setting-item title="描边颜色" description="歌词文字描边/阴影颜色，留空无描边">
+      <div class="flex items-center gap-2">
+        <input
+          type="color"
+          :value="setData.lyricStrokeColor || '#000000'"
+          class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+          @input="onColorInput($event, 'lyricStrokeColor')"
+        />
+        <button
+          class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+          @click="setData.lyricStrokeColor = ''; sendLyricStyle()"
+        >重置</button>
+      </div>
+    </setting-item>
+
+    <!-- 封面取色 -->
+    <setting-item title="封面取色" description="自动跟随当前播放歌曲封面提取颜色">
+      <n-switch v-model:value="setData.lyricUseCoverColor" @update:value="sendLyricStyle" />
+    </setting-item>
+  </setting-section>
+
+  <!-- 侧边栏项目排序 -->
+  <setting-section :title="t('settings.interface.sidebarOrder')" :description="t('settings.interface.sidebarOrderDesc')">
     <div class="sidebar-sorter">
       <div
         v-for="(item, index) in sidebarItems"
@@ -225,7 +203,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </setting-section>
 </template>
 
 <script setup lang="ts">
