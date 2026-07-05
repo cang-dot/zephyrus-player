@@ -1,67 +1,44 @@
 <template>
   <div class="h-full w-full bg-white dark:bg-black transition-colors duration-500 flex flex-col">
-    <!-- 椤堕儴瀵艰埅鍖?-->
-    <div
-      class="flex-shrink-0 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-black z-10 page-padding pt-6 pb-2"
-    >
-      <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white mb-6">
+    <div class="flex-shrink-0 page-padding pt-6 pb-2">
+      <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white">
         {{ t('common.settings') }}
       </h1>
-
-      <n-scrollbar x-scrollable class="w-full">
-        <div class="flex items-center pl-2 pb-2 whitespace-nowrap">
-          <div
-            v-for="section in navSections"
-            :key="section.id"
-            class="py-1.5 px-4 mr-3 inline-block rounded-full cursor-pointer transition-all duration-300 text-sm font-medium select-none"
-            :class="
-              currentSection === section.id
-                ? 'bg-[var(--accent-color)] text-white shadow-lg shadow-primary/25 scale-105'
-                : 'bg-gray-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
-            "
-            @click="currentSection = section.id"
-          >
-            {{ section.title }}
+    </div>
+    <div class="flex flex-1 min-h-0">
+      <setting-nav
+        :sections="navSections"
+        :current-section="currentSection"
+        @navigate="currentSection = $event"
+      />
+      <n-scrollbar class="flex-1">
+        <div class="w-full mx-auto pb-32 pt-6 page-padding">
+          <div v-show="currentSection === 'basic'" class="animate-fade-in">
+            <basic-tab />
           </div>
+          <div v-show="currentSection === 'interface'" class="animate-fade-in">
+            <interface-tab />
+          </div>
+          <div v-show="currentSection === 'playback'" class="animate-fade-in">
+            <playback-tab />
+          </div>
+          <div v-show="currentSection === 'application'" class="animate-fade-in">
+            <application-tab />
+          </div>
+          <div v-show="currentSection === 'network'" class="animate-fade-in">
+            <network-tab />
+          </div>
+          <div v-show="currentSection === 'system'" class="animate-fade-in">
+            <system-tab />
+          </div>
+          <div v-show="currentSection === 'about'" class="animate-fade-in">
+            <about-tab />
+          </div>
+          <div class="h-20"></div>
+          <play-bottom />
         </div>
       </n-scrollbar>
     </div>
-
-    <!-- 鍐呭鍖哄煙 -->
-    <n-scrollbar class="flex-1">
-      <div class="w-full mx-auto pb-32 pt-6 page-padding">
-        <div v-show="currentSection === 'basic'" class="animate-fade-in">
-          <basic-tab />
-        </div>
-
-        <div v-show="currentSection === 'interface'" class="animate-fade-in">
-          <interface-tab />
-        </div>
-
-        <div v-show="currentSection === 'playback'" class="animate-fade-in">
-          <playback-tab />
-        </div>
-
-        <div v-show="currentSection === 'application'" class="animate-fade-in">
-          <application-tab />
-        </div>
-
-        <div v-show="currentSection === 'network'" class="animate-fade-in">
-          <network-tab />
-        </div>
-
-        <div v-show="currentSection === 'system'" class="animate-fade-in">
-          <system-tab />
-        </div>
-
-        <div v-show="currentSection === 'about'" class="animate-fade-in">
-          <about-tab />
-        </div>
-
-        <div class="h-20"></div>
-        <play-bottom />
-      </div>
-    </n-scrollbar>
   </div>
 </template>
 
@@ -74,6 +51,7 @@ import { useI18n } from 'vue-i18n';
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
+import SettingNav from '@/views/set/SettingNav.vue';
 
 import config from '../../../../package.json';
 import { createDefaultAppUpdateState } from '../../../shared/appUpdate';
@@ -200,4 +178,3 @@ onMounted(() => {
   }
 }
 </style>
-

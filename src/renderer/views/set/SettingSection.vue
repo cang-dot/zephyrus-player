@@ -5,10 +5,8 @@
       <slot name="title">{{ title }}</slot>
     </div>
 
-    <!-- 设置项列表容器 -->
-    <div
-      class="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm"
-    >
+    <!-- 设置项列表 -->
+    <div class="space-y-px">
       <slot></slot>
     </div>
   </div>
