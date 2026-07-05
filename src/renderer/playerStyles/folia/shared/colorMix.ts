@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export function colorWithAlpha(color: string, alpha: number): string {
   if (color.startsWith('#')) {
     const r = parseInt(color.slice(1, 3), 16)
@@ -34,3 +36,4 @@ export function mixColors(colorA: string, colorB: string, t: number): string {
   const b = Math.round(ca.b + (cb.b - ca.b) * t)
   return `rgb(${r},${g},${b})`
 }
+

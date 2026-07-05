@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export interface FoliaSyllable {
   text: string
   startTime: number
@@ -33,3 +35,4 @@ export interface FoliaTheme {
   animationIntensity: 'calm' | 'normal' | 'chaotic'
   wordColors?: { word: string; color: string }[]
 }
+

@@ -1,3 +1,7 @@
+﻿<!--
+SPDX-License-Identifier: AGPL-3.0-only
+Originally ported from Folia (AGPL-3.0) — see NOTICE
+-->
 <template>
   <div class="folia-partita-root w-full h-full flex items-center justify-center overflow-hidden pointer-events-none select-none">
     <div class="relative z-10 w-full max-w-6xl h-[70vh] flex gap-4 items-center justify-center p-8">
@@ -21,7 +25,7 @@
           </div>
         </div>
         <div v-else key="empty" class="absolute opacity-50" :style="{ color: secondaryColor }">
-          聆听音乐...
+          鑱嗗惉闊充箰...
         </div>
       </transition>
     </div>
@@ -174,3 +178,4 @@ const showText = ref(true)
   transform: scale(1.05);
 }
 </style>
+

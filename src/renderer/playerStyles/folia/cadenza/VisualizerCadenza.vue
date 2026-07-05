@@ -1,3 +1,7 @@
+﻿<!--
+SPDX-License-Identifier: AGPL-3.0-only
+Originally ported from Folia (AGPL-3.0) — see NOTICE
+-->
 <template>
   <div class="folia-cadenza-root w-full h-full overflow-hidden pointer-events-none select-none">
     <canvas ref="canvasRef" class="absolute inset-0 w-full h-full" />
@@ -165,3 +169,4 @@ onUnmounted(() => {
   background: transparent;
 }
 </style>
+

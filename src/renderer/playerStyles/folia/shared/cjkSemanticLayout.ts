@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export interface LyricLayoutUnit {
   text: string
   words: { text: string; startTime: number; endTime: number }[]
@@ -20,7 +22,7 @@ export function createSingleWordLayoutUnits(
 }
 
 const CJK_REGEX = /[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/
-const STICKY_PUNCTUATION_REGEX = /^[,.;:!?，。！？、：；）】》」』〉\]}'"’”’]+$/u
+const STICKY_PUNCTUATION_REGEX = /^[,.;:!?锛屻€傦紒锛熴€侊細锛涳級銆戙€嬨€嶃€忋€塡]}'"鈥欌€濃€橾+$/u
 
 function hasCjkText(text: string): boolean {
   return CJK_REGEX.test(text)
@@ -146,3 +148,4 @@ export function buildDisplayWordsFromLayoutUnits(
     ]
   })
 }
+

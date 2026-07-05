@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export type LineTimingClass = 'normal' | 'short' | 'micro'
 export type LineTransitionMode = 'normal' | 'fast' | 'none'
 export type WordRevealMode = 'normal' | 'fast' | 'instant'
@@ -70,3 +72,4 @@ export function getLineRenderEndTime<T extends RenderHintLineLike>(line: T | nul
   if (!line) return Number.NEGATIVE_INFINITY
   return getLineRenderHints(line)?.renderEndTime ?? line.endTime
 }
+

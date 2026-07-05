@@ -1,3 +1,7 @@
+﻿<!--
+SPDX-License-Identifier: AGPL-3.0-only
+Originally ported from Folia (AGPL-3.0) — see NOTICE
+-->
 <template>
   <div class="folia-tilt-root w-full h-full flex items-center justify-center overflow-hidden pointer-events-none select-none">
     <div class="relative z-10 w-full h-[70vh] flex flex-col items-center justify-center p-8 gap-4">
@@ -23,7 +27,7 @@
           </div>
         </div>
         <div v-else key="empty" class="absolute opacity-50" :style="{ color: secondaryColor }">
-          聆听音乐...
+          鑱嗗惉闊充箰...
         </div>
       </transition>
     </div>
@@ -108,7 +112,7 @@ function splitText(text: string, targetCount: number): string[] {
 }
 
 function findSplit(text: string, near: number): number {
-  const punct = [',', '.', '，', '。', '、', '；', '：', '!', '?', '！', '？', ' ', '　']
+  const punct = [',', '.', '锛?, '銆?, '銆?, '锛?, '锛?, '!', '?', '锛?, '锛?, ' ', '銆€']
   for (const p of punct) {
     const idx = text.indexOf(p, Math.max(0, near))
     if (idx > 0 && idx < text.length - 1) return idx + 1
@@ -181,3 +185,4 @@ onMounted(() => {
   transform: scale(1.05);
 }
 </style>
+

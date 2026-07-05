@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 import { computed, ref, type Ref } from 'vue'
 
 import type { FoliaLine } from './types'
@@ -73,3 +75,4 @@ export function useFoliaRuntime(lines: Ref<FoliaLine[]>, currentTime: Ref<number
     getLineRenderEndTime
   }
 }
+

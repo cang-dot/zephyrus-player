@@ -1,3 +1,7 @@
+﻿<!--
+SPDX-License-Identifier: AGPL-3.0-only
+Originally ported from Folia (AGPL-3.0) — see NOTICE
+-->
 <template>
   <div
     class="folia-classic-root w-full h-full flex items-center justify-center overflow-hidden pointer-events-none select-none"
@@ -43,7 +47,7 @@
           class="absolute opacity-50"
           :style="{ color: secondaryColor, fontSize: emptyFontSize }"
         >
-          聆听音乐...
+          鑱嗗惉闊充箰...
         </div>
       </transition>
     </div>
@@ -314,3 +318,4 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 </style>
+

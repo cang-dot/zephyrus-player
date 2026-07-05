@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export function resolveThemeFontStack(
   fontStyle: string,
   customFont?: string
@@ -17,3 +19,4 @@ export function resolveThemeTranslationFontStack(
 ): string {
   return resolveThemeFontStack(fontStyle)
 }
+

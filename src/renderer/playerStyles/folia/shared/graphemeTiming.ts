@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 import type { FoliaWord } from './types'
 
 export interface GraphemeTiming {
@@ -49,3 +51,4 @@ export function buildWordGraphemeTimings(word: FoliaWord, wordIndex?: number): G
     buildEvenGraphemeTimings(syllable.text, syllable.startTime, syllable.endTime, wordIndex)
   )
 }
+

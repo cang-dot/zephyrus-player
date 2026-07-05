@@ -1,3 +1,5 @@
+﻿// SPDX-License-Identifier: AGPL-3.0-only
+// Originally ported from Folia (AGPL-3.0) — see NOTICE
 export function resolveWordColor(
   wordText: string,
   wordColors?: { word: string; color: string }[],
@@ -9,3 +11,4 @@ export function resolveWordColor(
   )
   return match?.color || fallbackColor || '#ffffff'
 }
+
