@@ -1,44 +1,19 @@
 <template>
   <div class="flex items-center gap-2 pb-4 pr-4 pl-1">
-    <!-- 左侧标签页 -->
-    <transition name="tab-slide">
-      <div
-        v-if="!isSearchExpanded && !showBackButton"
-        class="tabs-track flex-shrink-0"
-        ref="tabsTrackRef"
-      >
-        <div class="tab-slider-bg" :style="sliderStyle" />
-        <button
-          v-for="(tab, i) in tabs"
-          :key="tab.key"
-          :ref="(el) => setTabRef(el as HTMLElement, i)"
-          class="tab-btn"
-          :class="isTabActive(tab.path) ? 'tab-btn--on' : 'tab-btn--off'"
-          @click="router.push(tab.path)"
-        >
-          <i :class="tab.icon" />
-          <span>{{ tab.label }}</span>
-        </button>
-      </div>
-
-      <!-- 返回按钮 -->
-      <div v-else-if="showBackButton" class="flex items-center gap-2 flex-shrink-0">
-        <button class="back-btn" @click="goBack">
-          <i class="ri-arrow-left-line" />
-        </button>
-        <transition name="nav-title">
-          <span v-if="navTitleStore.isVisible && !isSearchExpanded" class="nav-page-title">
-            {{ navTitleStore.title }}
-          </span>
-        </transition>
-      </div>
-    </transition>
-
-    <!-- 间距 -->
-    <div v-if="!isSearchExpanded" class="flex-1" />
+    <!-- 返回按钮 -->
+    <div v-if="showBackButton" class="flex items-center gap-2 flex-shrink-0">
+      <button class="back-btn" @click="goBack">
+        <i class="ri-arrow-left-line" />
+      </button>
+      <transition name="nav-title">
+        <span v-if="navTitleStore.isVisible" class="nav-page-title">
+          {{ navTitleStore.title }}
+        </span>
+      </transition>
+    </div>
 
     <!-- 搜索输入框 -->
-    <div class="search-wrap" :class="isSearchExpanded ? 'search-wrap--open' : 'search-wrap--idle'">
+    <div class="search-wrap">
       <n-popover
         trigger="manual"
         placement="bottom-end"
@@ -62,7 +37,7 @@
               @blur="handleBlur"
             />
             <n-dropdown
-              v-if="searchTypeOptions.length && isSearchExpanded"
+              v-if="searchTypeOptions.length"
               trigger="hover"
               :options="searchTypeOptions"
               @select="selectSearchType"
@@ -104,24 +79,6 @@
         <i class="ri-download-cloud-2-line" />
       </n-badge>
     </button>
-
-    <!-- 心动模式 -->
-    <n-tooltip v-if="showIntelligenceBtn" trigger="hover">
-      <template #trigger>
-        <button
-          class="action-btn"
-          :class="{ 'intelligence-active': isIntelligenceMode }"
-          @click="toggleIntelligenceMode"
-        >
-          <i class="ri-heart-pulse-line" />
-        </button>
-      </template>
-      {{
-        isIntelligenceMode
-          ? t('comp.searchBar.exitIntelligence')
-          : t('comp.searchBar.intelligenceMode')
-      }}
-    </n-tooltip>
 
     <!-- 用户 -->
     <n-popover trigger="hover" placement="bottom-end" :show-arrow="false" raw>
@@ -205,7 +162,7 @@
 import { useDebounceFn } from '@vueuse/core';
 import { computed, nextTick, onMounted, ref, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { getSearchKeyword } from '@/api/home';
 import { getUserDetail } from '@/api/login';
@@ -213,7 +170,6 @@ import { getSearchSuggestions } from '@/api/search';
 import { SEARCH_TYPES, USER_SET_OPTIONS } from '@/const/bar-const';
 import { useDownloadStatus } from '@/hooks/useDownloadStatus';
 import { useZoom } from '@/hooks/useZoom';
-import { useIntelligenceModeStore } from '@/store/modules/intelligenceMode';
 import { useNavTitleStore } from '@/store/modules/navTitle';
 import { useSearchStore } from '@/store/modules/search';
 import { useSettingsStore } from '@/store/modules/settings';
@@ -224,7 +180,6 @@ import { checkUpdate, UpdateResult } from '@/utils/update';
 import config from '../../../../package.json';
 
 const router = useRouter();
-const route = useRoute();
 const navTitleStore = useNavTitleStore();
 const searchStore = useSearchStore();
 const settingsStore = useSettingsStore();
@@ -232,24 +187,12 @@ const userStore = useUserStore();
 const userSetOptions = ref(USER_SET_OPTIONS);
 const { t, locale } = useI18n();
 
-const intelligenceModeStore = useIntelligenceModeStore();
 const { downloadingCount, navigateToDownloads } = useDownloadStatus();
 const showDownloadButton = computed(
   () =>
     isElectron && (settingsStore.setData?.alwaysShowDownloadButton || downloadingCount.value > 0)
 );
 const { zoomFactor, initZoomFactor, increaseZoom, decreaseZoom, resetZoom, isZoom100 } = useZoom();
-
-// 心动模式
-const isIntelligenceMode = computed(() => intelligenceModeStore.isIntelligenceMode);
-const showIntelligenceBtn = computed(() => userStore.user && userStore.loginType === 'cookie');
-const toggleIntelligenceMode = async () => {
-  if (isIntelligenceMode.value) {
-    intelligenceModeStore.clearIntelligenceMode();
-  } else {
-    await intelligenceModeStore.playIntelligenceMode();
-  }
-};
 
 // 返回按钮
 const showBackButton = computed(() => {
@@ -259,63 +202,18 @@ const showBackButton = computed(() => {
 });
 const goBack = () => router.back();
 
-// 标签页
-const tabs = computed(() => {
-  const items = [
-    { key: 'home', label: t('comp.home'), path: '/', icon: 'ri-home-4-fill' },
-    { key: 'playlist', label: t('comp.list'), path: '/list', icon: 'ri-play-list-2-fill' },
-    { key: 'album', label: t('comp.newAlbum.title'), path: '/album', icon: 'ri-album-fill' },
-    {
-      key: 'charts',
-      label: t('comp.toplist'),
-      path: '/toplist',
-      icon: 'ri-bar-chart-grouped-fill'
-    },
-    { key: 'mv', label: t('comp.mv'), path: '/mv', icon: 'ri-movie-2-fill' },
-    {
-      key: 'localMusic',
-      label: t('comp.localMusic'),
-      path: '/local-music',
-      icon: 'ri-folder-music-fill',
-      electronOnly: true
-    }
-  ];
-  return items.filter((tab) => !tab.electronOnly || isElectron);
-});
-const isTabActive = (path: string) => route.path === path;
-
-// 滑动标签
-const tabsTrackRef = ref<HTMLElement | null>(null);
-const tabElsRef = ref<HTMLElement[]>([]);
-const setTabRef = (el: HTMLElement, i: number) => {
-  if (el) tabElsRef.value[i] = el;
-};
-const activeTabIndex = computed(() => tabs.value.findIndex((t) => isTabActive(t.path)));
-const sliderStyle = computed(() => {
-  const el = tabElsRef.value[activeTabIndex.value];
-  if (!el) return { opacity: '0' };
-  return {
-    transform: `translateX(${el.offsetLeft}px)`,
-    width: `${el.offsetWidth}px`,
-    opacity: '1'
-  };
-});
-
 // 搜索
-const isSearchExpanded = ref(false);
 const inputFocused = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
 
 const handleFocus = () => {
   inputFocused.value = true;
-  isSearchExpanded.value = true;
   if (searchValue.value && suggestions.value.length) showSuggestions.value = true;
 };
 const handleBlur = () => {
   inputFocused.value = false;
   setTimeout(() => {
     showSuggestions.value = false;
-    isSearchExpanded.value = false;
   }, 150);
 };
 
@@ -485,69 +383,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 标签页轨道 */
-.tabs-track {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 34px;
-  background: #f3f4f6;
-  border-radius: 9999px;
-  padding: 3px;
-  gap: 0;
-  box-sizing: border-box;
-}
-.dark .tabs-track {
-  background: #1f2937;
-}
-
-.tab-slider-bg {
-  position: absolute;
-  top: 3px;
-  left: 0;
-  height: calc(100% - 6px);
-  border-radius: 9999px;
-  background: var(--accent-color, #22c55e);
-  box-shadow: 0 1px 6px rgba(var(--accent-color-rgb, 34, 197, 94), 0.35);
-  transition:
-    transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1),
-    width 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.tab-btn {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 13px;
-  border-radius: 9999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.2s;
-}
-.tab-btn--on {
-  color: #fff;
-}
-.tab-btn--off {
-  color: #6b7280;
-}
-.dark .tab-btn--off {
-  color: #9ca3af;
-}
-.tab-btn--off:hover {
-  color: #111827;
-}
-.dark .tab-btn--off:hover {
-  color: #f9fafb;
-}
-
 /* 返回按钮 */
 .back-btn {
   display: flex;
@@ -574,17 +409,7 @@ onMounted(() => {
 
 /* 搜索框 */
 .search-wrap {
-  transition:
-    flex 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.search-wrap--idle {
-  flex: 0 0 240px;
-  max-width: 240px;
-}
-.search-wrap--open {
-  flex: 1 1 0%;
-  max-width: 9999px;
+  flex: 1;
 }
 
 .search-inner {
@@ -700,17 +525,6 @@ onMounted(() => {
   background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.08);
   color: var(--accent-color, #22c55e);
 }
-.action-btn.intelligence-active {
-  color: #ec4899;
-  border-color: #fbcfe8;
-  background: #fdf2f8;
-}
-.dark .action-btn.intelligence-active {
-  color: #ec4899;
-  border-color: #831843;
-  background: rgba(236, 72, 153, 0.1);
-}
-
 /* 用户按钮 */
 .user-btn {
   display: flex;
@@ -934,19 +748,6 @@ onMounted(() => {
 }
 .dark .nav-page-title {
   color: #f9fafb;
-}
-
-/* 过渡动画 */
-.tab-slide-enter-active,
-.tab-slide-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-.tab-slide-enter-from,
-.tab-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-8px);
 }
 
 .nav-title-enter-active {
