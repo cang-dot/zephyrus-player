@@ -146,17 +146,18 @@ class PluginManager {
     try {
       let jsCode = plugin.payload.js;
 
-      // Convert ES module exports to CommonJS for new Function execution
-      // Plugin JS ends with: export { X as default }
-      // or: export default X
-      jsCode = jsCode.replace(
-        /export\s*\{\s*(\w+)\s+as\s+default\s*\}/,
-        'module.exports = $1'
-      );
-      jsCode = jsCode.replace(
-        /export\s+default\s+(\w+)/,
-        'module.exports = $1'
-      );
+      // Convert ES module to CommonJS for new Function execution
+      // Extract default export name, then strip ALL export blocks
+      const defaultMatch = jsCode.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}/s);
+      const defaultName = defaultMatch?.[1];
+      // Remove all export { ... } blocks (including multi-line)
+      jsCode = jsCode.replace(/export\s*\{[^}]*\};?/gs, '');
+      // Remove export default statements
+      jsCode = jsCode.replace(/export\s+default\s+\w+;?/g, '');
+      // Add module.exports at the end
+      if (defaultName) {
+        jsCode += `\nmodule.exports = ${defaultName};`;
+      }
 
       const exports: any = {};
       const moduleObj = { exports };

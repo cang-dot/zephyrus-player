@@ -79,14 +79,13 @@ async function loadDomPlugin(def: PlayerStyleDefinition): Promise<any> {
     if (plugin?.payload?.js) {
       try {
         let jsCode = plugin.payload.js;
-        jsCode = jsCode.replace(
-          /export\s*\{\s*(\w+)\s+as\s+default\s*\}/,
-          'module.exports = $1'
-        );
-        jsCode = jsCode.replace(
-          /export\s+default\s+(\w+)/,
-          'module.exports = $1'
-        );
+        const defaultMatch = jsCode.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}/s);
+        const defaultName = defaultMatch?.[1];
+        jsCode = jsCode.replace(/export\s*\{[^}]*\};?/gs, '');
+        jsCode = jsCode.replace(/export\s+default\s+\w+;?/g, '');
+        if (defaultName) {
+          jsCode += `\nmodule.exports = ${defaultName};`;
+        }
         const exports: any = {};
         const moduleObj = { exports };
         const fn = new Function('module', 'exports', jsCode);
