@@ -288,6 +288,7 @@ export function initializePluginManager(): void {
   });
 
   ipcMain.handle('plugin:test-mirrors', async () => {
+    console.log('[PluginManager] test-mirrors called');
     const testUrl = `${GITHUB_RAW}/cang-dot/zephyrus-player-plugins/main/index.json`;
     const mirrors = [
       { name: 'GitHub 直连', url: '' },
@@ -304,8 +305,12 @@ export function initializePluginManager(): void {
       const targetUrl = mirror.url ? `${mirror.url}/${testUrl}` : testUrl;
       const start = Date.now();
       try {
-        const response = await net.fetch(targetUrl, { signal: AbortSignal.timeout(8000) });
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+        const response = await net.fetch(targetUrl, { signal: controller.signal });
+        clearTimeout(timer);
         const latencyMs = Date.now() - start;
+
         if (!response.ok) {
           results.push({
             name: mirror.name,
@@ -318,18 +323,9 @@ export function initializePluginManager(): void {
           continue;
         }
 
-        const reader = response.body?.getReader();
-        let received = 0;
-        const downloadStart = Date.now();
-        if (reader) {
-          for (;;) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            received += value.length;
-          }
-        }
-        const downloadMs = Math.max(1, Date.now() - downloadStart);
-        const speed = Math.round((received / downloadMs) * 1000);
+        const text = await response.text();
+        const downloadMs = Math.max(1, Date.now() - start);
+        const speed = Math.round((text.length / downloadMs) * 1000);
 
         results.push({
           name: mirror.name,
@@ -339,13 +335,14 @@ export function initializePluginManager(): void {
           speed
         });
       } catch (e: any) {
+        console.error('[PluginManager] mirror test error:', mirror.name, e?.message);
         results.push({
           name: mirror.name,
           url: mirror.url,
           ok: false,
           latencyMs: Date.now() - start,
           speed: 0,
-          error: e?.message || '连接失败'
+          error: e?.name === 'AbortError' ? '超时' : (e?.message || '连接失败')
         });
       }
     }
