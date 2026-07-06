@@ -297,7 +297,8 @@ export function initializePluginManager(): void {
       { name: 'ghproxy.link', url: 'https://ghproxy.link' },
       { name: 'ghfast.top', url: 'https://ghfast.top' },
       { name: 'ghproxy.cxkpro.top', url: 'https://ghproxy.cxkpro.top' },
-      { name: 'github-proxy.memory-echoes.cn', url: 'https://github-proxy.memory-echoes.cn' }
+      { name: 'github-proxy.memory-echoes.cn', url: 'https://github-proxy.memory-echoes.cn' },
+      { name: 'github.akams.cn', url: 'https://github.akams.cn' }
     ];
 
     const results: MirrorTestResult[] = [];

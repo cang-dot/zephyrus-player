@@ -152,6 +152,7 @@ const MIRROR_PRESETS = [
   { label: 'ghfast.top', value: 'https://ghfast.top' },
   { label: 'ghproxy.cxkpro.top', value: 'https://ghproxy.cxkpro.top' },
   { label: 'github-proxy.memory-echoes.cn', value: 'https://github-proxy.memory-echoes.cn' },
+  { label: 'github.akams.cn', value: 'https://github.akams.cn' },
   { label: '---custom---', value: '__custom__' }
 ];
 
