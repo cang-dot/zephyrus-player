@@ -76,34 +76,11 @@ async function downloadWithProgress(
   const response = await net.fetch(url);
   if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
 
-  const contentLength = Number(response.headers.get('content-length')) || 0;
-  const reader = response.body?.getReader();
-  if (!reader) {
-    const text = await response.text();
-    sender.send('plugin:install-progress', { pluginId, status: 'done' });
-    return text;
-  }
+  sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent: 50 });
 
-  const decoder = new TextDecoder();
-  const chunks: Uint8Array[] = [];
-  let received = 0;
-
-  sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent: 0 });
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    received += value.length;
-    if (contentLength > 0) {
-      const percent = Math.min(99, Math.round((received / contentLength) * 100));
-      sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent });
-    }
-  }
+  const text = await response.text();
 
   sender.send('plugin:install-progress', { pluginId, status: 'installing' });
-
-  const text = chunks.map((c) => decoder.decode(c, { stream: true })).join('') + decoder.decode();
   return text;
 }
 
