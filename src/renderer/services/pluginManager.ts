@@ -77,6 +77,11 @@ class PluginManager {
     try {
       const items = await window.api.plugin.getInstalled();
       Object.assign(this.installed, items);
+      for (const [id, plugin] of Object.entries(items)) {
+        if (plugin.manifest.type === 'playerStyle' && plugin.enabled) {
+          this.activatePlayerStyle(id);
+        }
+      }
     } catch {
       // silent
     }
