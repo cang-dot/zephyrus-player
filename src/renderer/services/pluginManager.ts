@@ -144,27 +144,13 @@ class PluginManager {
     if (!plugin?.payload?.js) return;
 
     try {
-      let jsCode = plugin.payload.js;
+      // Use data: URL import to preserve ES module scoping
+      // (new Function fails because Vite bundles have duplicate const declarations across logical modules)
+      const b64 = btoa(unescape(encodeURIComponent(plugin.payload.js)));
+      const dataUrl = `data:text/javascript;base64,${b64}`;
+      const mod = await import(/* @vite-ignore */ dataUrl);
 
-      // Convert ES module to CommonJS for new Function execution
-      // Extract default export name, then strip ALL export blocks
-      const defaultMatch = jsCode.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}/s);
-      const defaultName = defaultMatch?.[1];
-      // Remove all export { ... } blocks (including multi-line)
-      jsCode = jsCode.replace(/export\s*\{[^}]*\};?/gs, '');
-      // Remove export default statements
-      jsCode = jsCode.replace(/export\s+default\s+\w+;?/g, '');
-      // Add module.exports at the end
-      if (defaultName) {
-        jsCode += `\nmodule.exports = ${defaultName};`;
-      }
-
-      const exports: any = {};
-      const moduleObj = { exports };
-      const fn = new Function('module', 'exports', jsCode);
-      fn(moduleObj, exports);
-      const exportDefault = moduleObj.exports?.default || moduleObj.exports || exports.default || exports;
-
+      const exportDefault = mod.default || mod;
       if (!exportDefault || (typeof exportDefault !== 'object' && typeof exportDefault !== 'function')) {
         console.error(`[PluginManager] 插件 ${pluginId} 未导出有效组件`);
         return;

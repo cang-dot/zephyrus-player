@@ -78,19 +78,10 @@ async function loadDomPlugin(def: PlayerStyleDefinition): Promise<any> {
     const plugin = installed[def.externalId];
     if (plugin?.payload?.js) {
       try {
-        let jsCode = plugin.payload.js;
-        const defaultMatch = jsCode.match(/export\s*\{\s*(\w+)\s+as\s+default\s*\}/s);
-        const defaultName = defaultMatch?.[1];
-        jsCode = jsCode.replace(/export\s*\{[^}]*\};?/gs, '');
-        jsCode = jsCode.replace(/export\s+default\s+\w+;?/g, '');
-        if (defaultName) {
-          jsCode += `\nmodule.exports = ${defaultName};`;
-        }
-        const exports: any = {};
-        const moduleObj = { exports };
-        const fn = new Function('module', 'exports', jsCode);
-        fn(moduleObj, exports);
-        return moduleObj.exports?.default || moduleObj.exports || exports.default || exports;
+        const b64 = btoa(unescape(encodeURIComponent(plugin.payload.js)));
+        const dataUrl = `data:text/javascript;base64,${b64}`;
+        const mod = await import(/* @vite-ignore */ dataUrl);
+        return mod.default || mod;
       } catch {
         return null;
       }

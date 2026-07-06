@@ -84,6 +84,7 @@ import { type Platform } from '@/types/music';
 import { isElectron } from '@/utils';
 
 import { SETTINGS_DATA_KEY } from '../keys';
+import SBtn from '../SBtn.vue';
 import SettingItem from '../SettingItem.vue';
 import SettingSection from '../SettingSection.vue';
 import SSelect from '../SSelect.vue';
