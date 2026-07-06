@@ -1,4 +1,4 @@
-import { type Component, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { type Component, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 import { registerExternalStyle, unregisterStyle } from '@/playerStyles/registry';
 import type { InstalledPlugin, PluginStoreItem } from '@/types/plugin';
@@ -144,21 +144,39 @@ class PluginManager {
     if (!plugin?.payload?.js) return;
 
     try {
-      const blob = new Blob([plugin.payload.js], { type: 'application/javascript' });
-      const url = URL.createObjectURL(blob);
-      const mod = await import(/* @vite-ignore */ url);
-      URL.revokeObjectURL(url);
+      let jsCode = plugin.payload.js;
 
-      const exportDefault = mod.default || mod;
+      // Convert ES module exports to CommonJS for new Function execution
+      // Plugin JS ends with: export { X as default }
+      // or: export default X
+      jsCode = jsCode.replace(
+        /export\s*\{\s*(\w+)\s+as\s+default\s*\}/,
+        'module.exports = $1'
+      );
+      jsCode = jsCode.replace(
+        /export\s+default\s+(\w+)/,
+        'module.exports = $1'
+      );
+
+      const exports: any = {};
+      const moduleObj = { exports };
+      const fn = new Function('module', 'exports', jsCode);
+      fn(moduleObj, exports);
+      const exportDefault = moduleObj.exports?.default || moduleObj.exports || exports.default || exports;
+
+      if (!exportDefault || (typeof exportDefault !== 'object' && typeof exportDefault !== 'function')) {
+        console.error(`[PluginManager] 插件 ${pluginId} 未导出有效组件`);
+        return;
+      }
+
       const hasMount = typeof exportDefault?.mount === 'function';
       const renderMode = hasMount ? 'dom' : 'vue';
 
       if (renderMode === 'vue') {
-        const comp = shallowRef(exportDefault as Component);
         registerExternalStyle({
           key: `plugin-${pluginId}`,
           label: plugin.manifest.name,
-          component: comp.value,
+          component: exportDefault as Component,
           renderMode: 'vue',
           externalId: pluginId,
           settings: exportDefault.settings
@@ -175,8 +193,8 @@ class PluginManager {
         });
       }
       activeStyleKeys.add(pluginId);
-    } catch {
-      console.error(`[PluginManager] 激活播放器样式失败: ${pluginId}`);
+    } catch (e) {
+      console.error(`[PluginManager] 激活播放器样式失败: ${pluginId}`, e);
     }
   }
 

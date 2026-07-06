@@ -78,10 +78,20 @@ async function loadDomPlugin(def: PlayerStyleDefinition): Promise<any> {
     const plugin = installed[def.externalId];
     if (plugin?.payload?.js) {
       try {
+        let jsCode = plugin.payload.js;
+        jsCode = jsCode.replace(
+          /export\s*\{\s*(\w+)\s+as\s+default\s*\}/,
+          'module.exports = $1'
+        );
+        jsCode = jsCode.replace(
+          /export\s+default\s+(\w+)/,
+          'module.exports = $1'
+        );
         const exports: any = {};
-        const fn = new Function('module', 'exports', plugin.payload.js);
-        fn({ exports }, exports);
-        return exports.default || exports;
+        const moduleObj = { exports };
+        const fn = new Function('module', 'exports', jsCode);
+        fn(moduleObj, exports);
+        return moduleObj.exports?.default || moduleObj.exports || exports.default || exports;
       } catch {
         return null;
       }
