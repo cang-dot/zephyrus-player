@@ -42,7 +42,8 @@ export function initializePluginManager(): void {
       | { data: PluginStoreItem[]; cachedAt: number }
       | undefined;
 
-    if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    // 缓存有效且非空时使用缓存
+    if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS && cached.data.length > 0) {
       return cached.data;
     }
 
@@ -217,6 +218,7 @@ export function initializePluginManager(): void {
       store.set('plugins.registryCache', { data: plugins, cachedAt: Date.now() });
       return plugins;
     } catch {
+      // 刷新失败时返回缓存数据
       const cached = store.get('plugins.registryCache') as
         | { data: PluginStoreItem[]; cachedAt: number }
         | undefined;
