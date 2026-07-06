@@ -86,7 +86,8 @@ class PluginManager {
     this.loading.installing = item.id;
     this.installProgress[item.id] = { status: 'preparing' };
     try {
-      const result = await window.api.plugin.install(item);
+      const raw = JSON.parse(JSON.stringify(item));
+      const result = await window.api.plugin.install(raw);
       if (result) {
         (this.installed as any)[item.id] = result;
       }
