@@ -541,6 +541,7 @@ export default {
     installFailed: '설치 실패',
     retry: '재시도',
     empty: '사용 가능한 플러그인이 없습니다',
+    importHint: '호환 가능한 커스텀 플러그인을 가져와 기능을 확장',
     comingSoon: '준비 중입니다',
     status: {
       preparing: '준비 중...',

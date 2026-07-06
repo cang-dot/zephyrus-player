@@ -548,6 +548,7 @@ export default {
     installFailed: 'Install failed',
     retry: 'Retry',
     empty: 'No plugins available',
+    importHint: 'Import compatible custom plugins to extend functionality',
     comingSoon: 'Coming soon',
     status: {
       preparing: 'Preparing...',

@@ -533,6 +533,7 @@ export default {
     installFailed: '安裝失敗',
     retry: '重試',
     empty: '暫無可用外掛',
+    importHint: '匯入相容的自訂外掛以擴充功能',
     comingSoon: '正在開發中，敬請期待',
     status: {
       preparing: '準備中...',

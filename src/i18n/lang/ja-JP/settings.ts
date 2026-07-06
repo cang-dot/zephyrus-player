@@ -540,6 +540,7 @@ export default {
     installFailed: 'インストール失敗',
     retry: 'リトライ',
     empty: '利用可能なプラグインはありません',
+    importHint: '互換性のあるカスタムプラグインをインポートして機能を拡張',
     comingSoon: '準備中',
     status: {
       preparing: '準備中...',

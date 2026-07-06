@@ -544,6 +544,7 @@ export default {
     installFailed: '安装失败',
     retry: '重试',
     empty: '暂无可用插件',
+    importHint: '导入兼容的自定义插件以扩展功能',
     comingSoon: '正在开发中，敬请期待',
     status: {
       preparing: '准备中...',

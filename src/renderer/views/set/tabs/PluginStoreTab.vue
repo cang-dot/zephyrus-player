@@ -77,7 +77,7 @@
     <div v-show="activeTab === 'import'" class="space-y-4">
       <div class="flex flex-col items-center justify-center py-8 text-sm text-gray-400">
         <i class="ri-upload-cloud-line text-3xl mb-3"></i>
-        <p class="mb-1">{{ t('settings.playback.importHint') }}</p>
+        <p class="mb-1">{{ t('settings.plugins.importHint') }}</p>
         <div class="flex gap-2 mt-2">
           <s-btn @click="importLxMusic"> <i class="ri-file-js-line"></i> lxMusic </s-btn>
           <s-btn @click="importCustomApi"> <i class="ri-file-json-line"></i> customApi </s-btn>
