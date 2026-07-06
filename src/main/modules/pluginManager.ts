@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from 'electron';
+import { dialog, ipcMain, net } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -37,6 +37,7 @@ interface InstalledPlugin {
 
 export function initializePluginManager(): void {
   ipcMain.handle('plugin:get-registry', async () => {
+    console.log('[PluginManager] get-registry called');
     const store = getStore();
     const cached = store.get('plugins.registryCache') as
       | { data: PluginStoreItem[]; cachedAt: number }
@@ -44,18 +45,22 @@ export function initializePluginManager(): void {
 
     // 缓存有效且非空时使用缓存
     if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS && cached.data.length > 0) {
+      console.log('[PluginManager] returning cached:', cached.data.length, 'plugins');
       return cached.data;
     }
 
     try {
-      const response = await fetch(REGISTRY_URL);
+      console.log('[PluginManager] fetching from:', REGISTRY_URL);
+      const response = await net.fetch(REGISTRY_URL);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
       const plugins: PluginStoreItem[] = json.plugins || [];
+      console.log('[PluginManager] fetched:', plugins.length, 'plugins');
 
       store.set('plugins.registryCache', { data: plugins, cachedAt: Date.now() });
       return plugins;
-    } catch {
+    } catch (e: any) {
+      console.error('[PluginManager] fetch failed:', e?.message);
       return cached?.data || [];
     }
   });
@@ -79,7 +84,7 @@ export function initializePluginManager(): void {
 
     if (item.type === 'lxMusic' || item.type === 'translator') {
       try {
-        const response = await fetch(item.downloadUrl);
+        const response = await net.fetch(item.downloadUrl);
         if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
         const content = await response.text();
         payload = { script: content };
@@ -106,7 +111,7 @@ export function initializePluginManager(): void {
 
     if (item.type === 'customApi') {
       try {
-        const response = await fetch(item.downloadUrl);
+        const response = await net.fetch(item.downloadUrl);
         if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
         const content = await response.text();
         payload = { config: content };
@@ -119,7 +124,7 @@ export function initializePluginManager(): void {
 
     if (item.type === 'playerStyle') {
       try {
-        const response = await fetch(item.downloadUrl);
+        const response = await net.fetch(item.downloadUrl);
         if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
         const content = await response.text();
         payload = { js: content };
@@ -211,7 +216,7 @@ export function initializePluginManager(): void {
   ipcMain.handle('plugin:refresh-registry', async () => {
     const store = getStore();
     try {
-      const response = await fetch(REGISTRY_URL);
+      const response = await net.fetch(REGISTRY_URL);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
       const plugins: PluginStoreItem[] = json.plugins || [];

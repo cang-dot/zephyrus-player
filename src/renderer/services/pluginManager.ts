@@ -16,9 +16,12 @@ class PluginManager {
     this.error.registry = '';
     try {
       this.registry.length = 0;
+      console.log('[PluginManager:renderer] loadRegistry calling...');
       const items = await window.api.plugin.getRegistry();
+      console.log('[PluginManager:renderer] loadRegistry got:', items?.length, 'items');
       items.forEach((item) => this.registry.push(item));
     } catch (e: any) {
+      console.error('[PluginManager:renderer] loadRegistry error:', e);
       this.error.registry = e.message || '加载插件列表失败';
     } finally {
       this.loading.registry = false;
@@ -101,7 +104,7 @@ class PluginManager {
     try {
       const blob = new Blob([plugin.payload.js], { type: 'application/javascript' });
       const url = URL.createObjectURL(blob);
-      const mod = await import(url);
+      const mod = await import(/* @vite-ignore */ url);
       URL.revokeObjectURL(url);
 
       const exportDefault = mod.default || mod;
