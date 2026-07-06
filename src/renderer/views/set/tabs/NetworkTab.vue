@@ -151,6 +151,9 @@ const MIRROR_PRESETS = [
   { label: 'ghproxy.link', value: 'https://ghproxy.link' },
   { label: 'ghfast.top', value: 'https://ghfast.top' },
   { label: 'mirror.ghproxy.com', value: 'https://mirror.ghproxy.com' },
+  { label: 'ghproxy.cxkpro.top', value: 'https://ghproxy.cxkpro.top' },
+  { label: 'github-proxy.memory-echoes.cn', value: 'https://github-proxy.memory-echoes.cn' },
+  { label: 'j.1lin.dpdns.org', value: 'https://j.1lin.dpdns.org' },
   { label: '---custom---', value: '__custom__' }
 ];
 
