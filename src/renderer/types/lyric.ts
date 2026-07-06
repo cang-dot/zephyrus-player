@@ -13,7 +13,7 @@ export interface LyricConfig {
   hideMiniPlayBar: boolean;
   hideLyrics: boolean;
   contentWidth: number; // 内容区域宽度百分比
-  playerStyle: 'default' | 'classic' | 'stage' | 'magazine' | 'frenzy' | 'folia-classic' | 'folia-tilt' | 'folia-partita' | 'folia-cadenza' | 'folia-fume';
+  playerStyle: 'default' | 'classic' | 'stage' | 'magazine' | 'frenzy';
   animationIntensity: 'soft' | 'normal' | 'power'; // 舞台模式歌词动画幅度
   // 移动端配置
   mobileLayout: 'default' | 'ios' | 'android';
@@ -49,15 +49,7 @@ export interface LyricConfig {
   frenzyUseWhiteBackground: boolean; // 白色背景（级联第一级）
   frenzyUseCoverBackground: boolean; // 跟随封面背景（级联第二级）
   frenzyBackgroundCustomColor: string; // 背景自定义颜色
-  // Folia 样式配置
-  foliaShowTranslation: boolean;
-  foliaFloatSpeed: number;
-  foliaGlowIntensity: number;
-  foliaTiltSplitCount: number;
-  foliaPartitaChunks: number;
-  foliaCadenzaRadius: number;
-  foliaFumeScrollSpeed: number;
-  foliaFumeFontSize: number;
+
 }
 
 export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
@@ -112,15 +104,7 @@ export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
   frenzyUseWhiteBackground: true,
   frenzyUseCoverBackground: true,
   frenzyBackgroundCustomColor: '#ffffff',
-  // Folia 样式默认值
-  foliaShowTranslation: true,
-  foliaFloatSpeed: 7,
-  foliaGlowIntensity: 1,
-  foliaTiltSplitCount: 2,
-  foliaPartitaChunks: 3,
-  foliaCadenzaRadius: 0.25,
-  foliaFumeScrollSpeed: 1,
-  foliaFumeFontSize: 0.025,
+
 };
 
 export interface ILyric {

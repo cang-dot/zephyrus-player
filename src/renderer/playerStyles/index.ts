@@ -3,7 +3,6 @@ import './default';
 import './stage';
 import './magazine';
 import './frenzy';
-import './folia';
 
 // 导出注册表 API
 export type { PlayerStyleDefinition, SettingItem } from './registry';

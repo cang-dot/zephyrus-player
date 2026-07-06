@@ -416,7 +416,7 @@
         @update:config="config = $event"
       />
 
-      <!-- 通用样式设置（folia 等动态注册的样式） -->
+      <!-- 通用样式设置（动态注册的样式） -->
       <setting-renderer
         v-if="styleSettingsView && !['default', 'stage', 'magazine', 'frenzy'].includes(styleSettingsView) && currentStyleSettings.length > 0"
         :settings="currentStyleSettings"
