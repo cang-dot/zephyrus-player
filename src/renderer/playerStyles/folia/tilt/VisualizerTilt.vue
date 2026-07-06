@@ -112,7 +112,7 @@ function splitText(text: string, targetCount: number): string[] {
 }
 
 function findSplit(text: string, near: number): number {
-  const punct = [',', '.', '锛?, '銆?, '銆?, '锛?, '锛?, '!', '?', '锛?, '锛?, ' ', '銆€']
+  const punct = [',', '.', '\uFF0C', '\u3001', '\u3002', '\uFF1B', '\uFF1A', '!', '?', '\uFF01', '\uFF1F', ' ', '\u3000']
   for (const p of punct) {
     const idx = text.indexOf(p, Math.max(0, near))
     if (idx > 0 && idx < text.length - 1) return idx + 1

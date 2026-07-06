@@ -22,7 +22,7 @@ export function createSingleWordLayoutUnits(
 }
 
 const CJK_REGEX = /[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/
-const STICKY_PUNCTUATION_REGEX = /^[,.;:!?锛屻€傦紒锛熴€侊細锛涳級銆戙€嬨€嶃€忋€塡]}'"鈥欌€濃€橾+$/u
+const STICKY_PUNCTUATION_REGEX = /^[,.;:!?\uFF0C\u3002\uFF01\uFF1F\u3001\uFF1A\uFF1B\uFF09\u3011\u300F\u300D\u2014\u2026\u00BB\]\}'\u2018\u2019\u201C\u201D]+$/u
 
 function hasCjkText(text: string): boolean {
   return CJK_REGEX.test(text)

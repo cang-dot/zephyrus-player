@@ -5,15 +5,14 @@ import { registerStyle } from '../../registry'
 
 export default registerStyle({
   key: 'folia-classic',
-  label: '娴佸厜',
+  label: '\u6D41\u5149',
   component: VisualizerClassic as any,
   isFullScreen: true,
   theme: 'dark',
   showStyleSwitch: true,
   settings: [
-    { key: 'foliaShowTranslation', type: 'boolean', label: '鏄剧ず缈昏瘧', default: true },
-    { key: 'foliaFloatSpeed', type: 'slider', label: '娴姩閫熷害', min: 3, max: 15, step: 1, marks: ['鎱?, '蹇?], default: 7 },
-    { key: 'foliaGlowIntensity', type: 'slider', label: '杈夊厜寮哄害', min: 0, max: 2, step: 0.1, marks: ['寮?, '寮?], default: 1 }
+    { key: 'foliaShowTranslation', type: 'boolean', label: '\u663E\u793A\u7FFB\u8BD1', default: true },
+    { key: 'foliaFloatSpeed', type: 'slider', label: '\u6D6E\u52A8\u901F\u5EA6', min: 3, max: 15, step: 1, marks: ['\u6162', '\u5FEB'], default: 7 },
+    { key: 'foliaGlowIntensity', type: 'slider', label: '\u8F89\u5149\u5F3A\u5EA6', min: 0, max: 2, step: 0.1, marks: ['\u5F31', '\u5F3A'], default: 1 }
   ]
 })
-

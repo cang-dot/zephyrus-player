@@ -5,14 +5,13 @@ import { registerStyle } from '../../registry'
 
 export default registerStyle({
   key: 'folia-tilt',
-  label: '鍊捐瘔',
+  label: '\u503E\u8BC9',
   component: VisualizerTilt as any,
   isFullScreen: true,
   theme: 'dark',
   showStyleSwitch: true,
   settings: [
-    { key: 'foliaShowTranslation', type: 'boolean', label: '鏄剧ず缈昏瘧', default: true },
-    { key: 'foliaTiltSplitCount', type: 'slider', label: '鍒嗗壊娈垫暟', min: 2, max: 5, step: 1, marks: ['2娈?, '5娈?], default: 2 }
+    { key: 'foliaShowTranslation', type: 'boolean', label: '\u663E\u793A\u7FFB\u8BD1', default: true },
+    { key: 'foliaTiltSplitCount', type: 'slider', label: '\u5206\u5272\u6BB5\u6570', min: 2, max: 5, step: 1, marks: ['2\u6BB5', '5\u6BB5'], default: 2 }
   ]
 })
-
