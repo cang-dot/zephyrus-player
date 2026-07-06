@@ -194,6 +194,7 @@ export default {
     githubMirror: 'GitHub Mirror',
     githubMirrorDesc: 'Speed up plugin store downloads, leave empty for direct GitHub',
     githubMirrorPlaceholder: 'Empty for direct, e.g. https://gh-proxy.com',
+    githubMirrorCustom: 'Custom',
     testMirror: 'Test',
     mirrorTestResults: 'Mirror Test Results',
     useThisMirror: 'Use',

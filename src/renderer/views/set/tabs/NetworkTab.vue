@@ -34,17 +34,26 @@
       :description="t('settings.network.githubMirrorDesc')"
     >
       <template #action>
-        <div class="flex items-center gap-2">
-          <s-input
-            v-model="githubMirrorInput"
-            :placeholder="t('settings.network.githubMirrorPlaceholder')"
-            width="w-[260px] max-md:w-full"
-            @blur="saveMirror"
-          />
-          <s-btn :loading="testing" @click="testMirrors">
-            <i class="ri-speed-line"></i>
-            {{ t('settings.network.testMirror') }}
-          </s-btn>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <s-select
+              v-model="mirrorSelectValue"
+              :options="mirrorOptions"
+              width="w-[200px] max-md:w-[160px]"
+            />
+            <s-btn :loading="testing" @click="testMirrors">
+              <i class="ri-speed-line"></i>
+              {{ t('settings.network.testMirror') }}
+            </s-btn>
+          </div>
+          <div v-if="mirrorSelectValue === '__custom__'" class="flex items-center gap-2">
+            <s-input
+              v-model="githubMirrorInput"
+              :placeholder="t('settings.network.githubMirrorPlaceholder')"
+              width="w-[260px] max-md:w-full"
+              @blur="saveMirror"
+            />
+          </div>
         </div>
       </template>
     </setting-item>
@@ -74,18 +83,11 @@
             <span v-if="r.ok && r.speed > 0">{{ formatSpeed(r.speed) }}</span>
             <span v-if="!r.ok" class="text-red-400">{{ r.error }}</span>
             <button
-              v-if="r.ok && r.url"
+              v-if="r.ok"
               class="text-[var(--accent-color)] hover:underline"
-              @click="selectMirror(r.url)"
+              @click="applyMirror(r.url)"
             >
               {{ t('settings.network.useThisMirror') }}
-            </button>
-            <button
-              v-if="r.ok && !r.url"
-              class="text-[var(--accent-color)] hover:underline"
-              @click="selectMirror('')"
-            >
-              {{ t('settings.network.useDirect') }}
             </button>
           </div>
         </div>
@@ -122,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ProxySettings from '@/components/settings/ProxySettings.vue';
@@ -130,6 +132,7 @@ import { isElectron } from '@/utils';
 
 import { SETTINGS_DATA_KEY, SETTINGS_MESSAGE_KEY } from '../keys';
 import SBtn from '../SBtn.vue';
+import SSelect from '../SSelect.vue';
 import SettingItem from '../SettingItem.vue';
 import SettingSection from '../SettingSection.vue';
 import SInput from '../SInput.vue';
@@ -141,11 +144,50 @@ const message = inject(SETTINGS_MESSAGE_KEY)!;
 const showProxyModal = ref(false);
 const proxyForm = ref({ protocol: 'http', host: '127.0.0.1', port: 7890 });
 
+const MIRROR_PRESETS = [
+  { label: 'GitHub 直连', value: '' },
+  { label: 'gh-proxy.com', value: 'https://gh-proxy.com' },
+  { label: 'ghproxy.net', value: 'https://ghproxy.net' },
+  { label: 'ghproxy.link', value: 'https://ghproxy.link' },
+  { label: 'ghfast.top', value: 'https://ghfast.top' },
+  { label: 'mirror.ghproxy.com', value: 'https://mirror.ghproxy.com' },
+  { label: '---custom---', value: '__custom__' }
+];
+
+const mirrorOptions = computed(() =>
+  MIRROR_PRESETS.map((m) => ({
+    label: m.value === '__custom__' ? t('settings.network.githubMirrorCustom') : m.label,
+    value: m.value
+  }))
+);
+
 const githubMirrorInput = ref((setData.value.githubMirror as string) || '');
 const testing = ref(false);
 const mirrorResults = ref<
   { name: string; url: string; ok: boolean; latencyMs: number; speed: number; error?: string }[]
 >([]);
+
+const isCustomMirror = computed(() => {
+  const val = (setData.value.githubMirror as string) || '';
+  return val !== '' && !MIRROR_PRESETS.some((m) => m.value === val && m.value !== '__custom__');
+});
+
+const mirrorSelectValue = computed({
+  get: () => {
+    const val = (setData.value.githubMirror as string) || '';
+    if (val === '') return '';
+    if (MIRROR_PRESETS.some((m) => m.value === val && m.value !== '__custom__')) return val;
+    return '__custom__';
+  },
+  set: (val: string) => {
+    if (val === '__custom__') {
+      setData.value = { ...setData.value, githubMirror: githubMirrorInput.value || '' };
+    } else {
+      setData.value = { ...setData.value, githubMirror: val };
+      githubMirrorInput.value = val;
+    }
+  }
+});
 
 watch(
   () => setData.value.proxyConfig,
@@ -161,18 +203,11 @@ watch(
   { immediate: true, deep: true }
 );
 
-watch(
-  () => setData.value.githubMirror,
-  (val) => {
-    githubMirrorInput.value = (val as string) || '';
-  }
-);
-
 const saveMirror = () => {
   setData.value = { ...setData.value, githubMirror: githubMirrorInput.value };
 };
 
-const selectMirror = (url: string) => {
+const applyMirror = (url: string) => {
   githubMirrorInput.value = url;
   setData.value = { ...setData.value, githubMirror: url };
   message.success(t('settings.network.mirrorSelected'));

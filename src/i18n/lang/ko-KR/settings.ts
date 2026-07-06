@@ -186,6 +186,7 @@ export default {
     githubMirror: 'GitHub 미러',
     githubMirrorDesc: '플러그인 스토어 다운로드 가속, 비워두면 GitHub 직접 연결',
     githubMirrorPlaceholder: '비워두면 직접 연결, 예: https://gh-proxy.com',
+    githubMirrorCustom: '사용자 지정',
     testMirror: '테스트',
     mirrorTestResults: '미러 테스트 결과',
     useThisMirror: '사용',

@@ -180,6 +180,7 @@ export default {
     githubMirror: 'GitHub 鏡像站',
     githubMirrorDesc: '外掛商店下載加速，留空直連 GitHub',
     githubMirrorPlaceholder: '留空直連，如 https://gh-proxy.com',
+    githubMirrorCustom: '自訂',
     testMirror: '測試',
     mirrorTestResults: '鏡像站測試結果',
     useThisMirror: '使用',

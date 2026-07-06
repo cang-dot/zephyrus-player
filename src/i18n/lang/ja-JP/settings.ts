@@ -185,6 +185,7 @@ export default {
     githubMirror: 'GitHubミラーサイト',
     githubMirrorDesc: 'プラグインストアのダウンロードを高速化、空欄でGitHub直結',
     githubMirrorPlaceholder: '空欄で直結、例: https://gh-proxy.com',
+    githubMirrorCustom: 'カスタム',
     testMirror: 'テスト',
     mirrorTestResults: 'ミラーテスト結果',
     useThisMirror: '使用',

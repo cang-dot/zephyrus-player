@@ -191,6 +191,7 @@ export default {
     githubMirror: 'GitHub 镜像站',
     githubMirrorDesc: '插件商店下载加速，留空直连 GitHub',
     githubMirrorPlaceholder: '留空直连，如 https://gh-proxy.com',
+    githubMirrorCustom: '自定义',
     testMirror: '测试',
     mirrorTestResults: '镜像站测试结果',
     useThisMirror: '使用',
