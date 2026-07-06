@@ -296,10 +296,8 @@ export function initializePluginManager(): void {
       { name: 'ghproxy.net', url: 'https://ghproxy.net' },
       { name: 'ghproxy.link', url: 'https://ghproxy.link' },
       { name: 'ghfast.top', url: 'https://ghfast.top' },
-      { name: 'mirror.ghproxy.com', url: 'https://mirror.ghproxy.com' },
       { name: 'ghproxy.cxkpro.top', url: 'https://ghproxy.cxkpro.top' },
-      { name: 'github-proxy.memory-echoes.cn', url: 'https://github-proxy.memory-echoes.cn' },
-      { name: 'j.1lin.dpdns.org', url: 'https://j.1lin.dpdns.org' }
+      { name: 'github-proxy.memory-echoes.cn', url: 'https://github-proxy.memory-echoes.cn' }
     ];
 
     const results: MirrorTestResult[] = [];
