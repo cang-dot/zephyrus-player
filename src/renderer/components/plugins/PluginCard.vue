@@ -42,9 +42,9 @@
         <i class="ri-refresh-line"></i>
         {{ t('settings.plugins.retry') }}
       </s-btn>
-      <s-btn v-else variant="ghost" disabled>
-        <i class="ri-check-line"></i>
-        {{ t('settings.plugins.installed') }}
+      <s-btn v-else @click="$emit('uninstall', plugin)">
+        <i class="ri-delete-bin-line"></i>
+        {{ t('settings.plugins.uninstall') }}
       </s-btn>
     </div>
   </div>
@@ -67,6 +67,7 @@ const props = defineProps<{
 
 defineEmits<{
   install: [plugin: PluginStoreItem];
+  uninstall: [plugin: PluginStoreItem];
 }>();
 
 const { t } = useI18n();

@@ -51,6 +51,7 @@
           :installing="manager.loading.installing === plugin.id"
           :progress="manager.getProgress(plugin.id)"
           @install="handleInstall"
+          @uninstall="handleUninstall"
         />
       </div>
     </div>
@@ -63,6 +64,7 @@
         :plugin="plugin.manifest"
         :is-installed="true"
         :installing="false"
+        @uninstall="handleUninstall"
       />
       <div
         v-if="installedPlugins.length === 0"
@@ -130,6 +132,15 @@ async function handleInstall(plugin: PluginStoreItem): Promise<void> {
     message.success(`${t('common.success')}: ${plugin.name}`);
   } catch (e: any) {
     message.error(`${plugin.name}: ${e.message || t('settings.plugins.installFailed')}`);
+  }
+}
+
+async function handleUninstall(plugin: PluginStoreItem): Promise<void> {
+  try {
+    await manager.uninstall(plugin.id);
+    message.success(`${t('common.success')}: ${plugin.name}`);
+  } catch (e: any) {
+    message.error(`${plugin.name}: ${e.message || t('settings.plugins.uninstallFailed')}`);
   }
 }
 
