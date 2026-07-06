@@ -173,6 +173,11 @@ useAppShortcuts();
 
 onMounted(async () => {
   playerStore.setIsPlay(false);
+
+  // 加载已安装插件并激活播放器样式
+  const { pluginManager } = await import('@/services/pluginManager');
+  await pluginManager.loadInstalled();
+
   if (isLyricWindow.value) {
     return;
   }
