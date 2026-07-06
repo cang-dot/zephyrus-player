@@ -183,6 +183,15 @@ export default {
     proxyHostPlaceholder: '프록시 주소를 입력하세요',
     proxyPort: '프록시 포트',
     proxyPortPlaceholder: '프록시 포트를 입력하세요',
+    githubMirror: 'GitHub 미러',
+    githubMirrorDesc: '플러그인 스토어 다운로드 가속, 비워두면 GitHub 직접 연결',
+    githubMirrorPlaceholder: '비워두면 직접 연결, 예: https://gh-proxy.com',
+    testMirror: '테스트',
+    mirrorTestResults: '미러 테스트 결과',
+    useThisMirror: '사용',
+    useDirect: '직접 연결',
+    mirrorSelected: '미러가 전환되었습니다',
+    mirrorTestFailed: '테스트 실패',
     realIP: 'realIP 설정',
     realIPDesc:
       '제한으로 인해 이 프로젝트는 해외에서 사용할 때 제한을 받을 수 있으며, realIP 매개변수를 사용하여 국내 IP를 전달하여 해결할 수 있습니다',
@@ -528,7 +537,15 @@ export default {
     repo: '저장소',
     install: '설치',
     installed: '설치됨',
+    installFailed: '설치 실패',
+    retry: '재시도',
     empty: '사용 가능한 플러그인이 없습니다',
-    comingSoon: '준비 중입니다'
+    comingSoon: '준비 중입니다',
+    status: {
+      preparing: '준비 중...',
+      requesting: '요청 중...',
+      downloading: '다운로드 중',
+      installing: '설치 중...'
+    }
   }
 };

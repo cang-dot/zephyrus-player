@@ -182,6 +182,15 @@ export default {
     proxyHostPlaceholder: 'プロキシアドレスを入力してください',
     proxyPort: 'プロキシポート',
     proxyPortPlaceholder: 'プロキシポートを入力してください',
+    githubMirror: 'GitHubミラーサイト',
+    githubMirrorDesc: 'プラグインストアのダウンロードを高速化、空欄でGitHub直結',
+    githubMirrorPlaceholder: '空欄で直結、例: https://gh-proxy.com',
+    testMirror: 'テスト',
+    mirrorTestResults: 'ミラーテスト結果',
+    useThisMirror: '使用',
+    useDirect: '直結',
+    mirrorSelected: 'ミラーを切り替えました',
+    mirrorTestFailed: 'テスト失敗',
     realIP: 'realIP設定',
     realIPDesc:
       '制限により、このプロジェクトは海外での使用が制限されます。realIPパラメータを使用して国内IPを渡すことで解決できます',
@@ -527,7 +536,15 @@ export default {
     repo: 'リポジトリ',
     install: 'インストール',
     installed: 'インストール済み',
+    installFailed: 'インストール失敗',
+    retry: 'リトライ',
     empty: '利用可能なプラグインはありません',
-    comingSoon: '準備中'
+    comingSoon: '準備中',
+    status: {
+      preparing: '準備中...',
+      requesting: 'リクエスト中...',
+      downloading: 'ダウンロード中',
+      installing: 'インストール中...'
+    }
   }
 };

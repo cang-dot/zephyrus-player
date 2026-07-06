@@ -4,8 +4,8 @@ import * as path from 'path';
 
 import { getStore } from './config';
 
-const REGISTRY_URL =
-  'https://raw.githubusercontent.com/cang-dot/zephyrus-player-plugins/main/index.json';
+const GITHUB_RAW = 'https://raw.githubusercontent.com';
+const REGISTRY_PATH = '/cang-dot/zephyrus-player-plugins/main/index.json';
 const CACHE_TTL_MS = 3600_000;
 
 interface PluginStoreItem {
@@ -35,32 +35,99 @@ interface InstalledPlugin {
   payload?: Record<string, string>
 }
 
+interface MirrorTestResult {
+  name: string
+  url: string
+  ok: boolean
+  latencyMs: number
+  speed: number
+  error?: string
+}
+
+function getMirrorUrl(): string {
+  const store = getStore();
+  const mirror = (store.get('set.githubMirror') as string) || '';
+  return mirror.trim();
+}
+
+function buildUrl(originalUrl: string): string {
+  const mirror = getMirrorUrl();
+  if (!mirror) return originalUrl;
+  return `${mirror}/${originalUrl}`;
+}
+
+function getRegistryUrl(): string {
+  return buildUrl(`${GITHUB_RAW}${REGISTRY_PATH}`);
+}
+
+function getDownloadUrl(originalUrl: string): string {
+  const mirror = getMirrorUrl();
+  if (!mirror) return originalUrl;
+  return `${mirror}/${originalUrl}`;
+}
+
+async function downloadWithProgress(
+  url: string,
+  pluginId: string,
+  sender: Electron.WebContents
+): Promise<string> {
+  sender.send('plugin:install-progress', { pluginId, status: 'requesting' });
+
+  const response = await net.fetch(url);
+  if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
+
+  const contentLength = Number(response.headers.get('content-length')) || 0;
+  const reader = response.body?.getReader();
+  if (!reader) {
+    const text = await response.text();
+    sender.send('plugin:install-progress', { pluginId, status: 'done' });
+    return text;
+  }
+
+  const decoder = new TextDecoder();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+
+  sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent: 0 });
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    if (contentLength > 0) {
+      const percent = Math.min(99, Math.round((received / contentLength) * 100));
+      sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent });
+    }
+  }
+
+  sender.send('plugin:install-progress', { pluginId, status: 'installing' });
+
+  const text = chunks.map((c) => decoder.decode(c, { stream: true })).join('') + decoder.decode();
+  return text;
+}
+
 export function initializePluginManager(): void {
   ipcMain.handle('plugin:get-registry', async () => {
-    console.log('[PluginManager] get-registry called');
     const store = getStore();
     const cached = store.get('plugins.registryCache') as
       | { data: PluginStoreItem[]; cachedAt: number }
       | undefined;
 
-    // 缓存有效且非空时使用缓存
     if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS && cached.data.length > 0) {
-      console.log('[PluginManager] returning cached:', cached.data.length, 'plugins');
       return cached.data;
     }
 
     try {
-      console.log('[PluginManager] fetching from:', REGISTRY_URL);
-      const response = await net.fetch(REGISTRY_URL);
+      const url = getRegistryUrl();
+      const response = await net.fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
       const plugins: PluginStoreItem[] = json.plugins || [];
-      console.log('[PluginManager] fetched:', plugins.length, 'plugins');
-
       store.set('plugins.registryCache', { data: plugins, cachedAt: Date.now() });
       return plugins;
     } catch (e: any) {
-      console.error('[PluginManager] fetch failed:', e?.message);
+      console.error('[PluginManager] get-registry failed:', e?.message);
       return cached?.data || [];
     }
   });
@@ -71,66 +138,54 @@ export function initializePluginManager(): void {
     return installed || {};
   });
 
-  ipcMain.handle('plugin:install', async (_, item: PluginStoreItem) => {
+  ipcMain.handle('plugin:install', async (event, item: PluginStoreItem) => {
     const store = getStore();
     const installed =
       (store.get('plugins.installed') as Record<string, InstalledPlugin> | undefined) || {};
+    const sender = event.sender;
 
     if (installed[item.id]) {
       throw new Error('插件已安装');
     }
 
+    sender.send('plugin:install-progress', { pluginId: item.id, status: 'preparing' });
+
     let payload: Record<string, string> | undefined;
 
     if (item.type === 'lxMusic' || item.type === 'translator') {
-      try {
-        const response = await net.fetch(item.downloadUrl);
-        if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
-        const content = await response.text();
-        payload = { script: content };
+      const url = getDownloadUrl(item.downloadUrl);
+      const content = await downloadWithProgress(url, item.id, sender);
+      payload = { script: content };
 
-        if (item.type === 'lxMusic') {
-          const scripts = (store.get('set.lxMusicScripts') as any[]) || [];
-          const newScript = {
-            id: `plugin_${item.id}_${Date.now()}`,
-            name: item.name,
-            script: content,
-            info: { name: item.name, rawScript: content },
-            sources: [],
-            enabled: true,
-            createdAt: Date.now()
-          };
-          scripts.push(newScript);
-          store.set('set.lxMusicScripts', scripts);
-          store.set('set.activeLxMusicApiId', newScript.id);
-        }
-      } catch (e: any) {
-        throw new Error(`下载插件失败: ${e.message}`);
+      if (item.type === 'lxMusic') {
+        const scripts = (store.get('set.lxMusicScripts') as any[]) || [];
+        const newScript = {
+          id: `plugin_${item.id}_${Date.now()}`,
+          name: item.name,
+          script: content,
+          info: { name: item.name, rawScript: content },
+          sources: [],
+          enabled: true,
+          createdAt: Date.now()
+        };
+        scripts.push(newScript);
+        store.set('set.lxMusicScripts', scripts);
+        store.set('set.activeLxMusicApiId', newScript.id);
       }
     }
 
     if (item.type === 'customApi') {
-      try {
-        const response = await net.fetch(item.downloadUrl);
-        if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
-        const content = await response.text();
-        payload = { config: content };
-        store.set('set.customApiPlugin', content);
-        store.set('set.customApiPluginName', item.name);
-      } catch (e: any) {
-        throw new Error(`下载插件失败: ${e.message}`);
-      }
+      const url = getDownloadUrl(item.downloadUrl);
+      const content = await downloadWithProgress(url, item.id, sender);
+      payload = { config: content };
+      store.set('set.customApiPlugin', content);
+      store.set('set.customApiPluginName', item.name);
     }
 
     if (item.type === 'playerStyle') {
-      try {
-        const response = await net.fetch(item.downloadUrl);
-        if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
-        const content = await response.text();
-        payload = { js: content };
-      } catch (e: any) {
-        throw new Error(`下载插件失败: ${e.message}`);
-      }
+      const url = getDownloadUrl(item.downloadUrl);
+      const content = await downloadWithProgress(url, item.id, sender);
+      payload = { js: content };
     }
 
     installed[item.id] = {
@@ -141,6 +196,7 @@ export function initializePluginManager(): void {
     };
 
     store.set('plugins.installed', installed);
+    sender.send('plugin:install-progress', { pluginId: item.id, status: 'done' });
     return installed[item.id];
   });
 
@@ -216,18 +272,84 @@ export function initializePluginManager(): void {
   ipcMain.handle('plugin:refresh-registry', async () => {
     const store = getStore();
     try {
-      const response = await net.fetch(REGISTRY_URL);
+      const url = getRegistryUrl();
+      const response = await net.fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
       const plugins: PluginStoreItem[] = json.plugins || [];
       store.set('plugins.registryCache', { data: plugins, cachedAt: Date.now() });
       return plugins;
     } catch {
-      // 刷新失败时返回缓存数据
       const cached = store.get('plugins.registryCache') as
         | { data: PluginStoreItem[]; cachedAt: number }
         | undefined;
       return cached?.data || [];
     }
+  });
+
+  ipcMain.handle('plugin:test-mirrors', async () => {
+    const testUrl = `${GITHUB_RAW}/cang-dot/zephyrus-player-plugins/main/index.json`;
+    const mirrors = [
+      { name: 'GitHub 直连', url: '' },
+      { name: 'gh-proxy.com', url: 'https://gh-proxy.com' },
+      { name: 'ghproxy.net', url: 'https://ghproxy.net' },
+      { name: 'ghproxy.link', url: 'https://ghproxy.link' },
+      { name: 'ghfast.top', url: 'https://ghfast.top' },
+      { name: 'mirror.ghproxy.com', url: 'https://mirror.ghproxy.com' }
+    ];
+
+    const results: MirrorTestResult[] = [];
+
+    for (const mirror of mirrors) {
+      const targetUrl = mirror.url ? `${mirror.url}/${testUrl}` : testUrl;
+      const start = Date.now();
+      try {
+        const response = await net.fetch(targetUrl, { signal: AbortSignal.timeout(8000) });
+        const latencyMs = Date.now() - start;
+        if (!response.ok) {
+          results.push({
+            name: mirror.name,
+            url: mirror.url,
+            ok: false,
+            latencyMs,
+            speed: 0,
+            error: `HTTP ${response.status}`
+          });
+          continue;
+        }
+
+        const reader = response.body?.getReader();
+        let received = 0;
+        const downloadStart = Date.now();
+        if (reader) {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            received += value.length;
+          }
+        }
+        const downloadMs = Math.max(1, Date.now() - downloadStart);
+        const speed = Math.round((received / downloadMs) * 1000);
+
+        results.push({
+          name: mirror.name,
+          url: mirror.url,
+          ok: true,
+          latencyMs,
+          speed
+        });
+      } catch (e: any) {
+        results.push({
+          name: mirror.name,
+          url: mirror.url,
+          ok: false,
+          latencyMs: Date.now() - start,
+          speed: 0,
+          error: e?.message || '连接失败'
+        });
+      }
+    }
+
+    return results;
   });
 }

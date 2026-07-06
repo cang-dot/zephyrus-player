@@ -191,6 +191,15 @@ export default {
     proxyHostPlaceholder: 'Enter proxy host',
     proxyPort: 'Proxy Port',
     proxyPortPlaceholder: 'Enter proxy port',
+    githubMirror: 'GitHub Mirror',
+    githubMirrorDesc: 'Speed up plugin store downloads, leave empty for direct GitHub',
+    githubMirrorPlaceholder: 'Empty for direct, e.g. https://gh-proxy.com',
+    testMirror: 'Test',
+    mirrorTestResults: 'Mirror Test Results',
+    useThisMirror: 'Use',
+    useDirect: 'Direct',
+    mirrorSelected: 'Mirror switched',
+    mirrorTestFailed: 'Test failed',
     realIP: 'RealIP Settings',
     realIPDesc: 'Use realIP parameter with mainland China IP to resolve access restrictions abroad',
     messages: {
@@ -535,7 +544,15 @@ export default {
     repo: 'Repo',
     install: 'Install',
     installed: 'Installed',
+    installFailed: 'Install failed',
+    retry: 'Retry',
     empty: 'No plugins available',
-    comingSoon: 'Coming soon'
+    comingSoon: 'Coming soon',
+    status: {
+      preparing: 'Preparing...',
+      requesting: 'Requesting...',
+      downloading: 'Downloading',
+      installing: 'Installing...'
+    }
   }
 };

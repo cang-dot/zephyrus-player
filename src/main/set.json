@@ -48,5 +48,6 @@
   "lyricFontFamily": "",
   "lyricTextColor": "",
   "lyricStrokeColor": "",
-  "lyricUseCoverColor": true
+  "lyricUseCoverColor": true,
+  "githubMirror": ""
 }

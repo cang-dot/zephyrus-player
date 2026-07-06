@@ -49,6 +49,7 @@
           :plugin="plugin"
           :is-installed="manager.isInstalled(plugin.id)"
           :installing="manager.loading.installing === plugin.id"
+          :progress="manager.getProgress(plugin.id)"
           @install="handleInstall"
         />
       </div>
@@ -96,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PluginCard from '@/components/plugins/PluginCard.vue';
@@ -123,8 +124,13 @@ const activeTab = ref('browse');
 const installedPlugins = computed(() => Object.values(manager.installed).filter((p) => p.enabled));
 
 async function handleInstall(plugin: PluginStoreItem): Promise<void> {
-  await manager.install(plugin);
-  message.success(`${t('common.success')}: ${plugin.name}`);
+  try {
+    manager.clearProgress(plugin.id);
+    await manager.install(plugin);
+    message.success(`${t('common.success')}: ${plugin.name}`);
+  } catch (e: any) {
+    message.error(`${plugin.name}: ${e.message || t('settings.plugins.installFailed')}`);
+  }
 }
 
 async function importLxMusic(): Promise<void> {

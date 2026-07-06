@@ -38,6 +38,7 @@ type SetConfig = {
   lyricTextColor: string;
   lyricStrokeColor: string;
   lyricUseCoverColor: boolean;
+  githubMirror: string;
 };
 interface StoreType {
   set: SetConfig;

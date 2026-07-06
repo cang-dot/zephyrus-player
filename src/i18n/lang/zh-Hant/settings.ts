@@ -177,6 +177,15 @@ export default {
     proxyHostPlaceholder: '請輸入代理位址',
     proxyPort: '代理連接埠',
     proxyPortPlaceholder: '請輸入代理連接埠',
+    githubMirror: 'GitHub 鏡像站',
+    githubMirrorDesc: '外掛商店下載加速，留空直連 GitHub',
+    githubMirrorPlaceholder: '留空直連，如 https://gh-proxy.com',
+    testMirror: '測試',
+    mirrorTestResults: '鏡像站測試結果',
+    useThisMirror: '使用',
+    useDirect: '直連',
+    mirrorSelected: '鏡像站已切換',
+    mirrorTestFailed: '測試失敗',
     realIP: 'realIP設定',
     realIPDesc: '由於限制,此項目在國外使用會受到限制可使用realIP參數,傳進國內IP解決',
     messages: {
@@ -520,7 +529,15 @@ export default {
     repo: '倉庫',
     install: '安裝',
     installed: '已安裝',
+    installFailed: '安裝失敗',
+    retry: '重試',
     empty: '暫無可用外掛',
-    comingSoon: '正在開發中，敬請期待'
+    comingSoon: '正在開發中，敬請期待',
+    status: {
+      preparing: '準備中...',
+      requesting: '請求中...',
+      downloading: '下載中',
+      installing: '安裝中...'
+    }
   }
 };

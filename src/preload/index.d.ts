@@ -56,6 +56,12 @@ interface API {
     toggleEnabled: (_pluginId: string, _enabled: boolean) => Promise<boolean>;
     importFile: (_type: string) => Promise<{ name: string; content: string; filePath: string } | null>;
     refreshRegistry: () => Promise<PluginStoreItem[]>;
+    testMirrors: () => Promise<
+      { name: string; url: string; ok: boolean; latencyMs: number; speed: number; error?: string }[]
+    >;
+    onInstallProgress: (
+      _callback: (data: { pluginId: string; status: string; percent?: number }) => void
+    ) => () => void;
   };
 }
 

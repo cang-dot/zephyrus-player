@@ -188,6 +188,15 @@ export default {
     proxyHostPlaceholder: '请输入代理地址',
     proxyPort: '代理端口',
     proxyPortPlaceholder: '请输入代理端口',
+    githubMirror: 'GitHub 镜像站',
+    githubMirrorDesc: '插件商店下载加速，留空直连 GitHub',
+    githubMirrorPlaceholder: '留空直连，如 https://gh-proxy.com',
+    testMirror: '测试',
+    mirrorTestResults: '镜像站测试结果',
+    useThisMirror: '使用',
+    useDirect: '直连',
+    mirrorSelected: '镜像站已切换',
+    mirrorTestFailed: '测试失败',
     realIP: 'realIP设置',
     realIPDesc: '由于限制,此项目在国外使用会受到限制可使用realIP参数,传进国内IP解决',
     messages: {
@@ -531,7 +540,15 @@ export default {
     repo: '仓库',
     install: '安装',
     installed: '已安装',
+    installFailed: '安装失败',
+    retry: '重试',
     empty: '暂无可用插件',
-    comingSoon: '正在开发中，敬请期待'
+    comingSoon: '正在开发中，敬请期待',
+    status: {
+      preparing: '准备中...',
+      requesting: '请求中...',
+      downloading: '下载中',
+      installing: '安装中...'
+    }
   }
 };

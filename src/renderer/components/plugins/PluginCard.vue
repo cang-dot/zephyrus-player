@@ -27,12 +27,20 @@
         {{ t('settings.plugins.repo') }}
       </s-btn>
       <s-btn
-        v-if="!isInstalled"
+        v-if="!isInstalled && !isError"
         variant="primary"
-        :loading="installing"
+        :loading="isActive"
         @click="$emit('install', plugin)"
       >
-        {{ t('settings.plugins.install') }}
+        {{ buttonLabel }}
+      </s-btn>
+      <s-btn
+        v-else-if="isError"
+        variant="danger"
+        @click="$emit('install', plugin)"
+      >
+        <i class="ri-refresh-line"></i>
+        {{ t('settings.plugins.retry') }}
       </s-btn>
       <s-btn v-else variant="ghost" disabled>
         <i class="ri-check-line"></i>
@@ -46,6 +54,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import type { InstallProgress, InstallStatus } from '@/services/pluginManager';
 import type { PluginStoreItem } from '@/types/plugin';
 import SBtn from '@/views/set/SBtn.vue';
 
@@ -53,6 +62,7 @@ const props = defineProps<{
   plugin: PluginStoreItem;
   isInstalled: boolean;
   installing: boolean;
+  progress?: InstallProgress;
 }>();
 
 defineEmits<{
@@ -60,6 +70,22 @@ defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const status = computed<InstallStatus>(() => props.progress?.status || 'idle');
+const isActive = computed(() => status.value !== 'idle' && status.value !== 'done' && status.value !== 'error');
+const isError = computed(() => status.value === 'error');
+
+const buttonLabel = computed(() => {
+  const s = status.value;
+  if (s === 'preparing') return t('settings.plugins.status.preparing');
+  if (s === 'requesting') return t('settings.plugins.status.requesting');
+  if (s === 'downloading') {
+    const pct = props.progress?.percent;
+    return pct != null ? `${t('settings.plugins.status.downloading')} ${pct}%` : t('settings.plugins.status.downloading');
+  }
+  if (s === 'installing') return t('settings.plugins.status.installing');
+  return t('settings.plugins.install');
+});
 
 const iconClass = computed(() => {
   const map: Record<string, string> = {

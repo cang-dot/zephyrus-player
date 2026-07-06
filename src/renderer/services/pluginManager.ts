@@ -3,6 +3,13 @@ import { type Component, defineComponent, h, onBeforeUnmount, onMounted, reactiv
 import { registerExternalStyle, unregisterStyle } from '@/playerStyles/registry';
 import type { InstalledPlugin, PluginStoreItem } from '@/types/plugin';
 
+export type InstallStatus = 'idle' | 'preparing' | 'requesting' | 'downloading' | 'installing' | 'done' | 'error';
+
+export interface InstallProgress {
+  status: InstallStatus;
+  percent?: number;
+}
+
 const activeStyleKeys = new Set<string>();
 
 class PluginManager {
@@ -10,18 +17,42 @@ class PluginManager {
   public installed = reactive<Record<string, InstalledPlugin>>({});
   public loading = reactive({ registry: false, installing: '' });
   public error = reactive({ registry: '' });
+  public installProgress = reactive<Record<string, InstallProgress>>({});
+  private removeProgressListener: (() => void) | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined' && window.api?.plugin?.onInstallProgress) {
+      this.removeProgressListener = window.api.plugin.onInstallProgress((data) => {
+        const existing = this.installProgress[data.pluginId];
+        if (existing) {
+          existing.status = data.status as InstallStatus;
+          existing.percent = data.percent;
+        } else {
+          this.installProgress[data.pluginId] = {
+            status: data.status as InstallStatus,
+            percent: data.percent
+          };
+        }
+      });
+    }
+  }
+
+  getProgress(pluginId: string): InstallProgress {
+    return this.installProgress[pluginId] || { status: 'idle' };
+  }
+
+  clearProgress(pluginId: string): void {
+    delete this.installProgress[pluginId];
+  }
 
   async loadRegistry(): Promise<void> {
     this.loading.registry = true;
     this.error.registry = '';
     try {
       this.registry.length = 0;
-      console.log('[PluginManager:renderer] loadRegistry calling...');
       const items = await window.api.plugin.getRegistry();
-      console.log('[PluginManager:renderer] loadRegistry got:', items?.length, 'items');
       items.forEach((item) => this.registry.push(item));
     } catch (e: any) {
-      console.error('[PluginManager:renderer] loadRegistry error:', e);
       this.error.registry = e.message || '加载插件列表失败';
     } finally {
       this.loading.registry = false;
@@ -53,6 +84,7 @@ class PluginManager {
 
   async install(item: PluginStoreItem): Promise<void> {
     this.loading.installing = item.id;
+    this.installProgress[item.id] = { status: 'preparing' };
     try {
       const result = await window.api.plugin.install(item);
       if (result) {
@@ -61,6 +93,10 @@ class PluginManager {
       if (item.type === 'playerStyle' && result) {
         this.activatePlayerStyle(item.id);
       }
+      this.installProgress[item.id] = { status: 'done' };
+    } catch (e: any) {
+      this.installProgress[item.id] = { status: 'error' };
+      throw e;
     } finally {
       this.loading.installing = '';
     }

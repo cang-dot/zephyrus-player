@@ -93,7 +93,13 @@ const api = {
     uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
     toggleEnabled: (pluginId, enabled) => ipcRenderer.invoke('plugin:toggle-enabled', pluginId, enabled),
     importFile: (type) => ipcRenderer.invoke('plugin:import-file', type),
-    refreshRegistry: () => ipcRenderer.invoke('plugin:refresh-registry')
+    refreshRegistry: () => ipcRenderer.invoke('plugin:refresh-registry'),
+    testMirrors: () => ipcRenderer.invoke('plugin:test-mirrors'),
+    onInstallProgress: (callback: (data: { pluginId: string; status: string; percent?: number }) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { pluginId: string; status: string; percent?: number }) => callback(data);
+      ipcRenderer.on('plugin:install-progress', handler);
+      return () => { ipcRenderer.removeListener('plugin:install-progress', handler); };
+    }
   }
 };
 

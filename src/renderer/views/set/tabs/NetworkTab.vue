@@ -30,6 +30,69 @@
     </setting-item>
 
     <setting-item
+      :title="t('settings.network.githubMirror')"
+      :description="t('settings.network.githubMirrorDesc')"
+    >
+      <template #action>
+        <div class="flex items-center gap-2">
+          <s-input
+            v-model="githubMirrorInput"
+            :placeholder="t('settings.network.githubMirrorPlaceholder')"
+            width="w-[260px] max-md:w-full"
+            @blur="saveMirror"
+          />
+          <s-btn :loading="testing" @click="testMirrors">
+            <i class="ri-speed-line"></i>
+            {{ t('settings.network.testMirror') }}
+          </s-btn>
+        </div>
+      </template>
+    </setting-item>
+
+    <!-- 镜像测试结果 -->
+    <div
+      v-if="mirrorResults.length > 0"
+      class="mx-4 mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800"
+    >
+      <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+        {{ t('settings.network.mirrorTestResults') }}
+      </div>
+      <div class="space-y-1.5">
+        <div
+          v-for="r in mirrorResults"
+          :key="r.name"
+          class="flex items-center justify-between text-xs"
+        >
+          <div class="flex items-center gap-2">
+            <i
+              :class="r.ok ? 'ri-checkbox-circle-fill text-green-500' : 'ri-close-circle-fill text-red-400'"
+            ></i>
+            <span class="text-gray-700 dark:text-gray-300">{{ r.name }}</span>
+          </div>
+          <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+            <span v-if="r.ok">{{ r.latencyMs }}ms</span>
+            <span v-if="r.ok && r.speed > 0">{{ formatSpeed(r.speed) }}</span>
+            <span v-if="!r.ok" class="text-red-400">{{ r.error }}</span>
+            <button
+              v-if="r.ok && r.url"
+              class="text-[var(--accent-color)] hover:underline"
+              @click="selectMirror(r.url)"
+            >
+              {{ t('settings.network.useThisMirror') }}
+            </button>
+            <button
+              v-if="r.ok && !r.url"
+              class="text-[var(--accent-color)] hover:underline"
+              @click="selectMirror('')"
+            >
+              {{ t('settings.network.useDirect') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <setting-item
       :title="t('settings.network.realIP')"
       :description="t('settings.network.realIPDesc')"
     >
@@ -78,6 +141,12 @@ const message = inject(SETTINGS_MESSAGE_KEY)!;
 const showProxyModal = ref(false);
 const proxyForm = ref({ protocol: 'http', host: '127.0.0.1', port: 7890 });
 
+const githubMirrorInput = ref((setData.value.githubMirror as string) || '');
+const testing = ref(false);
+const mirrorResults = ref<
+  { name: string; url: string; ok: boolean; latencyMs: number; speed: number; error?: string }[]
+>([]);
+
 watch(
   () => setData.value.proxyConfig,
   (newVal) => {
@@ -91,6 +160,42 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+watch(
+  () => setData.value.githubMirror,
+  (val) => {
+    githubMirrorInput.value = (val as string) || '';
+  }
+);
+
+const saveMirror = () => {
+  setData.value = { ...setData.value, githubMirror: githubMirrorInput.value };
+};
+
+const selectMirror = (url: string) => {
+  githubMirrorInput.value = url;
+  setData.value = { ...setData.value, githubMirror: url };
+  message.success(t('settings.network.mirrorSelected'));
+};
+
+const formatSpeed = (bytesPerSec: number): string => {
+  if (bytesPerSec >= 1024 * 1024) return `${(bytesPerSec / 1024 / 1024).toFixed(1)} MB/s`;
+  if (bytesPerSec >= 1024) return `${(bytesPerSec / 1024).toFixed(0)} KB/s`;
+  return `${bytesPerSec} B/s`;
+};
+
+const testMirrors = async () => {
+  testing.value = true;
+  mirrorResults.value = [];
+  try {
+    const results = await window.api.plugin.testMirrors();
+    mirrorResults.value = results;
+  } catch {
+    message.error(t('settings.network.mirrorTestFailed'));
+  } finally {
+    testing.value = false;
+  }
+};
 
 const handleProxyConfirm = async (proxyConfig: any) => {
   setData.value = {
