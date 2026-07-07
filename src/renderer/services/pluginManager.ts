@@ -178,6 +178,7 @@ class PluginManager {
       // 如果既没有 compiled 也不是 v2，运行时编译（兼容旧插件）
       if (!/return\s*\{\s*default\s*:/.test(code) || /export\s*\{/.test(code)) {
         try {
+          // 只在行首匹配 class 声明（避免破坏正则字面量中的 class）
           code = code
             .replace(/^\s*let X;\s*$/gm, '')
             .replace(/^\(function\(\)\{var s=document\.createElement\('style'\);[\s\S]*?\}\)\(\);\s*/m, '')
@@ -188,8 +189,9 @@ class PluginManager {
             .replace(/^\}\)\(\)\s*;?\s*$/gm, '')
             .replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =')
             .replace(/^\s*(const|let)\s+/gm, 'var ')
-            .replace(/\bclass\s+([$\w]+)\s*(extends\s+[^{]+?)?\s*\{/g, (_: string, name: string, ext: string) => {
-              return `var ${name} = class ${ext ? ext.trim() : ''} {`;
+            // 只匹配行首的 class 声明（有缩进的才是真正的声明，避免匹配正则字面量）
+            .replace(/^(\s*)class\s+([$\w]+)\s*(extends\s+[^{]+?)?\s*\{/gm, (match, indent, name, ext) => {
+              return `${indent}var ${name} = class ${ext ? ext.trim() : ''} {`;
             })
             .replace(
               /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
@@ -249,8 +251,8 @@ class PluginManager {
       }
 
       const exportDefault = mod.default || mod;
-      if (!exportDefault || (typeof exportDefault !== 'object' && typeof exportDefault !== 'function')) {
-        console.error(`[PluginManager] 插件 ${pluginId} 未导出有效组件`);
+      if (!exportDefault || typeof exportDefault === 'boolean' || (typeof exportDefault !== 'object' && typeof exportDefault !== 'function')) {
+        console.error(`[PluginManager] 插件 ${pluginId} 未导出有效组件:`, typeof exportDefault, exportDefault);
         return;
       }
 
