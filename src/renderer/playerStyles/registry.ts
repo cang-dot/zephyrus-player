@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { reactive } from 'vue';
+import { shallowReactive } from 'vue';
 
 export interface SettingItem {
   key?: string;
@@ -26,7 +26,7 @@ export interface PlayerStyleDefinition {
   externalId?: string;
 }
 
-const styles = reactive<PlayerStyleDefinition[]>([]);
+const styles = shallowReactive<PlayerStyleDefinition[]>([]);
 
 export function registerStyle(def: PlayerStyleDefinition) {
   const idx = styles.findIndex(s => s.key === def.key);
