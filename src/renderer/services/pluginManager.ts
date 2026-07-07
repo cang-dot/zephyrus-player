@@ -193,9 +193,15 @@ class PluginManager {
           .replace(
             /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
             'return { default: $1 };'
+          )
+          .replace(
+            /export\s+default\s+([$\w]+)\s*;?/g,
+            'return { default: $1 };'
           );
+      }
 
-        // 跨 IIFE 重命名重复 var 声明
+      // 跨 IIFE 重命名重复 var 声明（始终执行，处理部分转换的旧插件）
+      if (/^\s*var\s+__sh_/m.test(code)) {
         const blocks = code.split(/(?=^\s*var\s+__sh_)/m);
         const declared = new Set<string>();
         code = blocks.map((block) => {
