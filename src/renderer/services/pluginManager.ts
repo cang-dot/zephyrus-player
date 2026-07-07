@@ -177,27 +177,31 @@ class PluginManager {
 
       // 如果既没有 compiled 也不是 v2，运行时编译（兼容旧插件）
       if (!/return\s*\{\s*default\s*:/.test(code) || /export\s*\{/.test(code)) {
-        code = code
-          .replace(/^\s*let X;\s*$/gm, '')
-          .replace(/^\(function\(\)\{var s=document\.createElement\('style'\);[\s\S]*?\}\)\(\);\s*/m, '')
-          .replace(
-            /(var\s+__sh_\w+\s*=\s*\{\s*\}\s*;\s*)\(function\s*\(\s*\)\s*\{['"]use strict['"];\s*/g,
-            '$1\n'
-          )
-          .replace(/^\}\)\(\)\s*;?\s*$/gm, '')
-          .replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =')
-          .replace(/^\s*(const|let)\s+/gm, 'var ')
-          .replace(/\bclass\s+([$\w]+)\s*(extends\s+[^{]+?)?\s*\{/g, (_: string, name: string, ext: string) => {
-            return `var ${name} = class ${ext ? ext.trim() : ''} {`;
-          })
-          .replace(
-            /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
-            'return { default: $1 };'
-          )
-          .replace(
-            /export\s+default\s+([$\w]+)\s*;?/g,
-            'return { default: $1 };'
-          );
+        try {
+          code = code
+            .replace(/^\s*let X;\s*$/gm, '')
+            .replace(/^\(function\(\)\{var s=document\.createElement\('style'\);[\s\S]*?\}\)\(\);\s*/m, '')
+            .replace(
+              /(var\s+__sh_\w+\s*=\s*\{\s*\}\s*;\s*)\(function\s*\(\s*\)\s*\{['"]use strict['"];\s*/g,
+              '$1\n'
+            )
+            .replace(/^\}\)\(\)\s*;?\s*$/gm, '')
+            .replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =')
+            .replace(/^\s*(const|let)\s+/gm, 'var ')
+            .replace(/\bclass\s+([$\w]+)\s*(extends\s+[^{]+?)?\s*\{/g, (_: string, name: string, ext: string) => {
+              return `var ${name} = class ${ext ? ext.trim() : ''} {`;
+            })
+            .replace(
+              /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
+              'return { default: $1 };'
+            )
+            .replace(
+              /export\s+default\s+([$\w]+)\s*;?/g,
+              'return { default: $1 };'
+            );
+        } catch (compileErr) {
+          console.warn(`[PluginManager] 运行时编译替换失败: ${pluginId}, 跳过替换`, compileErr);
+        }
       }
 
       // 跨 IIFE 重命名重复 var 声明（始终执行，处理部分转换的旧插件）
@@ -231,8 +235,17 @@ class PluginManager {
         mod = fn();
         console.log(`[PluginManager] 插件加载成功: ${pluginId}`, mod);
       } catch (e: any) {
-        console.error(`[PluginManager] 加载插件失败: ${pluginId}`, e?.message || e);
-        return;
+        // 编译后的代码执行失败，尝试用原始代码（跳过运行时编译）
+        console.warn(`[PluginManager] 编译后代码执行失败: ${pluginId}, 尝试原始代码`, e?.message);
+        try {
+          const rawCode = plugin.payload.compiled || plugin.payload.js || '';
+          const fn2 = new Function(rawCode);
+          mod = fn2();
+          console.log(`[PluginManager] 原始代码加载成功: ${pluginId}`, mod);
+        } catch (e2: any) {
+          console.error(`[PluginManager] 原始代码也失败: ${pluginId}`, e2?.message || e2);
+          return;
+        }
       }
 
       const exportDefault = mod.default || mod;
