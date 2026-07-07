@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
@@ -68,7 +68,7 @@ const isFullScreenStyle = computed(() => {
 
 const componentToUse = computed(() => {
   const style = getStyle(playerStyle.value);
-  if (style) return style.component;
+  if (style) return markRaw(style.component);
   return isMobile.value ? MusicFullMobile : MusicFull;
 });
 
