@@ -10,8 +10,8 @@ export interface SettingItem {
   max?: number;
   step?: number;
   marks?: string[];
-  options?: { value: string; label: string; showWhen?: { key: string; is?: string; not?: string } }[];
-  showWhen?: { key: string; is?: string; not?: string };
+  options?: { value: string; label: string; showWhen?: { key: string; is?: string; not?: string; and?: { key: string; is?: string; not?: string } } }[];
+  showWhen?: { key: string; is?: string; not?: string; and?: { key: string; is?: string; not?: string } };
 }
 
 export interface PlayerStyleDefinition {

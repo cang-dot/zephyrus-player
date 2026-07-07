@@ -17,6 +17,9 @@
           :speed="auroraSpeed"
         />
 
+        <!-- 鼓点闪白效果（高潮时跟随鼓点闪烁） -->
+        <div class="beat-flash" :style="{ opacity: beatSpike }"></div>
+
         <!-- 通用控件（左上关闭 + 右上设置/模式切换/全屏） -->
         <player-controls
           :isFullScreen="isFullScreen"
@@ -88,7 +91,9 @@ import {
   setAudioTime
 } from '@/hooks/MusicHook';
 import { useStyleContext } from '@/playerStyles/useStyleContext';
+import { drumDetector } from '@/services/drumDetector';
 import { useClimaxStore } from '@/store/modules/climax';
+import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { usePlayerStore } from '@/store/modules/player';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import type { ILyricText, IWordData } from '@/types/music';
@@ -110,6 +115,29 @@ const animationIntensity = computed<'soft' | 'normal' | 'power'>(() => {
     }
   } catch {}
   return 'normal';
+});
+
+// 从 localStorage 读取高潮闪光设置
+const stageBeatFlashEnabled = computed(() => {
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    if (saved) {
+      const config = JSON.parse(saved);
+      return config.stageBeatFlash !== false;
+    }
+  } catch {}
+  return true;
+});
+
+const stageFlashIntensity = computed(() => {
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    if (saved) {
+      const config = JSON.parse(saved);
+      return config.stageFlashIntensity ?? 0.5;
+    }
+  } catch {}
+  return 0.5;
 });
 
 // 根据强度获取动画集合
@@ -241,6 +269,63 @@ const isInClimax = computed(() => {
 
 // 高潮时增强歌词动画
 const climaxAnimationBoost = computed(() => (isInClimax.value ? 1.5 : 1));
+
+// ==================== 鼓点闪白 ====================
+
+const styleEngine = useStyleEngineStore();
+
+const beatSpike = ref(0);
+let spikeTimer: ReturnType<typeof setTimeout> | null = null;
+const SPIKE_DURATION = 150;
+let unsubscribeBeat: (() => void) | null = null;
+
+// 只在高潮期间启动鼓点检测（仿照 climaxDriver 模式）
+function startBeatListening() {
+  if (unsubscribeBeat) return;
+  drumDetector.start();
+  unsubscribeBeat = drumDetector.onBeat((info) => {
+    const intensity = stageFlashIntensity.value;
+    beatSpike.value = (info.isStrong ? 0.5 : 0.35) * intensity;
+    if (spikeTimer) clearTimeout(spikeTimer);
+    spikeTimer = setTimeout(() => {
+      beatSpike.value = 0;
+    }, SPIKE_DURATION);
+  });
+}
+
+function stopBeatListening() {
+  if (unsubscribeBeat) {
+    unsubscribeBeat();
+    unsubscribeBeat = null;
+  }
+  drumDetector.stop();
+  beatSpike.value = 0;
+  if (spikeTimer) {
+    clearTimeout(spikeTimer);
+    spikeTimer = null;
+  }
+}
+
+// 监听高潮状态变化（仅在开启闪光时生效）
+watch(isInClimax, (inClimax) => {
+  if (!stageBeatFlashEnabled.value) return;
+  if (inClimax) {
+    startBeatListening();
+  } else {
+    stopBeatListening();
+  }
+});
+
+// 监听闪光开关变化
+watch(stageBeatFlashEnabled, (enabled) => {
+  if (!enabled) {
+    stopBeatListening();
+  }
+});
+
+onBeforeUnmount(() => {
+  stopBeatListening();
+});
 
 watch(
   () => playMusic.value?.picUrl,
@@ -713,6 +798,17 @@ onBeforeUnmount(() => {
     transform: scale(1.25);
     filter: blur(50px) brightness(1.1) saturate(1.6);
   }
+}
+
+// ==================== 鼓点闪白 ====================
+
+.beat-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.15s ease-out;
 }
 
 .background-smoke {

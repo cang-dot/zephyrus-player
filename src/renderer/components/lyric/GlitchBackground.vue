@@ -16,6 +16,7 @@ interface Props {
   baseColor?: string;
   accentColor?: string;
   intensity?: number;
+  crtIntensity?: number;
   speed?: number;
   showScanlines?: boolean;
 }
@@ -24,6 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
   baseColor: '#1a1a2e',
   accentColor: '#e94560',
   intensity: 0.5,
+  crtIntensity: 0,
   speed: 1.0,
   showScanlines: true
 });
@@ -42,6 +44,7 @@ precision highp float;
 uniform vec2 iResolution;
 uniform float iTime;
 uniform float uIntensity;
+uniform float uCrtIntensity;
 uniform vec3 uBaseColor;
 uniform vec3 uAccentColor;
 uniform float uShowScanlines;
@@ -62,26 +65,51 @@ float noise(vec2 st) {
   return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
+// CRT 桶形失真
+vec2 crtDistort(vec2 uv, float strength) {
+  vec2 centered = uv - 0.5;
+  float r2 = dot(centered, centered);
+  return centered * (1.0 + r2 * strength) + 0.5;
+}
+
 void main() {
   vec2 uv = gl_FragCoord.xy / iResolution.xy;
   float t = iTime * 0.5;
+  float crt = uCrtIntensity; // 高潮时才为非零
 
-  // 基础颜色
+  // CRT 桶形失真（常态由 uIntensity 驱动，高潮时 crt 额外加强）
+  float barrelStrength = uIntensity * 0.35 + crt * 0.3;
+  uv = crtDistort(uv, barrelStrength);
+
+  // 水平同步抖动
+  float jitter = sin(uv.y * 80.0 + t * 5.0) * 0.008 * uIntensity;
+  // 高潮时额外高频抖动
+  jitter += sin(uv.y * 200.0 + t * 15.0) * 0.02 * crt;
+  // 随机撕裂线（高潮时加强）
+  float tearLine = step(0.96, random(vec2(floor(uv.y * 100.0), floor(t * 3.0))));
+  jitter += tearLine * (0.03 * uIntensity + 0.06 * crt) * sin(t * 30.0);
+  uv.x += jitter;
+
+  uv = clamp(uv, 0.0, 1.0);
+
   vec3 col = uBaseColor;
 
   // 扫描线
   if (uShowScanlines > 0.5) {
     float scanline = sin(uv.y * iResolution.y * 0.5) * 0.5 + 0.5;
-    scanline = pow(scanline, 8.0) * uIntensity * 0.15;
+    scanline = pow(scanline, 6.0) * uIntensity * 0.25;
     col -= scanline;
+    // 高潮时扫描线亮度闪烁
+    float flicker = sin(uv.y * iResolution.y * 3.0 + t * 2.0) * 0.1 * crt;
+    col *= (1.0 - flicker);
   }
 
-  // RGB 通道偏移
-  float offset = sin(t * 2.0) * uIntensity * 0.015;
-  float r = col.r + offset;
-  float g = col.g;
-  float b = col.b - offset;
-  col = vec3(r, g, b);
+  // RGB 通道偏移（常态由 uIntensity，高潮时大幅偏移）
+  float rgbOffset = sin(t * 2.0) * (uIntensity * 0.02 + crt * 0.05);
+  col.r += rgbOffset;
+  col.b -= rgbOffset;
+  // 高潮时垂直方向 RGB 偏移
+  col.g += cos(t * 3.0) * crt * 0.02;
 
   // 强调色闪烁
   float flash = sin(t * 8.0) * 0.5 + 0.5;
@@ -89,14 +117,28 @@ void main() {
     col = mix(col, uAccentColor, 0.12 * uIntensity);
   }
 
+  // 高潮时暖色调偏移（老电视偏黄）
+  col.r *= 1.0 + crt * 0.15;
+  col.g *= 1.0 + crt * 0.08;
+  col.b *= 1.0 - crt * 0.1;
+
   // 噪点
-  float grain = random(uv + t) * 0.06 * uIntensity;
+  float grain = random(uv + t) * (0.06 * uIntensity + 0.1 * crt);
   col += grain;
 
   // 暗角
   float vignette = 1.0 - length((uv - 0.5) * 1.0);
   vignette = clamp(vignette, 0.0, 1.0);
   col *= mix(0.92, 1.0, vignette);
+  // CRT 暗角增强（高潮时压暗边缘）
+  float crtVignette = 1.0 - length((uv - 0.5) * 1.5);
+  crtVignette = clamp(crtVignette, 0.0, 1.0);
+  crtVignette = pow(crtVignette, 0.6);
+  col *= mix(1.0, mix(0.4, 1.0, crtVignette), crt);
+
+  // CRT 边缘衰减（高潮时）
+  float edgeFade = 1.0 - 0.35 * crt * pow(abs(uv.x - 0.5) * 2.0, 2.0);
+  col *= edgeFade;
 
   fragColor = vec4(col, 1.0);
 }
@@ -143,6 +185,7 @@ onMounted(() => {
         iTime: { value: 0 },
         iResolution: { value: new Float32Array([ctn.offsetWidth, ctn.offsetHeight]) },
         uIntensity: { value: props.intensity },
+        uCrtIntensity: { value: props.crtIntensity },
         uBaseColor: { value: new Float32Array(hexToRgb(props.baseColor)) },
         uAccentColor: { value: new Float32Array(hexToRgb(props.accentColor)) },
         uShowScanlines: { value: props.showScanlines ? 1.0 : 0.0 }
@@ -160,6 +203,7 @@ onMounted(() => {
       const elapsed = (t - startTime) * 0.001;
       program.uniforms.iTime.value = elapsed * props.speed;
       program.uniforms.uIntensity.value = props.intensity;
+      program.uniforms.uCrtIntensity.value = props.crtIntensity;
       program.uniforms.uBaseColor.value = new Float32Array(hexToRgb(props.baseColor));
       program.uniforms.uAccentColor.value = new Float32Array(hexToRgb(props.accentColor));
       program.uniforms.uShowScanlines.value = props.showScanlines ? 1.0 : 0.0;

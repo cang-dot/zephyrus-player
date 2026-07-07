@@ -42,13 +42,16 @@ export interface LyricConfig {
   frenzyFontWeight: number; // 字体粗细 100-900
   frenzyCustomFont: string; // 系统字体名
   frenzyEmotionalDict: string[]; // 自定义情感词典
+  frenzyShowEmphasisWords: boolean; // 显示强调词（总开关）
   frenzyShowRedKeywords: boolean; // 始终红色（级联第一级）
   frenzyUseCoverColor: boolean; // 跟随封面取色（级联第二级）
   frenzyShowScanlines: boolean; // 背景扫描线开关
+  frenzyCrtIntensity: number; // CRT 失真强度 0-1
   frenzyKeywordCustomColor: string; // 强调字自定义颜色
   frenzyUseWhiteBackground: boolean; // 白色背景（级联第一级）
   frenzyUseCoverBackground: boolean; // 跟随封面背景（级联第二级）
   frenzyBackgroundCustomColor: string; // 背景自定义颜色
+  frenzyShowBackgroundColor: boolean; // 自定义背景（总开关）
 
 }
 
@@ -97,13 +100,16 @@ export const DEFAULT_LYRIC_CONFIG: LyricConfig = {
   frenzyFontWeight: 900,
   frenzyCustomFont: 'PingFang SC',
   frenzyEmotionalDict: [],
+  frenzyShowEmphasisWords: true,
   frenzyShowRedKeywords: true,
   frenzyUseCoverColor: true,
   frenzyShowScanlines: true,
+  frenzyCrtIntensity: 0.35,
   frenzyKeywordCustomColor: '#ff0000',
   frenzyUseWhiteBackground: true,
   frenzyUseCoverBackground: true,
   frenzyBackgroundCustomColor: '#ffffff',
+  frenzyShowBackgroundColor: false,
 
 };
 

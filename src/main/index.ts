@@ -128,9 +128,21 @@ if (!isSingleInstance) {
     // 设置应用ID
     electronApp.setAppUserModelId('cang-dot.ZephyrusPlayer');
 
+    // 防止网络服务崩溃导致闪退
+    app.on('child-process-gone', (_event, details) => {
+      if (details.type === 'utility' && details.reason === 'crashed') {
+        console.warn('[Main] Network service crashed, Electron will auto-restart it');
+      }
+    });
+
     // 监听窗口创建事件
     app.on('browser-window-created', (_, window) => {
       optimizer.watchWindowShortcuts(window);
+
+      // 防止渲染进程崩溃导致闪退
+      window.webContents.on('render-process-gone', (_event, details) => {
+        console.error('[Main] Render process gone:', details.reason);
+      });
     });
 
     // 初始化窗口大小管理器
@@ -186,6 +198,15 @@ if (!isSingleInstance) {
     if (process.platform !== 'darwin') {
       app.quit();
     }
+  });
+
+  // 防止未捕获异常导致闪退
+  process.on('uncaughtException', (error) => {
+    console.error('[Main] Uncaught exception:', error.message);
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    console.error('[Main] Unhandled rejection:', reason);
   });
 
   // 应用即将退出时的处理

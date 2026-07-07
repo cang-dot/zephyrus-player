@@ -134,11 +134,6 @@ const detectionResult = computed<EmotionalDetectionResult>(() => {
 
   const text = currentLyric.value.text;
 
-  // 如果关闭了红字模式，返回完整黑色文本
-  if (!showRedKeywords.value) {
-    return { fullText: text, blackText: text, redWords: [] };
-  }
-
   // 优先使用服务器重点词
   const serverKeywords = styleEngine.currentLineKeywords;
   if (serverKeywords.length > 0 && currentLineIndex.value >= 0) {

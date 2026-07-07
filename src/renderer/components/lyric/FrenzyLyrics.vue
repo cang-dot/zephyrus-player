@@ -75,6 +75,7 @@ const frenzyConfig = ref<
     | 'frenzyScale'
     | 'frenzyFontWeight'
     | 'frenzyCustomFont'
+    | 'frenzyShowEmphasisWords'
     | 'frenzyShowRedKeywords'
     | 'frenzyUseCoverColor'
     | 'frenzyKeywordCustomColor'
@@ -84,6 +85,7 @@ const frenzyConfig = ref<
   frenzyScale: 1.0,
   frenzyFontWeight: 900,
   frenzyCustomFont: 'PingFang SC',
+  frenzyShowEmphasisWords: true,
   frenzyShowRedKeywords: true,
   frenzyUseCoverColor: true,
   frenzyKeywordCustomColor: '#ff0000'
@@ -133,8 +135,8 @@ const detectionResult = computed<EmotionalDetectionResult>(() => {
 
   const text = currentLyric.value.text;
 
-  // 如果关闭了红字模式，返回完整黑色文本
-  if (!showRedKeywords.value) {
+  // 强词总开关关闭时，不显示强调词
+  if (frenzyConfig.value.frenzyShowEmphasisWords === false) {
     return { fullText: text, blackText: text, redWords: [] };
   }
 
@@ -223,6 +225,7 @@ onMounted(() => {
       frenzyScale: parsed.frenzyScale ?? 1.0,
       frenzyFontWeight: parsed.frenzyFontWeight ?? 900,
       frenzyCustomFont: parsed.frenzyCustomFont || 'PingFang SC',
+      frenzyShowEmphasisWords: parsed.frenzyShowEmphasisWords !== false,
       frenzyShowRedKeywords: parsed.frenzyShowRedKeywords !== false,
       frenzyUseCoverColor: parsed.frenzyUseCoverColor !== false,
       frenzyKeywordCustomColor: parsed.frenzyKeywordCustomColor || '#ff0000'
@@ -240,6 +243,7 @@ const handleConfigUpdate = () => {
       frenzyScale: parsed.frenzyScale ?? 1.0,
       frenzyFontWeight: parsed.frenzyFontWeight ?? 900,
       frenzyCustomFont: parsed.frenzyCustomFont || 'PingFang SC',
+      frenzyShowEmphasisWords: parsed.frenzyShowEmphasisWords !== false,
       frenzyShowRedKeywords: parsed.frenzyShowRedKeywords !== false,
       frenzyUseCoverColor: parsed.frenzyUseCoverColor !== false,
       frenzyKeywordCustomColor: parsed.frenzyKeywordCustomColor || '#ff0000'

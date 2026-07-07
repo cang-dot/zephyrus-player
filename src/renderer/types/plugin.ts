@@ -34,5 +34,6 @@ export interface InstalledPlugin {
     config?: string
     css?: string
     js?: string
+    compiled?: string
   }
 }

@@ -32,7 +32,7 @@ interface InstalledPlugin {
   manifest: PluginStoreItem
   enabled: boolean
   installedAt: number
-  payload?: Record<string, string>
+  payload?: { js?: string; compiled?: string; [key: string]: string | undefined }
 }
 
 interface MirrorTestResult {
@@ -62,8 +62,8 @@ function getRegistryUrl(): string {
 
 function getDownloadUrl(originalUrl: string): string {
   const mirror = getMirrorUrl();
-  if (!mirror) return originalUrl;
-  return `${mirror}/${originalUrl}`;
+  const base = mirror ? `${mirror}/${originalUrl}` : originalUrl;
+  return `${base}?t=${Date.now()}`;
 }
 
 async function downloadWithProgress(
@@ -73,15 +73,63 @@ async function downloadWithProgress(
 ): Promise<string> {
   sender.send('plugin:install-progress', { pluginId, status: 'requesting' });
 
+  console.log(`[PluginManager] Downloading ${pluginId} from: ${url}`);
   const response = await net.fetch(url);
   if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
 
   sender.send('plugin:install-progress', { pluginId, status: 'downloading', percent: 50 });
 
   const text = await response.text();
+  console.log(`[PluginManager] Downloaded ${pluginId} (${text.length} chars), has process: ${text.includes('process')}, has function oe: ${/\bfunction oe\b/.test(text)}, has 'use strict': ${text.includes("'use strict'")}`);
 
   sender.send('plugin:install-progress', { pluginId, status: 'installing' });
   return text;
+}
+
+/**
+ * 预编译插件 JS：剥离 IIFE、修复语法、替换 export 为 return
+ * 在主进程中执行，结果存入 payload.compiled
+ */
+/**
+ * 检测插件是否为 v2 格式（可直接被 new Function() 执行）
+ * v2 特征：有 return { default: ... }，无 export {，无 IIFE 包装
+ */
+function isV2Format(js: string): boolean {
+  return /return\s*\{\s*default\s*:/.test(js) && !/export\s*\{/.test(js);
+}
+
+/**
+ * 旧格式预编译（v1 → 可执行代码）
+ * 仅用于未升级的旧插件
+ */
+function preCompilePlugin(rawJs: string): string {
+  let code = rawJs;
+
+  code = code.replace(/^\s*let X;\s*$/gm, '');
+  code = code.replace(/^\(function\(\)\{var s=document\.createElement\('style'\);[\s\S]*?\}\)\(\);\s*/m, '');
+  code = code
+    .replace(
+      /(var\s+__sh_\w+\s*=\s*\{\s*\}\s*;\s*)\(function\s*\(\s*\)\s*\{['"]use strict['"];\s*/g,
+      '$1\n'
+    )
+    .replace(/^\}\)\(\)\s*;?\s*$/gm, '');
+  code = code.replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =');
+  code = code.replace(/^\s*(const|let)\s+/gm, 'var ');
+  code = code.replace(
+    /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
+    'return { default: $1 };'
+  );
+
+  return code;
+}
+
+function ensureCompiled(payload: Record<string, string> | undefined): string | undefined {
+  if (!payload?.js) return undefined;
+  // v2 格式直接使用，无需编译
+  if (isV2Format(payload.js)) return payload.js;
+  // 旧插件：优先使用已编译版本，否则实时编译
+  if (payload.compiled) return payload.compiled;
+  return preCompilePlugin(payload.js);
 }
 
 export function initializePluginManager(): void {
@@ -163,6 +211,10 @@ export function initializePluginManager(): void {
       const url = getDownloadUrl(item.downloadUrl);
       const content = await downloadWithProgress(url, item.id, sender);
       payload = { js: content };
+      // v2 格式无需预编译，旧格式预编译后存储
+      if (!isV2Format(content)) {
+        payload.compiled = preCompilePlugin(content);
+      }
     }
 
     installed[item.id] = {
@@ -184,6 +236,8 @@ export function initializePluginManager(): void {
     const plugin = installed[pluginId];
     if (!plugin) throw new Error('插件未安装');
 
+    console.log(`[PluginManager] Uninstalling ${pluginId} (type: ${plugin.manifest.type})`);
+
     if (plugin.manifest.type === 'lxMusic') {
       const scripts = (store.get('set.lxMusicScripts') as any[]) || [];
       const remaining = scripts.filter(
@@ -204,6 +258,12 @@ export function initializePluginManager(): void {
 
     delete installed[pluginId];
     store.set('plugins.installed', installed);
+
+    // Verify deletion
+    const verify = store.get('plugins.installed') as Record<string, InstalledPlugin> | undefined;
+    const stillExists = verify && verify[pluginId];
+    console.log(`[PluginManager] Uninstall ${pluginId}: deleted=${!stillExists}`);
+
     return true;
   });
 
@@ -214,6 +274,22 @@ export function initializePluginManager(): void {
     if (!installed[pluginId]) throw new Error('插件未安装');
     installed[pluginId].enabled = enabled;
     store.set('plugins.installed', installed);
+    return true;
+  });
+
+  // 为旧插件补编译 payload.compiled
+  ipcMain.handle('plugin:pre-compile', async (_, pluginId: string) => {
+    const store = getStore();
+    const installed =
+      (store.get('plugins.installed') as Record<string, InstalledPlugin> | undefined) || {};
+    const plugin = installed[pluginId];
+    if (!plugin?.manifest || plugin.manifest.type !== 'playerStyle') return false;
+    if (!plugin.payload?.js) return false;
+    if (plugin.payload.compiled) return true; // 已编译
+
+    plugin.payload.compiled = preCompilePlugin(plugin.payload.js);
+    store.set('plugins.installed', installed);
+    console.log(`[PluginManager] 旧插件补编译完成: ${pluginId}`);
     return true;
   });
 

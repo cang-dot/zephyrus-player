@@ -19,9 +19,13 @@
       baseColor="#ffffff"
       accentColor="#d0d0d0"
       :intensity="glitchIntensity"
+      :crtIntensity="crtIntensity"
       :speed="0.8"
       :showScanlines="config.frenzyShowScanlines !== false"
     />
+
+    <!-- 高潮过渡闪光（进入/退出高潮时触发，带色偏） -->
+    <div class="climax-flash" :style="climaxFlashStyle"></div>
 
     <!-- 歌词层 -->
     <div class="frenzy-player__lyrics">
@@ -71,7 +75,8 @@ const isFullScreen = ref(false);
 async function toggleFullScreen() {
   try {
     if (!document.fullscreenElement) {
-      await playerRef.value?.requestFullscreen();
+      // 全屏整个页面，而非仅全屏 playerRef，确保底栏和弹出层可见
+      await document.documentElement.requestFullscreen();
       isFullScreen.value = true;
     } else {
       await document.exitFullscreen();
@@ -145,11 +150,15 @@ onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullScreenChange);
   if (document.fullscreenElement) document.exitFullscreen();
   communityData.clear();
+  if (flashTimer) clearTimeout(flashTimer);
+  if (flashTimer2) clearTimeout(flashTimer2);
+  if (crtRafId) cancelAnimationFrame(crtRafId);
   console.log('[FrenzyPlayer] onUnmounted, communityData cleared');
 });
 
-// 背景颜色（级联：白色背景 → 跟随封面背景 → 自定义）
+// 背景颜色（级联：白色背景 → 跟随封面背景 → 自定义，总开关关闭时默认白色）
 const backgroundColor = computed(() => {
+  if (config.value.frenzyShowBackgroundColor === false) return '#ffffff';
   if (config.value.frenzyUseWhiteBackground !== false) return '#ffffff';
   if (config.value.frenzyUseCoverBackground !== false) return styleEngine.primaryColor;
   return config.value.frenzyBackgroundCustomColor;
@@ -200,6 +209,89 @@ const glitchIntensity = computed(() => {
 
   return Math.min(1.0, base + spike);
 });
+
+// CRT 老电视失真强度：带淡入淡出过渡
+const crtIntensityCurrent = ref(0);
+let crtTarget = 0;
+let crtRafId = 0;
+const CRT_FADE_SPEED = 0.04; // 每帧变化量，约 250ms 完成过渡
+
+function crtAnimate() {
+  const diff = crtTarget - crtIntensityCurrent.value;
+  if (Math.abs(diff) < 0.01) {
+    crtIntensityCurrent.value = crtTarget;
+    crtRafId = 0;
+    return;
+  }
+  crtIntensityCurrent.value += diff * CRT_FADE_SPEED;
+  crtRafId = requestAnimationFrame(crtAnimate);
+}
+
+const crtIntensity = computed(() => {
+  const beatBoost = styleEngine.isInClimax ? beatSpike.value * 0.4 : 0;
+  return Math.min(1.0, crtIntensityCurrent.value + beatBoost);
+});
+
+watch(() => styleEngine.isInClimax, (inClimax) => {
+  crtTarget = inClimax ? 0.6 : 0;
+  if (!crtRafId) crtRafId = requestAnimationFrame(crtAnimate);
+});
+
+watch(crtIntensity, (val) => {
+  console.log('[FrenzyPlayer] crtIntensity:', val.toFixed(3));
+});
+
+// ==================== 高潮过渡闪光 ====================
+
+const climaxFlashOpacity = ref(0);
+const climaxFlashHue = ref(0); // 色偏角度（红/绿/蓝偏移）
+let flashTimer: ReturnType<typeof setTimeout> | null = null;
+let flashTimer2: ReturnType<typeof setTimeout> | null = null;
+
+const climaxFlashStyle = computed(() => ({
+  opacity: climaxFlashOpacity.value,
+  filter: `hue-rotate(${climaxFlashHue.value}deg)`,
+  mixBlendMode: 'overlay'
+}));
+
+// 监听高潮状态变化，触发闪光 + 色偏
+watch(
+  () => styleEngine.isInClimax,
+  (newVal, oldVal) => {
+    if (newVal === oldVal) return;
+
+    if (newVal) {
+      // 进入高潮：冷色调闪光（蓝偏移）
+      climaxFlashOpacity.value = 0.7;
+      climaxFlashHue.value = 200;
+      if (flashTimer) clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => {
+        climaxFlashOpacity.value = 0;
+        climaxFlashHue.value = 0;
+      }, 180);
+    } else {
+      // 退出高潮：暖色调闪光（红偏移）
+      climaxFlashOpacity.value = 0.5;
+      climaxFlashHue.value = 30;
+      if (flashTimer) clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => {
+        climaxFlashOpacity.value = 0;
+        climaxFlashHue.value = 0;
+      }, 200);
+      // 退出高潮后再来一次短闪光
+      if (flashTimer2) clearTimeout(flashTimer2);
+      flashTimer2 = setTimeout(() => {
+        climaxFlashOpacity.value = 0.3;
+        climaxFlashHue.value = -20;
+        if (flashTimer) clearTimeout(flashTimer);
+        flashTimer = setTimeout(() => {
+          climaxFlashOpacity.value = 0;
+          climaxFlashHue.value = 0;
+        }, 120);
+      }, 250);
+    }
+  }
+);
 </script>
 
 <style scoped>
@@ -214,6 +306,15 @@ const glitchIntensity = computed(() => {
 .frenzy-player__lyrics {
   color: #1a1a1a;
   font-size: 24px;
+}
+
+.climax-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+  z-index: 15;
+  transition: opacity 0.15s ease-out;
 }
 
 .frenzy-player__settings-btn:hover {

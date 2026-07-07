@@ -150,17 +150,23 @@ function isSettingVisible(item: SettingItem): boolean {
 
 function isOptionVisible(
   item: SettingItem,
-  opt: { showWhen?: { key: string; is?: string; not?: string } }
+  opt: { showWhen?: { key: string; is?: string; not?: string; and?: { key: string; is?: string; not?: string } } }
 ): boolean {
   if (!opt.showWhen) return true;
   return checkCondition(opt.showWhen);
 }
 
-function checkCondition(condition: { key: string; is?: string; not?: string }): boolean {
+function checkCondition(condition: { key: string; is?: string; not?: string; and?: { key: string; is?: string; not?: string } }): boolean {
   const val = String(getConfigValue(condition.key));
-  if (condition.is !== undefined) return val === condition.is;
-  if (condition.not !== undefined) return val !== condition.not;
-  return true;
+  let result = true;
+  if (condition.is !== undefined) result = val === condition.is;
+  else if (condition.not !== undefined) result = val !== condition.not;
+  if (result && condition.and) {
+    const val2 = String(getConfigValue(condition.and.key));
+    if (condition.and.is !== undefined) return val2 === condition.and.is;
+    if (condition.and.not !== undefined) return val2 !== condition.and.not;
+  }
+  return result;
 }
 </script>
 

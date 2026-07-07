@@ -16,6 +16,7 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "dev:web": "vite dev",
+    "build:plugins": "node scripts/build-plugins.mjs --in-place",
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",

@@ -107,7 +107,17 @@ export const useStyleEngineStore = defineStore('styleEngine', () => {
     // 实时更新音频特征
     energyLevel.value = climaxDetector.energyLevel;
     spectrumCoverage.value = climaxDetector.spectrumCoverage;
-    isInClimax.value = climaxDetector.isClimax;
+
+    // 使用后端高潮时段数据判断是否在高潮段
+    const segments = climaxSegments.value;
+    let inClimax = false;
+    for (const seg of segments) {
+      if (time >= seg.start && time <= seg.end) {
+        inClimax = true;
+        break;
+      }
+    }
+    isInClimax.value = inClimax;
 
     // 更新当前行的重点词（由外部传入歌词行索引）
     // 注意：这里需要外部组件在切换行时调用 updateCurrentLineKeywords

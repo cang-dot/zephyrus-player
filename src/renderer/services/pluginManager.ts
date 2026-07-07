@@ -77,9 +77,27 @@ class PluginManager {
     try {
       const items = await window.api.plugin.getInstalled();
       Object.assign(this.installed, items);
-      for (const [id, plugin] of Object.entries(items)) {
-        if (plugin.manifest.type === 'playerStyle') {
-          this.activatePlayerStyle(id);
+      console.log('[PluginManager] 已安装插件:', Object.keys(items));
+      // 激活已安装且已启用的播放器样式插件
+      for (const pluginId of Object.keys(items)) {
+        const plugin = items[pluginId];
+        if (plugin?.manifest?.type === 'playerStyle') {
+          // 旧插件没有 compiled 且不是 v2，触发补编译
+          if (plugin.enabled && !plugin.payload?.compiled && !/^return\s*\{\s*default\s*:/.test(plugin.payload?.js || '')) {
+            console.log(`[PluginManager] 旧插件补编译: ${pluginId}`);
+            await window.api.plugin.preCompile(pluginId).catch((e) =>
+              console.error(`[PluginManager] 补编译失败: ${pluginId}`, e)
+            );
+            // 重新获取编译后的数据
+            const updated = await window.api.plugin.getInstalled();
+            Object.assign(this.installed, updated);
+          }
+          if (plugin.enabled) {
+            console.log(`[PluginManager] 启动激活样式: ${pluginId}`);
+            this.activatePlayerStyle(pluginId).catch((e) =>
+              console.error(`[PluginManager] 启动激活样式失败: ${pluginId}`, e)
+            );
+          }
         }
       }
     } catch {
@@ -97,7 +115,9 @@ class PluginManager {
         (this.installed as any)[item.id] = result;
       }
       if (item.type === 'playerStyle' && result) {
-        this.activatePlayerStyle(item.id);
+        this.activatePlayerStyle(item.id).catch((e) =>
+          console.error(`[PluginManager] 安装后激活样式失败: ${item.id}`, e)
+        );
       }
       this.installProgress[item.id] = { status: 'done' };
     } catch (e: any) {
@@ -112,8 +132,14 @@ class PluginManager {
     if (activeStyleKeys.has(pluginId)) {
       this.deactivatePlayerStyle(pluginId);
     }
-    await window.api.plugin.uninstall(pluginId);
+    try {
+      await window.api.plugin.uninstall(pluginId);
+    } catch (e: any) {
+      console.error(`[PluginManager] IPC uninstall failed for ${pluginId}:`, e);
+      throw e;
+    }
     delete (this.installed as any)[pluginId];
+    console.log(`[PluginManager] Removed ${pluginId} from local state`);
   }
 
   async toggleEnabled(pluginId: string, enabled: boolean): Promise<void> {
@@ -124,7 +150,9 @@ class PluginManager {
     const plugin = this.installed[pluginId];
     if (plugin?.manifest.type === 'playerStyle') {
       if (enabled) {
-        this.activatePlayerStyle(pluginId);
+        this.activatePlayerStyle(pluginId).catch((e) =>
+          console.error(`[PluginManager] 启用样式失败: ${pluginId}`, e)
+        );
       } else {
         this.deactivatePlayerStyle(pluginId);
       }
@@ -144,11 +172,37 @@ class PluginManager {
     if (!plugin?.payload?.js) return;
 
     try {
-      // Use data: URL import to preserve ES module scoping
-      // (new Function fails because Vite bundles have duplicate const declarations across logical modules)
-      const b64 = btoa(unescape(encodeURIComponent(plugin.payload.js)));
-      const dataUrl = `data:text/javascript;base64,${b64}`;
-      const mod = await import(/* @vite-ignore */ dataUrl);
+      // v2 格式直接使用 payload.js，旧格式使用 payload.compiled 或运行时编译
+      let code: string = plugin.payload.compiled || plugin.payload.js || '';
+
+      // 如果既没有 compiled 也不是 v2，运行时编译（兼容旧插件）
+      if (!/return\s*\{\s*default\s*:/.test(code) || /export\s*\{/.test(code)) {
+        code = code
+          .replace(/^\s*let X;\s*$/gm, '')
+          .replace(/^\(function\(\)\{var s=document\.createElement\('style'\);[\s\S]*?\}\)\(\);\s*/m, '')
+          .replace(
+            /(var\s+__sh_\w+\s*=\s*\{\s*\}\s*;\s*)\(function\s*\(\s*\)\s*\{['"]use strict['"];\s*/g,
+            '$1\n'
+          )
+          .replace(/^\}\)\(\)\s*;?\s*$/gm, '')
+          .replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =')
+          .replace(/^\s*(const|let)\s+/gm, 'var ')
+          .replace(
+            /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
+            'return { default: $1 };'
+          );
+      }
+
+      console.log(`[PluginManager] 正在加载插件 (new Function): ${pluginId}`);
+      let mod: any;
+      try {
+        const fn = new Function(code);
+        mod = fn();
+        console.log(`[PluginManager] 插件加载成功: ${pluginId}`, mod);
+      } catch (e: any) {
+        console.error(`[PluginManager] 加载插件失败: ${pluginId}`, e?.message || e);
+        return;
+      }
 
       const exportDefault = mod.default || mod;
       if (!exportDefault || (typeof exportDefault !== 'object' && typeof exportDefault !== 'function')) {
@@ -180,8 +234,9 @@ class PluginManager {
         });
       }
       activeStyleKeys.add(pluginId);
-    } catch (e) {
-      console.error(`[PluginManager] 激活播放器样式失败: ${pluginId}`, e);
+      console.log(`[PluginManager] 样式已注册: plugin-${pluginId} (renderMode: ${renderMode})`);
+    } catch (e: any) {
+      console.error(`[PluginManager] 激活播放器样式失败: ${pluginId}`, e?.message || e);
     }
   }
 
