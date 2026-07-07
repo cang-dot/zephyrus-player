@@ -187,10 +187,35 @@ class PluginManager {
           .replace(/^\}\)\(\)\s*;?\s*$/gm, '')
           .replace(/\bvar\s+([$\w]+)\s*=\s*var\s+\1\s*=/g, 'var $1 =')
           .replace(/^\s*(const|let)\s+/gm, 'var ')
+          .replace(/\bclass\s+([$\w]+)\s*(extends\s+[^{]+?)?\s*\{/g, (_: string, name: string, ext: string) => {
+            return `var ${name} = class ${ext ? ext.trim() : ''} {`;
+          })
           .replace(
             /export\s*\{\s*([$\w]+)\s+as\s+default\s*\}\s*;?/g,
             'return { default: $1 };'
           );
+
+        // 跨 IIFE 重命名重复 var 声明
+        const blocks = code.split(/(?=^\s*var\s+__sh_)/m);
+        const declared = new Set<string>();
+        code = blocks.map((block) => {
+          const decls = [...block.matchAll(/^\s*var\s+([$\w]+)/gm)].map((m) => m[1]);
+          let result = block;
+          for (const v of decls) {
+            if (v.startsWith('__sh_')) continue;
+            if (declared.has(v)) {
+              let s = 2;
+              while (declared.has(`${v}_${s}`)) s++;
+              const nv = `${v}_${s}`;
+              result = result.replace(new RegExp(`\\bvar\\s+${v}\\b`, 'g'), `var ${nv}`);
+              result = result.replace(new RegExp(`\\b${v}\\b`, 'g'), nv);
+              declared.add(nv);
+            } else {
+              declared.add(v);
+            }
+          }
+          return result;
+        }).join('');
       }
 
       console.log(`[PluginManager] 正在加载插件 (new Function): ${pluginId}`);
