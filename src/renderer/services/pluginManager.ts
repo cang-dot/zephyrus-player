@@ -237,17 +237,8 @@ class PluginManager {
         mod = fn();
         console.log(`[PluginManager] 插件加载成功: ${pluginId}`, mod);
       } catch (e: any) {
-        // 编译后的代码执行失败，尝试用原始代码（跳过运行时编译）
-        console.warn(`[PluginManager] 编译后代码执行失败: ${pluginId}, 尝试原始代码`, e?.message);
-        try {
-          const rawCode = plugin.payload.compiled || plugin.payload.js || '';
-          const fn2 = new Function(rawCode);
-          mod = fn2();
-          console.log(`[PluginManager] 原始代码加载成功: ${pluginId}`, mod);
-        } catch (e2: any) {
-          console.error(`[PluginManager] 原始代码也失败: ${pluginId}`, e2?.message || e2);
-          return;
-        }
+        console.error(`[PluginManager] 加载插件失败: ${pluginId}`, e?.message || e);
+        return;
       }
 
       const exportDefault = mod.default || mod;
