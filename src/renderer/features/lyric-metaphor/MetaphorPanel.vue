@@ -25,7 +25,7 @@
           </template>
           重新分析
         </n-tooltip>
-        <n-tooltip trigger="hover" v-if="result">
+        <n-tooltip trigger="hover">
           <template #trigger>
             <div class="action-btn" @click="handleConfigure">
               <i class="iconfont ri-settings-3-line"></i>

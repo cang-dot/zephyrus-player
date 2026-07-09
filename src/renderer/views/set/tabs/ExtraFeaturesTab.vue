@@ -47,7 +47,10 @@
             {{ feature.description }}
           </div>
         </div>
-        <div class="shrink-0 ml-4">
+        <div class="shrink-0 ml-4 flex items-center gap-2">
+          <s-btn v-if="feature.id === 'lyric-metaphor' && isFeatureEnabled(feature.id)" @click="showAIConfig = true">
+            <i class="ri-settings-3-line"></i>
+          </s-btn>
           <n-switch
             v-if="!feature.locked"
             :value="isFeatureEnabled(feature.id)"
@@ -70,6 +73,9 @@
       </div>
     </div>
   </setting-section>
+
+  <!-- AI 配置弹窗 -->
+  <metaphor-config-modal v-model="showAIConfig" />
 </template>
 
 <script setup lang="ts">
@@ -77,6 +83,7 @@ import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { isFeatureEnabled, setFeatureEnabled, getAllFeatures } from '@/features/index';
+import MetaphorConfigModal from '@/features/lyric-metaphor/MetaphorConfigModal.vue';
 import type { FeatureType } from '@/features/index';
 
 import { SETTINGS_MESSAGE_KEY } from '../keys';
@@ -92,6 +99,7 @@ const tabs = [
 ];
 
 const activeTab = ref('features');
+const showAIConfig = ref(false);
 
 const featureList = getAllFeatures();
 
