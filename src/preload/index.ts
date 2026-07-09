@@ -95,7 +95,6 @@ const api = {
     importFile: (type) => ipcRenderer.invoke('plugin:import-file', type),
     refreshRegistry: () => ipcRenderer.invoke('plugin:refresh-registry'),
     testMirrors: () => ipcRenderer.invoke('plugin:test-mirrors'),
-    preCompile: (pluginId) => ipcRenderer.invoke('plugin:pre-compile', pluginId),
     onInstallProgress: (callback: (data: { pluginId: string; status: string; percent?: number }) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: { pluginId: string; status: string; percent?: number }) => callback(data);
       ipcRenderer.on('plugin:install-progress', handler);

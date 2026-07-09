@@ -59,7 +59,6 @@ interface API {
     testMirrors: () => Promise<
       { name: string; url: string; ok: boolean; latencyMs: number; speed: number; error?: string }[]
     >;
-    preCompile: (_pluginId: string) => Promise<boolean>;
     onInstallProgress: (
       _callback: (data: { pluginId: string; status: string; percent?: number }) => void
     ) => () => void;
