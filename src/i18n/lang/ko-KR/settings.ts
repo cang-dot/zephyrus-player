@@ -9,7 +9,7 @@ export default {
     application: '애플리케이션 설정',
     network: '네트워크 설정',
     system: '시스템 관리',
-    plugins: '플러그인 스토어',
+    plugins: '추가 기능',
     about: '정보'
   },
   basic: {

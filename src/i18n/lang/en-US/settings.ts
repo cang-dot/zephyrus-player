@@ -10,7 +10,7 @@ export default {
     application: 'Application Settings',
     network: 'Network Settings',
     system: 'System Management',
-    plugins: 'Plugin Store',
+    plugins: 'Extra Features',
     about: 'About'
   },
   basic: {

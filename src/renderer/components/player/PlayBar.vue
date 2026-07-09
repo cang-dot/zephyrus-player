@@ -192,6 +192,18 @@
       </n-tooltip>
       <climax-editor v-model="showClimaxEditor" />
 
+      <!-- 歌词隐喻分析按钮 -->
+      <n-tooltip v-if="metaphorButtonVisible" trigger="hover" :z-index="9999999">
+        <template #trigger>
+          <i
+            class="iconfont ri-quill-pen-line text-2xl hover:text-green-500 transition-colors cursor-pointer"
+            :class="{ 'text-green-500': showMetaphorPanel }"
+            @click="showMetaphorPanel = !showMetaphorPanel"
+          ></i>
+        </template>
+        歌词隐喻分析
+      </n-tooltip>
+
       <n-tooltip trigger="hover" :z-index="9999999">
         <template #trigger>
           <i
@@ -205,6 +217,16 @@
     <!-- 全屏播放器 -->
     <music-full-wrapper ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
   </div>
+
+  <!-- 歌词隐喻分析面板 -->
+  <metaphor-panel
+    v-model="showMetaphorPanel"
+    :lyrics="lyricsText"
+    :song-name="songName"
+    :artist="artistName"
+    @configure="showMetaphorConfig = true"
+  />
+  <metaphor-config-modal v-model="showMetaphorConfig" />
 </template>
 
 <script lang="ts" setup>
@@ -217,11 +239,15 @@ import ClimaxEditor from '@/components/ClimaxEditor.vue';
 import MusicFullWrapper from '@/components/lyric/MusicFullWrapper.vue';
 import AdvancedControlsPopover from '@/components/player/AdvancedControlsPopover.vue';
 import ReparsePopover from '@/components/player/ReparsePopover.vue';
+import MetaphorConfigModal from '@/features/lyric-metaphor/MetaphorConfigModal.vue';
+import MetaphorPanel from '@/features/lyric-metaphor/MetaphorPanel.vue';
+import { isFeatureEnabled } from '@/features/store';
 import {
   allTime,
   artistList,
   getLyricTextAtTime,
   isLyricWindowOpen,
+  lrcArray,
   nowTime,
   openLyric,
   playMusic,
@@ -331,6 +357,8 @@ const handleSliderDragEnd = () => {
 const MusicFullRef = ref<any>(null);
 const showSliderTooltip = ref(false);
 const showClimaxEditor = ref(false);
+const showMetaphorPanel = ref(false);
+const showMetaphorConfig = ref(false);
 const hoverTimeSec = ref(0);
 const tooltipX = ref(0);
 const hoverLyric = ref<string | null>(null);
@@ -474,6 +502,23 @@ const handleArtistClick = (id: number) => {
 const openPlayListDrawer = () => {
   playerStore.setPlayListDrawerVisible(true);
 };
+
+const metaphorButtonVisible = computed(() => {
+  return isFeatureEnabled('lyric-metaphor') && !!playMusic?.value?.name;
+});
+
+const lyricsText = computed(() => {
+  return lrcArray.value.map((l) => l.text).join('\n');
+});
+
+const songName = computed(() => playMusic?.value?.name || '');
+const artistName = computed(() => {
+  const list = artistList.value;
+  if (Array.isArray(list)) {
+    return list.map((a: any) => a.name).join(' / ');
+  }
+  return '';
+});
 </script>
 
 <style lang="scss" scoped>

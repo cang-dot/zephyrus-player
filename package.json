@@ -1,6 +1,6 @@
 {
   "name": "ZephyrusPlayer",
-  "version": "0.9.7",
+  "version": "0.9.8-vision",
   "description": "Zephyrus Player",
   "author": "Zephyrus <WEISTUDIOWEI@126.com>",
   "main": "./out/main/index.js",
@@ -41,6 +41,7 @@
     "@unblockneteasemusic/server": "^0.27.10",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
+    "dompurify": "^3.4.11",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.6.2",
     "electron-window-state": "^5.0.3",
@@ -68,6 +69,7 @@
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@eslint/js": "^9.39.2",
     "@rushstack/eslint-patch": "^1.15.0",
+    "@types/dompurify": "^3.0.5",
     "@types/howler": "^2.2.12",
     "@types/node": "^20.19.26",
     "@types/node-fetch": "^2.6.13",

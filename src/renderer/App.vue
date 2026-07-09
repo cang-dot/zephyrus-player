@@ -33,6 +33,7 @@ import { useUserStore } from '@/store/modules/user';
 import { isElectron, isLyricWindow } from '@/utils';
 import { checkLoginStatus } from '@/utils/auth';
 
+import { registerBuiltinFeatures } from '@/features/register';
 import { initAudioListeners, initMusicHook } from './hooks/MusicHook';
 import { initCoverColor, useCoverColor } from './hooks/useCoverColor';
 import { audioService } from './services/audioService';
@@ -173,6 +174,9 @@ useAppShortcuts();
 
 onMounted(async () => {
   playerStore.setIsPlay(false);
+
+  // 注册内置功能
+  registerBuiltinFeatures();
 
   // 加载已安装插件并激活播放器样式
   const { pluginManager } = await import('@/services/pluginManager');
