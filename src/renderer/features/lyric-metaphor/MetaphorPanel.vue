@@ -73,6 +73,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 
 import { useMetaphor } from '@/features/lyric-metaphor/useMetaphor';
 import { isMobile } from '@/utils';
@@ -146,7 +148,9 @@ function handleConfigure() {
 }
 
 const sanitizedResult = computed(() => {
-  return result.value;
+  if (!result.value) return '';
+  const html = marked.parseSync(result.value);
+  return DOMPurify.sanitize(html);
 });
 
 const handleKeyDown = (event: KeyboardEvent) => {
