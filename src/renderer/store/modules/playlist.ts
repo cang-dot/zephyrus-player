@@ -5,6 +5,7 @@ import { defineStore, storeToRefs } from 'pinia';
 import { computed, ref, shallowRef, triggerRef } from 'vue';
 
 import i18n from '@/../i18n/renderer';
+import { useLocalMusic, isLocalSong } from '@/hooks/useLocalMusic';
 import { useSongDetail } from '@/hooks/usePlayerHooks';
 import { preloadService } from '@/services/preloadService';
 import type { SongResult } from '@/types/music';
@@ -142,7 +143,11 @@ export const usePlaylistStore = defineStore(
         // 预加载下一首歌曲的音频和封面
         if (nextSong) {
           if (nextSong.playMusicUrl) {
-            preloadService.load(nextSong);
+            try {
+              await preloadService.load(nextSong);
+            } catch (error) {
+              console.warn('预加载下一首音频失败:', error);
+            }
           }
           if (nextSong.picUrl) {
             preloadCoverImage(nextSong.picUrl, getImgUrl);
@@ -485,6 +490,14 @@ export const usePlaylistStore = defineStore(
           sleepTimerStore.handleSongChange();
         } else {
           console.error(`[nextPlay] 播放失败: ${nextSong.name}`);
+
+          // 本地歌曲失败：不自动跳下一首，提示用户
+          if (isLocalSong(nextSong)) {
+            const localMusic = useLocalMusic();
+            localMusic.handleLocalError(nextSong);
+            playerCore.setIsPlay(false);
+            return;
+          }
 
           // 单曲重试逻辑
           if (singleTrackRetryCount < SINGLE_TRACK_MAX_RETRIES) {

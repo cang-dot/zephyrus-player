@@ -54,8 +54,18 @@ const styleEngine = useStyleEngineStore();
 
 // naive-ui 主题覆盖：组件强调色跟随封面取色
 const themeOverrides = computed(() => {
-  const pc = primaryColor.value || '#22c55e';
+  const pc = primaryColor.value || '#888888';
   return {
+    common: {
+      primaryColor: pc,
+      primaryColorHover: pc,
+      primaryColorPressed: pc,
+      primaryColorSuppl: pc,
+      infoColor: pc,
+      successColor: pc,
+      warningColor: pc,
+      errorColor: '#e53e3e'
+    },
     Slider: {
       fillColor: pc,
       fillColorHover: pc,
@@ -64,7 +74,9 @@ const themeOverrides = computed(() => {
       dotColorActive: pc
     },
     Switch: {
-      railColorActive: pc
+      railColorActive: pc,
+      loadingColor: pc,
+      boxShadowFocus: `0 0 0 2px ${pc}33`
     },
     Button: {
       color: pc,
@@ -89,6 +101,63 @@ const themeOverrides = computed(() => {
       colorSuccess: pc,
       textColorSuccess: '#fff',
       borderSuccess: pc
+    },
+    Input: {
+      color: 'transparent',
+      colorFocus: 'transparent',
+      border: `1px solid #d9d9d9`,
+      borderHover: `1px solid ${pc}`,
+      borderFocus: `1px solid ${pc}`,
+      borderDisabled: '1px solid #e0e0e0',
+      boxShadowFocus: `0 0 0 1px ${pc}`,
+      textColor: '#333',
+      placeholderColor: '#999'
+    },
+    Dropdown: {
+      optionColorActive: `${pc}15`,
+      optionColorActiveHover: `${pc}20`,
+      optionTextColorActive: pc
+    },
+    Menu: {
+      colorActive: pc,
+      itemTextColorActive: pc,
+      itemIconColorActive: pc
+    },
+    Select: {
+      peers: {
+        InternalSelectMenu: {
+          optionColorActive: `${pc}15`,
+          optionColorActiveHover: `${pc}20`,
+          optionTextColorActive: pc
+        },
+        Selection: {
+          border: `1px solid #d9d9d9`,
+          borderHover: `1px solid ${pc}`,
+          borderActive: `1px solid ${pc}`,
+          borderFocus: `1px solid ${pc}`,
+          boxShadowFocus: `0 0 0 1px ${pc}`,
+          boxShadowActive: `0 0 0 1px ${pc}`
+        }
+      }
+    },
+    Slider: {
+      fillColor: pc,
+      fillColorHover: pc,
+      handleColor: pc,
+      dotColor: pc,
+      dotColorActive: pc,
+      dotColorModal: pc,
+      dotColorPopover: pc,
+      indicatorColor: pc,
+      indicatorTextColor: '#fff'
+    },
+    Checkbox: {
+      colorChecked: pc,
+      borderChecked: pc,
+      boxShadowChecked: `inset 0 0 0 1px ${pc}`
+    },
+    Spin: {
+      color: pc
     }
   };
 });
@@ -172,8 +241,21 @@ if (isElectron) {
 // 使用应用内快捷键
 useAppShortcuts();
 
+let focusTrapObserver: MutationObserver | null = null;
+
 onMounted(async () => {
   playerStore.setIsPlay(false);
+
+  // 修复 vueuc FocusTrap 哨兵元素的 aria-hidden 警告
+  focusTrapObserver = new MutationObserver(() => {
+    document.querySelectorAll('[aria-hidden="true"][tabindex="0"]').forEach((el) => {
+      el.setAttribute('tabindex', '-1');
+    });
+  });
+  focusTrapObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex', 'aria-hidden'] });
+  document.querySelectorAll('[aria-hidden="true"][tabindex="0"]').forEach((el) => {
+    el.setAttribute('tabindex', '-1');
+  });
 
   // 注册内置功能
   registerBuiltinFeatures();
@@ -241,6 +323,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   styleEngine.dispose();
+  focusTrapObserver?.disconnect();
 });
 </script>
 

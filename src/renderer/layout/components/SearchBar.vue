@@ -404,8 +404,8 @@ onMounted(() => {
   color: #9ca3af;
 }
 .back-btn:hover {
-  color: var(--accent-color, #22c55e);
-  border-color: var(--accent-color, #22c55e);
+  color: var(--accent-color, #888888);
+  border-color: var(--accent-color, #888888);
 }
 
 /* 搜索框 */
@@ -432,13 +432,13 @@ onMounted(() => {
   background: #111827;
 }
 .search-inner--focus {
-  border-color: var(--accent-color, #22c55e);
+  border-color: var(--accent-color, #888888);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 34, 197, 94), 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
 }
 .dark .search-inner--focus {
   background: #0a0a0a;
-  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 34, 197, 94), 0.12);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.12);
 }
 
 .search-icon-glyph {
@@ -448,7 +448,7 @@ onMounted(() => {
   transition: color 0.2s;
 }
 .search-inner--focus .search-icon-glyph {
-  color: var(--accent-color, #22c55e);
+  color: var(--accent-color, #888888);
 }
 
 .search-input {
@@ -489,12 +489,12 @@ onMounted(() => {
   color: #9ca3af;
 }
 .type-chip:hover {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.15);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.15);
+  color: var(--accent-color, #888888);
 }
 .dark .type-chip:hover {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.1);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
+  color: var(--accent-color, #888888);
 }
 
 /* 操作按钮 */
@@ -517,14 +517,14 @@ onMounted(() => {
   color: #9ca3af;
 }
 .action-btn:hover {
-  color: var(--accent-color, #22c55e);
-  border-color: #bbf7d0;
-  background: #f0fdf4;
+  color: var(--accent-color, #888888);
+  border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.05);
 }
 .dark .action-btn:hover {
-  border-color: #166534;
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.08);
-  color: var(--accent-color, #22c55e);
+  border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.08);
+  color: var(--accent-color, #888888);
 }
 /* 用户按钮 */
 .user-btn {
@@ -546,8 +546,8 @@ onMounted(() => {
   border-color: #374151;
 }
 .user-btn:hover {
-  border-color: var(--accent-color, #22c55e);
-  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 34, 197, 94), 0.12);
+  border-color: var(--accent-color, #888888);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 136, 136, 136), 0.12);
 }
 
 .login-label {
@@ -664,8 +664,8 @@ onMounted(() => {
   transition: all 0.12s;
 }
 .zoom-btn:hover {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.15);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.15);
+  color: var(--accent-color, #888888);
 }
 .zoom-val {
   font-size: 11px;
@@ -678,8 +678,8 @@ onMounted(() => {
   transition: all 0.12s;
 }
 .zoom-val--100 {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.15);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.15);
+  color: var(--accent-color, #888888);
 }
 .ver-chip {
   font-size: 11px;
@@ -717,13 +717,13 @@ onMounted(() => {
 }
 .suggest-row:hover,
 .suggest-row--hi {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.06);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.06);
+  color: var(--accent-color, #888888);
 }
 .dark .suggest-row:hover,
 .dark .suggest-row--hi {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.06);
-  color: var(--accent-color, #22c55e);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.06);
+  color: var(--accent-color, #888888);
 }
 .suggest-icon {
   font-size: 13px;

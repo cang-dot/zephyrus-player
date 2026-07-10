@@ -241,7 +241,7 @@ const handleLoginError = (error: string) => {
         }
 
         &.active {
-          @apply bg-green-600 text-white font-medium;
+          @apply bg-[var(--accent-color)] text-white font-medium;
           transform: translateY(-1px);
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -274,7 +274,7 @@ const handleLoginError = (error: string) => {
         transition: all 0.3s ease;
 
         &:focus {
-          @apply border-green-500;
+          @apply border-[var(--accent-color)];
           transform: translateY(-1px);
         }
       }
@@ -284,7 +284,7 @@ const handleLoginError = (error: string) => {
       width: 250px;
       height: 40px;
       @apply mt-10 text-white rounded-xl;
-      @apply bg-green-600 hover:bg-green-700 transition-all duration-300;
+      @apply bg-[var(--accent-color)] hover:brightness-90 transition-all duration-300;
       transform: translateY(0);
 
       &:hover {

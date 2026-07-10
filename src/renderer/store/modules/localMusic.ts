@@ -239,6 +239,38 @@ export const useLocalMusicStore = defineStore(
       }
     }
 
+    /**
+     * 从目录批量绑定歌词文件到本地歌曲
+     * @param dirPath 歌词文件所在目录
+     * @returns 绑定结果 { total: 歌词文件总数, matched: 匹配成功数 }
+     */
+    async function bindLyricsFromDirectory(dirPath: string) {
+      const { batchSetLocalLyricPaths } = await import('@/utils/localLyricStorage');
+      const { parseLyricFilename, matchLyricsToSongs } = await import('@/utils/localMusicUtils');
+
+      // 1. 扫描目录下的歌词文件
+      const lyricFiles: string[] = await (window.electron as any).api.invoke(
+        'scan-lyric-files',
+        dirPath
+      );
+
+      // 2. 解析文件名
+      const parsed = lyricFiles.map((f) => ({
+        path: f,
+        ...parseLyricFilename(f)
+      }));
+
+      // 3. 匹配本地歌曲
+      const matches = matchLyricsToSongs(parsed, musicList.value);
+
+      // 4. 批量绑定
+      if (matches.length > 0) {
+        batchSetLocalLyricPaths(matches);
+      }
+
+      return { total: lyricFiles.length, matched: matches.length };
+    }
+
     return {
       // 状态
       folderPaths,
@@ -251,7 +283,8 @@ export const useLocalMusicStore = defineStore(
       removeFolder,
       scanFolders,
       loadFromCache,
-      clearCache
+      clearCache,
+      bindLyricsFromDirectory
     };
   },
   {

@@ -74,7 +74,7 @@
         >
           <div class="flex items-center gap-2">
             <i
-              :class="r.ok ? 'ri-checkbox-circle-fill text-green-500' : 'ri-close-circle-fill text-red-400'"
+              :class="r.ok ? 'ri-checkbox-circle-fill text-[var(--accent-color)]' : 'ri-close-circle-fill text-red-400'"
             ></i>
             <span class="text-gray-700 dark:text-gray-300">{{ r.name }}</span>
           </div>

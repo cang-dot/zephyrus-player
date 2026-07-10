@@ -267,6 +267,12 @@ const parseLyrics = (lyricsString: string): { lyrics: ILyricText[]; times: numbe
 export const loadLrc = async (id: string | number): Promise<ILyric> => {
   try {
     const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+    // 本地歌曲（字符串 ID，parseInt 返回 NaN）直接返回空，不走网易云 API
+    if (typeof id === 'string' && isNaN(numericId)) {
+      return { lrcTimeArray: [], lrcArray: [], hasWordByWord: false };
+    }
+
     let lyricData: any;
 
     if (isElectron) {

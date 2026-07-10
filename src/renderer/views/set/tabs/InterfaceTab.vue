@@ -543,7 +543,7 @@ function saveOrder(order: string[]) {
 
 .font-select-input--open {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 34, 197, 94), 0.2);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
 }
 
 .fade-enter-active,

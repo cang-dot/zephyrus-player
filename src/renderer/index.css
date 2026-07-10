@@ -54,7 +54,7 @@
   --text-color-100: #e9ecef;
   --text-color-200: #dee2e6;
   --text-color-300: #dde0e3;
-  --primary-color: var(--dynamic-primary, #22c55e);
+  --primary-color: var(--dynamic-primary, #888888);
 }
 
 .theme-light {
@@ -67,7 +67,7 @@
   --text-color-100: #161616;
   --text-color-200: #2d2d2d;
   --text-color-300: #3d3d3d;
-  --primary-color: var(--dynamic-primary, #22c55e);
+  --primary-color: var(--dynamic-primary, #888888);
 }
 
 .theme-gray {
@@ -80,7 +80,7 @@
   --text-color-100: #161616;
   --text-color-200: #2d2d2d;
   --text-color-300: #3d3d3d;
-  --primary-color: var(--dynamic-primary, #22c55e);
+  --primary-color: var(--dynamic-primary, #888888);
 }
 
 :root {
@@ -95,13 +95,13 @@
   --page-pl: 1rem; /* 左边距，PC 端有菜单时为 0 */
   --page-pr: 1rem; /* 右边距 */
 
-  /* 强调色（从封面提取，默认绿色） */
-  --accent-color: rgb(34, 197, 94);
-  --accent-color-rgb: 34, 197, 94;
-  --accent-color-light: rgb(54, 217, 114);
-  --accent-color-dark: rgb(14, 177, 74);
-  --accent-color-10: rgba(34, 197, 94, 0.1);
-  --accent-color-20: rgba(34, 197, 94, 0.2);
+  /* 强调色（从封面提取，默认灰色） */
+  --accent-color: rgb(136, 136, 136);
+  --accent-color-rgb: 136, 136, 136;
+  --accent-color-light: rgb(156, 156, 156);
+  --accent-color-dark: rgb(116, 116, 116);
+  --accent-color-10: rgba(136, 136, 136, 0.1);
+  --accent-color-20: rgba(136, 136, 136, 0.2);
 }
 
 /* PC 端：有左侧菜单，左边距为 0 */
@@ -183,4 +183,69 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* naive-ui 全局强调色覆盖 */
+:root {
+  --n-primary-color: var(--accent-color) !important;
+  --n-primary-color-hover: var(--accent-color) !important;
+  --n-primary-color-pressed: var(--accent-color-dark) !important;
+  --n-info-color: var(--accent-color) !important;
+  --n-success-color: var(--accent-color) !important;
+  --n-warning-color: var(--accent-color) !important;
+  --n-border-color: var(--accent-color) !important;
+  --n-border-color-hover: var(--accent-color) !important;
+  --n-border-color-focus: var(--accent-color) !important;
+}
+
+/* 覆盖 n-select 和 n-input 的绿色边框 */
+:root .n-base-selection,
+:root .n-base-selection:hover,
+:root .n-base-selection--focused,
+:root .n-base-selection--active {
+  border-color: var(--accent-color) !important;
+}
+
+:root .n-input,
+:root .n-input:hover,
+:root .n-input--focus,
+:root .n-input--focus:hover {
+  border-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-switch */
+:root .n-switch--rail-checked {
+  background-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-slider */
+:root .n-slider-handle,
+:root .n-slider-fill {
+  background-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-select dropdown */
+:root .n-base-select-menu {
+  border: 1px solid var(--accent-color) !important;
+}
+
+/* 覆盖 n-button */
+:root .n-button--primary-type {
+  background-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-radio */
+:root .n-radio--checked .n-radio-dot {
+  border-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-checkbox */
+:root .n-checkbox--checked .n-checkbox-box {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+/* 覆盖 n-spin */
+:root .n-spin-container .n-spin-dot {
+  color: var(--accent-color) !important;
 }

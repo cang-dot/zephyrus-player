@@ -50,7 +50,13 @@ export async function chatCompletion(options: ChatOptions): Promise<ChatResult> 
     return geminiChat(baseUrl, model, options.apiKey || '', options.messages, options.signal);
   }
 
-  return openaiChat(baseUrl, model, options.apiKey, options.messages, options.signal);
+  const extraHeaders: Record<string, string> = {};
+  if (p.id === 'github-models') {
+    extraHeaders['Accept'] = 'application/vnd.github+json';
+    extraHeaders['X-GitHub-Api-Version'] = '2022-11-28';
+  }
+
+  return openaiChat(baseUrl, model, options.apiKey, options.messages, options.signal, extraHeaders);
 }
 
 async function openaiChat(
@@ -58,11 +64,13 @@ async function openaiChat(
   model: string,
   apiKey: string | undefined,
   messages: ChatMessage[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  extraHeaders?: Record<string, string>
 ): Promise<ChatResult> {
   const url = `${baseUrl}/chat/completions`;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    ...extraHeaders
   };
   if (apiKey) {
     headers['Authorization'] = `Bearer ${apiKey}`;

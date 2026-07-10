@@ -2,7 +2,7 @@
  * 封面取色 composable
  *
  * 从当前播放歌曲的封面提取主色，动态更新 CSS 变量
- * 替换全局的绿色主色 #22c55e
+ * 替换全局的默认灰色主色
  */
 import { ref, watch } from 'vue';
 
@@ -10,16 +10,16 @@ import { playMusic } from '@/hooks/MusicHook';
 import { getImgUrl } from '@/utils';
 
 // 当前提取的颜色
-const primaryColor = ref('#22c55e');
-const primaryColorRgb = ref('34, 197, 94');
+const primaryColor = ref('#888888');
+const primaryColorRgb = ref('136, 136, 136');
 // 封面原始平均色（不做暖色调整）
-const averageColor = ref('#22c55e');
-const averageColorRgb = ref('34, 197, 94');
+const averageColor = ref('#888888');
+const averageColorRgb = ref('136, 136, 136');
 
-// 默认绿色的 RGB
-const DEFAULT_R = 34;
-const DEFAULT_G = 197;
-const DEFAULT_B = 94;
+// 默认灰色的 RGB
+const DEFAULT_R = 136;
+const DEFAULT_G = 136;
+const DEFAULT_B = 136;
 
 /**
  * 从图片提取主色（基于 canvas 像素采样）
@@ -136,9 +136,9 @@ function updateCSSVariables(r: number, g: number, b: number) {
  * 重置为默认绿色
  */
 function resetToDefault() {
-  primaryColor.value = '#22c55e';
+  primaryColor.value = '#888888';
   primaryColorRgb.value = `${DEFAULT_R}, ${DEFAULT_G}, ${DEFAULT_B}`;
-  averageColor.value = '#22c55e';
+  averageColor.value = '#888888';
   averageColorRgb.value = `${DEFAULT_R}, ${DEFAULT_G}, ${DEFAULT_B}`;
   updateCSSVariables(DEFAULT_R, DEFAULT_G, DEFAULT_B);
 }

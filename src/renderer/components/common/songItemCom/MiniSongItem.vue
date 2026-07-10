@@ -72,7 +72,7 @@
         </div>
         <div
           class="song-item-operating-play bg-gray-300 dark:bg-gray-800 animate__animated"
-          :class="{ 'bg-green-600': isPlaying, animate__flipInY: playLoading }"
+          :class="{ 'bg-[var(--accent-color)]': isPlaying, animate__flipInY: playLoading }"
           @click="onPlayMusic"
         >
           <i v-if="isPlaying && play" class="iconfont icon-stop"></i>
@@ -223,7 +223,7 @@ const onPlayMusic = () => {
       color: rgb(17 24 39); /* text-gray-900 */
 
       &:hover,
-      &.bg-green-600 {
+      &.bg-\[var\(--accent-color\)\] {
         background-color: var(--accent-color, rgb(34 197 94));
         border-color: var(--accent-color, rgb(34 197 94));
         color: white;

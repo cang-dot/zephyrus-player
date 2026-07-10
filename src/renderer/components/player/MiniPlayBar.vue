@@ -174,17 +174,17 @@ const handleArtistClick = (id: number) => {
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
-    color: var(--accent-color, #22c55e);
+    color: var(--accent-color, #888888);
   }
 
   &.play {
     width: 36px;
     height: 36px;
-    background: var(--accent-color, #22c55e);
+    background: var(--accent-color, #888888);
     color: #fff;
 
     &:hover {
-      background: var(--accent-color-dark, #16a34a);
+      background: var(--accent-color-dark, #747474);
     }
   }
 }
@@ -209,7 +209,7 @@ const handleArtistClick = (id: number) => {
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
-    color: var(--accent-color, #22c55e);
+    color: var(--accent-color, #888888);
   }
 }
 </style>

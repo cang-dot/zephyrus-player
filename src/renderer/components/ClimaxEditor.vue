@@ -350,7 +350,7 @@ async function saveToServer() {
   position: absolute;
   top: 2px;
   bottom: 2px;
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.4);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -358,7 +358,7 @@ async function saveToServer() {
   z-index: 2;
 
   &.climax-region-active {
-    background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.7);
+    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.7);
   }
 }
 
@@ -416,7 +416,7 @@ async function saveToServer() {
   position: absolute;
   top: 2px;
   bottom: 2px;
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.3);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3);
   pointer-events: none;
   z-index: 1;
 }

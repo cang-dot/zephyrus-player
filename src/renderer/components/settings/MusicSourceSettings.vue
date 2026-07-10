@@ -39,7 +39,7 @@
                   class="group relative flex items-center p-2.5 rounded-xl border transition-all duration-200 cursor-pointer"
                   :class="[
                     isSourceSelected(source.key)
-                      ? 'bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
+                      ? 'bg-[var(--accent-color-10)]/50 dark:bg-[var(--accent-color-10)] border-[var(--accent-color)]/30 dark:border-[var(--accent-color)]/20'
                       : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10',
                     { 'opacity-60 cursor-not-allowed': !source.available }
                   ]"
@@ -65,7 +65,7 @@
                         class="w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ml-1"
                         :class="[
                           isSourceSelected(source.key)
-                            ? 'bg-emerald-500 border-emerald-500'
+                            ? 'bg-[var(--accent-color)] border-[var(--accent-color)]'
                             : 'border-gray-300 dark:border-gray-600'
                         ]"
                       >
@@ -110,7 +110,7 @@
                 </h3>
                 <button
                   @click="importLxMusicScript"
-                  class="flex items-center gap-1 px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg transition-colors"
+                  class="flex items-center gap-1 px-2.5 py-1 bg-[var(--accent-color)] hover:brightness-90 text-white text-xs font-medium rounded-lg transition-colors"
                 >
                   <i class="ri-upload-line"></i>
                   {{ t('settings.playback.lxMusic.scripts.importLocal') }}
@@ -125,7 +125,7 @@
                   class="flex items-center p-2.5 rounded-xl border transition-all duration-200"
                   :class="[
                     activeLxApiId === api.id
-                      ? 'bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
+                      ? 'bg-[var(--accent-color-10)]/50 dark:bg-[var(--accent-color-10)] border-[var(--accent-color)]/30 dark:border-[var(--accent-color)]/20'
                       : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'
                   ]"
                 >
@@ -133,7 +133,7 @@
                     <input
                       type="radio"
                       :checked="activeLxApiId === api.id"
-                      class="peer appearance-none w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 checked:border-emerald-500 checked:bg-emerald-500 transition-colors cursor-pointer"
+                      class="peer appearance-none w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 checked:border-[var(--accent-color)] checked:bg-[var(--accent-color)] transition-colors cursor-pointer"
                       @change="setActiveLxApi(api.id)"
                     />
                     <i
@@ -153,14 +153,14 @@
                         v-else
                         v-model="editingName"
                         ref="renameInputRef"
-                        class="w-full px-2 py-0.5 text-sm bg-white dark:bg-black/20 border border-emerald-500 rounded focus:outline-none"
+                        class="w-full px-2 py-0.5 text-sm bg-white dark:bg-black/20 border border-[var(--accent-color)] rounded focus:outline-none"
                         @blur="saveScriptName(api.id)"
                         @keyup.enter="saveScriptName(api.id)"
                       />
 
                       <button
                         v-if="editingScriptId !== api.id"
-                        class="text-gray-400 hover:text-emerald-500 transition-colors"
+                        class="text-gray-400 hover:text-[var(--accent-color)] transition-colors"
                         @click="startRenaming(api)"
                       >
                         <i class="ri-edit-line text-sm"></i>
@@ -201,12 +201,12 @@
                   <input
                     v-model="lxScriptUrl"
                     :placeholder="t('settings.playback.lxMusic.scripts.urlPlaceholder')"
-                    class="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:outline-none focus:border-emerald-500 transition-colors"
+                    class="flex-1 px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:outline-none focus:border-[var(--accent-color)] transition-colors"
                     :disabled="isImportingFromUrl"
                   />
                   <button
                     @click="importLxMusicScriptFromUrl"
-                    class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors flex items-center gap-1"
+                    class="px-3 py-1.5 bg-[var(--accent-color)] hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors flex items-center gap-1"
                     :disabled="!lxScriptUrl.trim() || isImportingFromUrl"
                   >
                     <i v-if="isImportingFromUrl" class="ri-loader-4-line animate-spin"></i>
@@ -245,7 +245,7 @@
 
               <div
                 v-if="settingsStore.setData.customApiPluginName"
-                class="mt-4 flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-xs"
+                class="mt-4 flex items-center gap-2 px-3 py-1.5 bg-[var(--accent-color-10)] dark:bg-[var(--accent-color-10)] text-[var(--accent-color-dark)] dark:text-[var(--accent-color-light)] rounded-lg text-xs"
               >
                 <i class="ri-check-circle-fill"></i>
                 <span
@@ -273,7 +273,7 @@
           {{ t('common.cancel') }}
         </button>
         <button
-          class="px-4 py-2 text-xs font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+          class="px-4 py-2 text-xs font-medium text-white bg-[var(--accent-color)] hover:brightness-90 rounded-lg shadow-lg shadow-[var(--accent-color)]/20 transition-all active:scale-95"
           @click="handleConfirm"
         >
           {{ t('common.confirm') }}

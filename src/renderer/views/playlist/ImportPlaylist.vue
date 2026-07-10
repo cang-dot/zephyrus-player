@@ -277,7 +277,7 @@
                       :class="{
                         'bg-blue-50 text-blue-500':
                           taskStatus === 'processing' || taskStatus === 'pending',
-                        'bg-green-50 text-[var(--accent-color)]': taskStatus === 'success',
+                        'bg-[var(--accent-color-10)] text-[var(--accent-color)]': taskStatus === 'success',
                         'bg-red-50 text-red-500': taskStatus === 'failed'
                       }"
                     >
@@ -298,7 +298,7 @@
 
                   <div
                     v-if="taskStatus === 'success'"
-                    class="bg-green-50 dark:bg-green-900/10 rounded-xl p-3 text-green-700 dark:text-[var(--accent-color)] text-sm flex justify-between"
+                    class="bg-[var(--accent-color-10)] dark:bg-[var(--accent-color-10)] rounded-xl p-3 text-[var(--accent-color-dark)] dark:text-[var(--accent-color)] text-sm flex justify-between"
                   >
                     <span>{{ t('comp.playlist.import.successCount') }}</span>
                     <span class="font-bold">{{ successCount }}</span>

@@ -77,6 +77,7 @@ const {
   handleContextMenu,
   handleMenuClick,
   handleArtistClick,
+  handleAlbumClick,
   handleMouseEnter,
   handleMouseLeave,
   downloadMusic,
@@ -108,34 +109,11 @@ const bindLocalLyric = async () => {
 
   // 如果当前正在播放这首歌，立即重新加载歌词
   if (playerStore.playMusic?.id?.toString() === songId) {
-    const content = await readLocalLyricFile(filePath);
-    if (content) {
-      const isTtml = filePath.toLowerCase().endsWith('.ttml');
-      if (isTtml) {
-        const ttmlLines = parseTtml(content);
-        playerStore.playMusic.lyric = {
-          lrcArray: ttmlLines,
-          lrcTimeArray: ttmlLines.map((l) => l.startTime || 0)
-        };
-      } else {
-        const { lyrics } = parseLyrics(content);
-        const lrcArray = lyrics.map((l) => ({
-          text: l.fullText,
-          trText: '',
-          words: l.words?.map((w) => ({
-            text: w.text,
-            startTime: w.startTime,
-            duration: w.duration
-          })),
-          hasWordByWord: l.words && l.words.length > 1,
-          startTime: l.startTime,
-          duration: l.duration
-        }));
-        playerStore.playMusic.lyric = {
-          lrcArray,
-          lrcTimeArray: lrcArray.map((l) => l.startTime || 0)
-        };
-      }
+    const { loadLocalLyrics } = await import('@/hooks/useLocalMusic');
+    const { isLocalSong } = await import('@/hooks/useLocalMusic');
+    if (isLocalSong(playerStore.playMusic)) {
+      const lyrics = await loadLocalLyrics(playerStore.playMusic);
+      playerStore.playMusic.lyric = lyrics;
     }
   }
 };
@@ -145,6 +123,7 @@ defineExpose({
   imageLoad,
   toggleSelect,
   handleArtistClick,
+  handleAlbumClick,
   handleMenuClick,
   playMusicEvent,
   toggleFavorite,

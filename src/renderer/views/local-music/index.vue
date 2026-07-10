@@ -98,7 +98,16 @@
                 <i class="ri-folder-add-line text-lg" />
               </button>
 
-              <!-- 鏂囦欢澶圭鐞嗘寜閽?-->
+              <!-- 添加歌词目录按钮 -->
+              <button
+                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                :disabled="localMusicStore.musicList.length === 0"
+                @click="handleAddLyricDir"
+              >
+                <i class="ri-file-music-line text-lg" />
+              </button>
+
+              <!-- 鏂囦欢澶圭鐞嗘寜閽?-->
               <button
                 v-if="localMusicStore.folderPaths.length > 0"
                 class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
@@ -262,6 +271,30 @@ async function handleAddFolder(): Promise<void> {
   } catch (error) {
     console.error('閫夋嫨鏂囦欢澶瑰け璐?', error);
     message.error(String(error));
+  }
+}
+
+/**
+ * 添加歌词目录并自动匹配绑定
+ */
+async function handleAddLyricDir(): Promise<void> {
+  try {
+    const dirPath = await window.electron.ipcRenderer.invoke('select-directory');
+    if (!dirPath) return;
+
+    message.loading('正在扫描歌词文件...');
+    const result = await localMusicStore.bindLyricsFromDirectory(dirPath);
+
+    if (result.matched > 0) {
+      message.success(`成功绑定 ${result.matched} 首歌词（共扫描 ${result.total} 个文件）`);
+    } else if (result.total > 0) {
+      message.warning(`扫描到 ${result.total} 个歌词文件，但未匹配到本地歌曲`);
+    } else {
+      message.info('该目录下没有找到歌词文件');
+    }
+  } catch (error) {
+    console.error('添加歌词目录失败:', error);
+    message.error('添加歌词目录失败');
   }
 }
 

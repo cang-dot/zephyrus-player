@@ -38,7 +38,7 @@
 
                 <div class="flex items-start gap-3">
                   <div
-                    class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0"
+                    class="w-6 h-6 rounded-full bg-[var(--accent-color-10)] dark:bg-[var(--accent-color-20)] flex items-center justify-center flex-shrink-0"
                   >
                     <i class="ri-time-line text-[var(--accent-color)] text-sm"></i>
                   </div>
@@ -60,7 +60,7 @@
           <div class="px-6 pb-8 space-y-3">
             <button
               @click="handleAgree"
-              class="w-full py-4 rounded-2xl text-base font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-green-500/25"
+              class="w-full py-4 rounded-2xl text-base font-medium text-white bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-color-dark)] hover:brightness-90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-[var(--accent-color)]/25"
             >
               <span class="flex items-center justify-center gap-2">
                 <i class="ri-check-line text-lg"></i>

@@ -55,7 +55,7 @@
                 <span
                   v-for="(item, index) in artistList"
                   :key="index"
-                  class="cursor-pointer hover:text-green-500"
+                  class="cursor-pointer hover:text-[var(--accent-color)]"
                   @click="handleArtistClick(item.id)"
                 >
                   {{ item.name }}
@@ -100,7 +100,7 @@
                   <span
                     v-for="(item, index) in artistList"
                     :key="index"
-                    class="cursor-pointer hover:text-green-500"
+                    class="cursor-pointer hover:text-[var(--accent-color)]"
                     @click="handleArtistClick(item.id)"
                   >
                     {{ item.name }}
@@ -108,8 +108,12 @@
                   </span>
                 </div>
               </div>
+              <!-- 无歌词提示 -->
+              <div v-if="!hasLyrics" class="music-lrc-text no-scroll-tip">
+                <span>暂无歌词</span>
+              </div>
               <!-- 无时间戳歌词提示 -->
-              <div v-if="!supportAutoScroll" class="music-lrc-text no-scroll-tip">
+              <div v-else-if="!supportAutoScroll" class="music-lrc-text no-scroll-tip">
                 <span>{{ t('player.lrc.noAutoScroll') }}</span>
               </div>
               <div
@@ -271,8 +275,11 @@ watch(
   { deep: true }
 );
 
+const hasLyrics = computed(() => lrcArray.value.length > 0);
 const supportAutoScroll = computed(() => {
-  return lrcArray.value.length > 0 && lrcArray.value[0].startTime !== -1;
+  if (!hasLyrics.value) return false;
+  // 至少存在一条有效的时间戳（>0），才支持自动滚动
+  return lrcArray.value.some((line) => line.startTime !== undefined && line.startTime > 0);
 });
 
 const props = defineProps({

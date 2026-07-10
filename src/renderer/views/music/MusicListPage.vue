@@ -5,7 +5,7 @@
         <!-- Hero Section 和 Action Bar -->
         <n-spin :show="loading">
           <!-- Hero Section -->
-          <section class="hero-section relative overflow-hidden rounded-tl-2xl">
+          <section class="hero-section relative rounded-tl-2xl">
             <!-- Background Image with Blur -->
             <div class="hero-bg absolute inset-0 -top-20">
               <div
@@ -81,6 +81,7 @@
                       />
                       <span
                         class="text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:text-[var(--accent-color)] cursor-pointer transition-colors"
+                        @click="router.push(`/artist/detail/${listInfo.artist.id}`)"
                         >{{ listInfo.artist.name }}</span
                       >
                     </div>
@@ -100,17 +101,39 @@
                     </span>
                   </div>
 
-                  <p
+                  <div
                     v-if="listInfo?.description"
-                    class="text-sm md:text-base text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed max-w-3xl"
+                    class="relative"
                   >
-                    {{ listInfo.description }}
-                  </p>
+                    <p
+                      class="text-sm md:text-base text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed max-w-3xl cursor-pointer hover:text-[var(--accent-color)] transition-colors"
+                      @click.stop="showDescriptionPopover = !showDescriptionPopover"
+                    >
+                      {{ listInfo.description }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
         </n-spin>
+
+        <!-- 专辑介绍弹窗（Teleport 到 body 避免被裁剪） -->
+        <Teleport to="body">
+          <Transition name="popover-fade">
+            <div v-if="showDescriptionPopover" class="description-popover-overlay" @click.stop="showDescriptionPopover = false"></div>
+          </Transition>
+          <Transition name="popover-slide">
+            <div
+              v-if="showDescriptionPopover"
+              class="description-popover-card"
+              @click.stop
+            >
+              <p class="description-popover-title">专辑介绍</p>
+              <p class="description-popover-text">{{ listInfo?.description }}</p>
+            </div>
+          </Transition>
+        </Teleport>
 
         <!-- Action Bar (Sticky) -->
         <section
@@ -234,6 +257,19 @@
               >
                 <i :class="isCompactLayout ? 'ri-list-check-2' : 'ri-grid-line'" class="text-lg" />
               </button>
+
+              <!-- Sort Dropdown -->
+              <n-dropdown
+                :options="sortOptions"
+                :value="sortBy"
+                @select="handleSortChange"
+              >
+                <button
+                  class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                >
+                  <i class="ri-sort-asc text-lg" />
+                </button>
+              </n-dropdown>
             </div>
           </div>
         </section>
@@ -305,7 +341,7 @@ import { useMessage } from 'naive-ui';
 import PinyinMatch from 'pinyin-match';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { getAlbum, getListDetail } from '@/api/list';
 import {
@@ -330,6 +366,7 @@ defineOptions({
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const playerStore = usePlayerStore();
 const musicStore = useMusicStore();
 const recommendStore = useRecommendStore();
@@ -438,6 +475,13 @@ const isPlaylistLoading = ref(false);
 const completePlaylist = ref<SongResult[]>([]);
 const hasMore = ref(true);
 const searchKeyword = ref('');
+
+// 排序方式
+type SortType = 'default' | 'name-asc' | 'name-desc' | 'artist-asc' | 'artist-desc' | 'album-asc' | 'album-desc' | 'duration-asc' | 'duration-desc';
+const sortBy = ref<SortType>('default');
+
+// 专辑介绍弹窗
+const showDescriptionPopover = ref(false);
 const isFullPlaylistLoaded = ref(false);
 
 const isSelecting = ref(false);
@@ -463,7 +507,47 @@ const getCoverImgUrl = computed(() => {
 // 全量歌曲列表（用于"播放全部"等操作）
 const allFilteredSongs = computed(() => {
   const sourceList = isDailyRecommend.value ? songList.value : displayedSongs.value;
-  return sourceList.filter((s) => !playerStore.dislikeList.includes(s.id));
+  const filtered = sourceList.filter((s) => !playerStore.dislikeList.includes(s.id));
+
+  // 排序
+  if (sortBy.value === 'default') return filtered;
+
+  const sorted = [...filtered];
+  switch (sortBy.value) {
+    case 'name-asc':
+      sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      break;
+    case 'name-desc':
+      sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+      break;
+    case 'artist-asc':
+      sorted.sort((a, b) => {
+        const aName = a.ar?.[0]?.name || a.artists?.[0]?.name || '';
+        const bName = b.ar?.[0]?.name || b.artists?.[0]?.name || '';
+        return aName.localeCompare(bName);
+      });
+      break;
+    case 'artist-desc':
+      sorted.sort((a, b) => {
+        const aName = a.ar?.[0]?.name || a.artists?.[0]?.name || '';
+        const bName = b.ar?.[0]?.name || b.artists?.[0]?.name || '';
+        return bName.localeCompare(aName);
+      });
+      break;
+    case 'album-asc':
+      sorted.sort((a, b) => (a.al?.name || '').localeCompare(b.al?.name || ''));
+      break;
+    case 'album-desc':
+      sorted.sort((a, b) => (b.al?.name || '').localeCompare(a.al?.name || ''));
+      break;
+    case 'duration-asc':
+      sorted.sort((a, b) => (a.dt || a.duration || 0) - (b.dt || b.duration || 0));
+      break;
+    case 'duration-desc':
+      sorted.sort((a, b) => (b.dt || b.duration || 0) - (a.dt || a.duration || 0));
+      break;
+  }
+  return sorted;
 });
 
 // 实际渲染到 DOM 的歌曲（搜索时显示全部匹配，非搜索时按 renderLimit 分页渲染）
@@ -832,6 +916,23 @@ const toggleLayout = () => {
   localStorage.setItem('musicListLayout', isCompactLayout.value ? 'compact' : 'normal');
 };
 
+// 排序选项
+const sortOptions = [
+  { label: '默认排序', key: 'default' },
+  { label: '歌曲名 A→Z', key: 'name-asc' },
+  { label: '歌曲名 Z→A', key: 'name-desc' },
+  { label: '歌手名 A→Z', key: 'artist-asc' },
+  { label: '歌手名 Z→A', key: 'artist-desc' },
+  { label: '专辑名 A→Z', key: 'album-asc' },
+  { label: '专辑名 Z→A', key: 'album-desc' },
+  { label: '时长 短→长', key: 'duration-asc' },
+  { label: '时长 长→短', key: 'duration-desc' }
+];
+
+const handleSortChange = (key: SortType) => {
+  sortBy.value = key;
+};
+
 const checkCollectionStatus = () => {
   const type = route.query.type as string;
   if (type === 'playlist' && listInfo.value?.id) {
@@ -860,7 +961,9 @@ watch(
   { immediate: true }
 );
 
-onMounted(checkCollectionStatus);
+onMounted(() => {
+  checkCollectionStatus();
+});
 </script>
 
 <style scoped lang="scss">
@@ -935,6 +1038,92 @@ onMounted(checkCollectionStatus);
   }
   .action-bar {
     @apply py-2;
+  }
+}
+
+// 专辑介绍弹窗遮罩
+.description-popover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+// 专辑介绍弹窗
+.description-popover-card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  max-width: 400px;
+  width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 9999;
+
+  .dark & {
+    background: #1a1a1a;
+    border-color: #333;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+// 弹窗动画
+.popover-fade-enter-active,
+.popover-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.popover-fade-enter-from,
+.popover-fade-leave-to {
+  opacity: 0;
+}
+
+.popover-slide-enter-active {
+  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.popover-slide-leave-active {
+  transition: all 0.2s ease;
+}
+
+.popover-slide-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.popover-slide-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.description-popover-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+
+  .dark & {
+    color: #e0e0e0;
+  }
+}
+
+.description-popover-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #666;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+
+  .dark & {
+    color: #999;
   }
 }
 </style>

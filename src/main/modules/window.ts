@@ -282,6 +282,14 @@ export function initializeWindowManager() {
       }
     }
   });
+
+  // 打开外部链接（浏览器）
+  ipcMain.handle('open-external', async (_event, url: string) => {
+    if (typeof url !== 'string' || !url.startsWith('https://')) return;
+    await shell.openExternal(url).catch((error) => {
+      console.error('打开外部链接失败:', url, error);
+    });
+  });
 }
 
 /**

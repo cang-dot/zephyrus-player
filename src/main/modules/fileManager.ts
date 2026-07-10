@@ -72,7 +72,9 @@ export function initializeFileManager() {
   // 检查文件是否存在
   ipcMain.handle('check-file-exists', (_, filePath) => {
     try {
-      return fs.existsSync(filePath);
+      // 处理中文路径编码
+      const decodedPath = decodeURIComponent(filePath);
+      return fs.existsSync(decodedPath);
     } catch (error) {
       console.error('Error checking if file exists:', error);
       return false;

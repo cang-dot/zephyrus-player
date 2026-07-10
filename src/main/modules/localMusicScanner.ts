@@ -326,4 +326,29 @@ export function initializeLocalMusicScanner(): void {
       return [];
     }
   });
+
+  // 扫描目录下的歌词文件（.lrc, .ttml, .txt）
+  ipcMain.handle('scan-lyric-files', async (_, folderPath: string) => {
+    const LYRIC_EXTENSIONS = ['.lrc', '.ttml', '.txt'];
+    const lyricFiles: string[] = [];
+
+    const walk = async (dir: string) => {
+      try {
+        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            await walk(fullPath);
+          } else if (LYRIC_EXTENSIONS.includes(path.extname(entry.name).toLowerCase())) {
+            lyricFiles.push(fullPath);
+          }
+        }
+      } catch (error) {
+        console.error(`扫描目录失败: ${dir}`, error);
+      }
+    };
+
+    await walk(folderPath);
+    return lyricFiles;
+  });
 }

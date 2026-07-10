@@ -359,7 +359,7 @@ onMounted(() => {
   :deep(.n-tabs-rail) {
     @apply rounded-xl overflow-hidden bg-white dark:bg-dark-300 !important;
     .n-tabs-capsule {
-      @apply rounded-xl bg-green-500 dark:bg-green-600 !important;
+      @apply rounded-xl bg-[var(--accent-color)] dark:bg-[var(--accent-color-dark)] !important;
     }
     .n-tabs-tab--active {
       @apply text-white !important;

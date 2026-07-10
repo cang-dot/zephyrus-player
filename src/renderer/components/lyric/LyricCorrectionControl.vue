@@ -53,14 +53,14 @@ const { t } = useI18n();
 .lyric-correction-btn {
   @apply w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-white/20 dark:border-neutral-700/40 shadow-md backdrop-blur-2xl cursor-pointer transition-all duration-150 text-gray-700 dark:text-gray-200 active:scale-95 bg-opacity-40;
   &:hover {
-    background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.8);
+    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.8);
     color: white;
-    border-color: rgba(var(--accent-color-rgb, 34, 197, 94), 0.6);
+    border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.6);
   }
   &.dark:hover {
-    background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.8);
+    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.8);
     color: white;
-    border-color: rgba(var(--accent-color-rgb, 34, 197, 94), 0.6);
+    border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.6);
     background-opacity: 0.4;
   }
 }

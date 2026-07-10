@@ -1,5 +1,6 @@
 <template>
-  <div
+  <div class="play-bar-root">
+    <div
     class="music-play-bar"
     :class="[
       setAnimationClass('animate__bounceInUp'),
@@ -98,7 +99,7 @@
           <span
             v-for="(artists, artistsindex) in artistList"
             :key="artistsindex"
-            class="cursor-pointer hover:text-green-500"
+            class="cursor-pointer hover:text-[var(--accent-color)]"
             @click="handleArtistClick(artists.id)"
           >
             {{ artists.name }}{{ artistsindex < artistList.length - 1 ? ' / ' : '' }}
@@ -163,7 +164,7 @@
         <template #trigger>
           <i
             class="iconfont ri-netease-cloud-music-line"
-            :class="{ 'text-green-500': isLyricWindowOpen, 'disabled-icon': !playMusic?.id }"
+            :class="{ 'text-[var(--accent-color)]': isLyricWindowOpen, 'disabled-icon': !playMusic?.id }"
             @click="playMusic?.id && openLyricWindow()"
           ></i>
         </template>
@@ -183,7 +184,7 @@
       <n-tooltip trigger="hover" :z-index="9999999" v-if="isElectron">
         <template #trigger>
           <i
-            class="iconfont ri-soundcloud-fill text-2xl hover:text-green-500 transition-colors cursor-pointer"
+            class="iconfont ri-soundcloud-fill text-2xl hover:text-[var(--accent-color)] transition-colors cursor-pointer"
             :class="{ 'disabled-icon': !playMusic?.id }"
             @click="playMusic?.id && (showClimaxEditor = true)"
           ></i>
@@ -196,8 +197,8 @@
       <n-tooltip v-if="metaphorButtonVisible" trigger="hover" :z-index="9999999">
         <template #trigger>
           <i
-            class="iconfont ri-quill-pen-line text-2xl hover:text-green-500 transition-colors cursor-pointer"
-            :class="{ 'text-green-500': showMetaphorPanel }"
+            class="iconfont ri-quill-pen-line text-2xl hover:text-[var(--accent-color)] transition-colors cursor-pointer"
+            :class="{ 'text-[var(--accent-color)]': showMetaphorPanel }"
             @click="showMetaphorPanel = !showMetaphorPanel"
           ></i>
         </template>
@@ -207,7 +208,7 @@
       <n-tooltip trigger="hover" :z-index="9999999">
         <template #trigger>
           <i
-            class="iconfont icon-list text-2xl hover:text-green-500 transition-colors cursor-pointer"
+            class="iconfont icon-list text-2xl hover:text-[var(--accent-color)] transition-colors cursor-pointer"
             @click="openPlayListDrawer"
           ></i>
         </template>
@@ -224,9 +225,11 @@
     :lyrics="lyricsText"
     :song-name="songName"
     :artist="artistName"
+    :album-id="albumId"
     @configure="showMetaphorConfig = true"
   />
   <metaphor-config-modal v-model="showMetaphorConfig" />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -512,6 +515,7 @@ const lyricsText = computed(() => {
 });
 
 const songName = computed(() => playMusic?.value?.name || '');
+const albumId = computed(() => playMusic?.value?.al?.id ?? playMusic?.value?.album?.id ?? null);
 const artistName = computed(() => {
   const list = artistList.value;
   if (Array.isArray(list)) {
@@ -582,7 +586,7 @@ const artistName = computed(() => {
     :deep(.audio-button .iconfont) {
       transition: color 0.2s ease;
       &:hover {
-        color: var(--accent-color, #22c55e) !important;
+        color: var(--accent-color, #888888) !important;
       }
     }
   }
@@ -638,12 +642,12 @@ const artistName = computed(() => {
 
   .iconfont {
     @apply text-2xl transition;
-    @apply hover:text-green-500;
+    @apply hover:text-[var(--accent-color)];
   }
 
   .icon {
     @apply text-3xl;
-    @apply hover:text-green-500;
+    @apply hover:text-[var(--accent-color)];
   }
 
   @apply flex items-center;
@@ -671,7 +675,7 @@ const artistName = computed(() => {
 
   .iconfont {
     @apply text-2xl transition;
-    @apply hover:text-green-500;
+    @apply hover:text-[var(--accent-color)];
   }
 
   .volume-slider {
@@ -697,7 +701,7 @@ const artistName = computed(() => {
 
   .iconfont {
     @apply text-2xl transition cursor-pointer mx-3;
-    @apply hover:text-green-500;
+    @apply hover:text-[var(--accent-color)];
   }
 }
 
@@ -754,10 +758,10 @@ const artistName = computed(() => {
     --n-rail-height: 4px;
     --n-rail-color: theme('colors.gray.200');
     --n-rail-color-dark: theme('colors.gray.700');
-    --n-fill-color: var(--accent-color, #22c55e);
-    --n-fill-color-hover: var(--accent-color, #22c55e);
+    --n-fill-color: var(--accent-color, #888888);
+    --n-fill-color-hover: var(--accent-color, #888888);
     --n-handle-size: 12px;
-    --n-handle-color: var(--accent-color, #22c55e);
+    --n-handle-color: var(--accent-color, #888888);
 
     &.n-slider--vertical {
       height: 100%;
@@ -846,7 +850,7 @@ const artistName = computed(() => {
 }
 
 .intelligence-active {
-  @apply text-green-500 hover:text-green-600 !important;
+  @apply text-[var(--accent-color)] hover:text-[var(--accent-color-dark)] !important;
 }
 
 .disabled-icon {
@@ -883,14 +887,14 @@ const artistName = computed(() => {
 .climax-segment {
   position: absolute;
   height: 100%;
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.4);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
   border-radius: 2px;
   transition: background-color 0.3s;
 }
 
 .climax-segment.climax-active {
-  background: rgba(var(--accent-color-rgb, 34, 197, 94), 0.8);
-  box-shadow: 0 0 6px rgba(var(--accent-color-rgb, 34, 197, 94), 0.5);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.8);
+  box-shadow: 0 0 6px rgba(var(--accent-color-rgb, 136, 136, 136), 0.5);
 }
 
 .music-eq {
@@ -954,7 +958,7 @@ const artistName = computed(() => {
 }
 
 .playback-rate-badge {
-  @apply ml-2 px-1.5 h-4 flex items-center text-xs rounded bg-green-500 bg-opacity-15 text-green-600 dark:text-green-400;
+  @apply ml-2 px-1.5 h-4 flex items-center text-xs rounded bg-[var(--accent-color)] bg-opacity-15 text-[var(--accent-color-dark)] dark:text-[var(--accent-color-light)];
   font-weight: 500;
   vertical-align: 1px;
 }

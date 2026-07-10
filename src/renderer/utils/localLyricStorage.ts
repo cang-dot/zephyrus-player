@@ -36,6 +36,19 @@ export function setLocalLyricPath(songId: string, filePath: string): void {
 }
 
 /**
+ * 批量设置歌曲的本地歌词文件路径
+ */
+export function batchSetLocalLyricPaths(
+  mappings: Array<{ songId: string; lyricPath: string }>
+): void {
+  const map = getLocalLyricMap();
+  for (const { songId, lyricPath } of mappings) {
+    map[songId] = lyricPath;
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+}
+
+/**
  * 获取歌曲的本地歌词文件路径
  */
 export function getLocalLyricPath(songId: string): string | null {

@@ -76,6 +76,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
+import { getAlbum } from '@/api/list';
 import { useMetaphor } from '@/features/lyric-metaphor/useMetaphor';
 import { isMobile } from '@/utils';
 
@@ -86,6 +87,7 @@ const props = defineProps<{
   lyrics: string;
   songName: string;
   artist: string;
+  albumId: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -97,13 +99,19 @@ const closing = ref(false);
 
 const { loading, error, result, cached, analyze, clear } = useMetaphor();
 
+const lastSongKey = ref('');
+
 watch(
   () => props.modelValue,
   (val) => {
     if (val) {
       internalVisible.value = true;
       closing.value = false;
-      if (!result.value && props.lyrics) {
+      const currentKey = `${props.songName}|${props.artist}`;
+      if (lastSongKey.value && lastSongKey.value !== currentKey) {
+        clear();
+      }
+      if (props.lyrics) {
         doAnalyze();
       }
     } else {
@@ -117,6 +125,7 @@ watch(
 watch(
   [() => props.songName, () => props.artist],
   () => {
+    lastSongKey.value = '';
     if (props.modelValue && props.lyrics) {
       clear();
       doAnalyze();
@@ -136,7 +145,15 @@ function onAnimationEnd() {
 
 async function doAnalyze() {
   if (!props.lyrics) return;
-  analyze(props.lyrics, props.songName, props.artist);
+  let albumDesc = '';
+  if (props.albumId) {
+    try {
+      const res = await getAlbum(props.albumId);
+      albumDesc = res?.data?.album?.description || '';
+    } catch {}
+  }
+  await analyze(props.lyrics, props.songName, props.artist, albumDesc);
+  lastSongKey.value = `${props.songName}|${props.artist}`;
 }
 
 function handleReanalyze() {
@@ -149,7 +166,8 @@ function handleConfigure() {
 
 const sanitizedResult = computed(() => {
   if (!result.value) return '';
-  const html = marked.parseSync(result.value);
+  const tokens = marked.lexer(result.value);
+  const html = marked.parser(tokens);
   return DOMPurify.sanitize(html);
 });
 
@@ -213,7 +231,7 @@ onUnmounted(() => {
     .action-btn {
       @apply text-gray-500 dark:text-gray-400;
       &:hover {
-        @apply text-green-500 dark:text-green-400;
+        @apply text-[var(--accent-color)] dark:text-[var(--accent-color-light)];
       }
     }
   }
@@ -280,7 +298,7 @@ onUnmounted(() => {
   }
 
   :deep(blockquote) {
-    @apply border-l-4 border-green-400 pl-3 italic text-gray-500 dark:text-gray-400 mb-3;
+    @apply border-l-4 border-[var(--accent-color-light)] pl-3 italic text-gray-500 dark:text-gray-400 mb-3;
   }
 
   :deep(code) {

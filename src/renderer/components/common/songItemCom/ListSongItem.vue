@@ -71,7 +71,7 @@
         </div>
         <div
           class="song-item-operating-list-play bg-gray-300 dark:bg-gray-800 animate__animated"
-          :class="{ 'bg-green-600': isPlaying, animate__flipInY: playLoading }"
+          :class="{ 'bg-[var(--accent-color)]': isPlaying, animate__flipInY: playLoading }"
           @click="onPlayMusic"
         >
           <i v-if="isPlaying && play" class="iconfont icon-stop"></i>
@@ -238,7 +238,7 @@ const onPlayMusic = () => {
         font-size: 1rem; /* text-base */
       }
 
-      &.bg-green-600 {
+      &.bg-\[var\(--accent-color\)\] {
         background-color: var(--accent-color, rgb(34 197 94));
         color: white;
       }

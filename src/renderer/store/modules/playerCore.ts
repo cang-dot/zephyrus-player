@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 
 import i18n from '@/../i18n/renderer';
 import { getParsingMusicUrl } from '@/api/music';
+import { useLocalMusic, isLocalSong } from '@/hooks/useLocalMusic';
 import { useLyrics, useSongDetail } from '@/hooks/usePlayerHooks';
 import { audioService } from '@/services/audioService';
 import { playbackRequestManager } from '@/services/playbackRequestManager';
@@ -272,13 +273,20 @@ export const usePlayerCoreStore = defineStore(
 
       const { loadLrc } = useLyrics();
       const { getSongDetail } = useSongDetail();
+      const localMusic = useLocalMusic();
 
-      // 并行加载歌词和背景色
+      // 本地歌曲：使用专属逻辑加载歌词（不走网易云 API）
       const [lyrics, { backgroundColor, primaryColor }] = await Promise.all([
         (async () => {
+          // 本地歌曲始终走专属歌词加载（优先级：外部 .lrc → 内嵌歌词 → 社区歌词）
+          if (isLocalSong(music)) {
+            return await localMusic.loadLocalLyrics(music);
+          }
+          // 在线歌曲：如果已有歌词且有效，直接使用
           if (music.lyric && music.lyric.lrcTimeArray.length > 0) {
             return music.lyric;
           }
+          // 在线歌曲走网易云 API
           return await loadLrc(music.id);
         })(),
         (async () => {
@@ -339,6 +347,19 @@ export const usePlayerCoreStore = defineStore(
         }
 
         updatedPlayMusic.lyric = lyrics;
+
+        // 本地歌曲：确保 URL 正确编码（统一格式：local:///编码后的路径）
+        if (isLocalSong(updatedPlayMusic) && updatedPlayMusic.playMusicUrl) {
+          const rawPath = updatedPlayMusic.playMusicUrl.replace('local:///', '');
+          // 先解码，再重新编码，确保格式一致
+          let decodedPath: string;
+          try {
+            decodedPath = decodeURIComponent(rawPath);
+          } catch {
+            decodedPath = rawPath;
+          }
+          updatedPlayMusic.playMusicUrl = `local:///${encodeURIComponent(decodedPath)}`;
+        }
 
         playMusic.value = updatedPlayMusic;
         playMusicUrl.value = updatedPlayMusic.playMusicUrl as string;

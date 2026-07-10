@@ -78,12 +78,20 @@ const api = {
 
   lxMusicHttpCancel: (requestId: string) => ipcRenderer.invoke('lx-music-http-cancel', requestId),
 
+  // 打开外部链接（浏览器）
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+
   // 本地音乐扫描相关
   scanLocalMusic: (folderPath: string) => ipcRenderer.invoke('scan-local-music', folderPath),
   scanLocalMusicWithStats: (folderPath: string) =>
     ipcRenderer.invoke('scan-local-music-with-stats', folderPath),
   parseLocalMusicMetadata: (filePaths: string[]) =>
     ipcRenderer.invoke('parse-local-music-metadata', filePaths),
+
+  // 本地文件操作
+  checkFileExists: (filePath: string) => ipcRenderer.invoke('check-file-exists', filePath),
+  scanLyricFiles: (folderPath: string) => ipcRenderer.invoke('scan-lyric-files', folderPath),
+  selectDirectory: () => ipcRenderer.invoke('select-directory'),
 
   // 插件商店
   plugin: {

@@ -655,6 +655,6 @@ onMounted(() => {
 }
 
 .intelligence-active {
-  @apply text-green-500;
+  @apply text-[var(--accent-color)];
 }
 </style>

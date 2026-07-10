@@ -56,6 +56,9 @@
             </template>
           </n-ellipsis>
         </div>
+        <div v-if="item.al?.name" class="song-item-content-album" @click.stop="onAlbumClick">
+          <n-ellipsis class="text-ellipsis" line-clamp="1">{{ item.al.name }}</n-ellipsis>
+        </div>
       </div>
     </template>
 
@@ -79,7 +82,7 @@
         </n-tooltip>
         <div
           class="song-item-operating-play bg-gray-300 dark:bg-gray-800 animate__animated"
-          :class="{ 'bg-green-600': isPlaying, animate__flipInY: playLoading }"
+          :class="{ 'bg-[var(--accent-color)]': isPlaying, animate__flipInY: playLoading }"
           @click="onPlayMusic"
         >
           <i v-if="isPlaying && play" class="iconfont icon-stop"></i>
@@ -140,6 +143,11 @@ const onToggleSelect = () => {
 };
 const onImageLoad = (event: Event) => baseItem.value?.imageLoad(event);
 const onArtistClick = (id: number) => baseItem.value?.handleArtistClick(id);
+const onAlbumClick = () => {
+  if (props.item.al?.id) {
+    baseItem.value?.handleAlbumClick(props.item.al.id);
+  }
+};
 const onToggleFavorite = (event: Event) => {
   baseItem.value?.toggleFavorite(event);
 };
@@ -171,6 +179,14 @@ const onPlayNext = () => {
 
     &-name {
       @apply text-xs text-gray-500 dark:text-gray-400;
+    }
+
+    &-album {
+      @apply text-xs text-gray-400 dark:text-gray-500 mt-0.5 cursor-pointer;
+
+      &:hover {
+        @apply text-[var(--accent-color)];
+      }
     }
   }
 
@@ -205,9 +221,10 @@ const onPlayNext = () => {
       @apply cursor-pointer rounded-full w-10 h-10 flex justify-center items-center transition
              border dark:border-gray-700 border-gray-200 text-gray-900 dark:text-white;
 
-      &:hover,
-      &.bg-green-600 {
-        @apply bg-green-500 border-green-500 text-white;
+      &:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
       }
     }
   }

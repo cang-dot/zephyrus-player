@@ -432,6 +432,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { isFeatureEnabled } from '@/features/store';
 import { getAllStyles, getStyle } from '@/playerStyles';
 import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
 
@@ -497,7 +498,15 @@ onMounted(async () => {
 });
 
 const playerStyles = computed(() => {
-  return getAllStyles().map((s) => ({ key: s.key, label: s.label }));
+  return getAllStyles()
+    .filter((s) => {
+      if (s.key === 'default') return true;
+      if (s.key === 'stage') return isFeatureEnabled('stage-style');
+      if (s.key === 'magazine') return isFeatureEnabled('magazine-style');
+      if (s.key === 'frenzy') return isFeatureEnabled('frenzy-style');
+      return false;
+    })
+    .map((s) => ({ key: s.key, label: s.label }));
 });
 
 // 样式设置视图：null=主视图，其他=样式设置

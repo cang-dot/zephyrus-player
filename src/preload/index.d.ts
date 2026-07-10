@@ -32,6 +32,7 @@ interface API {
   onLanguageChanged: (callback: (locale: string) => void) => void;
   importCustomApiPlugin: () => Promise<{ name: string; content: string } | null>;
   importLxMusicScript: () => Promise<{ name: string; content: string } | null>;
+  openExternal: (url: string) => Promise<void>;
   invoke: (channel: string, ...args: any[]) => Promise<any>;
   getSearchSuggestions: (keyword: string) => Promise<any>;
   lxMusicHttpRequest: (request: { url: string; options: any; requestId: string }) => Promise<any>;

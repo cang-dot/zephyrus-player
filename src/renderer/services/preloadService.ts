@@ -25,6 +25,7 @@ class PreloadService {
     // 2. 检查是否有已完成的缓存
     if (this.preloadedSounds.has(song.id)) {
       const sound = this.preloadedSounds.get(song.id)!;
+      // 检查 URL 是否变化（本地歌曲可能重新编码 URL）
       if (sound.state() === 'loaded') {
         console.log(`[PreloadService] 歌曲 ${song.name} 已预加载完成，直接使用`);
         return sound;

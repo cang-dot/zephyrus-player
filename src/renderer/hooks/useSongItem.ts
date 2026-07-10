@@ -1,6 +1,7 @@
 import { useMessage } from 'naive-ui';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import { usePlayerStore, useRecommendStore } from '@/store';
 import type { SongResult } from '@/types/music';
@@ -13,6 +14,7 @@ import { useDownload } from './useDownload';
 
 export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
   const { t } = useI18n();
+  const router = useRouter();
   const playerStore = usePlayerStore();
   const recommendStore = useRecommendStore();
   const message = useMessage();
@@ -183,6 +185,11 @@ export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
     navigateToArtist(id);
   };
 
+  // 处理专辑点击
+  const handleAlbumClick = (id: number) => {
+    router.push(`/music-list/${id}?type=album`);
+  };
+
   // 鼠标悬停处理
   const handleMouseEnter = () => {
     isHovering.value = true;
@@ -218,6 +225,7 @@ export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
     handleContextMenu,
     handleMenuClick,
     handleArtistClick,
+    handleAlbumClick,
     handleMouseEnter,
     handleMouseLeave,
     downloadMusic,

@@ -32,63 +32,53 @@
             <div v-if="!settingsStore.setData.isMenuExpanded">{{ t(item.meta.title) }}</div>
           </n-tooltip>
 
-          <!-- 歌单手风琴子菜单 -->
+          <!-- 歌单子菜单（统一版，丝滑过渡） -->
           <div
-            v-if="isMenuItemPlaylist(item) && settingsStore.setData.isMenuExpanded"
-            class="app-menu-submenu"
+            v-if="isMenuItemPlaylist(item)"
+            class="app-menu-submenu-unified"
           >
-            <div class="app-menu-submenu-scroll">
+            <div class="app-menu-submenu-scroll-unified">
               <!-- 创建的歌单 -->
-              <div v-if="createdPlaylists.length > 0" class="app-menu-submenu-group">
-                <div class="app-menu-submenu-label">创建的歌单</div>
+              <template v-if="createdPlaylists.length > 0">
                 <div
                   v-for="pl in createdPlaylists"
-                  :key="pl.id"
-                  class="app-menu-submenu-item"
+                  :key="'c-' + pl.id"
+                  class="app-menu-submenu-row"
                   @click="navigateToPlaylist(pl.id)"
                 >
                   <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="app-menu-submenu-cover" />
-                  <span class="app-menu-submenu-name">{{ pl.name }}</span>
+                  <span v-show="settingsStore.setData.isMenuExpanded" class="app-menu-submenu-name">{{ pl.name }}</span>
                 </div>
-              </div>
+              </template>
 
               <!-- 收藏的歌单 -->
-              <div v-if="collectedPlaylists.length > 0" class="app-menu-submenu-group">
-                <div class="app-menu-submenu-label">收藏的歌单</div>
+              <template v-if="collectedPlaylists.length > 0">
                 <div
                   v-for="pl in collectedPlaylists"
-                  :key="pl.id"
-                  class="app-menu-submenu-item"
+                  :key="'d-' + pl.id"
+                  class="app-menu-submenu-row"
                   @click="navigateToPlaylist(pl.id)"
                 >
                   <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="app-menu-submenu-cover" />
-                  <span class="app-menu-submenu-name">{{ pl.name }}</span>
+                  <span v-show="settingsStore.setData.isMenuExpanded" class="app-menu-submenu-name">{{ pl.name }}</span>
                 </div>
-              </div>
+              </template>
 
               <!-- 收藏的专辑 -->
-              <div v-if="collectedAlbums.length > 0" class="app-menu-submenu-group">
-                <div class="app-menu-submenu-label">收藏的专辑</div>
+              <template v-if="collectedAlbums.length > 0">
                 <div
                   v-for="al in collectedAlbums"
-                  :key="al.id"
-                  class="app-menu-submenu-item"
+                  :key="'a-' + al.id"
+                  class="app-menu-submenu-row"
                   @click="navigateToAlbum(al.id)"
                 >
-                  <img
-                    :src="getImgUrl(al.picUrl || al.blurPicUrl, '64y64')"
-                    class="app-menu-submenu-cover"
-                  />
-                  <span class="app-menu-submenu-name">{{ al.name }}</span>
+                  <img :src="getImgUrl(al.picUrl || al.blurPicUrl, '64y64')" class="app-menu-submenu-cover" />
+                  <span v-show="settingsStore.setData.isMenuExpanded" class="app-menu-submenu-name">{{ al.name }}</span>
                 </div>
-              </div>
+              </template>
 
               <div
-                v-if="
-                  createdPlaylists.length === 0 &&
-                  collectedPlaylists.length === 0 &&
-                  collectedAlbums.length === 0
-                "
+                v-if="createdPlaylists.length === 0 && collectedPlaylists.length === 0 && collectedAlbums.length === 0"
                 class="app-menu-submenu-empty"
               >
                 暂无歌单
@@ -149,7 +139,7 @@ const isChecked = (index: number) => {
   return path.value === props.menus[index].path;
 };
 
-const activeColor = computed(() => props.selectColor || primaryColor.value || '#22c55e');
+const activeColor = computed(() => props.selectColor || primaryColor.value || '#888888');
 
 const iconStyle = (index: number) => {
   const style = {
@@ -264,63 +254,28 @@ const navigateToAlbum = (id: number) => {
 }
 
 // 歌单子菜单样式
-.app-menu-submenu {
+.app-menu-submenu-unified {
   width: 100%;
-  padding: 0 8px 8px 8px;
+  padding: 0 8px 8px 20px;
+  transition: padding 0.3s ease;
 }
 
-.app-menu-submenu-scroll {
+.app-menu-submenu-scroll-unified {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
 
   &::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 2px;
-  }
-
-  &:hover {
-    scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
-
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(156, 163, 175, 0.4);
-    }
+    display: none;
   }
 }
 
-.app-menu-submenu-group {
-  margin-bottom: 6px;
-}
-
-.app-menu-submenu-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 4px 8px 2px;
-  user-select: none;
-
-  .dark & {
-    color: #6b7280;
-  }
-}
-
-.app-menu-submenu-item {
+.app-menu-submenu-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 8px;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -336,11 +291,12 @@ const navigateToAlbum = (id: number) => {
 }
 
 .app-menu-submenu-cover {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
+  transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
 }
 
 .app-menu-submenu-name {
@@ -349,9 +305,32 @@ const navigateToAlbum = (id: number) => {
   overflow: hidden;
   text-overflow: ellipsis;
   color: #666;
+  transition: opacity 0.25s ease, max-width 0.3s ease;
+  max-width: 120px;
 
   .dark & {
     color: #999;
+  }
+}
+
+// 展开时：封面变大
+.app-menu-expanded {
+  .app-menu-submenu-cover {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+}
+
+// 收起时：padding-left 居中（容器100px - 封面24px）/2 - 8px(row padding) ≈ 28px
+.app-menu:not(.app-menu-expanded) {
+  .app-menu-submenu-unified {
+    padding: 0 4px 4px 22px;
+  }
+
+  .app-menu-submenu-name {
+    opacity: 0;
+    max-width: 0;
   }
 }
 

@@ -713,7 +713,7 @@ onUnmounted(() => {
   border-radius: 14px;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)),
-    radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 40%);
+    radial-gradient(circle at top right, var(--accent-color), transparent 40%);
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -829,7 +829,7 @@ onUnmounted(() => {
 .shortcut-recorder:hover,
 .shortcut-recorder:focus-visible {
   border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 12%, transparent);
   outline: none;
 }
 
@@ -925,12 +925,12 @@ onUnmounted(() => {
 
 :deep(.toolbar-btn--success.n-button) {
   color: #fff;
-  background: #10b981;
+  background: var(--accent-color);
   box-shadow: 0 10px 20px -14px rgba(20, 184, 166, 0.75);
 }
 
 :deep(.toolbar-btn--success.n-button:hover) {
-  background: #059669;
+  background: var(--accent-color-dark);
   box-shadow: 0 14px 28px -16px rgba(20, 184, 166, 0.8);
 }
 
@@ -945,7 +945,7 @@ onUnmounted(() => {
 
 :deep(.footer-btn--primary.n-button) {
   color: #fff;
-  background: #059669;
+  background: var(--accent-color-dark);
   box-shadow: 0 14px 24px -18px rgba(5, 150, 105, 0.9);
 }
 
@@ -988,7 +988,7 @@ onUnmounted(() => {
   border-color: #334155;
   background:
     linear-gradient(160deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88)),
-    radial-gradient(circle at top right, rgba(16, 185, 129, 0.24), transparent 45%);
+    radial-gradient(circle at top right, var(--accent-color), transparent 45%);
 }
 
 :deep(.dark) .shortcut-panel__content {
@@ -1054,9 +1054,9 @@ onUnmounted(() => {
 }
 
 :deep(.dark) .shortcut-count-tag {
-  background: rgba(16, 185, 129, 0.14);
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.36);
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  color: var(--accent-color-light);
+  border-color: color-mix(in srgb, var(--accent-color) 36%, transparent);
 }
 
 :deep(.dark) .footer-btn--primary.n-button.n-button--disabled {

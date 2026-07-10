@@ -151,7 +151,7 @@
                       class="eq-bar"
                       :style="{
                         animationDelay: `${(i - 1) * 0.15}s`,
-                        '--eq-color': primaryColor || '#22c55e'
+                        '--eq-color': primaryColor || '#888888'
                       }"
                     />
                   </div>
@@ -851,7 +851,7 @@ onActivated(() => {
 .eq-bar {
   width: 3px;
   border-radius: 9999px;
-  background-color: var(--eq-color, #22c55e);
+  background-color: var(--eq-color, #888888);
   animation: eqPulse 0.8s ease-in-out infinite;
 }
 .eq-bar:nth-child(1) {

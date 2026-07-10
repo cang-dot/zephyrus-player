@@ -117,9 +117,9 @@ const handleInstall = async (): Promise<void> => {
         }
       }
       .install-btn {
-        @apply bg-green-600 border-none;
+        @apply bg-[var(--accent-color)] border-none;
         &:hover {
-          @apply bg-green-500;
+          @apply brightness-90;
         }
       }
     }

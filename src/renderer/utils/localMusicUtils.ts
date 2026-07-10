@@ -176,7 +176,7 @@ export function toSongResult(entry: LocalMusicEntry): SongResult {
       artists: [{ name: entry.artist }],
       album: { name: entry.album }
     },
-    playMusicUrl: `local:///${entry.filePath}`,
+    playMusicUrl: `local:///${encodeURIComponent(entry.filePath)}`,
     duration: entry.duration,
     dt: entry.duration,
     source: 'netease' as const,
@@ -258,4 +258,111 @@ export function removeStaleEntries(
   existsMap: Record<string, boolean>
 ): LocalMusicEntry[] {
   return entries.filter((entry) => existsMap[entry.filePath] === true);
+}
+
+/**
+ * 解析歌词文件名，提取歌手和歌名
+ * 支持格式：歌手 - 歌名.lrc、歌手-歌名.lrc、歌名.lrc
+ * @param filePath 歌词文件路径
+ * @returns { artist?, title }
+ */
+export function parseLyricFilename(filePath: string): { artist?: string; title: string } {
+  // 获取文件名（不含路径和扩展名）
+  const separator = filePath.includes('\\') ? '\\' : '/';
+  const filename = filePath.split(separator).pop() || filePath;
+  const name = filename.replace(/\.(lrc|ttml|txt)$/i, '');
+
+  // 尝试 "歌手 - 歌名" 或 "歌手-歌名"（支持 -、–、— 分隔符）
+  const match = name.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+  if (match) {
+    return { artist: match[1].trim(), title: match[2].trim() };
+  }
+
+  // 无分隔符，整个作为歌名
+  return { title: name.trim() };
+}
+
+/**
+ * 匹配歌词文件到本地歌曲
+ * @param lyricsFiles 歌词文件列表（已解析文件名）
+ * @param songs 本地歌曲列表
+ * @returns 匹配结果列表
+ */
+export function matchLyricsToSongs(
+  lyricsFiles: Array<{ path: string; artist?: string; title: string }>,
+  songs: LocalMusicEntry[]
+): Array<{ songId: string; lyricPath: string }> {
+  const matches: Array<{ songId: string; lyricPath: string }> = [];
+
+  for (const lrc of lyricsFiles) {
+    // 精确匹配：歌名 + 歌手
+    const exactMatch = songs.find(
+      (s) => s.title === lrc.title && (!lrc.artist || s.artist === lrc.artist)
+    );
+    if (exactMatch) {
+      matches.push({ songId: exactMatch.id, lyricPath: lrc.path });
+      continue;
+    }
+
+    // 模糊匹配：歌名包含
+    const fuzzyMatch = songs.find(
+      (s) => s.title.includes(lrc.title) || lrc.title.includes(s.title)
+    );
+    if (fuzzyMatch) {
+      matches.push({ songId: fuzzyMatch.id, lyricPath: lrc.path });
+    }
+  }
+
+  return matches;
+}
+
+/**
+ * 解析歌词内容为 ILyric 格式
+ * @param content 歌词文件内容
+ * @param filePath 文件路径（用于判断格式）
+ * @returns ILyric 对象
+ */
+export function parseLyricContent(content: string, filePath?: string): ILyric | null {
+  if (!content) return null;
+
+  try {
+    const isTtml = filePath?.toLowerCase().endsWith('.ttml');
+    if (isTtml) {
+      // TTML 格式：使用 parseLyrics 解析
+      const { lyrics, times } = parseYrcLyrics(content);
+      if (lyrics.length === 0) return null;
+      return { lrcTimeArray: times, lrcArray: lyrics, hasWordByWord: false };
+    }
+
+    // LRC/TXT 格式：使用 parseYrcLyrics 解析
+    const parseResult = parseYrcLyrics(content);
+    if (!parseResult.success) return null;
+
+    const { lyrics: parsedLyrics } = parseResult.data;
+    const lrcArray: ILyricText[] = [];
+    const lrcTimeArray: number[] = [];
+    let hasWordByWord = false;
+
+    for (const line of parsedLyrics) {
+      const hasWords = line.words && line.words.length > 0;
+      if (hasWords) hasWordByWord = true;
+
+      lrcArray.push({
+        text: line.fullText,
+        trText: '',
+        words: hasWords ? (line.words as IWordData[]) : undefined,
+        hasWordByWord: hasWords,
+        startTime: line.startTime,
+        duration: line.duration
+      });
+
+      lrcTimeArray.push(line.startTime / 1000);
+    }
+
+    if (lrcArray.length === 0) return null;
+
+    return { lrcTimeArray, lrcArray, hasWordByWord };
+  } catch {
+    return null;
+  }
 }

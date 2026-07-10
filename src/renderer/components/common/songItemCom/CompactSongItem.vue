@@ -82,7 +82,7 @@
         <div
           class="song-item-operating-play animate__animated"
           :class="{
-            'bg-green-600': isPlaying,
+            'bg-[var(--accent-color)]': isPlaying,
             animate__flipInY: playLoading,
             'opacity-0': !isHovering && !isPlaying
           }"
@@ -232,9 +232,10 @@ const formatDuration = (ms: number): string => {
     .song-item-operating-play {
       @apply w-7 h-7 flex items-center justify-center cursor-pointer rounded-full bg-gray-300 dark:bg-gray-800 border dark:border-gray-700 border-gray-200 text-gray-900 dark:text-white;
 
-      &:hover,
-      &.bg-green-600 {
-        @apply bg-green-500 border-green-500 text-white;
+      &:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
       }
 
       .iconfont {

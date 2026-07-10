@@ -167,7 +167,7 @@ const songTitle = computed(() => playMusic.value?.name || '');
 
 // ==================== 颜色系统 ====================
 
-const accentColor = computed(() => primaryColor.value || '#22c55e');
+const accentColor = computed(() => primaryColor.value || '#888888');
 
 const bgColor = computed(() => {
   if (isColorInverted.value) return accentColor.value;
@@ -185,7 +185,7 @@ const dynamicBgStyle = computed(() => {
     '--bg-color': climaxBg || bgColor.value,
     '--text-color': textColor.value,
     '--accent-color': accentColor.value,
-    '--accent-rgb': primaryColorRgb.value || '34, 197, 94',
+    '--accent-rgb': primaryColorRgb.value || '136, 136, 136',
     backgroundColor: climaxBg || 'var(--bg-color)',
     color: 'var(--text-color)'
   };

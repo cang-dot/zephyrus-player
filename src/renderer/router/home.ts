@@ -98,8 +98,7 @@ const layoutRouter = [
       icon: 'ri-folder-music-fill',
       keepAlive: true,
       isMobile: false,
-      electronOnly: true,
-      hideInSidebar: true
+      electronOnly: true
     },
     component: () => import('@/views/local-music/index.vue')
   },

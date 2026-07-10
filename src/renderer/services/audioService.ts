@@ -659,17 +659,25 @@ class AudioService {
 
             newSound.on('loaderror', (_, error) => {
               console.error('Audio load error:', error);
+              // 已加载完成的歌曲触发 loaderror，通常是 seek 导致的重新加载失败
+              // 不视为关键错误，仅记录日志，继续当前播放
+              if (this.currentSound === newSound && newSound.state() === 'loaded') {
+                console.warn('seek 后重新加载失败，继续当前播放');
+                return;
+              }
               this.emit('loaderror', { track, error });
               if (retryCount < maxRetries && !existingSound) {
-                // 预加载的音频通常已经 loaded，不应重试
                 retryCount++;
                 console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
                 setTimeout(tryPlay, 1000 * retryCount);
               } else {
-                this.emit('url_expired', track);
+                const isLocal = track.playMusicUrl?.startsWith('local://');
+                if (!isLocal) {
+                  this.emit('url_expired', track);
+                }
                 this.releaseOperationLock();
                 if (isHotSwap) this.pendingSound = null;
-                reject(new Error('音频加载失败，请尝试切换其他歌曲'));
+                reject(new Error(isLocal ? '本地文件加载失败' : '音频加载失败，请尝试切换其他歌曲'));
               }
             });
 
@@ -681,7 +689,10 @@ class AudioService {
                 console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
                 setTimeout(tryPlay, 1000 * retryCount);
               } else {
-                this.emit('url_expired', track);
+                const isLocal = track.playMusicUrl?.startsWith('local://');
+                if (!isLocal) {
+                  this.emit('url_expired', track);
+                }
                 this.releaseOperationLock();
                 if (isHotSwap) this.pendingSound = null;
                 reject(new Error('音频播放失败，请尝试切换其他歌曲'));
@@ -690,52 +701,41 @@ class AudioService {
 
             const onLoaded = async () => {
               try {
-                // 如果是热切换，现在执行切换逻辑
                 if (isHotSwap) {
                   console.log('audioService: 执行无缝切换');
 
-                  // 1. 获取当前播放进度或使用指定的 seekTime
                   let targetPos = 0;
                   if (seekTime > 0) {
-                    // 如果有指定的 seekTime（如恢复播放进度），优先使用
                     targetPos = seekTime;
                     console.log(`audioService: 使用指定的 seekTime: ${seekTime}s`);
                   } else if (this.currentSound) {
-                    // 否则同步当前进度
                     targetPos = this.currentSound.seek() as number;
                   }
 
-                  // 2. 同步新音频进度
                   newSound.seek(targetPos);
 
-                  // 3. 初始化新音频的 EQ
                   await this.disposeEQ(true);
                   await this.setupEQ(newSound);
 
-                  // 4. 播放新音频
                   if (isPlay) {
                     newSound.play();
                   }
 
-                  // 5. 停止旧音频
                   if (this.currentSound) {
                     this.currentSound.stop();
                     this.currentSound.unload();
                   }
 
-                  // 6. 更新引用
                   this.currentSound = newSound;
                   this.currentTrack = track;
                   this.pendingSound = null;
 
                   console.log(`audioService: 无缝切换完成，进度同步至 ${targetPos}s`);
                 } else {
-                  // 普通加载逻辑
                   await this.setupEQ(newSound);
                   this.currentSound = newSound;
                 }
 
-                // 重新应用已保存的音量
                 const savedVolume = localStorage.getItem('volume');
                 if (savedVolume) {
                   this.applyVolume(parseFloat(savedVolume));
@@ -760,14 +760,17 @@ class AudioService {
                       }
                     }
 
+                    this.releaseOperationLock();
                     resolve(this.currentSound);
                   } catch (error) {
                     console.error('Audio initialization failed:', error);
+                    this.releaseOperationLock();
                     reject(error);
                   }
                 }
               } catch (error) {
                 console.error('Audio initialization failed:', error);
+                this.releaseOperationLock();
                 reject(error);
               }
             };
@@ -850,9 +853,6 @@ class AudioService {
   }
 
   stop() {
-    // 强制重置操作锁并继续执行
-    this.forceResetOperationLock();
-
     try {
       if (this.currentSound) {
         try {
@@ -883,15 +883,20 @@ class AudioService {
     this.applyVolume(volume);
   }
 
+  private _lastSeekTime = 0;
+  private readonly _SEEK_DEBOUNCE_MS = 100;
+
   seek(time: number) {
-    // 直接强制重置操作锁
-    this.forceResetOperationLock();
+    const now = Date.now();
+    if (now - this._lastSeekTime < this._SEEK_DEBOUNCE_MS) {
+      console.log(`seek 防抖: 跳过 ${time}s (距上次 ${now - this._lastSeekTime}ms)`);
+      return;
+    }
+    this._lastSeekTime = now;
 
     if (this.currentSound) {
       try {
-        // 直接执行seek操作
         this.currentSound.seek(time);
-        // 触发seek事件
         this.updateMediaSessionPositionState();
         this.emit('seek', time);
       } catch (error) {
@@ -901,8 +906,6 @@ class AudioService {
   }
 
   pause() {
-    this.forceResetOperationLock();
-
     if (this.currentSound) {
       try {
         // 确保任何进行中的seek操作被取消
@@ -1118,11 +1121,8 @@ class AudioService {
   isLoading(): boolean {
     if (!this.currentSound) return false;
 
-    // 检查Howl对象的内部状态
-    // 如果状态为1表示已经加载但未完成，状态为2表示正在加载
     const state = (this.currentSound as any)._state;
-    // 如果操作锁激活也认为是加载状态
-    return this.operationLock || state === 'loading' || state === 1;
+    return state === 'loading' || state === 1;
   }
 
   // 检查音频是否真正在播放
