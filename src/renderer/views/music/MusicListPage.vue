@@ -353,6 +353,7 @@ import {
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import SongItem from '@/components/common/SongItem.vue';
 import { useDownload } from '@/hooks/useDownload';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { useScrollTitle } from '@/hooks/useScrollTitle';
 import { useMusicStore, usePlayerStore, useRecommendStore, useUserStore } from '@/store';
 import { usePlayHistoryStore } from '@/store/modules/playHistory';
@@ -363,6 +364,8 @@ import { getLoginErrorMessage, hasPermission } from '@/utils/auth';
 defineOptions({
   name: 'MusicList'
 });
+
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 const { t } = useI18n();
 const route = useRoute();
@@ -655,22 +658,26 @@ const loadFullPlaylist = async () => {
 
 const handlePlayAll = () => {
   if (displayedSongs.value.length === 0) return;
-  saveHistory();
-  const list = searchKeyword.value
-    ? filteredSongs.value
-    : isFullPlaylistLoaded.value
-      ? completePlaylist.value
-      : allFilteredSongs.value;
-  playerStore.setPlayList(list.map(formatSong));
-  playerStore.setPlay(formatSong(list[0]));
-  if (!isFullPlaylistLoaded.value) loadFullPlaylist();
+  confirmPlaylistReplace(() => {
+    saveHistory();
+    const list = searchKeyword.value
+      ? filteredSongs.value
+      : isFullPlaylistLoaded.value
+        ? completePlaylist.value
+        : allFilteredSongs.value;
+    playerStore.setPlayList(list.map(formatSong));
+    playerStore.setPlay(formatSong(list[0]));
+    if (!isFullPlaylistLoaded.value) loadFullPlaylist();
+  });
 };
 
 const handlePlayItem = (item: any) => {
-  playerStore.setPlay(formatSong(item));
-  if (!playerStore.playList.some((s) => s.id === item.id)) {
-    playerStore.addToNextPlay(formatSong(item));
-  }
+  confirmPlaylistReplace(() => {
+    playerStore.setPlay(formatSong(item));
+    if (!playerStore.playList.some((s) => s.id === item.id)) {
+      playerStore.addToNextPlay(formatSong(item));
+    }
+  });
 };
 
 const handleRemoveSong = async (songId: number) => {

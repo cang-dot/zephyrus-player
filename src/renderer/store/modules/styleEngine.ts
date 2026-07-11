@@ -90,11 +90,22 @@ export const useStyleEngineStore = defineStore('styleEngine', () => {
   }
 
   // ==================== 副歌数据同步 ====================
+
+  // 响应式同步：communityData 的高潮段落变化时自动更新 styleEngine
+  watch(
+    () => useCommunityDataStore().climaxSegments,
+    (newSegments) => {
+      climaxSegments.value = newSegments;
+    },
+    { immediate: true }
+  );
+
   async function loadClimaxData(songId: string) {
     console.log('[StyleEngine] loadClimaxData called, songId:', songId);
     const communityData = useCommunityDataStore();
     await communityData.loadAll(songId);
 
+    // 同步到 styleEngine（watch 也会触发，但这里确保首次赋值）
     climaxSegments.value = communityData.climaxSegments;
     keywordLines.value = communityData.keywordMark?.lines ?? [];
     console.log('[StyleEngine] loadClimaxData done, keywords:', keywordLines.value.length, 'lines');

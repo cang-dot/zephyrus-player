@@ -1,9 +1,11 @@
 import { cloneDeep } from 'lodash';
+import { Howl } from 'howler';
 import { createDiscreteApi } from 'naive-ui';
 import { computed, type ComputedRef, nextTick, ref, watch } from 'vue';
 
 import useIndexedDB from '@/hooks/IndexDBHook';
 import { audioService } from '@/services/audioService';
+import { LocalAudioPlayer } from '@/services/localAudioPlayer';
 import type { usePlayerStore } from '@/store';
 import type { Artist, ILyricText, SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
@@ -45,7 +47,7 @@ export const nowTime = ref(0); // 当前播放时间
 export const allTime = ref(0); // 总播放时间
 export const nowIndex = ref(0); // 当前播放歌词
 export const currentLrcProgress = ref(0); // 来存储当前歌词的进度
-export const sound = ref<Howl | null>(audioService.getCurrentSound());
+export const sound = ref<Howl | LocalAudioPlayer | null>(audioService.getCurrentSound());
 export const isLyricWindowOpen = ref(false); // 新增状态
 export const textColors = ref<any>(getTextColors());
 
@@ -68,10 +70,11 @@ export async function getMusicDB(): Promise<Awaited<ReturnType<typeof useIndexed
         { name: 'music_url_cache', keyPath: 'id' },
         { name: 'music_failed_cache', keyPath: 'id' },
         { name: 'climax_cache', keyPath: 'id' },
+        { name: 'local_climax_data', keyPath: 'id' },
         { name: 'keywords_cache', keyPath: 'id' },
         { name: 'community_lyric_cache', keyPath: 'id' }
       ],
-      4
+      5
     ).then(db => {
       _musicDB = db;
       return db;
@@ -463,7 +466,7 @@ const setupAudioListeners = () => {
       // 重新播放当前歌曲
       if (getPlayerStore().playMusicUrl && playMusic.value) {
         const newSound = await audioService.play(getPlayerStore().playMusicUrl, playMusic.value);
-        sound.value = newSound as Howl;
+        sound.value = newSound;
         setupAudioListeners();
       } else {
         console.error('单曲循环：无可用 URL 或歌曲数据');
@@ -1020,7 +1023,7 @@ window.addEventListener('audio-ready', ((event: CustomEvent) => {
     const { sound: newSound } = event.detail;
     if (newSound) {
       // 更新本地 sound 引用
-      sound.value = newSound as Howl;
+      sound.value = newSound;
 
       // 设置音频监听器
       setupAudioListeners();

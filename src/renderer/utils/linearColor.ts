@@ -79,6 +79,7 @@ const getImageColor = (img: HTMLImageElement): Promise<string> => {
 
 const getImagePrimaryColor = (imageSrc: string): Promise<string> => {
   return new Promise((resolve, reject) => {
+    console.log('[cover-debug] 渲染进程收到图片URL前120字符:', imageSrc?.substring(0, 120));
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.src = imageSrc;
@@ -100,7 +101,10 @@ const getImagePrimaryColor = (imageSrc: string): Promise<string> => {
       resolve(`rgb(${color.join(',')})`);
     };
 
-    img.onerror = () => reject(new Error('图片加载失败'));
+    img.onerror = () => {
+      console.error('[cover-debug] 图片加载失败, URL前200字符:', imageSrc?.substring(0, 200));
+      reject(new Error('图片加载失败'));
+    };
   });
 };
 

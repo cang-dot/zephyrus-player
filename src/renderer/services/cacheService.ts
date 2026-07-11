@@ -89,6 +89,46 @@ export async function deleteClimaxCache(songId: string): Promise<void> {
   await deleteCache('climax_cache', songId);
 }
 
+// ==================== Local Climax Data (本地歌曲永久存储) ====================
+
+/**
+ * 读取本地歌曲的高潮数据（永久存储，不设 TTL）
+ */
+export async function getLocalClimax(songId: string): Promise<ClimaxCacheData | null | undefined> {
+  try {
+    const db = await getMusicDB();
+    const entry = await db.getData('local_climax_data' as any, songId) as { data: ClimaxCacheData } | undefined;
+    if (!entry) return undefined;
+    return entry.data;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * 保存本地歌曲的高潮数据（永久存储）
+ */
+export async function saveLocalClimax(songId: string, data: ClimaxCacheData): Promise<void> {
+  try {
+    const db = await getMusicDB();
+    await db.saveData('local_climax_data' as any, { id: songId, data } as any);
+  } catch (err) {
+    console.error('[CacheService] 保存本地高潮数据失败:', err);
+  }
+}
+
+/**
+ * 删除本地歌曲的高潮数据
+ */
+export async function deleteLocalClimax(songId: string): Promise<void> {
+  try {
+    const db = await getMusicDB();
+    await db.deleteData('local_climax_data' as any, songId);
+  } catch (err) {
+    console.error('[CacheService] 删除本地高潮数据失败:', err);
+  }
+}
+
 // ==================== Keywords Cache ====================
 
 export async function getKeywordsCache(songId: string): Promise<KeywordMark | null | undefined> {

@@ -113,6 +113,7 @@ import { computed, onActivated, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useRecommendStore } from '@/store';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { calculateAnimationDelay, getImgUrl } from '@/utils';
 
 defineProps<{
@@ -122,6 +123,7 @@ defineProps<{
 
 const { t } = useI18n();
 const recommendStore = useRecommendStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 const songs = computed(() => recommendStore.dailyRecommendSongs);
 const loading = computed(() => songs.value.length === 0 && !recommendStore.lastFetchDate);
@@ -169,24 +171,26 @@ const handleSongClick = async (_song: any, index: number) => {
 const playAll = async () => {
   if (songs.value.length === 0) return;
 
-  const { usePlayerCoreStore } = await import('@/store/modules/playerCore');
-  const { usePlaylistStore } = await import('@/store/modules/playlist');
+  confirmPlaylistReplace(async () => {
+    const { usePlayerCoreStore } = await import('@/store/modules/playerCore');
+    const { usePlaylistStore } = await import('@/store/modules/playlist');
 
-  const playerCore = usePlayerCoreStore();
-  const playlistStore = usePlaylistStore();
+    const playerCore = usePlayerCoreStore();
+    const playlistStore = usePlaylistStore();
 
-  const playlist = songs.value.map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    picUrl: s.album?.picUrl || s.al?.picUrl,
-    source: 'netease',
-    song: s,
-    ...s,
-    playLoading: false
-  }));
+    const playlist = songs.value.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      picUrl: s.album?.picUrl || s.al?.picUrl,
+      source: 'netease',
+      song: s,
+      ...s,
+      playLoading: false
+    }));
 
-  playlistStore.setPlayList(playlist, false, false);
-  await playerCore.handlePlayMusic(playlist[0], true);
+    playlistStore.setPlayList(playlist, false, false);
+    await playerCore.handlePlayMusic(playlist[0], true);
+  });
 };
 </script>
 

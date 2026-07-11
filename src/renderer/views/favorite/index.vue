@@ -152,12 +152,14 @@ import { getMusicDetail } from '@/api/music';
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import SongItem from '@/components/common/SongItem.vue';
 import { useDownload } from '@/hooks/useDownload';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { usePlayerStore } from '@/store';
 import type { SongResult } from '@/types/music';
 import { isElectron, setAnimationClass, setAnimationDelay } from '@/utils';
 
 const { t } = useI18n();
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 const favoriteList = computed(() => playerStore.favoriteList);
 const favoriteSongs = ref<SongResult[]>([]);
 const loading = ref(false);
@@ -340,7 +342,9 @@ watch(
 );
 
 const handlePlay = () => {
-  playerStore.setPlayList(favoriteSongs.value);
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(favoriteSongs.value);
+  });
 };
 
 const getItemAnimationDelay = (index: number) => {

@@ -36,6 +36,8 @@ type SetConfig = {
   lyricUnlockShortcut: string;
   lyricFontFamily: string;
   lyricTextColor: string;
+  lyricPlayedColor: string;
+  lyricUnplayedColor: string;
   lyricStrokeColor: string;
   lyricUseCoverColor: boolean;
   githubMirror: string;

@@ -103,6 +103,7 @@ import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import StickyTabPage from '@/components/common/StickyTabPage.vue';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
 import { usePlaylistStore } from '@/store/modules/playlist';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { calculateAnimationDelay, getImgUrl } from '@/utils';
 
 defineOptions({
@@ -113,6 +114,7 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const pageRef = ref();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 const TOTAL_ITEMS = 30;
 
@@ -213,22 +215,24 @@ const playAlbum = async (album: any) => {
   try {
     const { data } = await getAlbum(album.id);
     if (data.code === 200 && data.songs?.length > 0) {
-      const playerCore = usePlayerCoreStore();
-      const playlistStore = usePlaylistStore();
+      confirmPlaylistReplace(async () => {
+        const playerCore = usePlayerCoreStore();
+        const playlistStore = usePlaylistStore();
 
-      const albumCover = data.album?.picUrl || album.picUrl;
-      const playlist = data.songs.map((s: any) => ({
-        id: s.id,
-        name: s.name,
-        source: 'netease',
-        song: s,
-        ...s,
-        picUrl: s.al?.picUrl || albumCover,
-        playLoading: false
-      }));
+        const albumCover = data.album?.picUrl || album.picUrl;
+        const playlist = data.songs.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          source: 'netease',
+          song: s,
+          ...s,
+          picUrl: s.al?.picUrl || albumCover,
+          playLoading: false
+        }));
 
-      playlistStore.setPlayList(playlist, false, false);
-      await playerCore.handlePlayMusic(playlist[0], true);
+        playlistStore.setPlayList(playlist, false, false);
+        await playerCore.handlePlayMusic(playlist[0], true);
+      });
     }
   } catch (error) {
     console.error('Failed to play album:', error);

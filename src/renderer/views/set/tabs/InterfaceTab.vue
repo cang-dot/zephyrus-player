@@ -137,6 +137,48 @@
       </div>
     </setting-item>
 
+    <!-- 已播放颜色 -->
+    <setting-item title="已播放颜色" description="当前播放行的高亮颜色，留空使用封面取色">
+      <div class="flex items-center gap-2">
+        <input
+          type="color"
+          :value="setData.lyricPlayedColor || '#1db954'"
+          class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+          @input="onColorInput($event, 'lyricPlayedColor')"
+        />
+        <button
+          class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+          @click="
+            setData.lyricPlayedColor = '';
+            sendLyricStyle();
+          "
+        >
+          重置
+        </button>
+      </div>
+    </setting-item>
+
+    <!-- 未播放颜色 -->
+    <setting-item title="未播放颜色" description="未播放歌词行的文字颜色，留空跟随主题">
+      <div class="flex items-center gap-2">
+        <input
+          type="color"
+          :value="setData.lyricUnplayedColor || '#ffffff'"
+          class="w-8 h-8 rounded cursor-pointer border border-gray-300 dark:border-white/20"
+          @input="onColorInput($event, 'lyricUnplayedColor')"
+        />
+        <button
+          class="px-2 py-0.5 text-xs rounded-md text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+          @click="
+            setData.lyricUnplayedColor = '';
+            sendLyricStyle();
+          "
+        >
+          重置
+        </button>
+      </div>
+    </setting-item>
+
     <!-- 描边颜色 -->
     <setting-item title="描边颜色" description="歌词文字描边/阴影颜色，留空无描边">
       <div class="flex items-center gap-2">
@@ -253,6 +295,8 @@ function sendLyricStyle() {
   window.electron.ipcRenderer.send('lyric-update-style', {
     fontFamily: setData.value.lyricFontFamily || '',
     textColor: setData.value.lyricTextColor || '',
+    playedColor: setData.value.lyricPlayedColor || '',
+    unplayedColor: setData.value.lyricUnplayedColor || '',
     strokeColor: setData.value.lyricStrokeColor || '',
     useCoverColor: setData.value.lyricUseCoverColor !== false
   });

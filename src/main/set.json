@@ -47,6 +47,8 @@
   "lyricUnlockShortcut": "CommandOrControl+L",
   "lyricFontFamily": "",
   "lyricTextColor": "",
+  "lyricPlayedColor": "",
+  "lyricUnplayedColor": "",
   "lyricStrokeColor": "",
   "lyricUseCoverColor": true,
   "githubMirror": ""

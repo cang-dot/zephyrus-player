@@ -246,6 +246,7 @@ import SearchItem from '@/components/common/SearchItem.vue';
 import SongItem from '@/components/common/SongItem.vue';
 import { SEARCH_TYPE, SEARCH_TYPES } from '@/const/bar-const';
 import { useDownload } from '@/hooks/useDownload';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { useScrollTitle } from '@/hooks/useScrollTitle';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSearchStore } from '@/store/modules/search';
@@ -260,6 +261,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 const searchStore = useSearchStore();
 
 const formatSong = (item: any) => {
@@ -468,10 +470,12 @@ const handlePlay = (item: any) => {
 const handlePlayAll = () => {
   if (!searchDetail.value?.songs?.length) return;
   const songs = searchDetail.value.songs.map(formatSong);
-  playerStore.setPlayList(songs);
-  if (songs[0]) {
-    playerStore.setPlay(songs[0]);
-  }
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(songs);
+    if (songs[0]) {
+      playerStore.setPlay(songs[0]);
+    }
+  });
 };
 
 onMounted(() => {

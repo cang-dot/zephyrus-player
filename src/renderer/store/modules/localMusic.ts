@@ -8,6 +8,9 @@ import { ref } from 'vue';
 
 import useIndexedDB from '@/hooks/IndexDBHook';
 import type { LocalMusicEntry } from '@/types/localMusic';
+
+// 扫描版本号，代码变更后递增可强制重新解析所有文件（解决封面/歌词提取逻辑变更后的缓存问题）
+const SCAN_VERSION = 2;
 import { removeStaleEntries } from '@/utils/localMusicUtils';
 
 const { message } = createDiscreteApi(['message']);
@@ -118,6 +121,14 @@ export const useLocalMusicStore = defineStore(
       try {
         const localDB = await getDB();
 
+        // 检查扫描版本，版本变化时强制重扫所有文件
+        const lastVersion = parseInt(localStorage.getItem('localMusicScanVersion') || '0', 10);
+        const forceRescan = lastVersion < SCAN_VERSION;
+        if (forceRescan) {
+          console.log(`[scan] 扫描版本变更 ${lastVersion} -> ${SCAN_VERSION}，强制重新解析所有文件`);
+          localStorage.setItem('localMusicScanVersion', SCAN_VERSION.toString());
+        }
+
         // 加载当前缓存数据用于增量对比
         const cachedEntries = await localDB.getAllData(LOCAL_MUSIC_STORE);
         const cachedMap = new Map<string, LocalMusicEntry>();
@@ -145,7 +156,7 @@ export const useLocalMusicStore = defineStore(
             const parseTargets: string[] = [];
             for (const file of files) {
               const cached = cachedMap.get(file.path);
-              if (!cached || cached.modifiedTime !== file.modifiedTime) {
+              if (forceRescan || !cached || cached.modifiedTime !== file.modifiedTime) {
                 parseTargets.push(file.path);
               }
             }

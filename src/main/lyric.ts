@@ -227,6 +227,8 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
       const styleConfig = {
         fontFamily: settings.lyricFontFamily || '',
         textColor: settings.lyricTextColor || '',
+        playedColor: settings.lyricPlayedColor || '',
+        unplayedColor: settings.lyricUnplayedColor || '',
         strokeColor: settings.lyricStrokeColor || '',
         useCoverColor: settings.lyricUseCoverColor !== false
       };

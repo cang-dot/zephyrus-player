@@ -8,6 +8,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { type ClimaxSegment,loadClimaxForSong } from '@/api/climax';
+import { getLocalClimax } from '@/services/cacheService';
 
 export const useClimaxStore = defineStore('climax', () => {
   // 当前歌曲的高潮段落
@@ -32,9 +33,16 @@ export const useClimaxStore = defineStore('climax', () => {
     currentSongId.value = songId;
 
     try {
-      const result = await loadClimaxForSong(songId);
-      segments.value = result.segments || [];
-      contributor.value = result.contributor || null;
+      // 本地歌曲：从本地永久存储加载
+      if (!/^\d+$/.test(songId)) {
+        const localData = await getLocalClimax(songId);
+        segments.value = localData?.segments || [];
+        contributor.value = localData?.contributor || null;
+      } else {
+        const result = await loadClimaxForSong(songId);
+        segments.value = result.segments || [];
+        contributor.value = result.contributor || null;
+      }
     } catch (err) {
       console.error('[ClimaxStore] 加载高潮数据失败:', err);
       segments.value = [];

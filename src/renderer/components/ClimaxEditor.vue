@@ -93,11 +93,15 @@ import { computed, ref, watch } from 'vue';
 
 import { type ClimaxSegment, uploadClimax } from '@/api/climax';
 import { allTime, nowTime, playMusic } from '@/hooks/MusicHook';
+import { isLocalSong } from '@/hooks/useLocalMusic';
 import { useClimaxStore } from '@/store/modules/climax';
+import { useCommunityDataStore } from '@/store/modules/communityData';
 import { useUserStore } from '@/store/modules/user';
+import { saveLocalClimax } from '@/services/cacheService';
 import { secondToMinute } from '@/utils';
 
 const climaxStore = useClimaxStore();
+const communityDataStore = useCommunityDataStore();
 const userStore = useUserStore();
 
 const visible = defineModel<boolean>({ default: false });
@@ -264,20 +268,31 @@ function clearAll() {
   climaxStore.updateSegments([]);
 }
 
-// 保存到服务器
+// 保存到服务器（本地歌曲存本地，不上传）
 async function saveToServer() {
   if (!playMusic.value?.id) return;
   saving.value = true;
   try {
-    await uploadClimax({
-      songId: String(playMusic.value.id),
-      songName: playMusic.value.name || '',
-      artist: playMusic.value.ar?.map((a) => a.name).join('/') || '',
-      album: playMusic.value.al?.name || '',
-      duration: duration.value,
-      segments: climaxStore.segments,
-      contributorName: userStore.user?.nickname || 'Anonymous'
-    });
+    if (isLocalSong(playMusic.value)) {
+      // 本地歌曲：保存到 IndexedDB（深拷贝避免 Proxy 无法序列化）
+      const data = {
+        segments: JSON.parse(JSON.stringify(climaxStore.segments)),
+        contributor: userStore.user?.nickname || 'Local'
+      };
+      await saveLocalClimax(String(playMusic.value.id), data);
+      // 同步到 communityData，触发 styleEngine 的 watch 更新高潮效果
+      communityDataStore.climaxSegments = data.segments;
+    } else {
+      await uploadClimax({
+        songId: String(playMusic.value.id),
+        songName: playMusic.value.name || '',
+        artist: playMusic.value.ar?.map((a) => a.name).join('/') || '',
+        album: playMusic.value.al?.name || '',
+        duration: duration.value,
+        segments: climaxStore.segments,
+        contributorName: userStore.user?.nickname || 'Anonymous'
+      });
+    }
   } catch (err) {
     console.error('[ClimaxEditor] 保存失败:', err);
   } finally {

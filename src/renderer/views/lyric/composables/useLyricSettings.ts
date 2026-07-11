@@ -11,6 +11,8 @@ export interface LyricSettings {
   displayMode: 'scroll' | 'single' | 'double';
   fontFamily: string;
   textColor: string;
+  playedColor: string;
+  unplayedColor: string;
   strokeColor: string;
   useCoverColor: boolean;
 }
@@ -36,6 +38,8 @@ export function loadLyricSettings(): LyricSettings {
           : 'scroll') as LyricSettings['displayMode'],
         fontFamily: parsed.fontFamily || '',
         textColor: parsed.textColor || '',
+        playedColor: parsed.playedColor || '',
+        unplayedColor: parsed.unplayedColor || '',
         strokeColor: parsed.strokeColor || '',
         useCoverColor: parsed.useCoverColor !== false
       };
@@ -52,6 +56,8 @@ export function loadLyricSettings(): LyricSettings {
     displayMode: 'scroll',
     fontFamily: '',
     textColor: '',
+    playedColor: '',
+    unplayedColor: '',
     strokeColor: '',
     useCoverColor: true
   };

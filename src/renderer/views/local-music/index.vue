@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="local-music-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
     <n-scrollbar class="h-full">
       <div class="local-music-content pb-32">
@@ -226,6 +226,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import SongItem from '@/components/common/SongItem.vue';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { useLocalMusicStore } from '@/store/modules/localMusic';
 import { usePlayerStore } from '@/store/modules/player';
 import type { SongResult } from '@/types/music';
@@ -236,6 +237,7 @@ const { t } = useI18n();
 const { message } = createDiscreteApi(['message']);
 const localMusicStore = useLocalMusicStore();
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 // ==================== State ====================
 /** 鎼滅储鍏抽敭璇?*/
@@ -322,11 +324,9 @@ async function handleScan(): Promise<void> {
  * 姝ゅ鍙渶璁剧疆鎾斁鍒楄〃涓婁笅鏂囷紝纭繚涓婁笅涓€棣栧垏鎹㈡甯? * @param song SongItem 缁勪欢 emit 鐨?SongResult 瀵硅薄
  */
 async function handlePlaySong(_song: SongResult): Promise<void> {
-  try {
-    // 璁剧疆鎾斁鍒楄〃涓婁笅鏂囷紝纭繚涓婁笅涓€棣栧垏鎹㈡甯?    playerStore.setPlayList(filteredSongResults.value);
-  } catch (error) {
-    console.error('鎾斁鏈湴闊充箰澶辫触:', error);
-  }
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(filteredSongResults.value);
+  });
 }
 
 /**
@@ -335,22 +335,23 @@ async function handlePlaySong(_song: SongResult): Promise<void> {
 async function handlePlayAll(): Promise<void> {
   if (filteredSongResults.value.length === 0) return;
 
-  try {
-    const firstSong = filteredSongResults.value[0];
-    const entry = filteredList.value[0];
+  confirmPlaylistReplace(async () => {
+    try {
+      const firstSong = filteredSongResults.value[0];
+      const entry = filteredList.value[0];
 
-    // 妫€鏌ョ涓€棣栨瓕鏂囦欢鏄惁瀛樺湪
-    const exists = await window.electron.ipcRenderer.invoke('check-file-exists', entry.filePath);
-    if (!exists) {
-      message.error(t('localMusic.fileNotFound'));
-      return;
+      const exists = await window.electron.ipcRenderer.invoke('check-file-exists', entry.filePath);
+      if (!exists) {
+        message.error(t('localMusic.fileNotFound'));
+        return;
+      }
+
+      playerStore.setPlayList(filteredSongResults.value);
+      await playerStore.setPlay(firstSong);
+    } catch (error) {
+      console.error('播放全部失败:', error);
     }
-
-    // 璁剧疆鎾斁鍒楄〃骞舵挱鏀剧涓€棣?    playerStore.setPlayList(filteredSongResults.value);
-    await playerStore.setPlay(firstSong);
-  } catch (error) {
-    console.error('鎾斁鍏ㄩ儴澶辫触:', error);
-  }
+  });
 }
 
 // ==================== Lifecycle ====================

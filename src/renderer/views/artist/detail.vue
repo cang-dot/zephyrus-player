@@ -435,6 +435,7 @@ import { getMusicDetail } from '@/api/music';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import SongItem from '@/components/common/SongItem.vue';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { useScrollTitle } from '@/hooks/useScrollTitle';
 import router from '@/router';
 import { usePlayerStore } from '@/store';
@@ -448,6 +449,7 @@ defineOptions({
 const { t } = useI18n();
 const route = useRoute();
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 const message = useMessage();
 
 const artistId = computed(() => Number(route.params.id));
@@ -741,17 +743,19 @@ const toggleLayout = () => {
 const handlePlayAll = () => {
   if (filteredSongs.value.length === 0) return;
 
-  playerStore.setPlayList(
-    filteredSongs.value.map((song) => ({
-      ...song,
-      picUrl: song.al.picUrl
-    }))
-  );
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(
+      filteredSongs.value.map((song) => ({
+        ...song,
+        picUrl: song.al.picUrl
+      }))
+    );
 
-  // 开始播放第一首
-  playerStore.setPlay(filteredSongs.value[0]);
+    // 开始播放第一首
+    playerStore.setPlay(filteredSongs.value[0]);
 
-  message.success(t('comp.musicList.playAll'));
+    message.success(t('comp.musicList.playAll'));
+  });
 };
 
 // 添加到播放列表

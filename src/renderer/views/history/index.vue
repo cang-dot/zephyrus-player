@@ -266,6 +266,7 @@ import AlbumItem from '@/components/common/AlbumItem.vue';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import PlaylistItem from '@/components/common/PlaylistItem.vue';
 import SongItem from '@/components/common/SongItem.vue';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { usePlayerStore } from '@/store/modules/player';
 import { usePlayHistoryStore } from '@/store/modules/playHistory';
 import { useUserStore } from '@/store/modules/user';
@@ -294,6 +295,7 @@ const loading = ref(false);
 const noMore = ref(false);
 const displayList = ref<any[]>([]);
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 const hasLoaded = ref(false);
 const currentCategory = ref<'songs' | 'playlists' | 'albums' | 'podcasts'>('songs');
 const currentTab = ref<'local' | 'cloud'>('local');
@@ -636,7 +638,9 @@ const handleScroll = (e: any) => {
 
 // 播放全部
 const handlePlay = () => {
-  playerStore.setPlayList(displayList.value);
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(displayList.value);
+  });
 };
 
 // 处理 tab 切换

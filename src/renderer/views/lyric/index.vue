@@ -114,6 +114,8 @@ const songName = computed(() => staticData.value.playMusic?.name || '');
 function applyStyle(config: {
   fontFamily?: string;
   textColor?: string;
+  playedColor?: string;
+  unplayedColor?: string;
   strokeColor?: string;
   useCoverColor?: boolean;
 }) {
@@ -124,12 +126,35 @@ function applyStyle(config: {
     lyricSetting.value.fontFamily = config.fontFamily;
   }
 
+  // 文本颜色（基础色）
   if (config.textColor) {
     root.style.setProperty('--text-color', config.textColor);
     lyricSetting.value.textColor = config.textColor;
-  } else {
+  } else if (!config.unplayedColor) {
+    // 仅在未设置 unplayedColor 时移除，让 unplayedColor 优先
     root.style.removeProperty('--text-color');
     lyricSetting.value.textColor = '';
+  }
+
+  // 未播放颜色（覆盖 --text-color）
+  if (config.unplayedColor) {
+    root.style.setProperty('--text-color', config.unplayedColor);
+    lyricSetting.value.unplayedColor = config.unplayedColor;
+  } else {
+    lyricSetting.value.unplayedColor = '';
+    // 如果同时清除了 textColor，移除 --text-color 让主题色生效
+    if (!config.textColor) {
+      root.style.removeProperty('--text-color');
+    }
+  }
+
+  // 已播放颜色（覆盖 --highlight-color）
+  if (config.playedColor) {
+    root.style.setProperty('--highlight-color', config.playedColor);
+    lyricSetting.value.playedColor = config.playedColor;
+  } else {
+    root.style.removeProperty('--highlight-color');
+    lyricSetting.value.playedColor = '';
   }
 
   if (config.strokeColor) {

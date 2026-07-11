@@ -121,13 +121,24 @@ export function initializeFileManager() {
     return result.filePaths[0];
   });
 
-  // 读取文件内容
+  // 读取文件内容（文本）
   ipcMain.handle('read-file', async (_, filePath: string) => {
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
       return content;
     } catch (error) {
       console.error('读取文件失败:', error);
+      return null;
+    }
+  });
+
+  // 读取文件内容（二进制，用于本地音乐播放）
+  ipcMain.handle('read-file-binary', async (_, filePath: string) => {
+    try {
+      const buffer = fs.readFileSync(filePath);
+      return buffer;
+    } catch (error) {
+      console.error('读取二进制文件失败:', error);
       return null;
     }
   });

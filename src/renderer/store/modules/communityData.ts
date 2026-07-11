@@ -15,6 +15,7 @@ import {
   getClimaxCache,
   getCommunityLyricCache,
   getKeywordsCache,
+  getLocalClimax,
   saveClimaxCache,
   saveCommunityLyricCache,
   saveKeywordsCache} from '@/services/cacheService';
@@ -23,6 +24,10 @@ export const useCommunityDataStore = defineStore('communityData', () => {
   // ==================== State ====================
   const currentSongId = ref<string>('');
 
+  // 判断 songId 是否为本地歌曲（本地歌曲 ID 是字符串路径哈希，非数字）
+  function isLocalSongId(songId: string): boolean {
+    return !/^\d+$/.test(songId);
+  }
   // Climax
   const climaxSegments = ref<ClimaxSegment[]>([]);
   const climaxContributor = ref<string | null>(null);
@@ -82,6 +87,20 @@ export const useCommunityDataStore = defineStore('communityData', () => {
   async function loadClimax(songId: string) {
     loadingClimax.value = true;
     try {
+      // 本地歌曲：从本地永久存储加载，不走服务器
+      if (isLocalSongId(songId)) {
+        const localData = await getLocalClimax(songId);
+        if (localData) {
+          climaxSegments.value = localData.segments;
+          climaxContributor.value = localData.contributor;
+        } else {
+          climaxSegments.value = [];
+          climaxContributor.value = null;
+        }
+        return;
+      }
+
+      // 在线歌曲：缓存优先
       const cached = await getClimaxCache(songId);
       console.log('[CommunityData] loadClimax cache:', cached != null ? 'hit' : 'miss');
       if (cached != null) {

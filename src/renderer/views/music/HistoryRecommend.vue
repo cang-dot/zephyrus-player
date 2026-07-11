@@ -120,6 +120,7 @@ import { useI18n } from 'vue-i18n';
 import { getHistoryRecommendDates, getHistoryRecommendSongs } from '@/api/music';
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import SongItem from '@/components/common/SongItem.vue';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { usePlayerStore } from '@/store';
 import type { SongResult } from '@/types/music';
 import { isMobile } from '@/utils';
@@ -127,6 +128,7 @@ import { isMobile } from '@/utils';
 const { t } = useI18n();
 const message = useMessage();
 const playerStore = usePlayerStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 // 鐘舵€
 const availableDates = ref<string[]>([]);
@@ -260,8 +262,10 @@ const handlePlay = () => {
 // 鎾斁鍏ㄩ儴
 const handlePlayAll = () => {
   if (songs.value.length === 0) return;
-  playerStore.setPlayList(songs.value.map(formatSong));
-  playerStore.setPlay(formatSong(songs.value[0]));
+  confirmPlaylistReplace(() => {
+    playerStore.setPlayList(songs.value.map(formatSong));
+    playerStore.setPlay(formatSong(songs.value[0]));
+  });
 };
 
 // 缁勪欢鎸傝浇鏃惰幏鍙栨暟鎹

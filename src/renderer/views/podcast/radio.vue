@@ -172,6 +172,7 @@ import { useRoute } from 'vue-router';
 import { getDjDetail, getDjProgram, getDjSublist, subscribeDj } from '@/api/podcast';
 import ProgramList from '@/components/podcast/ProgramList.vue';
 import { usePlayerStore, usePlaylistStore, useUserStore } from '@/store';
+import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import type { SongResult } from '@/types/music';
 import type { DjProgram, DjRadio } from '@/types/podcast';
 import { formatNumber, getImgUrl } from '@/utils';
@@ -185,6 +186,7 @@ const { t } = useI18n();
 const { message } = createDiscreteApi(['message']);
 const route = useRoute();
 const playlistStore = usePlaylistStore();
+const { confirmPlaylistReplace } = usePlaylistConfirm();
 const playerStore = usePlayerStore();
 const userStore = useUserStore();
 
@@ -276,24 +278,26 @@ const handleScroll = async (e: any) => {
 const handlePlayAll = async () => {
   if (!currentRadio.value) return;
 
-  const total = currentRadio.value.programCount;
-  try {
-    message.loading(t('common.loading'));
-    const { data } = await getDjProgram(radioId.value, total);
-    const allPrograms = data.programs || [];
+  confirmPlaylistReplace(async () => {
+    const total = currentRadio.value!.programCount;
+    try {
+      message.loading(t('common.loading'));
+      const { data } = await getDjProgram(radioId.value, total);
+      const allPrograms = data.programs || [];
 
-    const songList: SongResult[] = allPrograms.map((program: DjProgram) =>
-      mapDjProgramToSongResult(program)
-    );
+      const songList: SongResult[] = allPrograms.map((program: DjProgram) =>
+        mapDjProgramToSongResult(program)
+      );
 
-    playlistStore.setPlayList(songList);
-    if (songList[0]) {
-      playerStore.setPlay(songList[0]);
+      playlistStore.setPlayList(songList);
+      if (songList[0]) {
+        playerStore.setPlay(songList[0]);
+      }
+    } catch (error) {
+      console.error('鑾峰彇鍏ㄩ儴鑺傜洰澶辫触:', error);
+      message.error(t('common.loadFailed'));
     }
-  } catch (error) {
-    console.error('鑾峰彇鍏ㄩ儴鑺傜洰澶辫触:', error);
-    message.error(t('common.loadFailed'));
-  }
+  });
 };
 
 // 璁㈤槄/鍙栨秷璁㈤槄

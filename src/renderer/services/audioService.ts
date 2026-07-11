@@ -2,14 +2,16 @@ import { Howl, Howler } from 'howler';
 
 import type { AudioOutputDevice } from '@/types/audio';
 import type { SongResult } from '@/types/music';
-import { isElectron } from '@/utils'; // 导入isElectron常量
+import { isElectron } from '@/utils';
+import { isLocalSong } from '@/hooks/useLocalMusic';
 
 import { climaxDetector } from './climaxDetector';
 import { drumDetector } from './drumDetector';
+import { LocalAudioPlayer } from './localAudioPlayer';
 
 class AudioService {
-  private currentSound: Howl | null = null;
-  private pendingSound: Howl | null = null;
+  private currentSound: Howl | LocalAudioPlayer | null = null;
+  private pendingSound: Howl | LocalAudioPlayer | null = null;
 
   private currentTrack: SongResult | null = null;
 
@@ -243,11 +245,11 @@ class AudioService {
       climaxDetector.disconnect();
       drumDetector.disconnect();
 
-      // 清理音频节点连接
-      if (this.source) {
+      // 清理音频节点连接（不切断 LocalAudioPlayer 的 inputNode，它由播放器自己管理）
+      if (this.source && !(this.currentSound instanceof LocalAudioPlayer)) {
         this.source.disconnect();
-        this.source = null;
       }
+      this.source = null;
 
       // 清理滤波器
       this.filters.forEach((filter) => {
@@ -279,15 +281,24 @@ class AudioService {
     }
   }
 
-  private async setupEQ(sound: Howl) {
+  private async setupEQ(sound: Howl | LocalAudioPlayer) {
     try {
       if (!isElectron) {
         console.log('Web环境中跳过EQ设置，避免CORS问题');
         this.bypass = true;
         return;
       }
-      const howl = sound as any;
 
+      // 清理现有连接
+      await this.disposeEQ(true);
+
+      // LocalAudioPlayer: 走专用分支
+      if (sound instanceof LocalAudioPlayer) {
+        return this._setupEQLocal(sound);
+      }
+
+      // Howl: 走原有路径
+      const howl = sound as any;
       const audioNode = howl._sounds?.[0]?._node;
 
       if (!audioNode || !(audioNode instanceof HTMLMediaElement)) {
@@ -376,6 +387,46 @@ class AudioService {
       await this.disposeEQ();
       throw error;
     }
+  }
+
+  private _setupEQLocal(sound: LocalAudioPlayer) {
+    this.context = Howler.ctx as AudioContext;
+    if (!this.context || this.context.state === 'closed') {
+      Howler.ctx = new AudioContext();
+      this.context = Howler.ctx;
+      Howler.masterGain = this.context.createGain();
+      Howler.masterGain.connect(this.context.destination);
+    }
+
+    this.setupContextStateMonitoring();
+    this.restoreSavedAudioDevice();
+
+    this.source = sound.getInputNode() as any;
+
+    this.gainNode = this.context.createGain();
+
+    this.filters = this.frequencies.map((freq) => {
+      const filter = this.context!.createBiquadFilter();
+      filter.type = 'peaking';
+      filter.frequency.value = freq;
+      filter.Q.value = 1;
+      filter.gain.value = this.loadEQSettings()[freq.toString()] || 0;
+      return filter;
+    });
+
+    climaxDetector.connect(this.context, this.gainNode);
+    drumDetector.connect(this.context, this.gainNode);
+
+    this.applyBypassState();
+
+    const savedVolume = localStorage.getItem('volume');
+    if (savedVolume) {
+      this.applyVolume(parseFloat(savedVolume));
+    } else {
+      this.applyVolume(1);
+    }
+
+    console.log('EQ initialization successful for LocalAudioPlayer');
   }
 
   private applyBypassState() {
@@ -528,8 +579,8 @@ class AudioService {
     track: SongResult,
     isPlay: boolean = true,
     seekTime: number = 0,
-    existingSound?: Howl
-  ): Promise<Howl> {
+    existingSound?: Howl | LocalAudioPlayer
+  ): Promise<Howl | LocalAudioPlayer> {
     // 如果没有提供新的 URL 和 track，且当前有音频实例，则继续播放当前音频
     if (this.currentSound && !url && !track) {
       if (this.seekLock && this.seekDebounceTimer) {
@@ -627,25 +678,27 @@ class AudioService {
             this.currentTrack = track;
           }
 
-          let newSound: Howl;
+          let newSound: Howl | LocalAudioPlayer;
 
           if (existingSound) {
-            console.log('audioService: 使用预加载的 Howl 对象');
+            console.log('audioService: 使用预加载的 Howl/LocalAudioPlayer 对象');
             newSound = existingSound;
-            // 确保 volume 和 rate 正确
-            newSound.volume(1); // 内部 volume 设为 1，由 Howler.masterGain 控制实际音量
-            newSound.rate(this.playbackRate);
-
-            // 重新绑定事件监听器，因为 PreloadService 可能没有绑定这些
-            // 注意：Howler 允许重复绑定，但最好先清理（如果无法清理，就直接绑定，Howler 是 EventEmitter）
-            // 这里我们假设 existingSound 是干净的或者我们只绑定我们需要关心的
+            if (!(newSound instanceof LocalAudioPlayer)) {
+              newSound.volume(1);
+              newSound.rate(this.playbackRate);
+            } else {
+              newSound.rate(this.playbackRate);
+            }
+          } else if (url.startsWith('local://')) {
+            console.log('audioService: 创建 LocalAudioPlayer');
+            newSound = new LocalAudioPlayer(url);
           } else {
             console.log('audioService: 创建新的 Howl 对象');
             newSound = new Howl({
               src: [url],
               html5: true,
               autoplay: false,
-              volume: 1, // 禁用 Howler.js 音量控制
+              volume: 1,
               rate: this.playbackRate,
               format: ['mp3', 'aac']
             });
@@ -653,27 +706,43 @@ class AudioService {
 
           // 统一设置事件处理
           const setupEvents = () => {
-            newSound.off('loaderror');
-            newSound.off('playerror');
-            newSound.off('load');
+            if (newSound instanceof LocalAudioPlayer) {
+              newSound.off('loaderror');
+              newSound.off('load');
 
-            newSound.on('loaderror', (_, error) => {
-              console.error('Audio load error:', error);
-              // 已加载完成的歌曲触发 loaderror，通常是 seek 导致的重新加载失败
-              // 不视为关键错误，仅记录日志，继续当前播放
-              if (this.currentSound === newSound && newSound.state() === 'loaded') {
-                console.warn('seek 后重新加载失败，继续当前播放');
-                return;
-              }
-              this.emit('loaderror', { track, error });
-              if (retryCount < maxRetries && !existingSound) {
-                retryCount++;
-                console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
-                setTimeout(tryPlay, 1000 * retryCount);
-              } else {
-                const isLocal = track.playMusicUrl?.startsWith('local://');
-                if (!isLocal) {
-                  this.emit('url_expired', track);
+              newSound.on('loaderror', (error) => {
+                console.error('LocalAudio load error:', error);
+                this.emit('loaderror', { track, error: error?.message || error });
+                if (retryCount < maxRetries && !existingSound) {
+                  retryCount++;
+                  console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
+                  setTimeout(tryPlay, 1000 * retryCount);
+                } else {
+                  this.releaseOperationLock();
+                  if (isHotSwap) this.pendingSound = null;
+                  reject(new Error('本地文件加载失败'));
+                }
+              });
+            } else {
+              newSound.off('loaderror');
+              newSound.off('playerror');
+              newSound.off('load');
+
+              newSound.on('loaderror', (_, error) => {
+                console.error('Audio load error:', error);
+                if (this.currentSound === newSound && newSound.state() === 'loaded') {
+                  console.warn('seek 后重新加载失败，继续当前播放');
+                  return;
+                }
+                this.emit('loaderror', { track, error });
+                if (retryCount < maxRetries && !existingSound) {
+                  retryCount++;
+                  console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
+                  setTimeout(tryPlay, 1000 * retryCount);
+                } else {
+                  const isLocal = track.playMusicUrl?.startsWith('local://');
+                  if (!isLocal) {
+                    this.emit('url_expired', track);
                 }
                 this.releaseOperationLock();
                 if (isHotSwap) this.pendingSound = null;
@@ -698,6 +767,7 @@ class AudioService {
                 reject(new Error('音频播放失败，请尝试切换其他歌曲'));
               }
             });
+            } // close else (not LocalAudioPlayer)
 
             const onLoaded = async () => {
               try {
@@ -777,8 +847,10 @@ class AudioService {
 
             if (newSound.state() === 'loaded') {
               onLoaded();
+            } else if (newSound instanceof LocalAudioPlayer) {
+              newSound.on('load', onLoaded);
             } else {
-              newSound.once('load', onLoaded);
+              (newSound as Howl).once('load', onLoaded);
             }
           };
 
@@ -1069,16 +1141,19 @@ class AudioService {
     if (!this.currentSound) return;
     this.playbackRate = rate;
 
-    // Howler 的 rate() 在 html5 模式下不生效
     this.currentSound.rate(rate);
 
-    // 取出底层 HTMLAudioElement，改原生 playbackRate
-    const sounds = (this.currentSound as any)._sounds as any[];
-    sounds.forEach(({ _node }) => {
-      if (_node instanceof HTMLAudioElement) {
-        _node.playbackRate = rate;
+    // 取出底层 HTMLAudioElement，改原生 playbackRate（仅适用于 Howl）
+    if (!(this.currentSound instanceof LocalAudioPlayer)) {
+      const sounds = (this.currentSound as any)._sounds as any[];
+      if (sounds) {
+        sounds.forEach(({ _node }) => {
+          if (_node instanceof HTMLAudioElement) {
+            _node.playbackRate = rate;
+          }
+        });
       }
-    });
+    }
 
     // 同步给 Media Session UI
     if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
@@ -1121,6 +1196,10 @@ class AudioService {
   isLoading(): boolean {
     if (!this.currentSound) return false;
 
+    if (this.currentSound instanceof LocalAudioPlayer) {
+      return this.currentSound.state() === 'loading';
+    }
+
     const state = (this.currentSound as any)._state;
     return state === 'loading' || state === 1;
   }
@@ -1131,8 +1210,6 @@ class AudioService {
 
     try {
       // 核心判断：Howler API 是否报告正在播放 + 音频上下文是否正常
-      // 注意：不再检查 isAudioGraphConnected()，因为 EQ 重建期间
-      // source/gainNode 会暂时为 null，导致误判为未播放
       const isPlaying = this.currentSound.playing();
       const isLoading = this.isLoading();
       const contextRunning = Howler.ctx && Howler.ctx.state === 'running';

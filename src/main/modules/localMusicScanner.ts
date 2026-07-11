@@ -10,7 +10,7 @@ import * as path from 'path';
 /** 支持的音频文件格式 */
 const SUPPORTED_AUDIO_FORMATS = ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac'] as const;
 const METADATA_PARSE_CONCURRENCY = Math.min(8, Math.max(2, os.cpus().length));
-const MAX_COVER_BYTES = 1024 * 1024;
+const MAX_COVER_BYTES = 5 * 1024 * 1024;
 
 /**
  * 主进程返回的原始音乐元数据
@@ -72,6 +72,7 @@ function extractTitleFromFilename(filePath: string): string {
  */
 function extractCoverAsDataUrl(picture: mm.IPicture | undefined): string | null {
   if (!picture) {
+    console.log('[cover-debug] extractCoverAsDataUrl: picture为空，跳过');
     return null;
   }
   try {
@@ -79,7 +80,9 @@ function extractCoverAsDataUrl(picture: mm.IPicture | undefined): string | null 
       return null;
     }
     const mime = picture.format ?? 'image/jpeg';
+    console.log('[cover-debug] 格式:', mime, '大小:', picture.data.length, '类型:', picture.data.constructor.name);
     const base64 = Buffer.from(picture.data).toString('base64');
+    console.log('[cover-debug] base64前80字符:', base64.substring(0, 80));
     return `data:${mime};base64,${base64}`;
   } catch (error) {
     console.error('封面提取失败:', error);
@@ -97,9 +100,10 @@ function extractLyrics(lyrics: mm.ILyricsTag[] | undefined): string | null {
     return null;
   }
   try {
-    // 优先取第一条歌词的文本内容
     const firstLyric = lyrics[0];
-    return firstLyric?.text ?? null;
+    if (!firstLyric?.text) return null;
+    // music-metadata 的 text 可能是 string 或 string[]
+    return Array.isArray(firstLyric.text) ? firstLyric.text.join('\n') : firstLyric.text;
   } catch (error) {
     console.error('歌词提取失败:', error);
     return null;
@@ -243,6 +247,8 @@ async function parseMetadata(filePath: string): Promise<LocalMusicMeta> {
   try {
     const metadata = await mm.parseFile(filePath);
     const { common, format } = metadata;
+
+    console.log('[cover-debug] 文件:', path.basename(filePath), 'picture数量:', common.picture?.length ?? 0, 'lyrics数量:', common.lyrics?.length ?? 0);
 
     return {
       filePath,

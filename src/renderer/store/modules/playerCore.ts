@@ -180,11 +180,14 @@ export const usePlayerCoreStore = defineStore(
           return;
         }
 
-        // 双重确认：Howler 报告未播放 + 用户仍想播放
+        // 双重确认：音频是否真的在播放
         // 额外检查底层 HTMLAudioElement 的状态，避免 EQ 重建期间的误判
         const currentSound = audioService.getCurrentSound();
         let htmlPlaying = false;
-        if (currentSound) {
+        if (currentSound && playMusicUrl.value?.startsWith('local://')) {
+          // LocalAudioPlayer: 直接依赖 playing() 判断
+          htmlPlaying = currentSound.playing();
+        } else if (currentSound) {
           try {
             const sounds = (currentSound as any)._sounds as any[];
             if (sounds?.[0]?._node instanceof HTMLMediaElement) {
@@ -445,29 +448,30 @@ export const usePlayerCoreStore = defineStore(
           console.log('[playAudio] 恢复播放进度:', initialPosition);
         }
 
-        // 使用 PreloadService 获取音频
-        // 优先使用已预加载的 sound（通过 consume 获取并从缓存中移除）
-        // 如果没有预加载，则进行加载
-        let sound: Howl;
-        try {
-          // 先尝试消耗预加载的 sound
-          const preloadedSound = preloadService.consume(playMusic.value.id);
-          if (preloadedSound && preloadedSound.state() === 'loaded') {
-            console.log(`[playAudio] 使用预加载的音频: ${playMusic.value.name}`);
-            sound = preloadedSound;
-          } else {
-            // 没有预加载或预加载状态不正常，需要加载
-            console.log(`[playAudio] 没有预加载，开始加载: ${playMusic.value.name}`);
-            sound = await preloadService.load(playMusic.value);
+        // 本地歌曲不使用 PreloadService（LocalAudioPlayer 自行管理）
+        const isLocal = isLocalSong(playMusic.value);
+        let sound: Howl | undefined;
+
+        if (!isLocal) {
+          // 非本地歌曲：使用 PreloadService 获取音频
+          try {
+            const preloadedSound = preloadService.consume(playMusic.value.id) as Howl | undefined;
+            if (preloadedSound && preloadedSound.state() === 'loaded') {
+              console.log(`[playAudio] 使用预加载的音频: ${playMusic.value.name}`);
+              sound = preloadedSound;
+            } else {
+              console.log(`[playAudio] 没有预加载，开始加载: ${playMusic.value.name}`);
+              sound = await preloadService.load(playMusic.value);
+            }
+          } catch (error) {
+            console.error('PreloadService 加载失败:', error);
+            throw error;
           }
-        } catch (error) {
-          console.error('PreloadService 加载失败:', error);
-          // 如果 PreloadService 失败，尝试直接播放作为回退
-          // 但通常 PreloadService 失败意味着 URL 问题
-          throw error;
+        } else {
+          console.log(`[playAudio] 本地歌曲，跳过 PreloadService: ${playMusic.value.name}`);
         }
 
-        // 播放新音频，传入已加载的 sound 实例
+        // 播放新音频，传入已加载的 sound 实例（本地歌曲传入 undefined）
         const newSound = await audioService.play(
           playMusicUrl.value,
           playMusic.value,
