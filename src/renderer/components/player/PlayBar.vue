@@ -6,9 +6,31 @@
       :class="{ 'fp-visible': play || playMusic?.id }"
       :style="barMinimal ? { right: 'auto', width: barCollapsedWidth, left: '24px' } : {}"
     >
-      <div class="fp-track">
-        <div class="fp-fill" :style="{ width: progressPercent + '%' }"></div>
+      <div class="fp-climax" v-if="climaxStore.hasSegments && allTime > 0">
+        <div
+          v-for="(seg, i) in climaxStore.segments"
+          :key="'climax-' + i"
+          class="fp-climax-seg"
+          :class="{ 'fp-climax-active': nowTime >= seg.start && nowTime <= seg.end }"
+          :style="{ left: (seg.start / allTime) * 100 + '%', width: Math.max(0.5, ((seg.end - seg.start) / allTime) * 100) + '%' }"
+        ></div>
       </div>
+      <div class="fp-tooltip" v-if="showSliderTooltip" :style="{ left: tooltipX + 'px' }">
+        <div v-if="hoverLyric" class="fp-tooltip-lyric">{{ hoverLyric }}</div>
+        <div class="fp-tooltip-time">{{ hoverTimeStr }}</div>
+      </div>
+      <n-slider
+        v-model:value="timeSlider"
+        :step="1"
+        :max="allTime"
+        :min="0"
+        :show-tooltip="false"
+        @mouseenter="showSliderTooltip = true"
+        @mouseleave="!isDragging && (showSliderTooltip = false)"
+        @mousemove="handleSliderMouseMove"
+        @dragstart="handleSliderDragStart"
+        @dragend="handleSliderDragEnd"
+      ></n-slider>
     </div>
 
     <!-- 主播放栏 -->
@@ -166,7 +188,7 @@
       </div>
 
       <div class="bar-toggle" @click="toggleBarMinimal">
-        <i class="iconfont" :class="barMinimal ? 'ri-arrow-left-s-line' : 'ri-arrow-right-s-line'"></i>
+        <i class="iconfont" :class="barMinimal ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line'"></i>
       </div>
 
       <music-full-wrapper ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
@@ -185,7 +207,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useThrottleFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -198,7 +219,7 @@ import MetaphorConfigModal from '@/features/lyric-metaphor/MetaphorConfigModal.v
 import MetaphorPanel from '@/features/lyric-metaphor/MetaphorPanel.vue';
 import { isFeatureEnabled } from '@/features/store';
 import {
-  allTime, artistList, isLyricWindowOpen, lrcArray, nowTime, openLyric, playMusic
+  allTime, artistList, getLyricTextAtTime, isLyricWindowOpen, lrcArray, nowTime, openLyric, playMusic
 } from '@/hooks/MusicHook';
 import { useArtist } from '@/hooks/useArtist';
 import { useCoverColor } from '@/hooks/useCoverColor';
@@ -210,7 +231,7 @@ import { audioService } from '@/services/audioService';
 import { useClimaxStore } from '@/store/modules/climax';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
-import { getImgUrl, isElectron, isMobile, secondToMinute, setAnimationClass } from '@/utils';
+import { getImgUrl, isElectron, isMobile, secondToMinute } from '@/utils';
 
 const playerStore = usePlayerStore();
 const climaxStore = useClimaxStore();
@@ -234,16 +255,40 @@ watch(() => playMusic.value?.id, async (newId) => {
   else climaxStore.clear();
 }, { immediate: true });
 
-// ==================== 进度条 ====================
-const progressPercent = computed(() => {
-  if (allTime.value <= 0) return 0;
-  return (nowTime.value / allTime.value) * 100;
+// ==================== 进度条（可拖拽、悬停预览歌词/时间） ====================
+const isDragging = ref(false);
+const dragValue = ref(0);
+const showSliderTooltip = ref(false);
+const tooltipX = ref(0);
+const hoverLyric = ref<string | null>(null);
+const hoverTimeStr = ref('');
+
+const timeSlider = computed({
+  get: () => (isDragging.value ? dragValue.value : nowTime.value),
+  set: (val: number) => {
+    audioService.seek(val);
+    nowTime.value = val;
+  }
 });
 
-useThrottleFn((value: number) => {
-  audioService.seek(value);
-  nowTime.value = value;
-}, 50);
+const handleSliderDragStart = () => {
+  isDragging.value = true;
+  showSliderTooltip.value = true;
+};
+
+const handleSliderDragEnd = () => {
+  isDragging.value = false;
+  showSliderTooltip.value = false;
+};
+
+const handleSliderMouseMove = (e: MouseEvent) => {
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const hoverTimeSec = pct * allTime.value;
+  tooltipX.value = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+  hoverTimeStr.value = `${secondToMinute(hoverTimeSec)} / ${secondToMinute(allTime.value)}`;
+  hoverLyric.value = getLyricTextAtTime(hoverTimeSec);
+};
 
 const MusicFullRef = ref<any>(null);
 const showClimaxEditor = ref(false);
@@ -313,30 +358,47 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 </script>
 
 <style lang="scss" scoped>
-// ==================== 浮动进度条 ====================
+// ==================== 浮动进度条（带高潮标记、悬停预览、拖拽） ====================
 .floating-progress {
   position: fixed;
   bottom: 85px;
   left: 24px;
   right: 24px;
-  height: 6px;
-  border-radius: 12px;
+  height: 20px;
   z-index: 10000;
   opacity: 0;
   transform: translateY(8px);
-  pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.2, 0, 0.1, 1),
               transform 0.4s cubic-bezier(0.2, 0, 0.1, 1),
               width 0.45s cubic-bezier(0.2, 0, 0, 1);
 
-  &.fp-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  &.fp-visible { opacity: 1; transform: translateY(0); }
 }
-.fp-track { width: 100%; height: 100%; border-radius: 12px; background: rgba(0,0,0,0.06); overflow: hidden; }
-:global(.dark) .fp-track { background: rgba(255,255,255,0.08); }
-.fp-fill { height: 100%; border-radius: 12px; background: var(--accent-color, #888); transition: width 0.3s linear; }
+.fp-climax { position: absolute; inset: 3px 0; pointer-events: none; z-index: 1; }
+.fp-climax-seg {
+  position: absolute; top: 0; bottom: 0; border-radius: 4px;
+  background: rgba(255, 200, 50, 0.35);
+  transition: background 0.2s ease;
+  &.fp-climax-active { background: rgba(255, 200, 50, 0.6); }
+}
+.fp-tooltip {
+  position: absolute; bottom: 100%; margin-bottom: 6px;
+  transform: translateX(-50%); pointer-events: none; z-index: 2;
+  white-space: nowrap;
+  .fp-tooltip-lyric { font-size: 11px; opacity: 0.75; text-align: center; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  .fp-tooltip-time { font-size: 11px; font-weight: 600; text-align: center; }
+}
+// n-slider overrides for the floating bar
+.floating-progress .n-slider {
+  --n-rail-height: 4px !important;
+  --n-rail-color: rgba(0,0,0,0.08) !important;
+  --n-rail-color-active: var(--accent-color, #888) !important;
+  --n-fill-color: var(--accent-color, #888) !important;
+  --n-fill-color-hover: var(--accent-color, #888) !important;
+}
+:global(.dark) .floating-progress .n-slider {
+  --n-rail-color: rgba(255,255,255,0.1) !important;
+}
 
 // ==================== 主浮动栏 ====================
 .floating-bar {
@@ -433,7 +495,7 @@ $items: 10;
   right: 0;
   top: 0;
   bottom: 0;
-  width: 36px;
+  width: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
