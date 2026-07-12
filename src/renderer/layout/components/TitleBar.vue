@@ -5,7 +5,7 @@
     @mousedown="drag"
   >
     <div id="title">Zephyrus</div>
-    <div id="buttons" class="flex gap-4">
+    <div id="buttons">
       <n-button
         v-if="!isElectron"
         type="primary"
@@ -19,22 +19,25 @@
       </n-button>
       <template v-if="isElectron">
         <div
-          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          class="titlebar-btn"
+          title="小窗模式"
           @click="miniWindow"
         >
-          <i class="iconfont ri-picture-in-picture-line"></i>
+          <i class="ri-picture-in-picture-line"></i>
         </div>
         <div
-          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          class="titlebar-btn"
+          title="最小化"
           @click="minimize"
         >
-          <i class="iconfont icon-minisize"></i>
+          <i class="ri-subtract-line"></i>
         </div>
         <div
-          class="text-gray-600 dark:text-gray-400 hover:text-[var(--accent-color)]"
+          class="titlebar-btn titlebar-btn--close"
+          title="关闭"
           @click="handleClose"
         >
-          <i class="iconfont icon-close"></i>
+          <i class="ri-close-line"></i>
         </div>
       </template>
     </div>
@@ -206,5 +209,49 @@ const drag = (event: MouseEvent) => {
 
 #buttons {
   -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 与 PlayerControls 全屏按钮一致的视觉风格 */
+.titlebar-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  color: #fff;
+  font-size: 15px;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.titlebar-btn--close:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* 亮色主题下使用深色文字 */
+:global(html:not(.dark)) .titlebar-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #4b5563;
+}
+
+:global(html:not(.dark)) .titlebar-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+:global(html:not(.dark)) .titlebar-btn--close:hover {
+  background: #ef4444;
+  color: #fff;
 }
 </style>

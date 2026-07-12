@@ -15,9 +15,19 @@
 
     <!-- 内容区域 -->
     <div class="fp-content">
-      <n-scrollbar>
+      <n-scrollbar class="fp-scroll">
         <div class="fp-content-inner">
-          <component :is="loadedComponent" v-if="loadedComponent" :key="windowStore.panelKey" />
+          <!-- 加载中 -->
+          <div v-if="componentLoading" class="fp-loading">
+            <n-spin size="medium" />
+            <span class="fp-loading-text">加载中...</span>
+          </div>
+          <!-- 已加载 -->
+          <component
+            :is="loadedComponent"
+            v-else-if="loadedComponent"
+            :key="windowStore.panelKey"
+          />
         </div>
       </n-scrollbar>
     </div>
@@ -25,7 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { NSpin } from 'naive-ui';
 import { useWindowStore } from '@/store/modules/windowStore';
 import { useSettingsStore } from '@/store/modules/settings';
 
@@ -60,16 +71,22 @@ const panelStyle = computed(() => {
 
 // 异步加载组件
 const loadedComponent = ref<any>(null);
+const componentLoading = ref(false);
 const loadComponent = async () => {
   if (!windowStore.panelComponent) {
     loadedComponent.value = null;
+    componentLoading.value = false;
     return;
   }
+  componentLoading.value = true;
+  loadedComponent.value = null;
   try {
     const mod = await windowStore.panelComponent();
     loadedComponent.value = mod.default || mod;
   } catch (e) {
     console.error('[FloatingPanel] 组件加载失败:', e);
+  } finally {
+    componentLoading.value = false;
   }
 };
 
@@ -182,9 +199,37 @@ const close = () => {
   overflow: hidden;
   position: relative;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fp-scroll {
+  flex: 1;
+  min-height: 0;
 }
 
 .fp-content-inner {
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// 加载状态
+.fp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 20px;
+}
+
+.fp-loading-text {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.dark .fp-loading-text {
+  color: #6b7280;
 }
 </style>

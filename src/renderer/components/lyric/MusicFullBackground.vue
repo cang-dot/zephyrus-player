@@ -8,11 +8,13 @@
     ></div>
 
     <div class="mf-bg-content" :class="[config.theme]">
-      <!-- 通用控件（右上设置/全屏，隐藏关闭按钮） -->
+      <!-- 通用控件（右上全屏，隐藏关闭/设置按钮） -->
       <player-controls
         :isFullScreen="isFullScreen"
         @toggleFullscreen="toggleFullScreen"
         :showStyleSwitch="false"
+        :hideClose="true"
+        :hideSettings="true"
         :autoHide="true"
       />
 

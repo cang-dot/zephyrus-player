@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -136,8 +136,12 @@ const isAutoCollapseEnabled = () => {
 
 const startOffscreenTimer = () => {
   if (!isAutoCollapseEnabled()) return;
+  // 有悬浮面板打开时不收起
+  if (windowStore.activePath) return;
   cancelOffscreenTimer();
   offscreenTimer = setTimeout(() => {
+    // 再次检查面板状态
+    if (windowStore.activePath) return;
     isOffscreen.value = true;
   }, getAutoCollapseDelay());
 };
@@ -204,6 +208,19 @@ onMounted(() => {
   isExpanded.value = !!settingsStore.setData?.isMenuExpanded;
   // 启动初始计时
   startOffscreenTimer();
+});
+
+// 面板关闭后重新启动收起计时
+watch(() => windowStore.activePath, (newPath) => {
+  if (!newPath) {
+    // 面板关闭了，重新启动收起计时
+    isOffscreen.value = false;
+    startOffscreenTimer();
+  } else {
+    // 面板打开了，确保侧栏可见
+    cancelOffscreenTimer();
+    isOffscreen.value = false;
+  }
 });
 
 onUnmounted(() => {

@@ -34,8 +34,8 @@
         :current-section="currentSection"
         @navigate="currentSection = $event"
       />
-      <n-scrollbar ref="scrollbarRef" class="flex-1" @scroll="onScroll">
-        <div ref="contentRef" class="w-full mx-auto pb-32 pt-6 page-padding">
+      <div ref="contentRef" class="flex-1 overflow-y-auto min-h-0">
+        <div class="w-full mx-auto pb-32 pt-6 page-padding">
           <!-- 搜索结果模式 -->
           <template v-if="isSearching">
             <div v-if="searchResults.length > 0" class="animate-fade-in">
@@ -93,7 +93,7 @@
           <div class="h-20"></div>
           <play-bottom />
         </div>
-      </n-scrollbar>
+      </div>
     </div>
   </div>
 </template>
@@ -195,7 +195,6 @@ const currentSection = ref('basic');
 
 // ==================== 设置搜索（模糊匹配） ====================
 const searchInputRef = ref<HTMLInputElement | null>(null);
-const scrollbarRef = ref<any>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const searchQuery = ref('');
 const isSearching = ref(false);
@@ -397,8 +396,6 @@ const jumpToResult = (result: SearchResult) => {
     });
   });
 };
-
-const onScroll = () => {};
 
 // ==================== 初始化 ====================
 onMounted(() => {

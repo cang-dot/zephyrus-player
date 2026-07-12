@@ -1,11 +1,11 @@
 <template>
   <div
     class="mini-play-bar"
-    :class="{ 'pure-mode': pureModeEnabled, 'mini-mode': settingsStore.isMiniMode }"
+    :class="{ 'mini-mode': settingsStore.isMiniMode }"
   >
     <div class="mini-bar-container">
       <!-- 专辑封面 -->
-      <div class="album-cover" @click="setMusicFull">
+      <div class="album-cover">
         <n-image
           :src="getImgUrl(playMusic?.picUrl, '100y100')"
           fallback-src="/placeholder.png"
@@ -15,14 +15,12 @@
       </div>
 
       <!-- 歌曲信息 -->
-      <div class="song-info" @click="setMusicFull">
+      <div class="song-info">
         <div class="song-title" v-html="playMusic?.name || '未播放'"></div>
         <div class="song-artist">
           <span
             v-for="(artists, artistsindex) in artistList"
             :key="artistsindex"
-            class="cursor-pointer hover:text-[var(--accent-color)]"
-            @click.stop="handleArtistClick(artists.id)"
           >
             {{ artists.name }}{{ artistsindex < artistList.length - 1 ? ' / ' : '' }}
           </span>
@@ -44,8 +42,8 @@
 
       <!-- 右侧功能按钮 -->
       <div class="function-buttons">
-        <div class="function-button">
-          <i class="iconfont" :class="play ? 'icon-stop' : 'icon-play'" @click="playMusicEvent"></i>
+        <div class="function-button" @click="handleNext" title="下一首">
+          <i class="iconfont icon-next"></i>
         </div>
       </div>
     </div>
@@ -53,11 +51,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { artistList, playMusic } from '@/hooks/MusicHook';
-import { useArtist } from '@/hooks/useArtist';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
 import { getImgUrl } from '@/utils';
@@ -65,10 +62,8 @@ import { getImgUrl } from '@/utils';
 const { t } = useI18n();
 const playerStore = usePlayerStore();
 const settingsStore = useSettingsStore();
-const { navigateToArtist } = useArtist();
 
 const play = computed(() => playerStore.isPlay);
-const pureModeEnabled = computed(() => false);
 
 const playMusicEvent = async () => {
   try {
@@ -88,23 +83,14 @@ const handlePrev = () => {
 const handleNext = () => {
   playerStore.nextPlay();
 };
-
-const setMusicFull = () => {
-  playerStore.setMusicFull(!playerStore.musicFull);
-};
-
-const handleArtistClick = (id: number) => {
-  navigateToArtist(id);
-};
 </script>
 
 <style scoped lang="scss">
 .mini-play-bar {
   position: relative;
   width: 100%;
-  height: 60px;
+  flex: 1;
   background: var(--bg-color, #fff);
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
 }

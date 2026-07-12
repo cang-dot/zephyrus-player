@@ -1,6 +1,6 @@
 <template>
   <!-- 左上角：关闭按钮 -->
-  <transition name="controls-fade">
+  <transition v-if="!hideClose" name="controls-fade">
     <div v-show="visible" class="player-controls__left" :class="'theme-' + theme">
       <div class="player-controls__btn" @click="$emit('close')" :title="closeTitle">
         <i class="ri-arrow-down-s-line"></i>
@@ -11,7 +11,7 @@
   <!-- 右上角：设置 + 模式切换 + 全屏 -->
   <transition name="controls-fade">
     <div v-show="visible" class="player-controls__right" :class="'theme-' + theme">
-      <n-popover trigger="click" placement="bottom-end" :z-index="99999" raw to="body">
+      <n-popover v-if="!hideSettings" trigger="click" placement="bottom-end" :z-index="99999" raw to="body">
         <template #trigger>
           <div class="player-controls__btn">
             <i class="ri-settings-3-line"></i>
@@ -47,6 +47,8 @@ interface Props {
   showStyleSwitch?: boolean;
   autoHide?: boolean;
   theme?: 'light' | 'dark';
+  hideClose?: boolean;
+  hideSettings?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -56,7 +58,9 @@ const props = withDefaults(defineProps<Props>(), {
   closeTitle: '关闭',
   showStyleSwitch: true,
   autoHide: false,
-  theme: 'light'
+  theme: 'light',
+  hideClose: false,
+  hideSettings: false
 });
 
 defineEmits<{
