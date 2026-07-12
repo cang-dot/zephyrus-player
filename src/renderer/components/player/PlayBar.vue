@@ -1,9 +1,9 @@
 <template>
   <div class="play-bar-root">
-    <!-- 浮动进度条 -->
+    <!-- 浮动进度条（延迟显示避免启动动画冲突） -->
     <div
       class="floating-progress"
-      :class="{ 'fp-visible': play || playMusic?.id }"
+      :class="{ 'fp-visible': barReady && (play || playMusic?.id) }"
       :style="barMinimal ? { right: 'auto', width: barCollapsedWidth, left: '24px' } : {}"
     >
       <div class="fp-track">
@@ -356,9 +356,12 @@ const handleWindowMouseMove = (e: MouseEvent) => {
   }
 };
 
+// 启动动画完成后才显示进度条
+const barReady = ref(false);
 onMounted(() => {
   window.addEventListener('mousemove', handleWindowMouseMove);
   resetCollapseTimer();
+  setTimeout(() => { barReady.value = true; }, 600);
 });
 
 onUnmounted(() => {
@@ -381,7 +384,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 // ==================== 浮动进度条 ====================
 .floating-progress {
   position: fixed;
-  bottom: 93px;
+  bottom: 85px;
   left: 24px;
   right: 24px;
   height: 6px;
