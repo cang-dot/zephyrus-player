@@ -51,5 +51,7 @@
   "lyricUnplayedColor": "",
   "lyricStrokeColor": "",
   "lyricUseCoverColor": true,
-  "githubMirror": ""
+  "githubMirror": "",
+  "playBarStyle": "full",
+  "playBarMiniSlots": ["playMode", "favorite", "playlist", "volume"]
 }

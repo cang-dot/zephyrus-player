@@ -13,6 +13,36 @@
     </setting-item>
   </setting-section>
 
+  <!-- 底栏样式 -->
+  <setting-section
+    title="底栏样式"
+    description="选择播放底栏的显示样式，迷你模式下可自定义快捷组件"
+  >
+    <setting-item title="底栏样式" description="贯穿：全宽底栏 / 迷你：浮动圆角底栏">
+      <s-select
+        v-model="setData.playBarStyle"
+        :options="playBarStyleOptions"
+        width="w-40 max-md:w-full"
+      />
+    </setting-item>
+
+    <template v-if="setData.playBarStyle === 'mini'">
+      <setting-item
+        v-for="(slot, i) in 4"
+        :key="i"
+        :title="`快捷组件 ${i + 1}`"
+        :description="`迷你底栏悬停时显示的第 ${i + 1} 个组件`"
+      >
+        <s-select
+          :model-value="setData.playBarMiniSlots?.[i] || 'none'"
+          :options="miniSlotOptions"
+          width="w-40 max-md:w-full"
+          @update:model-value="(val: any) => updateMiniSlot(i, val)"
+        />
+      </setting-item>
+    </template>
+  </setting-section>
+
   <!-- 本地歌词文件指定 -->
   <setting-section
     title="本地歌词文件"
@@ -287,6 +317,33 @@ import SSelect from '../SSelect.vue';
 
 const { t } = useI18n();
 const setData = inject(SETTINGS_DATA_KEY)!;
+
+// 底栏样式选项
+const playBarStyleOptions = computed(() => [
+  { label: '贯穿', value: 'full' },
+  { label: '迷你底栏', value: 'mini' }
+]);
+
+// 迷你底栏快捷组件选项
+const miniSlotOptions = computed(() => [
+  { label: '空', value: 'none' },
+  { label: '播放模式', value: 'playMode' },
+  { label: '收藏', value: 'favorite' },
+  { label: '桌面歌词', value: 'lyric' },
+  { label: '播放列表', value: 'playlist' },
+  { label: '音量', value: 'volume' },
+  { label: '高级控制', value: 'advanced' },
+  { label: '高潮标记', value: 'climax' },
+  { label: '歌词隐喻', value: 'metaphor' },
+  { label: '重新解析', value: 'reparse' }
+]);
+
+// 更新迷你底栏槽位
+function updateMiniSlot(index: number, value: any) {
+  const slots = [...(setData.value.playBarMiniSlots || ['none', 'none', 'none', 'none'])];
+  slots[index] = value;
+  setData.value = { ...setData.value, playBarMiniSlots: slots };
+}
 const playerStore = usePlayerStore();
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
