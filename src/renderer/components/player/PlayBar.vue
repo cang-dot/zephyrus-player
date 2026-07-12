@@ -385,12 +385,16 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   position: absolute; bottom: 100%; margin-bottom: 6px;
   transform: translateX(-50%); pointer-events: none; z-index: 2;
   white-space: nowrap;
+  background: var(--bg-light, #fff); color: var(--text-color, #333);
+  padding: 3px 8px; border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  :global(.dark) & { background: var(--bg-dark, #2a2a2a); color: var(--text-color-dark, #e0e0e0); }
   .fp-tooltip-lyric { font-size: 11px; opacity: 0.75; text-align: center; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
   .fp-tooltip-time { font-size: 11px; font-weight: 600; text-align: center; }
 }
 // n-slider overrides for the floating bar
 .floating-progress .n-slider {
-  --n-rail-height: 4px !important;
+  --n-rail-height: 6px !important;
   --n-rail-color: rgba(0,0,0,0.08) !important;
   --n-rail-color-active: var(--accent-color, #888) !important;
   --n-fill-color: var(--accent-color, #888) !important;
