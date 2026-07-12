@@ -157,9 +157,15 @@ const { t, locale } = useI18n();
 // ==================== 展开/收起 ====================
 const isExpanded = ref(false);
 let collapseTimer: ReturnType<typeof setTimeout> | null = null;
-const COLLAPSE_DELAY = 5000;
 const inputRef = ref<HTMLInputElement | null>(null);
 const inputFocused = ref(false);
+
+const getCollapseDelay = () => {
+  return (settingsStore.setData?.overlayAutoCollapseDelay || 5) * 1000;
+};
+const isAutoCollapseEnabled = () => {
+  return settingsStore.setData?.overlayAutoCollapse !== false;
+};
 
 const expand = () => {
   isExpanded.value = true;
@@ -173,8 +179,9 @@ const collapse = () => {
 };
 
 const startCollapseTimer = () => {
+  if (!isAutoCollapseEnabled()) return;
   cancelCollapseTimer();
-  collapseTimer = setTimeout(() => collapse(), COLLAPSE_DELAY);
+  collapseTimer = setTimeout(() => collapse(), getCollapseDelay());
 };
 
 const cancelCollapseTimer = () => {
@@ -213,15 +220,15 @@ const search = () => {
   searchStore.searchValue = val;
   router.push({ path: '/search-result', query: q });
   showSuggestions.value = false;
-  // 尝试用浮动窗口打开
-  windowStore.openWindow('/search-result', '搜索结果');
+  // 用浮动面板打开
+  windowStore.openPanel('/search-result', 60, '搜索结果');
 };
 
 const selectSearchType = (key: number) => {
   searchStore.searchType = key;
   if (searchValue.value) {
     router.push({ path: '/search-result', query: { keyword: searchValue.value, type: key } });
-    windowStore.openWindow('/search-result', '搜索结果');
+    windowStore.openPanel('/search-result', 60, '搜索结果');
   }
   nextTick(() => inputRef.value?.focus());
 };
@@ -308,7 +315,7 @@ watchEffect(() => {
 });
 
 const restartApp = () => window.electron?.ipcRenderer?.send('restart');
-const toLogin = () => { router.push('/user'); windowStore.openWindow('/user', t('comp.my')); };
+const toLogin = () => { router.push('/user'); windowStore.openPanel('/user', 60, t('comp.my')); };
 const toGithubRelease = () => window.open('https://github.com/cang-dot/zephyrus-player/releases', '_blank');
 
 const isDark = computed({
@@ -319,8 +326,8 @@ const isDark = computed({
 const selectItem = (key: string) => {
   switch (key) {
     case 'logout': userStore.handleLogout(); break;
-    case 'set': router.push('/set'); windowStore.openWindow('/set', t('comp.settings')); break;
-    case 'user': router.push('/user'); windowStore.openWindow('/user', t('comp.my')); break;
+    case 'set': router.push('/set'); windowStore.openPanel('/set', 60, t('comp.settings')); break;
+    case 'user': router.push('/user'); windowStore.openPanel('/user', 60, t('comp.my')); break;
     case 'refresh': window.location.reload(); break;
   }
 };
@@ -364,32 +371,36 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .fsb-collapsed:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.9);
   transform: scale(1.05);
 }
 
 .dark .fsb-collapsed {
-  background: rgba(30, 30, 30, 0.7);
+  background: rgba(30, 30, 30, 0.78);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .dark .fsb-collapsed:hover {
-  background: rgba(50, 50, 50, 0.8);
+  background: rgba(50, 50, 50, 0.85);
 }
 
 .fsb-search-icon {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #6b7280;
+}
+
+.dark .fsb-search-icon {
+  color: #9ca3af;
 }
 
 /* 展开态 */
@@ -406,33 +417,33 @@ onMounted(() => {
   height: 38px;
   padding: 0 12px;
   border-radius: 9999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   width: 380px;
 }
 
 .dark .fsb-inner {
-  background: rgba(30, 30, 30, 0.7);
+  background: rgba(30, 30, 30, 0.85);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
 .fsb-inner--focus {
   border-color: var(--accent-color, #888888);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
 }
 
 .dark .fsb-inner--focus {
-  background: rgba(20, 20, 20, 0.8);
+  background: rgba(20, 20, 20, 0.9);
 }
 
 .fsb-glyph {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #9ca3af;
   flex-shrink: 0;
 }
 
@@ -447,11 +458,15 @@ onMounted(() => {
   outline: none;
   background: transparent;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #374151;
+}
+
+.dark .fsb-input {
+  color: #f3f4f6;
 }
 
 .fsb-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #9ca3af;
 }
 
 .fsb-type-chip {
@@ -460,14 +475,19 @@ onMounted(() => {
   gap: 3px;
   padding: 2px 7px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   font-size: 11px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: #6b7280;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
+}
+
+.dark .fsb-type-chip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #9ca3af;
 }
 
 .fsb-type-chip:hover {
@@ -484,16 +504,17 @@ onMounted(() => {
   height: 38px;
   padding: 2px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .dark .fsb-user-btn {
-  background: rgba(30, 30, 30, 0.7);
+  background: rgba(30, 30, 30, 0.78);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -505,8 +526,12 @@ onMounted(() => {
 .fsb-login {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
+  color: #6b7280;
   padding: 0 8px;
+}
+
+.dark .fsb-login {
+  color: #9ca3af;
 }
 
 /* 用户菜单 */

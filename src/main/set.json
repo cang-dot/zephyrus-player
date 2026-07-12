@@ -54,5 +54,7 @@
   "githubMirror": "",
   "playBarStyle": "full",
   "playBarMiniSlots": ["playMode", "favorite", "playlist", "volume"],
-  "layoutMode": "classic"
+  "layoutMode": "classic",
+  "overlayAutoCollapse": true,
+  "overlayAutoCollapseDelay": 5
 }

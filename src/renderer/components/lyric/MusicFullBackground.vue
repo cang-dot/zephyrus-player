@@ -169,9 +169,16 @@ import { animateGradient, getHoverBackgroundColor, getTextColors } from '@/utils
 
 const { t } = useI18n();
 
+const props = defineProps({
+  background: {
+    type: String,
+    default: '#000'
+  }
+});
+
 const lrcSider = ref<any>(null);
 const isMouse = ref(false);
-const currentBackground = ref('');
+const currentBackground = ref('#000');
 const animationFrame = ref<number | null>(null);
 const isDark = ref(false);
 const isFullScreen = ref(false);
@@ -239,9 +246,9 @@ const targetBackground = computed(() => {
     if (typeof customBackgroundStyle.value === 'string') return customBackgroundStyle.value;
   }
   if (config.value.theme !== 'default') {
-    return themeMusic[config.value.theme] || '';
+    return themeMusic[config.value.theme] || props.background;
   }
-  return currentBackground.value || '';
+  return props.background || currentBackground.value || '';
 });
 
 const bgStyle = computed(() => {
@@ -251,7 +258,7 @@ const bgStyle = computed(() => {
   if (config.value.useCustomBackground && customBackgroundStyle.value) {
     return { background: customBackgroundStyle.value };
   }
-  return { background: currentBackground.value || targetBackground.value };
+  return { background: targetBackground.value || props.background };
 });
 
 const backgroundImageStyle = computed(() => {

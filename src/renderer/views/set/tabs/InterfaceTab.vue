@@ -28,6 +28,45 @@
         width="w-40 max-md:w-full"
       />
     </setting-item>
+
+    <template v-if="setData.layoutMode === 'overlay'">
+      <setting-item
+        title="自动收起"
+        description="无操作时自动将侧栏和搜索栏移出屏幕"
+      >
+        <n-switch v-model:value="setData.overlayAutoCollapse" />
+      </setting-item>
+
+      <setting-item
+        v-if="setData.overlayAutoCollapse !== false"
+        title="收起延迟"
+        description="无操作后多少秒自动收起（3-10秒）"
+      >
+        <n-slider
+          v-model:value="overlayCollapseDelay"
+          :min="3"
+          :max="10"
+          :step="1"
+          :marks="{ 3: '3s', 5: '5s', 7: '7s', 10: '10s' }"
+          style="max-width: 260px"
+        />
+      </setting-item>
+    </template>
+  </setting-section>
+
+  <!-- 播放器样式 -->
+  <setting-section
+    title="播放器样式"
+    description="选择全屏播放界面的视觉样式"
+  >
+    <setting-item title="播放器样式" description="默认 / 舞台 / 杂志 / 狂躁">
+      <s-select
+        :model-value="currentPlayerStyle"
+        :options="playerStyleOptions"
+        width="w-40 max-md:w-full"
+        @update:model-value="updatePlayerStyle"
+      />
+    </setting-item>
   </setting-section>
 
   <!-- 底栏样式 -->
@@ -311,8 +350,8 @@
 </template>
 
 <script setup lang="ts">
-import { NSwitch } from 'naive-ui';
-import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
+import { NSlider, NSwitch } from 'naive-ui';
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { usePlayerStore } from '@/store/modules/player';
@@ -340,6 +379,54 @@ const layoutModeOptions = computed(() => [
   { label: '经典布局', value: 'classic' },
   { label: '浮动覆盖', value: 'overlay' }
 ]);
+
+// 自动收起延迟（双向绑定到 setData）
+const overlayCollapseDelay = computed({
+  get: () => setData.value?.overlayAutoCollapseDelay ?? 5,
+  set: (val: number) => { setData.value = { ...setData.value, overlayAutoCollapseDelay: val }; }
+});
+
+// ==================== 播放器样式 ====================
+const currentPlayerStyle = ref('default');
+
+const playerStyleOptions = computed(() => [
+  { label: '默认', value: 'default' },
+  { label: '舞台', value: 'stage' },
+  { label: '杂志', value: 'magazine' },
+  { label: '狂躁', value: 'frenzy' }
+]);
+
+// 从 localStorage 加载当前播放器样式
+function loadPlayerStyle() {
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      currentPlayerStyle.value = parsed.playerStyle || 'default';
+    }
+  } catch {}
+}
+loadPlayerStyle();
+
+const updatePlayerStyle = (val: string) => {
+  currentPlayerStyle.value = val;
+  try {
+    const saved = localStorage.getItem('music-full-config');
+    const config = saved ? JSON.parse(saved) : {};
+    config.playerStyle = val;
+    localStorage.setItem('music-full-config', JSON.stringify(config));
+    // 触发更新事件
+    window.dispatchEvent(new CustomEvent('music-full-config-updated'));
+  } catch (e) {
+    console.error('更新播放器样式失败:', e);
+  }
+};
+
+// 监听外部变更
+window.addEventListener('music-full-config-updated', loadPlayerStyle);
+onUnmounted(() => {
+  window.removeEventListener('music-full-config-updated', loadPlayerStyle);
+});
 
 // 底栏样式选项
 const playBarStyleOptions = computed(() => [

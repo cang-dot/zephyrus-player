@@ -1,85 +1,84 @@
 <template>
-  <div
-    class="floating-sidebar"
-    :class="{ 'fs-expanded': isExpanded }"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
-  >
-    <!-- Logo / 收起把手 -->
-    <div class="fs-header" @click="toggleExpand">
-      <img :src="icon" class="fs-logo" alt="logo" />
-    </div>
+  <div class="fs-zone" @mouseenter="handleZoneEnter" @mouseleave="handleZoneLeave">
+    <div
+      class="floating-sidebar"
+      :class="{
+        'fs-expanded': isExpanded,
+        'fs-offscreen': isOffscreen
+      }"
+    >
+      <!-- Logo / 样式切换 -->
+      <div class="fs-header" @click="toggleExpand">
+        <img :src="icon" class="fs-logo" alt="logo" />
+      </div>
 
-    <!-- 菜单列表 -->
-    <div class="fs-list">
-      <div v-for="(item, index) in menus" :key="item.path" class="fs-item">
-        <n-tooltip
-          :delay="200"
-          :disabled="isExpanded"
-          placement="right"
-        >
-          <template #trigger>
-            <div
-              class="fs-item-link"
-              :class="{ 'fs-item-active': isActive(item.path) }"
-              @click="openPage(item)"
-            >
-              <i
-                class="iconfont fs-item-icon"
-                :style="iconStyle(index)"
-                :class="item.meta.icon"
-              ></i>
-              <span
-                v-if="isExpanded"
-                class="fs-item-text"
-                :class="isActive(item.path) ? 'text-[var(--accent-color)]' : ''"
-              >{{ t(item.meta.title) }}</span>
-            </div>
-          </template>
-          <div>{{ t(item.meta.title) }}</div>
-        </n-tooltip>
+      <!-- 菜单列表 -->
+      <div class="fs-list">
+        <div v-for="(item, index) in menus" :key="item.path" class="fs-item">
+          <n-tooltip :delay="200" :disabled="isExpanded" placement="right">
+            <template #trigger>
+              <div
+                class="fs-item-link"
+                :class="{ 'fs-item-active': isActive(item.path) }"
+                @click="openPage($event, item)"
+              >
+                <i
+                  class="iconfont fs-item-icon"
+                  :style="iconStyle(index)"
+                  :class="item.meta.icon"
+                ></i>
+                <span
+                  v-if="isExpanded"
+                  class="fs-item-text"
+                  :class="isActive(item.path) ? 'fs-text-active' : ''"
+                >{{ t(item.meta.title) }}</span>
+              </div>
+            </template>
+            <div>{{ t(item.meta.title) }}</div>
+          </n-tooltip>
 
-        <!-- 歌单子菜单 -->
-        <div v-if="isMenuItemPlaylist(item)" class="fs-submenu">
-          <div class="fs-submenu-scroll">
-            <template v-if="createdPlaylists.length > 0">
+          <!-- 歌单子菜单 -->
+          <div v-if="isMenuItemPlaylist(item)" class="fs-submenu">
+            <div class="fs-submenu-scroll">
+              <template v-if="createdPlaylists.length > 0">
+                <div
+                  v-for="pl in createdPlaylists"
+                  :key="'c-' + pl.id"
+                  class="fs-submenu-row"
+                  @click="navigateToPlaylist(pl.id)"
+                >
+                  <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="fs-submenu-cover" />
+                  <span v-show="isExpanded" class="fs-submenu-name">{{ pl.name }}</span>
+                </div>
+              </template>
+              <template v-if="collectedPlaylists.length > 0">
+                <div
+                  v-for="pl in collectedPlaylists"
+                  :key="'d-' + pl.id"
+                  class="fs-submenu-row"
+                  @click="navigateToPlaylist(pl.id)"
+                >
+                  <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="fs-submenu-cover" />
+                  <span v-show="isExpanded" class="fs-submenu-name">{{ pl.name }}</span>
+                </div>
+              </template>
+              <template v-if="collectedAlbums.length > 0">
+                <div
+                  v-for="al in collectedAlbums"
+                  :key="'a-' + al.id"
+                  class="fs-submenu-row"
+                  @click="navigateToAlbum(al.id)"
+                >
+                  <img :src="getImgUrl(al.picUrl || al.blurPicUrl, '64y64')" class="fs-submenu-cover" />
+                  <span v-show="isExpanded" class="fs-submenu-name">{{ al.name }}</span>
+                </div>
+              </template>
               <div
-                v-for="pl in createdPlaylists"
-                :key="'c-' + pl.id"
-                class="fs-submenu-row"
-                @click="navigateToPlaylist(pl.id)"
+                v-if="createdPlaylists.length === 0 && collectedPlaylists.length === 0 && collectedAlbums.length === 0"
+                class="fs-submenu-empty"
               >
-                <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="fs-submenu-cover" />
-                <span v-show="isExpanded" class="fs-submenu-name">{{ pl.name }}</span>
+                暂无歌单
               </div>
-            </template>
-            <template v-if="collectedPlaylists.length > 0">
-              <div
-                v-for="pl in collectedPlaylists"
-                :key="'d-' + pl.id"
-                class="fs-submenu-row"
-                @click="navigateToPlaylist(pl.id)"
-              >
-                <img :src="getImgUrl(pl.coverImgUrl, '64y64')" class="fs-submenu-cover" />
-                <span v-show="isExpanded" class="fs-submenu-name">{{ pl.name }}</span>
-              </div>
-            </template>
-            <template v-if="collectedAlbums.length > 0">
-              <div
-                v-for="al in collectedAlbums"
-                :key="'a-' + al.id"
-                class="fs-submenu-row"
-                @click="navigateToAlbum(al.id)"
-              >
-                <img :src="getImgUrl(al.picUrl || al.blurPicUrl, '64y64')" class="fs-submenu-cover" />
-                <span v-show="isExpanded" class="fs-submenu-name">{{ al.name }}</span>
-              </div>
-            </template>
-            <div
-              v-if="createdPlaylists.length === 0 && collectedPlaylists.length === 0 && collectedAlbums.length === 0"
-              class="fs-submenu-empty"
-            >
-              暂无歌单
             </div>
           </div>
         </div>
@@ -89,7 +88,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -100,22 +99,10 @@ import { useSettingsStore, useUserStore } from '@/store';
 import { getImgUrl } from '@/utils';
 
 const props = defineProps({
-  menus: {
-    type: Array as any,
-    default: () => []
-  },
-  size: {
-    type: String,
-    default: '22px'
-  },
-  color: {
-    type: String,
-    default: '#aaa'
-  },
-  selectColor: {
-    type: String,
-    default: undefined
-  }
+  menus: { type: Array as any, default: () => [] },
+  size: { type: String, default: '22px' },
+  color: { type: String, default: '#888' },
+  selectColor: { type: String, default: undefined }
 });
 
 const route = useRoute();
@@ -126,47 +113,64 @@ const windowStore = useWindowStore();
 const { primaryColor } = useCoverColor();
 const { t } = useI18n();
 
-// ==================== 展开/收起 ====================
+// ==================== 展开样式切换（由 Logo 点击控制） ====================
 const isExpanded = ref(false);
-let collapseTimer: ReturnType<typeof setTimeout> | null = null;
-const COLLAPSE_DELAY = 5000;
 
 const toggleExpand = () => {
   isExpanded.value = !isExpanded.value;
-  if (isExpanded.value) cancelCollapseTimer();
+  // 同步到 settingsStore，影响面板定位计算
+  settingsStore.setSetData({ isMenuExpanded: isExpanded.value });
 };
 
-const startCollapseTimer = () => {
-  cancelCollapseTimer();
-  collapseTimer = setTimeout(() => {
-    isExpanded.value = false;
-  }, COLLAPSE_DELAY);
+// ==================== 自动收起 = 移出屏幕 ====================
+const isOffscreen = ref(false);
+let offscreenTimer: ReturnType<typeof setTimeout> | null = null;
+
+const getAutoCollapseDelay = () => {
+  return (settingsStore.setData?.overlayAutoCollapseDelay || 5) * 1000;
 };
 
-const cancelCollapseTimer = () => {
-  if (collapseTimer) {
-    clearTimeout(collapseTimer);
-    collapseTimer = null;
+const isAutoCollapseEnabled = () => {
+  return settingsStore.setData?.overlayAutoCollapse !== false;
+};
+
+const startOffscreenTimer = () => {
+  if (!isAutoCollapseEnabled()) return;
+  cancelOffscreenTimer();
+  offscreenTimer = setTimeout(() => {
+    isOffscreen.value = true;
+  }, getAutoCollapseDelay());
+};
+
+const cancelOffscreenTimer = () => {
+  if (offscreenTimer) {
+    clearTimeout(offscreenTimer);
+    offscreenTimer = null;
   }
 };
 
-const handleMouseEnter = () => {
-  cancelCollapseTimer();
-  isExpanded.value = true;
+// 鼠标进入触发区域：滑回 + 取消计时
+const handleZoneEnter = () => {
+  cancelOffscreenTimer();
+  isOffscreen.value = false;
 };
 
-const handleMouseLeave = () => {
-  startCollapseTimer();
+// 鼠标离开触发区域：启动移出计时
+const handleZoneLeave = () => {
+  startOffscreenTimer();
 };
 
 // ==================== 导航 ====================
 const isActive = (path: string) => route.path === path;
 
-const openPage = (item: any) => {
-  // 尝试用浮动窗口打开
-  const opened = windowStore.openWindow(item.path, t(item.meta.title));
+const openPage = (e: MouseEvent, item: any) => {
+  // 获取点击元素的 Y 坐标
+  const target = e.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const y = rect.top;
+
+  const opened = windowStore.openPanel(item.path, y, t(item.meta.title));
   if (!opened) {
-    // 回退到普通路由导航
     router.push(item.path);
   }
 };
@@ -185,13 +189,8 @@ const collectedPlaylists = computed(() => {
 
 const collectedAlbums = computed(() => userStore.albumList);
 
-const navigateToPlaylist = (id: number) => {
-  router.push('/music-list/' + id + '?type=playlist');
-};
-
-const navigateToAlbum = (id: number) => {
-  router.push('/music-list/' + id + '?type=album');
-};
+const navigateToPlaylist = (id: number) => router.push('/music-list/' + id + '?type=playlist');
+const navigateToAlbum = (id: number) => router.push('/music-list/' + id + '?type=album');
 
 const activeColor = computed(() => props.selectColor || primaryColor.value || '#888888');
 
@@ -199,25 +198,47 @@ const iconStyle = (index: number) => ({
   fontSize: props.size,
   color: isActive(props.menus[index]?.path) ? activeColor.value : props.color
 });
+
+onMounted(() => {
+  // 初始同步展开状态
+  isExpanded.value = !!settingsStore.setData?.isMenuExpanded;
+  // 启动初始计时
+  startOffscreenTimer();
+});
+
+onUnmounted(() => {
+  cancelOffscreenTimer();
+});
 </script>
 
 <style lang="scss" scoped>
+// 触发区域：侧栏左侧的一小条，用于鼠标移入唤回
+.fs-zone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 100vh;
+  z-index: 199;
+}
+
 .floating-sidebar {
   position: fixed;
-  left: 12px;
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
   width: 52px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 8px 4px;
   z-index: 200;
   transition:
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -226,7 +247,7 @@ const iconStyle = (index: number) => ({
 }
 
 .dark .floating-sidebar {
-  background: rgba(30, 30, 30, 0.7);
+  background: rgba(30, 30, 30, 0.78);
   border-color: rgba(255, 255, 255, 0.06);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -234,6 +255,11 @@ const iconStyle = (index: number) => ({
 .floating-sidebar.fs-expanded {
   width: 200px;
   align-items: stretch;
+}
+
+// 移出屏幕
+.floating-sidebar.fs-offscreen {
+  transform: translateY(-50%) translateX(-120%);
 }
 
 // Logo
@@ -278,7 +304,7 @@ const iconStyle = (index: number) => ({
   user-select: none;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.05);
   }
 
   .dark & {
@@ -310,11 +336,15 @@ const iconStyle = (index: number) => ({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: rgba(255, 255, 255, 0.8);
+  color: #4b5563;
 }
 
 .dark .fs-item-text {
-  color: rgba(255, 255, 255, 0.75);
+  color: #d1d5db;
+}
+
+.fs-text-active {
+  color: var(--accent-color, #888) !important;
 }
 
 // 子菜单
@@ -343,7 +373,13 @@ const iconStyle = (index: number) => ({
   transition: background 0.15s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .dark & {
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
   }
 }
 
@@ -366,14 +402,22 @@ const iconStyle = (index: number) => ({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: rgba(255, 255, 255, 0.65);
+  color: #6b7280;
   max-width: 120px;
+}
+
+.dark .fs-submenu-name {
+  color: #9ca3af;
 }
 
 .fs-submenu-empty {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #9ca3af;
   text-align: center;
   padding: 10px 4px;
+
+  .dark & {
+    color: #6b7280;
+  }
 }
 </style>

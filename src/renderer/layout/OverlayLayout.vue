@@ -3,7 +3,7 @@
     <title-bar />
 
     <!-- Layer 0: 播放界面背景（始终可见） -->
-    <music-full-background v-if="isPlay" />
+    <music-full-background v-if="isPlay" :background="background" />
 
     <!-- 无音乐时的背景 -->
     <div v-else class="overlay-empty-bg"></div>
@@ -14,7 +14,7 @@
     <!-- Layer 2: 浮动搜索栏 -->
     <floating-search-bar />
 
-    <!-- Layer 3: 浮动窗口管理器 -->
+    <!-- Layer 3: 浮动面板 -->
     <floating-window-manager />
 
     <!-- Layer 4: 底部播放栏 -->
@@ -32,13 +32,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, onMounted, provide, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, provide, ref, watch } from 'vue';
 
 import SleepTimerTop from '@/components/player/SleepTimerTop.vue';
 import { useMenuStore } from '@/store/modules/menu';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
+import { playMusic as playMusicRef } from '@/hooks/MusicHook';
 
 import FloatingSidebar from './components/FloatingSidebar.vue';
 import FloatingSearchBar from './components/FloatingSearchBar.vue';
@@ -58,6 +59,12 @@ const settingsStore = useSettingsStore();
 const menuStore = useMenuStore();
 
 const isPlay = computed(() => playerStore.playMusic && playerStore.playMusic.id);
+
+// ==================== 背景色（与 PlayBar 相同逻辑） ====================
+const background = ref('#000');
+watch(() => playerStore.playMusic, () => {
+  if (playMusicRef?.value?.backgroundColor) background.value = playMusicRef.value.backgroundColor as string;
+}, { immediate: true, deep: true });
 
 onMounted(() => {
   settingsStore.initializeSettings();
