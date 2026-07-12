@@ -21,8 +21,6 @@
           : ''
       ]"
       :style="barMinimal ? { right: 'auto', width: barCollapsedWidth } : {}"
-      @mouseenter="handleBarEnter"
-      @mouseleave="handleBarLeave"
     >
       <!-- 左侧：封面 + 歌曲信息 -->
       <div class="bar-left">
@@ -67,21 +65,6 @@
 
       <!-- 右侧隐形 spacer（展开时帮助居中） -->
       <div class="bar-spacer" v-if="!barMinimal"></div>
-
-      <!-- 音量（悬停内联横向滑块） -->
-      <div class="audio-volume" @wheel.prevent="handleVolumeWheel">
-        <div class="volume-icon" @click="mute">
-          <i class="iconfont" :class="getVolumeIcon"></i>
-        </div>
-        <div class="volume-slider">
-          <n-slider
-            v-model:value="volumeSlider"
-            :step="0.01"
-            :tooltip="false"
-            :disabled="isMuted"
-          ></n-slider>
-        </div>
-      </div>
 
       <!-- 右侧功能按钮（收起时隐藏） -->
       <div
@@ -168,6 +151,25 @@
             {{ t('player.playBar.playList') }}
           </n-tooltip>
         </div>
+
+        <!-- 音量 -->
+        <div class="bar-action-btn bar-action-volume" @wheel.prevent="handleVolumeWheel">
+          <div class="volume-inner">
+            <div class="volume-slider">
+              <n-slider v-model:value="volumeSlider" :step="0.01" :tooltip="false" :disabled="isMuted"></n-slider>
+            </div>
+            <div class="bar-btn volume-icon" @click="mute">
+              <i class="iconfont" :class="getVolumeIcon"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 收起/展开 -->
+        <div class="bar-action-btn bar-toggle-btn" @click="toggleBarMinimal">
+          <div class="bar-btn">
+            <i class="iconfont" :class="barMinimal ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'"></i>
+          </div>
+        </div>
       </div>
 
       <music-full-wrapper ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
@@ -188,7 +190,7 @@
 <script lang="ts" setup>
 import { useThrottleFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ClimaxEditor from '@/components/ClimaxEditor.vue';
@@ -262,30 +264,21 @@ const setMusicFull = () => {
   if (musicFullVisible.value) settingsStore.showArtistDrawer = false;
 };
 
-// ==================== 收起逻辑 ====================
+// ==================== 收起/展开 ====================
 const barMinimal = ref(false);
-let collapseTimer: ReturnType<typeof setTimeout> | null = null;
-let currentCollapseDelay = 5000;
 const barCollapsedWidth = ref('auto');
 
 function measureCollapsedWidth() {
   nextTick(() => {
     const el = document.querySelector('.floating-bar') as HTMLElement | null;
     if (!el) return;
-    // 临时隐藏所有收起时隐藏的元素
-    const volume = el.querySelector('.audio-volume') as HTMLElement | null;
-    if (volume) volume.style.display = 'none';
     const actions = el.querySelector('.bar-actions') as HTMLElement | null;
     if (actions) actions.style.display = 'none';
     const spacers = el.querySelectorAll('.bar-spacer');
     spacers.forEach((s: any) => (s as HTMLElement).style.display = 'none');
-
     el.style.width = 'fit-content';
     el.style.right = 'auto';
     const w = el.offsetWidth;
-
-    // 恢复
-    if (volume) volume.style.display = '';
     if (actions) actions.style.display = '';
     spacers.forEach((s: any) => (s as HTMLElement).style.display = '');
     el.style.width = '';
@@ -294,30 +287,10 @@ function measureCollapsedWidth() {
   });
 }
 
-function resetCollapseTimer() {
-  if (collapseTimer) clearTimeout(collapseTimer);
-  barMinimal.value = false;
-  collapseTimer = setTimeout(() => {
-    measureCollapsedWidth();
-    barMinimal.value = true;
-  }, currentCollapseDelay);
+function toggleBarMinimal() {
+  barMinimal.value = !barMinimal.value;
+  if (barMinimal.value) measureCollapsedWidth();
 }
-
-function clearCollapseTimer() {
-  if (collapseTimer) clearTimeout(collapseTimer);
-  barMinimal.value = false;
-}
-
-const handleBarEnter = () => {
-  if (barMinimal.value) {
-    barMinimal.value = false;
-    if (collapseTimer) clearTimeout(collapseTimer);
-  }
-};
-
-const handleBarLeave = () => {
-  resetCollapseTimer();
-};
 
 watch(musicFullVisible, (visible) => {
   if (visible) {
@@ -325,41 +298,10 @@ watch(musicFullVisible, (visible) => {
       const saved = localStorage.getItem('music-full-config');
       if (saved) {
         const cfg = JSON.parse(saved);
-        if (cfg.playerStyle === 'frenzy') { barMinimal.value = false; return; }
+        if (cfg.playerStyle === 'frenzy') barMinimal.value = false;
       }
     } catch {}
-    currentCollapseDelay = 3000;
-    resetCollapseTimer();
-  } else {
-    clearCollapseTimer();
   }
-});
-
-watch(musicFullVisible, (visible) => {
-  if (!visible) {
-    currentCollapseDelay = 5000;
-    nextTick(() => resetCollapseTimer());
-  }
-});
-
-const HOVER_ZONE = 24;
-const handleWindowMouseMove = (e: MouseEvent) => {
-  if (musicFullVisible.value) return;
-  if (e.clientY >= window.innerHeight - HOVER_ZONE && barMinimal.value) {
-    barMinimal.value = false;
-    currentCollapseDelay = 5000;
-    resetCollapseTimer();
-  }
-};
-
-onMounted(() => {
-  window.addEventListener('mousemove', handleWindowMouseMove);
-  resetCollapseTimer();
-});
-
-onUnmounted(() => {
-  if (collapseTimer) clearTimeout(collapseTimer);
-  window.removeEventListener('mousemove', handleWindowMouseMove);
 });
 
 const openLyricWindow = () => openLyric();
@@ -420,7 +362,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   :global(.dark) & { background: var(--bg-dark, #1a1a1a); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2); }
   &.bar-minimal {
     padding: 0 16px;
-    .audio-volume { display: none; }
+    .bar-actions { display: none; }
     .bar-spacer { display: none; }
   }
   &.animate__slideOutDown { animation-duration: 0.3s !important; }
@@ -463,32 +405,34 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   .iconfont { font-size: 24px; transition: color 0.2s ease; &:hover { color: var(--accent-color, #888); } }
 }
 
-// ==================== 音量（内联横向，悬停展开） ====================
-.audio-volume {
-  display: flex; align-items: center; flex-shrink: 0; gap: 0;
-  &:hover .volume-slider { width: 80px; opacity: 1; margin-left: 6px; }
-  .volume-icon { cursor: pointer; display: flex; align-items: center; }
-  .iconfont { font-size: 24px; transition: color 0.2s ease; &:hover { color: var(--accent-color, #888); } }
-  .volume-slider {
-    width: 0; opacity: 0; overflow: hidden;
-    transition: width 0.3s ease, opacity 0.25s ease, margin-left 0.3s ease;
-    white-space: nowrap;
-    display: flex; align-items: center;
-  }
-}
-
 // ==================== 右侧功能按钮 ====================
 .bar-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; overflow: hidden; }
-.bar-action-btn { flex-shrink: 0; transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
+.bar-action-btn { flex-shrink: 0; display: flex; align-items: center; transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 1, 1); }
 .bar-actions-hidden .bar-action-btn {
   opacity: 0; transform: translateX(12px); pointer-events: none;
 }
-$items: 8;
+$items: 10;
 @for $i from 1 through $items {
   .bar-actions-hidden .bar-action-btn:nth-child(#{$items - $i + 1}) {
     transition-delay: #{($i - 1) * 0.03}s;
   }
 }
+
+// ==================== 音量（内联横向，悬停展开） ====================
+.bar-action-volume {
+  position: relative;
+  .volume-inner { display: flex; align-items: center; }
+  &:hover .volume-slider { width: 72px; opacity: 1; margin-right: 4px; }
+  .volume-icon { display: flex; align-items: center; justify-content: center; }
+  .volume-slider {
+    width: 0; opacity: 0; overflow: hidden;
+    transition: width 0.3s ease, opacity 0.25s ease;
+    display: flex; align-items: center;
+  }
+}
+
+// ==================== 收起/展开按钮 ====================
+.bar-toggle-btn { margin-left: 4px; }
 
 // ==================== 工具类 ====================
 .like-active { color: #ef4444 !important; }
