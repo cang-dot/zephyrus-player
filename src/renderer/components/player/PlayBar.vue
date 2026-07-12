@@ -3,8 +3,7 @@
     <!-- 浮动进度条 -->
     <div
       class="floating-progress"
-      :class="{ 'fp-visible': play || playMusic?.id }"
-      :style="barMinimal ? { right: 'auto', width: barCollapsedWidth, left: '24px' } : {}"
+      :class="{ 'fp-visible': play || playMusic?.id, 'fp-collapsed': barMinimal }"
     >
       <div class="fp-climax" v-if="climaxStore.hasSegments && allTime > 0">
         <div
@@ -339,9 +338,9 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 // ==================== 浮动进度条（带高潮标记、悬停预览、拖拽） ====================
 .floating-progress {
   position: fixed;
-  bottom: 84px;
+  bottom: 82px;
   left: 24px;
-  right: 24px;
+  width: calc(100% - 48px);
   height: 20px;
   z-index: 10000;
   opacity: 0;
@@ -351,6 +350,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
               width 0.45s cubic-bezier(0.2, 0, 0, 1);
 
   &.fp-visible { opacity: 1; transform: translateY(0); }
+  &.fp-collapsed { width: 320px; }
 }
 .fp-climax { position: absolute; inset: 3px 0; pointer-events: none; z-index: 1; }
 .fp-climax-seg {
@@ -381,6 +381,12 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 .floating-progress .n-slider.n-slider--active {
   --n-rail-color-active: var(--accent-color, #888) !important;
   --n-fill-color: var(--accent-color, #888) !important;
+}
+.floating-progress .n-slider .n-slider-rail__fill {
+  background: var(--accent-color, #888) !important;
+}
+:global(.dark) .floating-progress .n-slider {
+  --n-rail-color: rgba(255,255,255,0.1) !important;
 }
 :global(.dark) .floating-progress .n-slider {
   --n-rail-color: rgba(255,255,255,0.1) !important;
@@ -512,5 +518,5 @@ $items: 10;
 
 <style>
 .n-slider-handle-indicator { display: none !important; }
-.n-slider-handle { display: none !important; }
+.n-slider-handle { opacity: 0 !important; pointer-events: none !important; width: 8px !important; height: 8px !important; }
 </style>
