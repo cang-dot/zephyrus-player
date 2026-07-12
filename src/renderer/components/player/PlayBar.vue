@@ -339,7 +339,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 // ==================== 浮动进度条（带高潮标记、悬停预览、拖拽） ====================
 .floating-progress {
   position: fixed;
-  bottom: 88px;
+  bottom: 84px;
   left: 24px;
   right: 24px;
   height: 20px;
@@ -377,6 +377,10 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   --n-rail-color-active: var(--accent-color, #888) !important;
   --n-fill-color: var(--accent-color, #888) !important;
   --n-fill-color-hover: var(--accent-color, #888) !important;
+}
+.floating-progress .n-slider.n-slider--active {
+  --n-rail-color-active: var(--accent-color, #888) !important;
+  --n-fill-color: var(--accent-color, #888) !important;
 }
 :global(.dark) .floating-progress .n-slider {
   --n-rail-color: rgba(255,255,255,0.1) !important;
