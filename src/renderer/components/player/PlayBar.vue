@@ -71,6 +71,18 @@
         class="bar-actions"
         :class="{ 'bar-actions-hidden': barMinimal }"
       >
+        <!-- 音量 -->
+        <div class="bar-action-btn bar-action-volume" @wheel.prevent="handleVolumeWheel">
+          <div class="volume-inner">
+            <div class="volume-slider">
+              <n-slider v-model:value="volumeSlider" :step="0.01" :tooltip="false" :disabled="isMuted"></n-slider>
+            </div>
+            <div class="bar-btn volume-icon" @click="mute">
+              <i class="iconfont" :class="getVolumeIcon"></i>
+            </div>
+          </div>
+        </div>
+
         <div class="bar-action-btn">
           <n-tooltip v-if="!isMobile" trigger="hover" :z-index="9999999">
             <template #trigger>
@@ -151,25 +163,10 @@
             {{ t('player.playBar.playList') }}
           </n-tooltip>
         </div>
+      </div>
 
-        <!-- 音量 -->
-        <div class="bar-action-btn bar-action-volume" @wheel.prevent="handleVolumeWheel">
-          <div class="volume-inner">
-            <div class="volume-slider">
-              <n-slider v-model:value="volumeSlider" :step="0.01" :tooltip="false" :disabled="isMuted"></n-slider>
-            </div>
-            <div class="bar-btn volume-icon" @click="mute">
-              <i class="iconfont" :class="getVolumeIcon"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- 收起/展开 -->
-        <div class="bar-action-btn bar-toggle-btn" @click="toggleBarMinimal">
-          <div class="bar-btn">
-            <i class="iconfont" :class="barMinimal ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'"></i>
-          </div>
-        </div>
+      <div class="bar-toggle" @click="toggleBarMinimal">
+        <i class="iconfont" :class="barMinimal ? 'ri-arrow-left-s-line' : 'ri-arrow-right-s-line'"></i>
       </div>
 
       <music-full-wrapper ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
@@ -324,7 +321,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   right: 24px;
   height: 6px;
   border-radius: 12px;
-  z-index: 9998;
+  z-index: 10000;
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
@@ -362,7 +359,6 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   :global(.dark) & { background: var(--bg-dark, #1a1a1a); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2); }
   &.bar-minimal {
     padding: 0 16px;
-    .bar-actions { display: none; }
     .bar-spacer { display: none; }
   }
   &.animate__slideOutDown { animation-duration: 0.3s !important; }
@@ -431,8 +427,25 @@ $items: 10;
   }
 }
 
-// ==================== 收起/展开按钮 ====================
-.bar-toggle-btn { margin-left: 4px; }
+// ==================== 收起/展开按钮（右侧圆角拐角，贯穿上下，悬停显示） ====================
+.bar-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0 16px 16px 0;
+  opacity: 0;
+  transition: opacity 0.25s ease, background 0.2s ease;
+  z-index: 1;
+  .floating-bar:hover & { opacity: 1; }
+  &:hover { background: rgba(0,0,0,0.05); :global(.dark) & { background: rgba(255,255,255,0.06); } }
+  .iconfont { font-size: 18px; }
+}
 
 // ==================== 工具类 ====================
 .like-active { color: #ef4444 !important; }
