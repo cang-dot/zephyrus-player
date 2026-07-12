@@ -1,9 +1,9 @@
 <template>
   <div class="play-bar-root">
-    <!-- 浮动进度条（延迟显示避免启动动画冲突） -->
+    <!-- 浮动进度条 -->
     <div
       class="floating-progress"
-      :class="{ 'fp-visible': barReady && (play || playMusic?.id) }"
+      :class="{ 'fp-visible': play || playMusic?.id }"
       :style="barMinimal ? { right: 'auto', width: barCollapsedWidth, left: '24px' } : {}"
     >
       <div class="fp-track">
@@ -68,21 +68,17 @@
       <!-- 右侧隐形 spacer（展开时帮助居中） -->
       <div class="bar-spacer" v-if="!barMinimal"></div>
 
-      <!-- 音量（独立于 actions，防止 popup 被 overflow 裁剪） -->
-      <div class="audio-volume custom-slider" @wheel.prevent="handleVolumeWheel">
+      <!-- 音量（悬停内联横向滑块） -->
+      <div class="audio-volume" @wheel.prevent="handleVolumeWheel">
         <div class="volume-icon" @click="mute">
           <i class="iconfont" :class="getVolumeIcon"></i>
         </div>
         <div class="volume-slider">
-          <div class="volume-percentage" :class="{ 'volume-percentage-disabled': isMuted }">
-            {{ Math.round(volumeSlider) }}%
-          </div>
           <n-slider
             v-model:value="volumeSlider"
             :step="0.01"
             :tooltip="false"
             :disabled="isMuted"
-            vertical
           ></n-slider>
         </div>
       </div>
@@ -356,12 +352,9 @@ const handleWindowMouseMove = (e: MouseEvent) => {
   }
 };
 
-// 启动动画完成后才显示进度条
-const barReady = ref(false);
 onMounted(() => {
   window.addEventListener('mousemove', handleWindowMouseMove);
   resetCollapseTimer();
-  setTimeout(() => { barReady.value = true; }, 600);
 });
 
 onUnmounted(() => {
@@ -389,7 +382,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   right: 24px;
   height: 6px;
   border-radius: 12px;
-  z-index: 10000;
+  z-index: 9998;
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
@@ -470,38 +463,17 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   .iconfont { font-size: 24px; transition: color 0.2s ease; &:hover { color: var(--accent-color, #888); } }
 }
 
-// ==================== 音量（恢复原始） ====================
+// ==================== 音量（内联横向，悬停展开） ====================
 .audio-volume {
-  @apply flex items-center relative flex-shrink-0;
-  &:hover {
-    .volume-slider {
-      @apply opacity-100 visible;
-    }
-  }
-  .volume-icon {
-    @apply cursor-pointer;
-  }
-
-  .iconfont {
-    @apply text-2xl transition;
-    @apply hover:text-[var(--accent-color)];
-  }
-
+  display: flex; align-items: center; flex-shrink: 0; gap: 0;
+  &:hover .volume-slider { width: 80px; opacity: 1; margin-left: 6px; }
+  .volume-icon { cursor: pointer; display: flex; align-items: center; }
+  .iconfont { font-size: 24px; transition: color 0.2s ease; &:hover { color: var(--accent-color, #888); } }
   .volume-slider {
-    @apply absolute opacity-0 invisible transition-all duration-300 bottom-[30px] left-1/2 -translate-x-1/2 h-[180px] px-2 py-4 rounded-xl;
-    @apply bg-light dark:bg-dark-200;
-    @apply border border-gray-200 dark:border-gray-700;
-
-    .volume-percentage {
-      @apply absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-medium bg-light dark:bg-dark-200 px-2 py-1 rounded-md;
-      @apply border border-gray-200 dark:border-gray-700;
-      @apply text-gray-800 dark:text-white;
-      white-space: nowrap;
-
-      &.volume-percentage-disabled {
-        @apply text-gray-400 dark:text-gray-500;
-      }
-    }
+    width: 0; opacity: 0; overflow: hidden;
+    transition: width 0.3s ease, opacity 0.25s ease, margin-left 0.3s ease;
+    white-space: nowrap;
+    display: flex; align-items: center;
   }
 }
 
@@ -535,4 +507,5 @@ $items: 8;
 
 <style>
 .n-slider-handle-indicator { display: none !important; }
+.n-slider-handle { display: none !important; }
 </style>
