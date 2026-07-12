@@ -306,33 +306,11 @@ const setMusicFull = () => {
   if (musicFullVisible.value) settingsStore.showArtistDrawer = false;
 };
 
-// ==================== 收起/展开 ====================
+// ==================== 收起/展开（固定收起宽度，避免动画时序问题） ====================
 const barMinimal = ref(false);
-const barCollapsedWidth = ref('auto');
+const barCollapsedWidth = ref('320px');
 
-function measureCollapsedWidth() {
-  nextTick(() => {
-    const el = document.querySelector('.floating-bar') as HTMLElement | null;
-    if (!el) return;
-    const actions = el.querySelector('.bar-actions') as HTMLElement | null;
-    if (actions) actions.style.display = 'none';
-    const spacers = el.querySelectorAll('.bar-spacer');
-    spacers.forEach((s: any) => (s as HTMLElement).style.display = 'none');
-    el.style.width = 'fit-content';
-    el.style.right = 'auto';
-    const w = el.offsetWidth;
-    if (actions) actions.style.display = '';
-    spacers.forEach((s: any) => (s as HTMLElement).style.display = '');
-    el.style.width = '';
-    el.style.right = '';
-    barCollapsedWidth.value = Math.max(w, 320) + 'px';
-  });
-}
-
-function toggleBarMinimal() {
-  barMinimal.value = !barMinimal.value;
-  if (barMinimal.value) measureCollapsedWidth();
-}
+function toggleBarMinimal() { barMinimal.value = !barMinimal.value; }
 
 watch(musicFullVisible, (visible) => {
   if (visible) {
@@ -361,7 +339,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 // ==================== 浮动进度条（带高潮标记、悬停预览、拖拽） ====================
 .floating-progress {
   position: fixed;
-  bottom: 85px;
+  bottom: 88px;
   left: 24px;
   right: 24px;
   height: 20px;
