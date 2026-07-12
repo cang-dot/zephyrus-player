@@ -279,7 +279,7 @@ const playBarHeight = ref(80);
 let heightCheckTimer: ReturnType<typeof setInterval> | null = null;
 
 function checkPlayBarHeight() {
-  const bar = document.querySelector('.music-play-bar');
+  const bar = document.querySelector('.floating-bar');
   if (bar) {
     const h = bar.getBoundingClientRect().height;
     playBarHeight.value = Math.max(6, h);
