@@ -299,7 +299,7 @@
     </template>
 
     <!-- ==================== Common ==================== -->
-    <music-full-wrapper ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
+    <music-full-wrapper v-if="!isOverlayMode" ref="MusicFullRef" v-model="musicFullVisible" :background="background" />
 
     <metaphor-panel
       v-model="showMetaphorPanel"
@@ -346,6 +346,9 @@ const climaxStore = useClimaxStore();
 const settingsStore = useSettingsStore();
 useCoverColor();
 const { t } = useI18n();
+
+// 浮动覆盖布局模式判断
+const isOverlayMode = computed(() => settingsStore.setData?.layoutMode === 'overlay' && !settingsStore.isMobile);
 
 const { isPlaying: play, playMusicEvent, handleNext, handlePrev } = usePlaybackControl();
 const { isMuted, volumeSlider, volumeIcon: getVolumeIcon, mute, handleVolumeWheel } = useVolumeControl();

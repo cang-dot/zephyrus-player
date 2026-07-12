@@ -13,6 +13,23 @@
     </setting-item>
   </setting-section>
 
+  <!-- 布局模式 -->
+  <setting-section
+    title="布局模式"
+    description="切换主界面布局方式。浮动覆盖模式将播放界面作为背景，侧栏和页面变为悬浮窗口"
+  >
+    <setting-item
+      title="界面布局"
+      description="经典：传统侧边栏+页面 / 浮动覆盖：播放界面为主+悬浮窗口"
+    >
+      <s-select
+        v-model="setData.layoutMode"
+        :options="layoutModeOptions"
+        width="w-40 max-md:w-full"
+      />
+    </setting-item>
+  </setting-section>
+
   <!-- 底栏样式 -->
   <setting-section
     title="底栏样式"
@@ -317,6 +334,12 @@ import SSelect from '../SSelect.vue';
 
 const { t } = useI18n();
 const setData = inject(SETTINGS_DATA_KEY)!;
+
+// 布局模式选项
+const layoutModeOptions = computed(() => [
+  { label: '经典布局', value: 'classic' },
+  { label: '浮动覆盖', value: 'overlay' }
+]);
 
 // 底栏样式选项
 const playBarStyleOptions = computed(() => [

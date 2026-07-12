@@ -31,5 +31,6 @@ export * from './modules/search';
 export * from './modules/settings';
 export * from './modules/styleEngine';
 export * from './modules/user';
+export * from './modules/windowStore';
 
 export default pinia;

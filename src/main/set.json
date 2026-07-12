@@ -53,5 +53,6 @@
   "lyricUseCoverColor": true,
   "githubMirror": "",
   "playBarStyle": "full",
-  "playBarMiniSlots": ["playMode", "favorite", "playlist", "volume"]
+  "playBarMiniSlots": ["playMode", "favorite", "playlist", "volume"],
+  "layoutMode": "classic"
 }

@@ -2,6 +2,9 @@
   <!-- 移动端使用专用布局（平板模式下使用 PC 布局） -->
   <mobile-layout v-if="isPhone && !settingsStore.setData?.tabletMode" :is-phone="isPhone" />
 
+  <!-- 浮动覆盖布局模式（播放界面为主 + 浮动侧栏/搜索栏/窗口） -->
+  <overlay-layout v-else-if="isOverlayMode" />
+
   <!-- PC 端 / 浏览器移动端 / 平板模式 保持原有布局 -->
   <div v-else class="layout-page" :class="{ mobile: settingsStore.isMobile }">
     <div id="layout-main" class="layout-main">
@@ -75,6 +78,8 @@ import SearchBar from './components/SearchBar.vue';
 import TitleBar from './components/TitleBar.vue';
 // 移动端专用布局
 import MobileLayout from './MobileLayout.vue';
+// 浮动覆盖布局
+import OverlayLayout from './OverlayLayout.vue';
 
 const keepAliveInclude = computed(() => {
   const allRoutes = [...homeRouter, ...otherRouter];
@@ -105,6 +110,9 @@ const menuStore = useMenuStore();
 
 const isPlay = computed(() => playerStore.playMusic && playerStore.playMusic.id);
 const route = useRoute();
+
+// 浮动覆盖布局模式判断
+const isOverlayMode = computed(() => settingsStore.setData?.layoutMode === 'overlay' && !settingsStore.isMobile);
 
 // 判断当前路由是否应该在移动端显示AppMenu
 const shouldShowMobileMenu = computed(() => {
