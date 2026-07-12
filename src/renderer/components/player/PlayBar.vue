@@ -69,12 +69,12 @@
       <div class="bar-spacer" v-if="!barMinimal"></div>
 
       <!-- 音量（独立于 actions，防止 popup 被 overflow 裁剪） -->
-      <div class="volume-box">
-        <div class="bar-btn" @click="mute">
+      <div class="audio-volume custom-slider" @wheel.prevent="handleVolumeWheel">
+        <div class="volume-icon" @click="mute">
           <i class="iconfont" :class="getVolumeIcon"></i>
         </div>
-        <div class="volume-popup">
-          <div class="volume-percentage" :class="{ 'opacity-50': isMuted }">
+        <div class="volume-slider">
+          <div class="volume-percentage" :class="{ 'volume-percentage-disabled': isMuted }">
             {{ Math.round(volumeSlider) }}%
           </div>
           <n-slider
@@ -276,14 +276,25 @@ function measureCollapsedWidth() {
   nextTick(() => {
     const el = document.querySelector('.floating-bar') as HTMLElement | null;
     if (!el) return;
-    el.classList.add('bar-minimal-measure');
+    // 临时隐藏所有收起时隐藏的元素
+    const volume = el.querySelector('.audio-volume') as HTMLElement | null;
+    if (volume) volume.style.display = 'none';
+    const actions = el.querySelector('.bar-actions') as HTMLElement | null;
+    if (actions) actions.style.display = 'none';
+    const spacers = el.querySelectorAll('.bar-spacer');
+    spacers.forEach((s: any) => (s as HTMLElement).style.display = 'none');
+
     el.style.width = 'fit-content';
     el.style.right = 'auto';
     const w = el.offsetWidth;
+
+    // 恢复
+    if (volume) volume.style.display = '';
+    if (actions) actions.style.display = '';
+    spacers.forEach((s: any) => (s as HTMLElement).style.display = '');
     el.style.width = '';
     el.style.right = '';
-    el.classList.remove('bar-minimal-measure');
-    barCollapsedWidth.value = Math.max(w, 360) + 'px';
+    barCollapsedWidth.value = Math.max(w, 320) + 'px';
   });
 }
 
@@ -370,7 +381,7 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
 // ==================== 浮动进度条 ====================
 .floating-progress {
   position: fixed;
-  bottom: 88px;
+  bottom: 93px;
   left: 24px;
   right: 24px;
   height: 6px;
@@ -387,7 +398,6 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
     opacity: 1;
     transform: translateY(0);
   }
-
 }
 .fp-track { width: 100%; height: 100%; border-radius: 12px; background: rgba(0,0,0,0.06); overflow: hidden; }
 :global(.dark) .fp-track { background: rgba(255,255,255,0.08); }
@@ -412,7 +422,11 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
               background 0.2s ease;
 
   :global(.dark) & { background: var(--bg-dark, #1a1a1a); box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2); }
-  &.bar-minimal { padding: 0 18px; }
+  &.bar-minimal {
+    padding: 0 16px;
+    .audio-volume { display: none; }
+    .bar-spacer { display: none; }
+  }
   &.animate__slideOutDown { animation-duration: 0.3s !important; }
 }
 
@@ -453,29 +467,38 @@ const artistName = computed(() => Array.isArray(artistList.value) ? artistList.v
   .iconfont { font-size: 24px; transition: color 0.2s ease; &:hover { color: var(--accent-color, #888); } }
 }
 
-// ==================== 音量（独立于 actions） ====================
-.volume-box {
-  position: relative; flex-shrink: 0;
-  &:hover .volume-popup { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
-}
-.volume-popup {
-  position: absolute;
-  bottom: 52px; left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  width: 52px; height: 180px; padding: 12px 8px;
-  border-radius: 12px;
-  background: var(--bg-light, #fff);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-  display: flex; flex-direction: column; align-items: center;
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-  z-index: 100000;
-  :global(.dark) & { background: var(--bg-dark, #2a2a2a); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-  .volume-percentage { font-size: 11px; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
-  :deep(.n-slider) {
-    height: 100% !important;
-    --n-rail-height: 4px; --n-rail-color: rgba(0,0,0,0.08);
-    --n-fill-color: var(--accent-color, #888); --n-handle-size: 12px; --n-handle-color: var(--accent-color, #888);
+// ==================== 音量（恢复原始） ====================
+.audio-volume {
+  @apply flex items-center relative flex-shrink-0;
+  &:hover {
+    .volume-slider {
+      @apply opacity-100 visible;
+    }
+  }
+  .volume-icon {
+    @apply cursor-pointer;
+  }
+
+  .iconfont {
+    @apply text-2xl transition;
+    @apply hover:text-[var(--accent-color)];
+  }
+
+  .volume-slider {
+    @apply absolute opacity-0 invisible transition-all duration-300 bottom-[30px] left-1/2 -translate-x-1/2 h-[180px] px-2 py-4 rounded-xl;
+    @apply bg-light dark:bg-dark-200;
+    @apply border border-gray-200 dark:border-gray-700;
+
+    .volume-percentage {
+      @apply absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-medium bg-light dark:bg-dark-200 px-2 py-1 rounded-md;
+      @apply border border-gray-200 dark:border-gray-700;
+      @apply text-gray-800 dark:text-white;
+      white-space: nowrap;
+
+      &.volume-percentage-disabled {
+        @apply text-gray-400 dark:text-gray-500;
+      }
+    }
   }
 }
 
