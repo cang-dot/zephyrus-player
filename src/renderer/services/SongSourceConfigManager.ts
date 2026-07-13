@@ -76,7 +76,6 @@ export class SongSourceConfigManager {
     try {
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${id}`, JSON.stringify(sources));
       localStorage.setItem(`${STORAGE_TYPE_KEY_PREFIX}${id}`, type);
-      console.log(`[SongSourceConfigManager] 设置歌曲 ${id} 音源: ${sources.join(', ')} (${type})`);
     } catch (error) {
       console.error(`[SongSourceConfigManager] 保存歌曲 ${id} 配置失败:`, error);
     }
@@ -91,7 +90,6 @@ export class SongSourceConfigManager {
     localStorage.removeItem(`${STORAGE_TYPE_KEY_PREFIX}${id}`);
     // 同时清除内存中的已尝试音源
     this.clearTriedSources(songId);
-    console.log(`[SongSourceConfigManager] 清除歌曲 ${id} 配置`);
   }
 
   /**
@@ -129,7 +127,6 @@ export class SongSourceConfigManager {
     const id = String(songId);
     const tried = this.getTriedSources(id);
     tried.add(source);
-    console.log(`[SongSourceConfigManager] 歌曲 ${id} 添加已尝试音源: ${source}`);
   }
 
   /**
@@ -139,7 +136,6 @@ export class SongSourceConfigManager {
     const id = String(songId);
     triedSourcesMap.delete(id);
     triedSourceDiffsMap.delete(id);
-    console.log(`[SongSourceConfigManager] 清除歌曲 ${id} 已尝试音源`);
   }
 
   /**
@@ -190,7 +186,6 @@ export class SongSourceConfigManager {
   static clearAllMemoryCache(): void {
     triedSourcesMap.clear();
     triedSourceDiffsMap.clear();
-    console.log('[SongSourceConfigManager] 清除所有内存缓存');
   }
 }
 

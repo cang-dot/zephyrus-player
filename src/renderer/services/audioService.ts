@@ -284,7 +284,6 @@ class AudioService {
   private async setupEQ(sound: Howl | LocalAudioPlayer) {
     try {
       if (!isElectron) {
-        console.log('Web环境中跳过EQ设置，避免CORS问题');
         this.bypass = true;
         return;
       }
@@ -340,11 +339,9 @@ class AudioService {
         // 检查节点是否已经有源
         const existingSource = (audioNode as any).source as MediaElementAudioSourceNode;
         if (existingSource?.context === this.context) {
-          console.log('复用现有音频源节点');
           this.source = existingSource;
         } else {
           // 创建新的源节点
-          console.log('创建新的音频源节点');
           this.source = this.context.createMediaElementSource(audioNode);
           (audioNode as any).source = this.source;
         }
@@ -381,7 +378,6 @@ class AudioService {
         this.applyVolume(1);
       }
 
-      console.log('EQ initialization successful');
     } catch (error) {
       console.error('EQ initialization failed:', error);
       await this.disposeEQ();
@@ -426,7 +422,6 @@ class AudioService {
       this.applyVolume(1);
     }
 
-    console.log('EQ initialization successful for LocalAudioPlayer');
   }
 
   private applyBypassState() {
@@ -479,7 +474,6 @@ class AudioService {
       try {
         if (this.source && this.context) {
           this.source.connect(this.context.destination);
-          console.log('Fallback: connected source directly to destination');
         }
       } catch (fallbackError) {
         console.error('Fallback connection also failed:', fallbackError);
@@ -503,7 +497,6 @@ class AudioService {
         console.warn(`操作锁已激活 ${lockDuration}ms，超过安全阈值，强制重置`);
         this.forceResetOperationLock();
       } else {
-        console.log(`操作锁激活中，持续时间 ${lockDuration}ms`);
         return false;
       }
     }
@@ -559,7 +552,6 @@ class AudioService {
 
   // 强制重置操作锁，用于特殊情况
   public forceResetOperationLock(): void {
-    console.log('强制重置操作锁');
     this.operationLock = false;
     this.operationLockStartTime = 0;
     this.operationLockId = '';
@@ -613,7 +605,6 @@ class AudioService {
       this.currentTrack && track && this.currentTrack.id === track.id && this.currentSound;
 
     if (isHotSwap) {
-      console.log('audioService: 检测到同一首歌曲的源切换，启用无缝切换模式');
     }
 
     return new Promise<Howl>((resolve, reject) => {
@@ -622,24 +613,20 @@ class AudioService {
 
       // 如果有正在加载的 pendingSound，先清理掉
       if (this.pendingSound) {
-        console.log('audioService: 清理正在加载的 pendingSound');
         this.pendingSound.unload();
         this.pendingSound = null;
       }
 
       const tryPlay = async () => {
         try {
-          console.log('audioService: 开始创建音频对象');
 
           // 确保 Howler 上下文已初始化
           if (!Howler.ctx) {
-            console.log('audioService: 初始化 Howler 上下文');
             Howler.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
           }
 
           // 确保使用同一个音频上下文
           if (Howler.ctx.state === 'closed') {
-            console.log('audioService: 重新创建音频上下文');
             Howler.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
             this.context = Howler.ctx;
             Howler.masterGain = this.context.createGain();
@@ -650,13 +637,11 @@ class AudioService {
 
           // 恢复上下文状态
           if (Howler.ctx.state === 'suspended') {
-            console.log('audioService: 恢复暂停的音频上下文');
             await Howler.ctx.resume();
           }
 
           // 非热切换模式下，先停止并清理现有的音频实例
           if (!isHotSwap && this.currentSound) {
-            console.log('audioService: 停止并清理现有的音频实例');
             // 确保任何进行中的seek操作被取消
             if (this.seekLock && this.seekDebounceTimer) {
               clearTimeout(this.seekDebounceTimer);
@@ -669,7 +654,6 @@ class AudioService {
 
           // 清理 EQ 但保持上下文 (热切换时暂时不清理，等切换完成后再处理)
           if (!isHotSwap) {
-            console.log('audioService: 清理 EQ');
             await this.disposeEQ(true);
           }
 
@@ -681,7 +665,6 @@ class AudioService {
           let newSound: Howl | LocalAudioPlayer;
 
           if (existingSound) {
-            console.log('audioService: 使用预加载的 Howl/LocalAudioPlayer 对象');
             newSound = existingSound;
             if (!(newSound instanceof LocalAudioPlayer)) {
               newSound.volume(1);
@@ -690,10 +673,8 @@ class AudioService {
               newSound.rate(this.playbackRate);
             }
           } else if (url.startsWith('local://')) {
-            console.log('audioService: 创建 LocalAudioPlayer');
             newSound = new LocalAudioPlayer(url);
           } else {
-            console.log('audioService: 创建新的 Howl 对象');
             newSound = new Howl({
               src: [url],
               html5: true,
@@ -715,7 +696,6 @@ class AudioService {
                 this.emit('loaderror', { track, error: error?.message || error });
                 if (retryCount < maxRetries && !existingSound) {
                   retryCount++;
-                  console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
                   setTimeout(tryPlay, 1000 * retryCount);
                 } else {
                   this.releaseOperationLock();
@@ -737,7 +717,6 @@ class AudioService {
                 this.emit('loaderror', { track, error });
                 if (retryCount < maxRetries && !existingSound) {
                   retryCount++;
-                  console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
                   setTimeout(tryPlay, 1000 * retryCount);
                 } else {
                   const isLocal = track.playMusicUrl?.startsWith('local://');
@@ -755,7 +734,6 @@ class AudioService {
               this.emit('playerror', { track, error });
               if (retryCount < maxRetries) {
                 retryCount++;
-                console.log(`Retrying playback (${retryCount}/${maxRetries})...`);
                 setTimeout(tryPlay, 1000 * retryCount);
               } else {
                 const isLocal = track.playMusicUrl?.startsWith('local://');
@@ -772,12 +750,10 @@ class AudioService {
             const onLoaded = async () => {
               try {
                 if (isHotSwap) {
-                  console.log('audioService: 执行无缝切换');
 
                   let targetPos = 0;
                   if (seekTime > 0) {
                     targetPos = seekTime;
-                    console.log(`audioService: 使用指定的 seekTime: ${seekTime}s`);
                   } else if (this.currentSound) {
                     targetPos = this.currentSound.seek() as number;
                   }
@@ -800,7 +776,6 @@ class AudioService {
                   this.currentTrack = track;
                   this.pendingSound = null;
 
-                  console.log(`audioService: 无缝切换完成，进度同步至 ${targetPos}s`);
                 } else {
                   await this.setupEQ(newSound);
                   this.currentSound = newSound;
@@ -817,15 +792,12 @@ class AudioService {
                       this.currentSound.seek(seekTime);
                     }
 
-                    console.log('audioService: 音频加载成功，设置 EQ');
                     this.updateMediaSessionMetadata(track);
                     this.updateMediaSessionPositionState();
                     this.emit('load');
 
                     if (!isHotSwap) {
-                      console.log('audioService: 音频完全初始化，isPlay =', isPlay);
                       if (isPlay) {
-                        console.log('audioService: 开始播放');
                         this.currentSound.play();
                       }
                     }
@@ -961,7 +933,6 @@ class AudioService {
   seek(time: number) {
     const now = Date.now();
     if (now - this._lastSeekTime < this._SEEK_DEBOUNCE_MS) {
-      console.log(`seek 防抖: 跳过 ${time}s (距上次 ${now - this._lastSeekTime}ms)`);
       return;
     }
     this._lastSeekTime = now;
@@ -1046,7 +1017,6 @@ class AudioService {
         await (this.context as any).setSinkId(deviceId);
         this.currentSinkId = deviceId;
         localStorage.setItem('audioOutputDeviceId', deviceId);
-        console.log('音频输出设备已切换:', deviceId);
         return true;
       } else {
         console.warn('AudioContext.setSinkId 不可用');
@@ -1089,13 +1059,10 @@ class AudioService {
     if (!this.context || this.contextStateMonitoringInitialized) return;
 
     this.context.addEventListener('statechange', async () => {
-      console.log('AudioContext state changed:', this.context?.state);
 
       if (this.context?.state === 'suspended' && this.currentSound?.playing()) {
-        console.log('AudioContext suspended while playing, attempting to resume...');
         try {
           await this.context.resume();
-          console.log('AudioContext resumed successfully');
         } catch (e) {
           console.error('Failed to resume AudioContext:', e);
           this.emit('audio_error', { type: 'context_suspended', error: e });
@@ -1107,7 +1074,6 @@ class AudioService {
     });
 
     this.contextStateMonitoringInitialized = true;
-    console.log('AudioContext state monitoring initialized');
   }
 
   /**
@@ -1189,7 +1155,6 @@ class AudioService {
     // 保存值
     localStorage.setItem('volume', linearVolume.toString());
 
-    console.log('Volume applied (linear):', linearVolume);
   }
 
   // 添加方法检查当前音频是否在加载状态

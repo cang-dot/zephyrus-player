@@ -544,7 +544,6 @@ const loadArtistInfo = async () => {
   // 简化缓存检查
   const cacheKey = getCacheKey(artistId.value);
   if (artistDataCache.has(cacheKey)) {
-    console.log('使用缓存数据');
     const cachedData = artistDataCache.get(cacheKey);
     artistInfo.value = cachedData.artistInfo;
     songs.value = cachedData.songs;
@@ -889,7 +888,6 @@ onActivated(() => {
 
     // 首次加载或ID变化时加载数据
     if (!previousId.value || previousId.value !== currentId) {
-      console.log('ID已变化，加载新数据');
       previousId.value = currentId;
       activeTab.value = 'songs';
       loadArtistInfo();

@@ -95,7 +95,6 @@ export const useUserStore = defineStore('user', () => {
     try {
       const { data } = await getUserPlaylist(user.value.userId, 1000, 0);
       playList.value = data?.playlist || [];
-      console.log(`已加载 ${playList.value.length} 个歌单`);
     } catch (error) {
       console.error('获取歌单列表失败:', error);
       playList.value = [];
@@ -112,7 +111,6 @@ export const useUserStore = defineStore('user', () => {
     try {
       const { data } = await getUserAlbumSublist({ limit: 1000, offset: 0 });
       albumList.value = data?.data || [];
-      console.log(`已加载 ${albumList.value.length} 个收藏专辑`);
     } catch (error) {
       console.error('获取专辑列表失败:', error);
       albumList.value = [];
@@ -130,7 +128,6 @@ export const useUserStore = defineStore('user', () => {
       const { data } = await getUserAlbumSublist({ limit: 1000, offset: 0 });
       const albumIds = (data?.data || []).map((album: any) => album.id);
       collectedAlbumIds.value = new Set(albumIds);
-      console.log(`已加载 ${albumIds.length} 个收藏专辑ID`);
     } catch (error) {
       console.error('获取收藏专辑列表失败:', error);
       collectedAlbumIds.value.clear();

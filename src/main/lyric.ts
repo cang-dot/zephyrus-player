@@ -49,7 +49,6 @@ function unregisterUnlockGlobalShortcut() {
 let originalSize = { width: 0, height: 0 };
 
 const createWin = () => {
-  console.log('Creating lyric window');
 
   // 获取保存的窗口位置
   const windowBounds =
@@ -73,7 +72,6 @@ const createWin = () => {
     const matchedDisplay = displays.find((d) => d.id === displayId);
     if (matchedDisplay) {
       targetDisplay = matchedDisplay;
-      console.log('Found matching display by ID:', displayId);
     }
   }
 
@@ -178,13 +176,11 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
   };
 
   ipcMain.on('open-lyric', () => {
-    console.log('Received open-lyric request');
 
     if (showLyricWindow()) {
       return;
     }
 
-    console.log('Creating new lyric window');
     const win = createWin();
 
     if (!win) {
@@ -204,7 +200,6 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
     win.setSkipTaskbar(true);
 
     win.once('ready-to-show', () => {
-      console.log('Lyric window ready to show');
       win.show();
     });
   });
@@ -393,9 +388,7 @@ export const loadLyricWindow = (ipcMain: IpcMain, mainWin: BrowserWindow): void 
 
   // 添加播放控制处理
   ipcMain.on('control-back', (_, command) => {
-    console.log('command', command);
     if (mainWin && !mainWin.isDestroyed()) {
-      console.log('Sending control-back command:', command);
       mainWin.webContents.send('lyric-control-back', command);
     }
   });

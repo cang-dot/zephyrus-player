@@ -128,13 +128,11 @@ function startServer(config: RemoteControlConfig) {
   // 启动服务器
   try {
     server = app.listen(config.port, () => {
-      console.log(`远程控制服务已启动，监听端口: ${config.port}`);
     });
     server.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
         console.error(`远程控制服务端口 ${config.port} 被占用，尝试切换到端口 ${config.port + 1}`);
         server = app.listen(config.port + 1, () => {
-          console.log(`远程控制服务已启动，监听端口: ${config.port + 1}`);
         });
       } else {
         console.error('远程控制服务异常:', err);
@@ -151,7 +149,6 @@ function stopServer() {
     server.close();
     server = null;
     app = null;
-    console.log('远程控制服务已停止');
   }
 }
 

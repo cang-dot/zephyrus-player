@@ -51,9 +51,7 @@ export const useCommunityDataStore = defineStore('communityData', () => {
    * 每一步只有在前置数据存在时才继续
    */
   async function loadAll(songId: string) {
-    console.log('[CommunityData] loadAll called, songId:', songId, 'currentSongId:', currentSongId.value);
     if (!songId || songId === currentSongId.value) {
-      console.log('[CommunityData] loadAll skipped (same song or empty)');
       return;
     }
 
@@ -63,21 +61,14 @@ export const useCommunityDataStore = defineStore('communityData', () => {
     keywordMark.value = null;
     communityLyric.value = null;
 
-    console.log('[CommunityData] Step 1: loading climax...');
     await loadClimax(songId);
-    console.log('[CommunityData] Climax loaded, segments:', climaxSegments.value.length);
 
     if (climaxSegments.value.length > 0) {
-      console.log('[CommunityData] Step 2: loading keywords...');
       await loadKeywords(songId);
-      console.log('[CommunityData] Keywords loaded:', keywordMark.value !== null);
     } else {
-      console.log('[CommunityData] Step 2: skipped (no climax)');
     }
 
-    console.log('[CommunityData] Step 3: loading community lyric...');
     await loadCommunityLyric(songId);
-    console.log('[CommunityData] Community lyric loaded:', communityLyric.value !== null);
   }
 
   /**
@@ -102,16 +93,13 @@ export const useCommunityDataStore = defineStore('communityData', () => {
 
       // 在线歌曲：缓存优先
       const cached = await getClimaxCache(songId);
-      console.log('[CommunityData] loadClimax cache:', cached != null ? 'hit' : 'miss');
       if (cached != null) {
         climaxSegments.value = cached.segments;
         climaxContributor.value = cached.contributor;
         return;
       }
 
-      console.log('[CommunityData] loadClimax fetching API...');
       const result = await loadClimaxForSong(songId);
-      console.log('[CommunityData] loadClimax API result:', result.segments?.length, 'segments');
       climaxSegments.value = result.segments || [];
       climaxContributor.value = result.contributor || null;
 
@@ -136,15 +124,12 @@ export const useCommunityDataStore = defineStore('communityData', () => {
     loadingKeywords.value = true;
     try {
       const cached = await getKeywordsCache(songId);
-      console.log('[CommunityData] loadKeywords cache:', cached != null ? 'hit' : 'miss', 'data:', cached);
       if (cached != null) {
         keywordMark.value = cached;
         return;
       }
 
-      console.log('[CommunityData] loadKeywords fetching API...');
       const result = await loadKeywordsForSong(songId);
-      console.log('[CommunityData] loadKeywords API result:', result);
       keywordMark.value = result;
 
       // 只缓存有数据的结果，不缓存 null

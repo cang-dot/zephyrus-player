@@ -79,7 +79,6 @@ const getImageColor = (img: HTMLImageElement): Promise<string> => {
 
 const getImagePrimaryColor = (imageSrc: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    console.log('[cover-debug] 渲染进程收到图片URL前120字符:', imageSrc?.substring(0, 120));
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.src = imageSrc;

@@ -407,7 +407,6 @@ const loadAlbumList = async () => {
 watch(
   () => router.currentRoute.value.path,
   (newPath) => {
-    console.log('newPath', newPath);
     if (newPath === '/user') {
       checkLoginStatus();
       loadData();

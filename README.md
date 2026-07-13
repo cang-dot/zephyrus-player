@@ -8,30 +8,88 @@
 
 **西风播放器** — 沉浸式音乐播放器
 
+[![Version](https://img.shields.io/badge/version-0.9.8-blue)](https://github.com/cang-dot/zephyrus-player/releases)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Vue](https://img.shields.io/badge/Vue_3.5-42b883?logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript_5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Electron](https://img.shields.io/badge/Electron_40-47848f?logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Vite](https://img.shields.io/badge/Vite_6.4-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+
 </div>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Vue_3.5-42b883?logo=vue.js&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript_5.9-3178c6?logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Electron_40-47848f?logo=electron&logoColor=white" />
-  <img src="https://img.shields.io/badge/GSAP_3.15-88ce02?logo=greensock&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite_6.4-646cff?logo=vite&logoColor=white" />
-</p>
+---
+
+## 概述
+
+Zephyrus Player 是一款基于 Electron + Vue 3 的沉浸式桌面音乐播放器，深度集成网易云音乐生态，支持多平台音源解锁、本地音乐管理、逐字歌词、实时高潮检测驱动的视觉动画，以及高度可定制的播放器界面。
 
 ---
 
 ## 功能亮点
 
-- 🎵 **多平台音乐源** — 网易云音乐完整集成 + 咪咕/酷狗/酷我解锁 + LX Music 脚本 + 本地音乐扫描
-- 🎨 **4 种全屏播放器** — 默认 / Stage / 杂志 / Frenzy，27+ GSAP 动画预设，实时高潮检测驱动视觉增强
-- 🎤 **逐字歌词系统** — YRC 逐字时间轴 + 桌面歌词窗口（置顶/透明/锁定模式/多显示器支持）
-- 🔧 **10 段均衡器** — Web Audio API，支持预设 + 变速播放 + 音频输出设备切换
-- 🌈 **动态主题色** — 封面取色自动级联到全局 UI，支持自定义已播放/未播放/描边颜色
-- 📱 **跨平台** — Windows / macOS / Linux + 移动端响应式适配 + 5 种语言
+### 音乐源
+- **网易云音乐** — 完整 API 集成，歌单/专辑/歌手/播客/MV/电台
+- **多平台解锁** — 咪咕/酷狗/酷我/QQ 音乐，通过 `@unblockneteasemusic/server` 智能回退
+- **LX Music 脚本** — 自定义音源脚本，沙箱化执行
+- **自定义 API** — 支持接入第三方音乐 API 服务
+- **本地音乐** — 文件夹扫描、元数据解析（碟号/音轨号/年份）、FLAC/MP3/M4A 等格式支持
+
+### 播放器视觉
+- **4 种全屏样式** — 默认 / Stage（舞台聚光）/ Magazine（杂志排版）/ Frenzy（狂躁排版）
+- **27+ GSAP 动画预设** — 逐字弹跳、滑动、缩放、故障等多种效果
+- **实时高潮检测** — Web Audio API 频谱分析，自动标注高潮段落，驱动视觉增强
+- **鼓点检测** — 实时节拍跟踪，动画同步
+- **动态主题色** — 封面取色自动级联到全局 UI
+- **浮动覆盖布局** — 播放界面作为背景层，侧栏/搜索栏/底栏悬浮其上
+
+### 歌词系统
+- **逐字歌词** — YRC 格式逐字时间轴，渐变填充进度
+- **桌面歌词窗口** — 独立透明窗口，置顶/锁定/拖拽/多显示器支持
+- **3 种显示模式** — 滚动 / 单行 / 双行
+- **翻译 & 罗马音** — 歌词翻译显示，时间偏移校正
+- **本地歌词绑定** — 支持 TTML/LRC 文件手动绑定
+- **内嵌歌词提取** — 从音频文件元数据自动提取歌词
+
+### 音频引擎
+- **10 段均衡器** — Web Audio API BiquadFilter，预设保存
+- **变速播放** — 0.5x ~ 2.0x 播放速率
+- **无缝预加载** — 下一曲音频预加载，无缝切换
+- **音频输出设备** — 热切换输出设备
+- **睡眠定时器** — 定时停止播放
+- **Media Session** — 系统媒体键控制
+
+### 界面 & 交互
+- **深色/浅色主题** — 跟随系统或手动切换
+- **迷你播放器** — 紧凑模式，快捷操作
+- **系统托盘** — 后台运行，托盘控制
+- **全局快捷键** — 可自定义快捷键绑定
+- **远程控制** — 局域网 HTTP API 远程操控
+- **5 种语言** — 中文/英语/日语/韩语/繁体中文
+- **无限网格浏览** — 歌单/专辑自动滚动展示，悬停查看详情
+
+### 本地音乐管理
+- **文件夹扫描** — 递归扫描，元数据缓存（版本化，自动重扫）
+- **筛选 & 排序** — 按艺术家/专辑/碟号/音轨号排序
+- **艺术家/专辑视图** — 分组展示同作者/同专辑作品
+- **歌词提取** — 从 syncText/text 元数据自动转换为 LRC 格式
+- **拼音搜索** — 支持中文拼音模糊匹配
+
+### 社区数据
+- **高潮段落标注** — 社区贡献的高潮时间点
+- **重点词标注** — 歌词关键词高亮
+- **社区歌词** — 用户校正的歌词版本
+- **IndexedDB 缓存** — 本地持久化，减少网络请求
 
 ---
 
 ## 快速开始
+
+### 环境要求
+
+- Node.js >= 18
+- npm >= 9
+
+### 安装 & 运行
 
 ```bash
 # 安装依赖
@@ -46,25 +104,19 @@ npm run dev:web
 # 构建
 npm run build
 
-# 打包
-npm run build:win      # Windows (NSIS)
-npm run build:mac      # macOS (DMG + ZIP)
+# 打包安装包
+npm run build:win      # Windows (NSIS, x64/ia32/arm64)
+npm run build:mac      # macOS (DMG + ZIP, x64/arm64)
 npm run build:linux    # Linux (AppImage / DEB / RPM)
 ```
 
----
+### 代码质量
 
-## 功能一览
-
-| 分类 | 功能 |
-|------|------|
-| **音乐源** | 网易云完整集成 · 多平台解锁 · LX Music 脚本 · 本地音乐扫描 · 播客 · MV |
-| **音频引擎** | 10 段 EQ · 变速播放 · 无缝预加载 · 热切换 · 睡眠定时器 · Media Session |
-| **歌词系统** | 逐字歌词 · 桌面歌词窗口 · 3 种显示模式 · 翻译 · 时间校正 · 封面取色 |
-| **视觉系统** | 4 种全屏样式 · 27+ 动画预设 · 实时高潮检测 · WebGL 故障背景 |
-| **界面** | 深色/浅色主题 · 迷你播放器 · 系统托盘 · 全局快捷键 · 远程控制 |
-| **本地音乐** | 文件夹扫描 · 歌词绑定 · 内嵌歌词提取 · Web Audio API 独立播放 |
-| **社区数据** | 高潮段落标注 · 重点词标注 · 社区歌词 · IndexedDB 缓存 |
+```bash
+npm run lint           # ESLint + Prettier 自动修复
+npm run typecheck      # TypeScript 类型检查
+npm run format         # Prettier 格式化
+```
 
 ---
 
@@ -79,8 +131,12 @@ npm run build:linux    # Linux (AppImage / DEB / RPM)
 | CSS 框架 | Tailwind CSS 3.4 + SCSS |
 | 状态管理 | Pinia + pinia-plugin-persistedstate |
 | 动画引擎 | GSAP 3.15 |
-| 音频播放 | Howler.js + Web Audio API + LocalAudioPlayer |
-| 音乐 API | netease-cloud-music-api-alger (本地 Express) |
+| WebGL | OGL 1.0 |
+| 音频播放 | Howler.js + Web Audio API + 自研 LocalAudioPlayer |
+| 音频元数据 | music-metadata 11 + flac-tagger + node-id3 |
+| 音乐 API | netease-cloud-music-api-alger (本地 Express 服务) |
+| 音源解锁 | @unblockneteasemusic/server |
+| 中文分词 | jieba-wasm |
 
 ---
 
@@ -88,27 +144,60 @@ npm run build:linux    # Linux (AppImage / DEB / RPM)
 
 ```
 src/
-├── main/                    # Electron 主进程
-│   ├── index.ts             # 入口
-│   ├── lyric.ts             # 桌面歌词窗口
-│   ├── server.ts            # 本地 API 服务
-│   └── modules/             # 主进程模块
-├── preload/                 # 预加载脚本
-└── renderer/                # Vue 3 渲染进程
-    ├── components/          # 组件
-    │   ├── lyric/           # 歌词组件（6 种样式）
-    │   └── player/          # 播放条
-    ├── hooks/               # 组合式函数
-    ├── services/            # 核心服务
-    │   ├── audioService.ts  # 音频引擎
+├── main/                        # Electron 主进程
+│   ├── index.ts                 # 入口
+│   ├── lyric.ts                 # 桌面歌词窗口管理
+│   ├── server.ts                # 本地音乐 API 服务
+│   ├── unblockMusic.ts          # 多平台音源解锁
+│   └── modules/                 # 主进程模块
+│       ├── window.ts            # 窗口管理
+│       ├── window-size.ts       # 窗口大小持久化
+│       ├── tray.ts              # 系统托盘
+│       ├── localMusicScanner.ts # 本地音乐扫描
+│       ├── fileManager.ts       # 文件管理
+│       ├── cache.ts             # 磁盘缓存
+│       ├── config.ts            # 配置存储
+│       ├── pluginManager.ts     # 插件管理
+│       └── remoteControl.ts     # 远程控制
+├── preload/                     # 预加载脚本
+│   └── index.ts                 # IPC 桥接
+└── renderer/                    # Vue 3 渲染进程
+    ├── App.vue                  # 根组件
+    ├── components/              # UI 组件
+    │   ├── lyric/               # 播放器样式（默认/Stage/Magazine/Frenzy）
+    │   ├── player/              # 播放栏/迷你播放栏
+    │   └── common/              # 通用组件
+    ├── hooks/                   # 组合式函数
+    │   ├── MusicHook.ts         # 音乐播放核心逻辑
+    │   ├── useCoverColor.ts     # 封面取色
+    │   └── usePlayerHooks.ts    # 播放器事件钩子
+    ├── services/                # 核心服务
+    │   ├── audioService.ts      # 音频引擎
     │   ├── localAudioPlayer.ts  # 本地音乐播放器
     │   ├── climaxDetector.ts    # 高潮检测
-    │   └── cacheService.ts      # 缓存服务
-    ├── store/               # Pinia 状态管理
-    ├── views/               # 页面视图
-    │   └── lyric/           # 桌面歌词窗口
-    └── utils/               # 工具函数
+    │   ├── drumDetector.ts      # 鼓点检测
+    │   └── playbackRequestManager.ts
+    ├── store/                   # Pinia 状态管理
+    │   └── modules/             # player/playerCore/settings/localMusic/...
+    ├── views/                   # 页面视图
+    │   ├── home/                # 首页
+    │   ├── lyric/               # 桌面歌词窗口
+    │   ├── local-music/         # 本地音乐
+    │   ├── set/                 # 设置
+    │   └── ...
+    ├── utils/                   # 工具函数
+    ├── features/                # 功能模块（AI/插件系统）
+    └── layout/                  # 布局组件
+        ├── AppLayout.vue        # 主布局
+        ├── MiniLayout.vue       # 迷你模式
+        └── OverlayLayout.vue    # 浮动覆盖模式
 ```
+
+---
+
+## 下载
+
+从 [GitHub Releases](https://github.com/cang-dot/zephyrus-player/releases) 下载最新版本。
 
 ---
 
@@ -132,3 +221,5 @@ src/
 - [GSAP](https://greensock.com/gsap/) — 动画引擎
 - [Naive UI](https://www.naiveui.com/) — UI 组件库
 - [OGL](https://github.com/oframe/ogl) — WebGL 渲染库
+- [Howler.js](https://howlerjs.com/) — 音频播放库
+- [music-metadata](https://github.com/Borewit/music-metadata) — 音频元数据解析

@@ -11,7 +11,6 @@ export function initializeOtherApi() {
       return [];
     }
     try {
-      console.log(`[Main Process Proxy] Forwarding suggestion request for: ${keyword}`);
       const response = await axios.get('http://msearchcdn.kugou.com/new/app/i/search.php', {
         params: {
           cmd: 302,

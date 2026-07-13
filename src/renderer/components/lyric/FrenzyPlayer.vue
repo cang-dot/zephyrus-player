@@ -123,7 +123,6 @@ function handleConfigUpdate() {
 watch(
   () => playerStore.currentSong?.id,
   (songId) => {
-    console.log('[FrenzyPlayer] watch songId:', songId);
     if (songId) {
       setCurrentSongId(String(songId));
       styleEngine.loadClimaxData(String(songId));
@@ -140,7 +139,6 @@ onMounted(() => {
   styleEngine.syncCoverColors();
 
   if (playerStore.currentSong?.id) {
-    console.log('[FrenzyPlayer] onMounted loading songId:', playerStore.currentSong.id);
     styleEngine.loadClimaxData(String(playerStore.currentSong.id));
   }
 });
@@ -153,7 +151,6 @@ onUnmounted(() => {
   if (flashTimer) clearTimeout(flashTimer);
   if (flashTimer2) clearTimeout(flashTimer2);
   if (crtRafId) cancelAnimationFrame(crtRafId);
-  console.log('[FrenzyPlayer] onUnmounted, communityData cleared');
 });
 
 // 背景颜色（级联：白色背景 → 跟随封面背景 → 自定义，总开关关闭时默认白色）
@@ -238,7 +235,6 @@ watch(() => styleEngine.isInClimax, (inClimax) => {
 });
 
 watch(crtIntensity, (val) => {
-  console.log('[FrenzyPlayer] crtIntensity:', val.toFixed(3));
 });
 
 // ==================== 高潮过渡闪光 ====================

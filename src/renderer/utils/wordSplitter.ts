@@ -22,7 +22,6 @@ async function initJieba(): Promise<void> {
       await jieba.default();
     }
     jiebaReady = true;
-    console.log('[WordSplitter] jieba-wasm 初始化成功');
   } catch (error) {
     console.warn('[WordSplitter] jieba-wasm 加载失败，使用降级方案:', error);
   }

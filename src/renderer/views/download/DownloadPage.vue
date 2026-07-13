@@ -625,7 +625,6 @@ const handlePlayMusic = async (item: DownloadedItem) => {
       count: 0
     };
 
-    console.log('寮€濮嬫挱鏀炬湰鍦伴煶涔?', song.name, '璺緞:', song.playMusicUrl);
 
     // 鎾斁姝屾洸
     await playerStore.setPlay(song);

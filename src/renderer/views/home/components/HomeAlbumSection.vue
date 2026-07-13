@@ -140,7 +140,6 @@ const preloadAllTracks = async () => {
             }));
           }
         } catch (error) {
-          console.debug('Failed to load tracks for album:', album.id, error);
         }
       })
     );

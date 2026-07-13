@@ -77,14 +77,12 @@ export const parseFromGDMusic = async (
         // 所有可用的音乐源 netease、joox、tidal
         const allSources = ['joox', 'tidal', 'netease'] as MusicSourceType[];
 
-        console.log('GD音乐台开始搜索:', searchQuery);
 
         // 依次尝试所有音源
         for (const source of allSources) {
           try {
             const result = await searchAndGetUrl(source, searchQuery, quality);
             if (result) {
-              console.log(`GD音乐台成功通过 ${result.source} 解析音乐!`);
               // 返回符合原API格式的数据
               return {
                 data: {
@@ -110,7 +108,6 @@ export const parseFromGDMusic = async (
           }
         }
 
-        console.log('GD音乐台所有音源均解析失败');
         return null;
       })(),
       timeoutPromise
@@ -148,14 +145,12 @@ async function searchAndGetUrl(
 ): Promise<GDMusicUrlResult | null> {
   // 1. 搜索歌曲
   const searchUrl = `${baseUrl}?types=search&source=${source}&name=${encodeURIComponent(searchQuery)}&count=1&pages=1`;
-  console.log(`GD音乐台尝试音源 ${source} 搜索:`, searchUrl);
 
   const searchResponse = await axios.get(searchUrl, { timeout: 5000 });
 
   if (searchResponse.data && Array.isArray(searchResponse.data) && searchResponse.data.length > 0) {
     const firstResult = searchResponse.data[0];
     if (!firstResult || !firstResult.id) {
-      console.log(`GD音乐台 ${source} 搜索结果无效`);
       return null;
     }
 
@@ -164,7 +159,6 @@ async function searchAndGetUrl(
 
     // 2. 获取歌曲URL
     const songUrl = `${baseUrl}?types=url&source=${trackSource}&id=${trackId}&br=${quality}`;
-    console.log(`GD音乐台尝试获取 ${trackSource} 歌曲URL:`, songUrl);
 
     const songResponse = await axios.get(songUrl, { timeout: 5000 });
 
@@ -176,11 +170,9 @@ async function searchAndGetUrl(
         source: trackSource
       };
     } else {
-      console.log(`GD音乐台 ${trackSource} 未返回有效URL`);
       return null;
     }
   } else {
-    console.log(`GD音乐台 ${source} 搜索结果为空`);
     return null;
   }
 }

@@ -199,17 +199,14 @@ export const usePlaylistStore = defineStore(
      * 应用随机播放
      */
     const shufflePlayList = () => {
-      console.log('[PlaylistStore] shufflePlayList called');
       if (playList.value.length === 0) return;
 
       // 保存原始列表
       if (originalPlayList.value.length === 0) {
-        console.log('[PlaylistStore] Saving original list, length:', playList.value.length);
         originalPlayList.value = [...playList.value];
       }
 
       const currentSong = playList.value[playListIndex.value];
-      console.log('[PlaylistStore] Current song before shuffle:', currentSong?.name);
 
       // 执行洗牌
       const shuffled = performShuffle([...playList.value], currentSong);
@@ -217,19 +214,15 @@ export const usePlaylistStore = defineStore(
       playList.value = [...shuffled];
       playListIndex.value = 0;
 
-      console.log('[PlaylistStore] List shuffled, new length:', playList.value.length);
-      console.log('[PlaylistStore] New first song:', playList.value[0]?.name);
     };
 
     /**
      * 恢复原始播放列表顺序
      */
     const restoreOriginalOrder = () => {
-      console.log('[PlaylistStore] restoreOriginalOrder called');
       if (originalPlayList.value.length === 0) return;
 
       const currentSong = playList.value[playListIndex.value];
-      console.log('[PlaylistStore] Current song before restore:', currentSong?.name);
 
       playList.value = [...originalPlayList.value];
       originalPlayList.value = [];
@@ -241,7 +234,6 @@ export const usePlaylistStore = defineStore(
           playListIndex.value = index;
         }
       }
-      console.log('[PlaylistStore] Original order restored, new index:', playListIndex.value);
     };
 
     /**
@@ -255,18 +247,11 @@ export const usePlaylistStore = defineStore(
       // 如果不是从心动模式调用，清除心动模式状态并切换播放模式
       if (!fromIntelligenceMode) {
         const intelligenceStore = useIntelligenceModeStore();
-        console.log('[PlaylistStore.setPlayList] 检查心动模式状态:', {
-          isIntelligenceMode: intelligenceStore.isIntelligenceMode,
-          currentPlayMode: playMode.value,
-          fromIntelligenceMode
-        });
 
         if (intelligenceStore.isIntelligenceMode) {
-          console.log('[PlaylistStore] 退出心动模式，切换播放模式为顺序播放');
           playMode.value = 0;
           // 清除心动模式状态
           intelligenceStore.clearIntelligenceMode(true);
-          console.log('[PlaylistStore] 心动模式已退出，新的播放模式:', playMode.value);
         }
       }
 
@@ -289,7 +274,6 @@ export const usePlaylistStore = defineStore(
       // 根据当前播放模式处理新的播放列表
       if (playMode.value === 2) {
         // 随机模式
-        console.log('随机模式下设置新播放列表，保存原始顺序并洗牌');
 
         originalPlayList.value = [...list];
 
@@ -306,7 +290,6 @@ export const usePlaylistStore = defineStore(
 
         playList.value = shuffledList;
       } else {
-        console.log('顺序/循环模式下设置新播放列表');
         if (originalPlayList.value.length > 0) {
           originalPlayList.value = [];
         }
@@ -398,24 +381,20 @@ export const usePlaylistStore = defineStore(
 
       const isRandom = newMode === 2;
 
-      console.log(`[PlaylistStore] togglePlayMode: ${playMode.value} -> ${newMode}`);
       playMode.value = newMode;
 
       // 切换到随机模式时洗牌
       if (isRandom && !wasRandom && playList.value.length > 0) {
         shufflePlayList();
-        console.log('切换到随机模式，洗牌播放列表');
       }
 
       // 从随机模式切换出去时恢复原始顺序
       if (!isRandom && wasRandom) {
         restoreOriginalOrder();
-        console.log('切换出随机模式，恢复原始顺序');
       }
 
       // 从心动模式切换出去
       if (wasIntelligence) {
-        console.log('退出心动模式');
         const intelligenceStore = useIntelligenceModeStore();
         intelligenceStore.clearIntelligenceMode(true);
       }
@@ -448,7 +427,6 @@ export const usePlaylistStore = defineStore(
           if (sleepTimerStore.sleepTimer.type === 'end') {
             sleepTimerStore.stopPlayback();
           }
-          console.log('[nextPlay] 顺序播放模式：已播放到最后一首，停止播放');
           playerCore.setIsPlay(false);
           const { audioService } = await import('@/services/audioService');
           audioService.pause();
@@ -465,15 +443,6 @@ export const usePlaylistStore = defineStore(
           nextSong.expiredAt = undefined;
         }
 
-        console.log(
-          `[nextPlay] 尝试播放: ${nextSong.name}, 索引: ${currentIndex} -> ${nowPlayListIndex}, 单曲重试: ${singleTrackRetryCount}/${SINGLE_TRACK_MAX_RETRIES}, 连续失败: ${consecutiveFailCount.value}/${MAX_CONSECUTIVE_FAILS}`
-        );
-        console.log(
-          '[nextPlay] Current mode:',
-          playMode.value,
-          'Playlist length:',
-          playList.value.length
-        );
 
         // 先尝试播放歌曲
         const success = await playerCore.handlePlayMusic(nextSong, true);
@@ -482,11 +451,6 @@ export const usePlaylistStore = defineStore(
           // 播放成功，重置所有计数器并更新索引
           consecutiveFailCount.value = 0;
           playListIndex.value = nowPlayListIndex;
-          console.log(`[nextPlay] 播放成功，索引已更新为: ${nowPlayListIndex}`);
-          console.log(
-            '[nextPlay] New current song in list:',
-            playList.value[playListIndex.value]?.name
-          );
           sleepTimerStore.handleSongChange();
         } else {
           console.error(`[nextPlay] 播放失败: ${nextSong.name}`);
@@ -501,9 +465,6 @@ export const usePlaylistStore = defineStore(
 
           // 单曲重试逻辑
           if (singleTrackRetryCount < SINGLE_TRACK_MAX_RETRIES) {
-            console.log(
-              `[nextPlay] 单曲重试 ${singleTrackRetryCount + 1}/${SINGLE_TRACK_MAX_RETRIES}`
-            );
             // 不更新索引，重试同一首歌
             setTimeout(() => {
               _nextPlay(singleTrackRetryCount + 1);
@@ -511,9 +472,6 @@ export const usePlaylistStore = defineStore(
           } else {
             // 单曲重试次数用尽，递增连续失败计数，尝试下一首
             consecutiveFailCount.value++;
-            console.log(
-              `[nextPlay] 单曲重试用尽，连续失败计数: ${consecutiveFailCount.value}/${MAX_CONSECUTIVE_FAILS}`
-            );
 
             if (playList.value.length > 1) {
               // 更新索引到失败的歌曲位置，这样下次递归调用会继续往下
@@ -554,9 +512,6 @@ export const usePlaylistStore = defineStore(
 
         const prevSong = { ...playList.value[nowPlayListIndex] };
 
-        console.log(
-          `[prevPlay] 尝试播放上一首: ${prevSong.name}, 索引: ${currentIndex} -> ${nowPlayListIndex}`
-        );
 
         let success = false;
         let retryCount = 0;
@@ -602,7 +557,6 @@ export const usePlaylistStore = defineStore(
         if (success) {
           // 播放成功，更新索引
           playListIndex.value = nowPlayListIndex;
-          console.log(`[prevPlay] 播放成功，索引已更新为: ${nowPlayListIndex}`);
         } else {
           console.error(`[prevPlay] 播放上一首失败，保持当前索引: ${currentIndex}`);
           playerCore.setIsPlay(false);
@@ -689,7 +643,6 @@ export const usePlaylistStore = defineStore(
 
         // 更新播放索引
         if (songIndex !== -1 && songIndex !== playListIndex.value) {
-          console.log('歌曲索引不匹配，更新为:', songIndex);
           playListIndex.value = songIndex;
         }
 
@@ -723,10 +676,8 @@ export const usePlaylistStore = defineStore(
       // 重启后恢复随机播放状态
       if (playMode.value === 2 && playList.value.length > 0) {
         if (originalPlayList.value.length === 0) {
-          console.log('重启后恢复随机播放模式，重新洗牌播放列表');
           shufflePlayList();
         } else {
-          console.log('重启后恢复随机播放模式，播放列表已是洗牌状态');
         }
       }
     };

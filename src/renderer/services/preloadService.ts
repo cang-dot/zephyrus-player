@@ -18,7 +18,6 @@ class PreloadService {
 
     // 1. 检查是否有正在进行的加载
     if (this.loadingPromises.has(song.id)) {
-      console.log(`[PreloadService] 歌曲 ${song.name} 正在加载中，复用现有请求`);
       return this.loadingPromises.get(song.id)!;
     }
 
@@ -27,7 +26,6 @@ class PreloadService {
       const sound = this.preloadedSounds.get(song.id)!;
       // 检查 URL 是否变化（本地歌曲可能重新编码 URL）
       if (sound.state() === 'loaded') {
-        console.log(`[PreloadService] 歌曲 ${song.name} 已预加载完成，直接使用`);
         return sound;
       } else {
         // 如果缓存的音频状态不正常，清理并重新加载
@@ -52,7 +50,6 @@ class PreloadService {
    * 执行实际的加载和验证逻辑
    */
   private async _performLoad(song: SongResult): Promise<Howl> {
-    console.log(`[PreloadService] 开始加载歌曲: ${song.name}`);
 
     if (!song.playMusicUrl) {
       throw new Error('歌曲没有 URL');
@@ -136,7 +133,6 @@ class PreloadService {
     const sound = this.preloadedSounds.get(songId);
     if (sound) {
       this.preloadedSounds.delete(songId);
-      console.log(`[PreloadService] 消耗预加载的歌曲: ${songId}`);
       return sound;
     }
     return undefined;

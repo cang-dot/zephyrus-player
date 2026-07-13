@@ -276,7 +276,6 @@ export const usePlayHistoryStore = defineStore(
         }
 
         localStorage.setItem('playHistory-migrated', '1');
-        console.log('[PlayHistory] 数据迁移完成');
       } catch (error) {
         console.error('[PlayHistory] 数据迁移失败:', error);
       }

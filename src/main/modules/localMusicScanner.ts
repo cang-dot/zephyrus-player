@@ -72,7 +72,6 @@ function extractTitleFromFilename(filePath: string): string {
  */
 function extractCoverAsDataUrl(picture: mm.IPicture | undefined): string | null {
   if (!picture) {
-    console.log('[cover-debug] extractCoverAsDataUrl: picture为空，跳过');
     return null;
   }
   try {
@@ -80,9 +79,7 @@ function extractCoverAsDataUrl(picture: mm.IPicture | undefined): string | null 
       return null;
     }
     const mime = picture.format ?? 'image/jpeg';
-    console.log('[cover-debug] 格式:', mime, '大小:', picture.data.length, '类型:', picture.data.constructor.name);
     const base64 = Buffer.from(picture.data).toString('base64');
-    console.log('[cover-debug] base64前80字符:', base64.substring(0, 80));
     return `data:${mime};base64,${base64}`;
   } catch (error) {
     console.error('封面提取失败:', error);
@@ -248,7 +245,6 @@ async function parseMetadata(filePath: string): Promise<LocalMusicMeta> {
     const metadata = await mm.parseFile(filePath);
     const { common, format } = metadata;
 
-    console.log('[cover-debug] 文件:', path.basename(filePath), 'picture数量:', common.picture?.length ?? 0, 'lyrics数量:', common.lyrics?.length ?? 0);
 
     return {
       filePath,

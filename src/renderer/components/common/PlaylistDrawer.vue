@@ -230,7 +230,6 @@ const handleAddToPlaylist = async (playlist: any) => {
       pid: playlist.id,
       tracks: props.songId.toString()
     });
-    console.log('res.data', res.data);
 
     if (res.status === 200) {
       message.success(t('comp.playlistDrawer.addSuccess'));

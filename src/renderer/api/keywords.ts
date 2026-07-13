@@ -49,9 +49,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 
 export async function queryKeywords(songId: string): Promise<KeywordQueryResult> {
   try {
-    console.log('[KeywordsAPI] queryKeywords songId:', songId);
     const result = await request<KeywordQueryResult>(`/keywords/${songId}`);
-    console.log('[KeywordsAPI] queryKeywords result:', result);
     return result;
   } catch (e) {
     console.error('[KeywordsAPI] queryKeywords error:', e);
@@ -62,7 +60,6 @@ export async function queryKeywords(songId: string): Promise<KeywordQueryResult>
 export async function loadKeywordsForSong(songId: string): Promise<KeywordMark | null> {
   try {
     const result = await queryKeywords(songId);
-    console.log('[KeywordsAPI] loadKeywordsForSong mark:', result.mark);
     return result.mark;
   } catch (e) {
     console.error('[KeywordsAPI] loadKeywordsForSong error:', e);

@@ -172,7 +172,6 @@ const scrollToCurrentSong = () => {
   setTimeout(() => {
     if (playListRef.value && playList.value.length > 0) {
       const index = playerStore.playListIndex;
-      console.log('滚动到歌曲索引:', index);
       playListRef.value.scrollTo({
         top: (index > 3 ? index - 3 : 0) * 62
       });

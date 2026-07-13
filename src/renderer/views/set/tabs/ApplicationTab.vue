@@ -186,7 +186,6 @@ const openDownloadPath = () => {
 };
 
 const handleShortcutsChange = (shortcuts: any) => {
-  console.log('快捷键已更新:', shortcuts);
 };
 </script>
 

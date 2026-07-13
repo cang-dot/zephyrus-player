@@ -31,7 +31,6 @@ export const useRecommendStore = defineStore('recommend', () => {
       if (recommendData && Array.isArray(recommendData.dailySongs)) {
         dailyRecommendSongs.value = recommendData.dailySongs as any;
         lastFetchDate.value = getTodayDateString();
-        console.log(`[Recommend Store] 已加载 ${recommendData.dailySongs.length} 首每日推荐歌曲。`);
       } else {
         dailyRecommendSongs.value = [];
       }
@@ -54,7 +53,6 @@ export const useRecommendStore = defineStore('recommend', () => {
     const index = dailyRecommendSongs.value.findIndex((song) => song.id === oldSongId);
     if (index !== -1) {
       dailyRecommendSongs.value.splice(index, 1, newSong as any);
-      console.log(`[Recommend Store] 已将歌曲 ${oldSongId} 替换为 ${newSong.name}`);
     } else {
       console.warn(`[Recommend Store] 未在日推列表中找到要替换的歌曲ID: ${oldSongId}`);
     }

@@ -110,11 +110,9 @@ export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
       return;
     }
     try {
-      console.log('发送不感兴趣请求，歌曲ID:', props.item.id);
       const numericId = typeof props.item.id === 'string' ? parseInt(props.item.id) : props.item.id;
       const response = await dislikeRecommendedSong(numericId);
       if (response.data.data) {
-        console.log(response);
         const newSongData = response.data.data;
         const newSong: SongResult = {
           ...newSongData,

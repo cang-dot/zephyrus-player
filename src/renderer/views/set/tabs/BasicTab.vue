@@ -333,7 +333,6 @@ watch(
 onMounted(() => {
   if (window.electron) {
     window.electron.ipcRenderer.on('gpu-acceleration-updated', (_, enabled: boolean) => {
-      console.log('GPU加速设置已更新:', enabled);
       gpuAccelerationChanged.value = true;
     });
 

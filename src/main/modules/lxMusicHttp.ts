@@ -43,7 +43,6 @@ export const initLxMusicHttp = () => {
       abortControllers.set(requestId, controller);
 
       try {
-        console.log(`[LxMusicHttp] 请求: ${options.method || 'GET'} ${url}`);
 
         const fetchOptions: RequestInit = {
           method: options.method || 'GET',
@@ -85,7 +84,6 @@ export const initLxMusicHttp = () => {
         const response = await fetch(url, fetchOptions);
         clearTimeout(timeoutId);
 
-        console.log(`[LxMusicHttp] 响应: ${response.status} ${url}`);
 
         // 读取响应体
         const rawBody = await response.text();
@@ -132,13 +130,11 @@ export const initLxMusicHttp = () => {
   ipcMain.handle('lx-music-http-cancel', (_, requestId: string) => {
     const controller = abortControllers.get(requestId);
     if (controller) {
-      console.log(`[LxMusicHttp] 取消请求: ${requestId}`);
       controller.abort();
       abortControllers.delete(requestId);
     }
   });
 
-  console.log('[LxMusicHttp] HTTP 请求处理已初始化');
 };
 
 /**
@@ -146,7 +142,6 @@ export const initLxMusicHttp = () => {
  */
 export const cleanupLxMusicHttp = () => {
   for (const [requestId, controller] of abortControllers.entries()) {
-    console.log(`[LxMusicHttp] 清理请求: ${requestId}`);
     controller.abort();
   }
   abortControllers.clear();

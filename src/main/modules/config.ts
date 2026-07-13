@@ -88,12 +88,10 @@ export function initializeConfig() {
   // 注意：GPU加速设置必须在应用启动时在app.ready之前设置才能生效
   ipcMain.on('update-gpu-acceleration', (event, enabled: boolean) => {
     try {
-      console.log('GPU加速设置更新:', enabled);
       store.set('set.enableGpuAcceleration', enabled);
 
       // GPU加速设置需要重启应用才能生效
       event.sender.send('gpu-acceleration-updated', enabled);
-      console.log('GPU加速设置已保存，重启应用后生效');
     } catch (error) {
       console.error('GPU加速设置更新失败:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);

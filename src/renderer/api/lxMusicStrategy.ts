@@ -27,7 +27,6 @@ const resolveAudioUrl = async (url: string): Promise<string> => {
       return url;
     }
 
-    console.log('[LxMusicStrategy] 检测到 API 端点，尝试解析真实 URL:', url);
 
     // 尝试获取真实 URL
     const response = await fetch(url, {
@@ -39,7 +38,6 @@ const resolveAudioUrl = async (url: string): Promise<string> => {
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('Location');
       if (location) {
-        console.log('[LxMusicStrategy] API 返回重定向 URL:', location);
         return location;
       }
     }
@@ -54,19 +52,16 @@ const resolveAudioUrl = async (url: string): Promise<string> => {
 
     // 如果是音频类型，返回最终 URL
     if (contentType.includes('audio/') || contentType.includes('application/octet-stream')) {
-      console.log('[LxMusicStrategy] 解析到音频 URL:', getResponse.url);
       return getResponse.url;
     }
 
     // 如果是 JSON，尝试解析
     if (contentType.includes('application/json') || contentType.includes('text/json')) {
       const json = await getResponse.json();
-      console.log('[LxMusicStrategy] API 返回 JSON:', json);
 
       // 尝试从 JSON 中提取 URL（常见字段）
       const audioUrl = json.url || json.data?.url || json.audio_url || json.link || json.src;
       if (audioUrl && typeof audioUrl === 'string') {
-        console.log('[LxMusicStrategy] 从 JSON 中提取音频 URL:', audioUrl);
         return audioUrl;
       }
     }
@@ -181,7 +176,6 @@ export class LxMusicStrategy {
       // 获取激活的音源 ID
       const activeLxApiId = settingsStore.setData?.activeLxMusicApiId;
       if (!activeLxApiId) {
-        console.log('[LxMusicStrategy] 未选择激活的落雪音源');
         return null;
       }
 
@@ -190,18 +184,13 @@ export class LxMusicStrategy {
       const activeScript = lxMusicScripts.find((script: any) => script.id === activeLxApiId);
 
       if (!activeScript || !activeScript.script) {
-        console.log('[LxMusicStrategy] 未找到激活的落雪音源脚本');
         return null;
       }
 
-      console.log(
-        `[LxMusicStrategy] 使用激活的音源: ${activeScript.name} (ID: ${activeScript.id})`
-      );
 
       // 获取或初始化执行器
       let runner = getLxMusicRunner();
       if (!runner || !runner.isInitialized()) {
-        console.log('[LxMusicStrategy] 初始化落雪音源执行器...');
         runner = await initLxMusicRunner(activeScript.script);
       }
 
@@ -210,7 +199,6 @@ export class LxMusicStrategy {
       const availableSourceKeys = Object.keys(sources) as LxSourceKey[];
 
       if (availableSourceKeys.length === 0) {
-        console.log('[LxMusicStrategy] 没有可用的落雪音源');
         CacheManager.addFailedCache(id, this.name);
         return null;
       }
@@ -218,12 +206,10 @@ export class LxMusicStrategy {
       // 选择最佳音源
       const bestSource = getBestMatchingSource(availableSourceKeys);
       if (!bestSource) {
-        console.log('[LxMusicStrategy] 无法找到匹配的音源');
         CacheManager.addFailedCache(id, this.name);
         return null;
       }
 
-      console.log(`[LxMusicStrategy] 使用音源: ${LX_SOURCE_NAMES[bestSource]} (${bestSource})`);
 
       // 转换歌曲信息
       const lxMusicInfo = convertToLxMusicInfo(data);
@@ -235,23 +221,19 @@ export class LxMusicStrategy {
       const rawUrl = await runner.getMusicUrl(bestSource, lxMusicInfo, lxQuality);
 
       if (!rawUrl) {
-        console.log('[LxMusicStrategy] 获取 URL 失败');
         CacheManager.addFailedCache(id, this.name);
         return null;
       }
 
-      console.log('[LxMusicStrategy] 脚本返回 URL:', rawUrl.substring(0, 80) + '...');
 
       // 解析可能是 API 端点的 URL
       const resolvedUrl = await resolveAudioUrl(rawUrl);
 
       if (!resolvedUrl) {
-        console.log('[LxMusicStrategy] URL 解析失败');
         CacheManager.addFailedCache(id, this.name);
         return null;
       }
 
-      console.log('[LxMusicStrategy] 最终音频 URL:', resolvedUrl.substring(0, 80) + '...');
 
       return {
         data: {

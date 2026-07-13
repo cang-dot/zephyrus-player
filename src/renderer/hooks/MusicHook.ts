@@ -122,7 +122,6 @@ const parseLyricsString = async (
 
   try {
     const parseResult = parseLyrics(lyricsStr);
-    console.log('parseResult', parseResult);
 
     if (!parseResult.success) {
       console.error('歌词解析失败:', parseResult.error.message);
@@ -188,7 +187,6 @@ const setupMusicWatchers = () => {
       }
 
       await nextTick(async () => {
-        console.log('歌曲切换，更新歌词数据');
 
         // 检查是否有原始歌词字符串需要解析
         const lyricData = playMusic.value.lyric;
@@ -221,7 +219,6 @@ const setupMusicWatchers = () => {
         }
         // 当歌词数据更新时，如果歌词窗口打开，则发送数据
         if (isElectron && isLyricWindowOpen.value) {
-          console.log('歌词窗口已打开，同步最新歌词数据');
           // 不管歌词数组是否为空，都发送最新数据
           sendLyricToWin();
 
@@ -444,7 +441,6 @@ const setupAudioListeners = () => {
 
   // 监听暂停
   audioService.on('pause', () => {
-    console.log('音频暂停事件触发');
     getPlayerStore().setPlayMusic(false);
     clearInterval();
     if (isElectron && isLyricWindowOpen.value) {
@@ -475,7 +471,6 @@ const setupAudioListeners = () => {
     } catch (error) {
       console.error('单曲循环重播失败:', error);
       if (retryCount < MAX_REPLAY_RETRIES) {
-        console.log(`单曲循环重试 ${retryCount + 1}/${MAX_REPLAY_RETRIES}`);
         setTimeout(() => replayMusic(retryCount + 1), 1000 * (retryCount + 1));
       } else {
         console.error('单曲循环重试次数用尽，切换下一首');
@@ -486,7 +481,6 @@ const setupAudioListeners = () => {
 
   // 监听结束
   audioService.on('end', async () => {
-    console.log('音频播放结束事件触发');
     clearInterval();
 
     if (getPlayerStore().playMode === 1) {
@@ -778,7 +772,6 @@ export const sendLyricToWin = () => {
       // 发送数据到歌词窗口
       window.api.sendLyric(JSON.stringify(updateData));
     } else {
-      console.log('No lyric data available, sending empty lyric message');
 
       // 发送没有歌词的提示
       const emptyLyricData = {
@@ -843,11 +836,9 @@ export const openLyric = () => {
 
   // 检查是否有播放中的歌曲
   if (!playMusic.value || !playMusic.value.id) {
-    console.log('没有正在播放的歌曲，无法打开歌词窗口');
     return;
   }
 
-  console.log('Opening lyric window with current song:', playMusic.value?.name);
 
   isLyricWindowOpen.value = !isLyricWindowOpen.value;
   if (isLyricWindowOpen.value) {
@@ -926,7 +917,6 @@ if (isElectron) {
         isLyricWindowOpen.value = false; // 确保状态更新
         break;
       default:
-        console.log('Unknown command:', command);
         break;
     }
   });
@@ -937,14 +927,12 @@ export const initAudioListeners = async () => {
   try {
     // 确保有正在播放的音乐
     if (!getPlayerStore().playMusic || !getPlayerStore().playMusic.id) {
-      console.log('没有正在播放的音乐，跳过音频监听器初始化');
       return;
     }
 
     // 确保有音频实例
     const initialSound = audioService.getCurrentSound();
     if (!initialSound) {
-      console.log('没有音频实例，等待音频加载...');
       // 等待音频加载完成
       await new Promise<void>((resolve) => {
         const checkInterval = setInterval(() => {
@@ -958,7 +946,6 @@ export const initAudioListeners = async () => {
         // 设置超时
         setTimeout(() => {
           clearInterval(checkInterval);
-          console.log('等待音频加载超时');
           resolve();
         }, 5000);
       });
@@ -997,7 +984,6 @@ export const initAudioListeners = async () => {
 audioService.on('url_expired', async (expiredTrack) => {
   if (!expiredTrack) return;
 
-  console.log('检测到URL过期事件，准备重新获取URL', expiredTrack.name);
 
   try {
     // 使用 handlePlayMusic 重新播放，它会自动处理 URL 获取和状态跟踪
@@ -1034,7 +1020,6 @@ window.addEventListener('audio-ready', ((event: CustomEvent) => {
         nowTime.value = currentPosition;
       }
 
-      console.log('音频就绪，已设置监听器并更新进度显示');
     }
   } catch (error) {
     console.error('处理音频就绪事件出错:', error);

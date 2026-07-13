@@ -65,7 +65,6 @@ class WindowSizeManager {
     this.initMinimumWindowSize();
     this.setupIPCHandlers();
     this.isInitialized = true;
-    console.log('窗口大小管理器初始化完成');
   }
 
   /**
@@ -104,7 +103,6 @@ class WindowSizeManager {
       MIN_WIDTH = Math.max(ABSOLUTE_MIN_WIDTH, Math.round(workAreaWidth * 0.3));
       MIN_HEIGHT = Math.max(ABSOLUTE_MIN_HEIGHT, Math.round(workAreaHeight * 0.3));
 
-      console.log(`设置最小窗口尺寸: ${MIN_WIDTH}x${MIN_HEIGHT}`);
     } catch (error) {
       console.error('初始化最小窗口尺寸失败:', error);
       // 使用默认值
@@ -177,9 +175,6 @@ class WindowSizeManager {
       Math.abs(currentWidth - this.savedState.width) > 2 ||
       Math.abs(currentHeight - this.savedState.height) > 2
     ) {
-      console.log(
-        `强制调整窗口大小: 当前=${currentWidth}x${currentHeight}, 目标=${this.savedState.width}x${this.savedState.height}`
-      );
 
       // 临时禁用minimum size限制
       const [minWidth, minHeight] = win.getMinimumSize();
@@ -193,14 +188,12 @@ class WindowSizeManager {
 
       // 验证尺寸设置是否成功
       const [newWidth, newHeight] = win.getSize();
-      console.log(`调整后窗口大小: ${newWidth}x${newHeight}`);
 
       // 如果调整后的大小仍然与目标不一致，尝试再次调整
       if (
         Math.abs(newWidth - this.savedState.width) > 1 ||
         Math.abs(newHeight - this.savedState.height) > 1
       ) {
-        console.log(`窗口大小调整后仍不一致，将再次尝试调整`);
         setTimeout(() => {
           if (!win.isDestroyed() && !win.isMaximized() && !win.isMinimized()) {
             win.setSize(this.savedState!.width, this.savedState!.height, false);
@@ -302,9 +295,6 @@ class WindowSizeManager {
       }
     }
 
-    console.log(
-      `窗口创建选项: 大小=${options.width}x${options.height}, 位置=(${options.x}, ${options.y})`
-    );
 
     return options;
   }
@@ -323,7 +313,6 @@ class WindowSizeManager {
 
     // 如果需要最大化，直接最大化
     if (savedState.isMaximized) {
-      console.log('应用已保存的最大化状态');
       win.maximize();
     }
     // 如果位置无效，则居中显示
@@ -333,7 +322,6 @@ class WindowSizeManager {
       savedState.y === undefined ||
       !this.isPositionVisible(savedState.x, savedState.y)
     ) {
-      console.log('保存的位置无效，窗口居中显示');
       win.center();
     }
   }
@@ -377,10 +365,8 @@ class WindowSizeManager {
         y: currentBounds.y,
         isMaximized: true
       };
-      console.log('state IsMaximized', state);
     } else if (win.isMinimized()) {
       // 最小化状态下不保存窗口大小，因为可能不准确
-      console.log('state IsMinimized', this.savedState);
       return (
         this.savedState || {
           width: DEFAULT_MAIN_WIDTH,
@@ -400,22 +386,18 @@ class WindowSizeManager {
         y,
         isMaximized: false
       };
-      console.log('state IsNormal', state);
     }
 
     // 如果是mini模式，不保存到持久化存储，只返回状态用于内存中的恢复
     if (isMiniMode) {
-      console.log('检测到mini模式窗口，不保存到持久化存储');
       return state;
     }
 
     // 保存状态到存储
     this.store.set(WINDOW_STATE_KEY, state);
-    console.log(`已保存窗口状态: ${JSON.stringify(state)}`);
 
     // 更新内部状态
     this.savedState = state;
-    console.log('state', state);
 
     return state;
   }
@@ -427,7 +409,6 @@ class WindowSizeManager {
     const state = this.store.get(WINDOW_STATE_KEY) as WindowState | undefined;
 
     if (!state) {
-      console.log('未找到保存的窗口状态，将使用默认值');
       return null;
     }
 
@@ -440,7 +421,6 @@ class WindowSizeManager {
       isMaximized: !!state.isMaximized
     };
 
-    console.log(`读取保存的窗口状态: ${JSON.stringify(validatedState)}`);
 
     return validatedState;
   }
@@ -529,14 +509,10 @@ class WindowSizeManager {
 
     if (app.isReady()) {
       try {
-        console.log(
-          `应用页面缩放因子: ${zoomFactor}, 系统缩放比: ${screen.getPrimaryDisplay().scaleFactor}`
-        );
       } catch (error) {
         console.error('获取系统缩放比失败:', error);
       }
     } else {
-      console.log(`应用页面缩放因子: ${zoomFactor}`);
     }
   }
 
@@ -546,11 +522,9 @@ class WindowSizeManager {
   setupIPCHandlers(): void {
     // 防止重复注册IPC处理程序
     if (ipcHandlersRegistered) {
-      console.log('IPC处理程序已注册，跳过重复注册');
       return;
     }
 
-    console.log('注册窗口大小相关的IPC处理程序');
 
     // 标记为已注册
     ipcHandlersRegistered = true;
@@ -609,7 +583,6 @@ class WindowSizeManager {
     ipcMain.on('resize-window', (event, width, height) => {
       const win = BrowserWindow.fromWebContents(event.sender);
       if (win && !win.isDestroyed()) {
-        console.log(`接收到调整窗口大小请求: ${width}x${height}`);
 
         // 确保尺寸不小于最小值
         const adjustedWidth = Math.max(width, MIN_WIDTH);
@@ -617,7 +590,6 @@ class WindowSizeManager {
 
         // 设置窗口的大小
         win.setSize(adjustedWidth, adjustedHeight);
-        console.log(`窗口大小已调整为: ${adjustedWidth}x${adjustedHeight}`);
 
         // 保存窗口状态
         this.saveWindowState(win);
@@ -628,12 +600,10 @@ class WindowSizeManager {
       const win = BrowserWindow.fromWebContents(event.sender);
       if (win && !win.isDestroyed()) {
         if (showPlaylist) {
-          console.log(`扩大迷你窗口至 ${DEFAULT_MINI_WIDTH} x ${DEFAULT_MINI_EXPANDED_HEIGHT}`);
           win.setMinimumSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_HEIGHT);
           win.setMaximumSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_EXPANDED_HEIGHT);
           win.setSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_EXPANDED_HEIGHT, false);
         } else {
-          console.log(`缩小迷你窗口至 ${DEFAULT_MINI_WIDTH} x ${DEFAULT_MINI_HEIGHT}`);
           win.setMaximumSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_HEIGHT);
           win.setMinimumSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_HEIGHT);
           win.setSize(DEFAULT_MINI_WIDTH, DEFAULT_MINI_HEIGHT, false);

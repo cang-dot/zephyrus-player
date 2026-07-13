@@ -89,7 +89,6 @@ router.afterEach((to) => {
   // 使用setTimeout避免阻塞路由导航
   setTimeout(() => {
     const userId = getUserId();
-    console.log('pageName', pageName, userId);
   }, 100);
 });
 

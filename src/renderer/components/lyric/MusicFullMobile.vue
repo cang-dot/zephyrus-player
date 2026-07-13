@@ -555,12 +555,10 @@ const scrollToCurrentLyric = (immediate = false, customScrollerRef?: HTMLElement
   try {
     const scrollerRef = customScrollerRef || lyricsScrollerRef.value;
     if (!scrollerRef) {
-      console.log('歌词容器引用不存在');
       return;
     }
 
     if (!supportAutoScroll.value) {
-      console.log('歌词不支持自动滚动');
       return;
     }
 
@@ -572,7 +570,6 @@ const scrollToCurrentLyric = (immediate = false, customScrollerRef?: HTMLElement
     const prefix = customScrollerRef ? 'landscape-' : '';
     const activeEl = document.getElementById(`${prefix}lyric-line-${nowIndex.value}`);
     if (!activeEl) {
-      console.log(`找不到当前歌词元素: ${prefix}lyric-line-${nowIndex.value}`);
       return;
     }
 
@@ -586,7 +583,6 @@ const scrollToCurrentLyric = (immediate = false, customScrollerRef?: HTMLElement
       containerRect.height / 2 +
       lineRect.height / 2;
 
-    console.log(`滚动到歌词 #${nowIndex.value}, 位置: ${scrollTop}px`);
 
     scrollerRef.scrollTo({
       top: scrollTop,
@@ -599,7 +595,6 @@ const scrollToCurrentLyric = (immediate = false, customScrollerRef?: HTMLElement
 
 // 监听歌词变化，自动滚动
 watch(nowIndex, (newIndex, oldIndex) => {
-  console.log(`歌词索引变化: ${oldIndex} -> ${newIndex}`);
 
   // 歌曲切换时不自动滚动
   if (isSongChanging.value) return;
@@ -755,7 +750,6 @@ const handleProgressBarClick = (e: MouseEvent) => {
   const percentage = offsetX / rect.width;
   const newTime = Math.max(0, Math.min(percentage * allTime.value, allTime.value));
 
-  console.log(`进度条点击: ${percentage.toFixed(2)}, 新时间: ${newTime.toFixed(2)}`);
 
   sound.value.seek(newTime);
   nowTime.value = newTime;
@@ -780,7 +774,6 @@ const handleMouseDown = (e: MouseEvent) => {
     const newTime = percentage * allTime.value;
 
     nowTime.value = newTime;
-    console.log(`鼠标按下，位置: ${percentage.toFixed(2)}, 时间: ${newTime.toFixed(2)}秒`);
   }
 
   // 添加全局鼠标事件监听
@@ -807,7 +800,6 @@ const handleMouseMove = (e: MouseEvent) => {
   const newTime = percentage * allTime.value;
 
   nowTime.value = newTime;
-  console.log(`鼠标移动，位置: ${percentage.toFixed(2)}, 时间: ${newTime.toFixed(2)}秒`);
 };
 
 // 鼠标释放事件
@@ -818,7 +810,6 @@ const handleMouseUp = (e: MouseEvent) => {
 
   // 释放时跳转到指定位置
   sound.value.seek(nowTime.value);
-  console.log(`鼠标释放，跳转到: ${nowTime.value.toFixed(2)}秒`);
 
   isMouseDragging.value = false;
 
@@ -838,7 +829,6 @@ const handleThumbTouchStart = (e: TouchEvent) => {
   const progressBar = target.parentElement?.parentElement as HTMLElement;
   if (progressBar) {
     progressContainerWidth.value = progressBar.getBoundingClientRect().width;
-    console.log(`进度条宽度: ${progressContainerWidth.value}px`);
   }
 };
 
@@ -860,7 +850,6 @@ const handleThumbTouchMove = (e: TouchEvent) => {
   // 实时更新UI，但不频繁seek
   nowTime.value = newTime;
 
-  console.log(`thumb拖动: ${percentage.toFixed(2)}, 时间: ${newTime.toFixed(2)}`);
 };
 
 const handleThumbTouchEnd = (e: TouchEvent) => {
@@ -870,7 +859,6 @@ const handleThumbTouchEnd = (e: TouchEvent) => {
   e.stopPropagation(); // 阻止事件冒泡
 
   // 拖动结束时执行seek操作
-  console.log(`拖动结束，跳转到: ${nowTime.value.toFixed(2)}秒`);
   sound.value.seek(nowTime.value);
   isThumbDragging.value = false;
 };

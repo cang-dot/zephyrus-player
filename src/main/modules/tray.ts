@@ -110,13 +110,11 @@ function updateStatusBarTray() {
       // 完整信息放在tooltip中
       const fullTitle = getSongTitle(currentSong);
       songTitleTray.setToolTip(fullTitle);
-      console.log('更新状态栏歌曲显示:', title, '完整信息:', fullTitle);
     } else {
       songTitleTray.setTitle('未播放', {
         fontType: 'monospacedDigit'
       });
       songTitleTray.setToolTip('未播放');
-      console.log('更新状态栏歌曲显示: 未播放');
     }
   }
 
@@ -186,7 +184,6 @@ export function updateTrayMenu(mainWindow: BrowserWindow) {
         label: i18n.global.t('common.tray.favorite'),
         type: 'normal',
         click: () => {
-          console.log('[Tray] 发送收藏命令 - macOS菜单');
           mainWindow.webContents.send('global-shortcut', 'toggleFavorite');
         }
       })
@@ -275,7 +272,6 @@ export function updateTrayMenu(mainWindow: BrowserWindow) {
         label: i18n.global.t('common.tray.favorite'),
         type: 'normal',
         click: () => {
-          console.log('[Tray] 发送收藏命令 - Windows/Linux菜单');
           mainWindow.webContents.send('global-shortcut', 'toggleFavorite');
         }
       },
@@ -397,7 +393,6 @@ function initializeStatusBarTray(mainWindow: BrowserWindow) {
   updateStatusBarTray();
 
   // 打印调试信息
-  console.log('状态栏初始化完成，歌曲显示标题:', initialText);
 }
 
 /**

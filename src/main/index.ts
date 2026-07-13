@@ -103,10 +103,8 @@ if (!isSingleInstance) {
     const enableGpuAcceleration = store.get('set.enableGpuAcceleration', true) as boolean;
 
     if (!enableGpuAcceleration) {
-      console.log('GPU加速已禁用');
       app.disableHardwareAcceleration();
     } else {
-      console.log('GPU加速已启用');
     }
   } catch (error) {
     console.error('GPU加速设置初始化失败:', error);

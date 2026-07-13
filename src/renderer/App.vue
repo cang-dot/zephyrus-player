@@ -191,7 +191,6 @@ watch(
 );
 
 const handleSetLanguage = (value: string) => {
-  console.log('应用语言变更:', value);
   if (value) {
     locale.value = value;
   }
@@ -270,13 +269,11 @@ onMounted(async () => {
 
   // 检查网络状态，离线时自动跳转到本地音乐页面
   if (!navigator.onLine) {
-    console.log('检测到无网络连接，跳转到本地音乐页面');
     router.push('/local-music');
   }
 
   // 监听网络状态变化，断网时跳转到本地音乐页面
   window.addEventListener('offline', () => {
-    console.log('网络连接断开，跳转到本地音乐页面');
     router.push('/local-music');
   });
 
@@ -297,7 +294,6 @@ onMounted(async () => {
     const activeScript = lxMusicScripts.find((script: any) => script.id === activeLxApiId);
     if (activeScript && activeScript.script) {
       try {
-        console.log('[App] 初始化激活的落雪音源:', activeScript.name);
         await initLxMusicRunner(activeScript.script);
       } catch (error) {
         console.error('[App] 初始化落雪音源失败:', error);

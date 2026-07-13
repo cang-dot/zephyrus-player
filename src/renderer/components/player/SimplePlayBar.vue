@@ -286,7 +286,6 @@ const isDarkMode = computed(() => props.isDark);
 const applyThemeColor = (colorValue: string) => {
   if (!colorValue || !playBarRef.value) return;
 
-  console.log('应用主题色:', colorValue);
   const playBarElement = playBarRef.value;
 
   // 解析RGB值
@@ -299,7 +298,6 @@ const applyThemeColor = (colorValue: string) => {
     // 使用加权平均值公式: 0.299*R + 0.587*G + 0.114*B
     const brightness = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
 
-    console.log(`主题色亮度: ${brightness}/255`);
 
     // 设置主色
     playBarElement.style.setProperty('--fill-color', colorValue);

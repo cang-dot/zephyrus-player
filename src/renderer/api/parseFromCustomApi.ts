@@ -45,7 +45,6 @@ export const parseFromCustomApi = async (
     return null;
   }
 
-  console.log(`自定义API：正在使用插件 [${plugin.name}] 进行解析...`);
 
   try {
     // 1. 准备请求参数，替换占位符
@@ -68,12 +67,10 @@ export const parseFromCustomApi = async (
 
     // 3. 根据方法发送不同的请求
     if (method === 'POST') {
-      console.log('自定义API：发送 POST 请求到:', plugin.apiUrl, '参数:', finalParams);
       response = await axios.post(plugin.apiUrl, finalParams, { timeout });
     } else {
       // 默认为 GET
       const finalUrl = `${plugin.apiUrl}?${new URLSearchParams(finalParams).toString()}`;
-      console.log('自定义API：发送 GET 请求到:', finalUrl);
       response = await axios.get(finalUrl, { timeout });
     }
 
@@ -81,7 +78,6 @@ export const parseFromCustomApi = async (
     const musicUrl = get(response.data, plugin.responseUrlPath);
 
     if (musicUrl && typeof musicUrl === 'string') {
-      console.log('自定义API：成功获取URL！');
       // 5. 组装成应用所需的标准格式并返回
       return {
         data: {

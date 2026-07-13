@@ -140,10 +140,6 @@ class DrumDetector {
 
     this.upstreamNode.connect(this.analyserNode);
 
-    console.log(
-      `[DrumDetector] 已连接, FFT=${this.config.fftSize}, ` +
-      `binCount=${this.analyserNode.frequencyBinCount}`
-    );
   }
 
   /**
@@ -160,7 +156,6 @@ class DrumDetector {
     this.upstreamNode = null;
     this.context = null;
 
-    console.log('[DrumDetector] 已断开');
   }
 
   /**
@@ -183,7 +178,6 @@ class DrumDetector {
     this.bpm = 0;
 
     this.analysisLoop();
-    console.log('[DrumDetector] 已启动');
   }
 
   /**
@@ -195,7 +189,6 @@ class DrumDetector {
       this.animationFrameId = null;
     }
     this.running = false;
-    console.log('[DrumDetector] 已停止');
   }
 
   /**

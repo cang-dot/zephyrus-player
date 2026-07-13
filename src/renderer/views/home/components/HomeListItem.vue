@@ -186,7 +186,6 @@ const extractColor = async () => {
       backgroundGradient.value = `linear-gradient(to top, ${darkColor.toRgbString()} 0%, ${midColor.toRgbString()} 60%, ${topColor.toRgbString()} 100%)`;
     }
   } catch (error) {
-    console.debug('Color extraction failed:', error);
     // 使用深色fallback
     backgroundGradient.value =
       'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.3) 100%)';

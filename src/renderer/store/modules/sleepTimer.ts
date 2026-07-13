@@ -81,7 +81,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
       checkSleepTimer();
     }, 1000) as unknown as number;
 
-    console.log(`设置定时关闭: ${minutes}分钟后`);
     return true;
   };
 
@@ -107,7 +106,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
 
     setLocalStorageItem('sleepTimer', sleepTimer.value);
 
-    console.log(`设置定时关闭: 再播放${songs}首歌后`);
     return true;
   };
 
@@ -124,7 +122,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
 
     setLocalStorageItem('sleepTimer', sleepTimer.value);
 
-    console.log('设置定时关闭: 播放列表结束时');
     return true;
   };
 
@@ -144,7 +141,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
 
     setLocalStorageItem('sleepTimer', sleepTimer.value);
 
-    console.log('取消定时关闭');
     return true;
   };
 
@@ -167,7 +163,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
    * 停止播放并清除定时器
    */
   const stopPlayback = async () => {
-    console.log('定时器触发：停止播放');
 
     const { usePlayerCoreStore } = await import('./playerCore');
     const playerCore = usePlayerCoreStore();
@@ -193,7 +188,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
    * 监听歌曲变化，处理按歌曲数定时和播放列表结束定时
    */
   const handleSongChange = async () => {
-    console.log('歌曲已切换，检查定时器状态:', sleepTimer.value);
 
     // 处理按歌曲数定时
     if (
@@ -201,12 +195,10 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
       sleepTimer.value.remainingSongs !== undefined
     ) {
       sleepTimer.value.remainingSongs--;
-      console.log(`剩余歌曲数: ${sleepTimer.value.remainingSongs}`);
 
       setLocalStorageItem('sleepTimer', sleepTimer.value);
 
       if (sleepTimer.value.remainingSongs <= 0) {
-        console.log('已播放完设定的歌曲数，停止播放');
         stopPlayback();
         setTimeout(() => {
           stopPlayback();
@@ -222,7 +214,6 @@ export const useSleepTimerStore = defineStore('sleepTimer', () => {
       const isLastSong = playlistStore.playListIndex === playlistStore.playList.length - 1;
 
       if (isLastSong && playlistStore.playMode !== 1) {
-        console.log('已到达播放列表末尾，将在当前歌曲结束后停止播放');
         sleepTimer.value = {
           type: SleepTimerType.SONGS,
           value: 1,

@@ -11,7 +11,6 @@ const { locale } = useI18n();
 // 使用自动导入的语言选项
 const languages = getLanguageOptions();
 
-console.log('locale', locale);
 // 使用计算属性来获取当前语言
 const currentLanguage = computed({
   get: () => locale.value,

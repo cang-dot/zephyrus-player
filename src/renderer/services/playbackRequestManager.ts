@@ -65,7 +65,6 @@ class PlaybackRequestManager {
     this.requestMap.set(requestId, request);
     this.currentRequestId = requestId;
 
-    console.log(`[PlaybackRequestManager] 创建新请求: ${requestId}, 歌曲: ${song.name}`);
 
     return requestId;
   }
@@ -87,7 +86,6 @@ class PlaybackRequestManager {
     }
 
     request.status = RequestStatus.ACTIVE;
-    console.log(`[PlaybackRequestManager] 激活请求: ${requestId}`);
     return true;
   }
 
@@ -102,7 +100,6 @@ class PlaybackRequestManager {
     }
 
     request.status = RequestStatus.COMPLETED;
-    console.log(`[PlaybackRequestManager] 完成请求: ${requestId}`);
 
     // 清理旧请求（保留最近3个）
     this.cleanupOldRequests();
@@ -119,7 +116,6 @@ class PlaybackRequestManager {
     }
 
     request.status = RequestStatus.FAILED;
-    console.log(`[PlaybackRequestManager] 请求失败: ${requestId}`);
   }
 
   /**
@@ -142,7 +138,6 @@ class PlaybackRequestManager {
     }
 
     request.status = RequestStatus.CANCELLED;
-    console.log(`[PlaybackRequestManager] 取消请求: ${requestId}, 歌曲: ${request.song.name}`);
 
     // 如果是当前请求，清除当前请求ID
     if (this.currentRequestId === requestId) {
@@ -154,7 +149,6 @@ class PlaybackRequestManager {
    * 取消所有请求
    */
   cancelAllRequests(): void {
-    console.log(`[PlaybackRequestManager] 取消所有请求，当前请求数: ${this.requestMap.size}`);
 
     this.requestMap.forEach((request) => {
       if (
@@ -247,7 +241,6 @@ class PlaybackRequestManager {
     });
 
     if (toDelete.length > 0) {
-      console.log(`[PlaybackRequestManager] 清理了 ${toDelete.length} 个旧请求`);
     }
   }
 
@@ -255,7 +248,6 @@ class PlaybackRequestManager {
    * 重置管理器（用于调试或特殊情况）
    */
   reset(): void {
-    console.log('[PlaybackRequestManager] 重置管理器');
     this.cancelAllRequests();
     this.requestMap.clear();
     this.currentRequestId = null;

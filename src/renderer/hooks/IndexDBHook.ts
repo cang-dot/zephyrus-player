@@ -54,7 +54,6 @@ const useIndexedDB = async <T extends string, S extends Record<T, Record<string,
       const request = store.add(value);
 
       request.onsuccess = () => {
-        console.log('成功');
         resolve();
       };
 
@@ -74,7 +73,6 @@ const useIndexedDB = async <T extends string, S extends Record<T, Record<string,
       const request = store.put(value);
 
       request.onsuccess = () => {
-        console.log('成功');
         resolve();
       };
 
@@ -115,7 +113,6 @@ const useIndexedDB = async <T extends string, S extends Record<T, Record<string,
       const request = store.delete(key);
 
       request.onsuccess = () => {
-        console.log('删除成功');
         resolve();
       };
 

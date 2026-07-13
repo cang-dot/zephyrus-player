@@ -262,7 +262,6 @@ export class LxMusicSourceRunner {
       case 'initialized':
         this.sources = message.data.sources;
         this.initialized = true;
-        console.log('[LxMusicRunner] 初始化成功:', message.data.sources);
         this.resolveInitialization(message.data);
         break;
 
@@ -291,7 +290,6 @@ export class LxMusicSourceRunner {
         } else if (message.level === 'info') {
           console.info('[LxScript]', ...message.args);
         } else {
-          console.log('[LxScript]', ...message.args);
         }
         break;
 
@@ -387,7 +385,6 @@ export class LxMusicSourceRunner {
     options: any,
     callback: (err: Error | null, resp: any, body: any) => void
   ): () => void {
-    console.log(`[LxMusicRunner] HTTP 请求: ${options.method || 'GET'} ${url}`);
 
     const timeout = options.timeout || 30000;
     const requestId = `lx_http_${Date.now()}_${Math.random().toString(36).substring(7)}`;

@@ -150,10 +150,6 @@ class ClimaxDetector {
     // 当前实现中 analyserNode 仅作为旁路监听，不插入主路径
     this.downstreamNode = null;
 
-    console.log(
-      `[ClimaxDetector] 已连接到音频图谱, FFT大小: ${this.config.fftSize}, ` +
-      `频率分辨率: ${audioContext.sampleRate / this.config.fftSize}Hz`
-    );
   }
 
   /**
@@ -175,7 +171,6 @@ class ClimaxDetector {
     this.downstreamNode = null;
     this.context = null;
 
-    console.log('[ClimaxDetector] 已断开音频图谱连接');
   }
 
   /**
@@ -200,7 +195,6 @@ class ClimaxDetector {
     this.energyHistory = [];
     this.analysisLoop();
 
-    console.log('[ClimaxDetector] 高潮检测已启动');
   }
 
   /**
@@ -217,7 +211,6 @@ class ClimaxDetector {
     this.energyLevel = 0;
     this.spectrumCoverage = 0;
 
-    console.log('[ClimaxDetector] 高潮检测已停止');
   }
 
   /**

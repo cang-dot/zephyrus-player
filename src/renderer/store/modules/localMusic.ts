@@ -125,7 +125,6 @@ export const useLocalMusicStore = defineStore(
         const lastVersion = parseInt(localStorage.getItem('localMusicScanVersion') || '0', 10);
         const forceRescan = lastVersion < SCAN_VERSION;
         if (forceRescan) {
-          console.log(`[scan] 扫描版本变更 ${lastVersion} -> ${SCAN_VERSION}，强制重新解析所有文件`);
           localStorage.setItem('localMusicScanVersion', SCAN_VERSION.toString());
         }
 

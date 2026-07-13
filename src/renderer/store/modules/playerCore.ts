@@ -125,7 +125,6 @@ export const usePlayerCoreStore = defineStore(
       const actualRequestId = requestId || `check_${Date.now()}`;
 
       const onPlayHandler = () => {
-        console.log(`[${actualRequestId}] 播放事件触发，歌曲成功开始播放`);
         audioService.off('play', onPlayHandler);
         audioService.off('playerror', onPlayErrorHandler);
         checkPlaybackRetryCount = 0; // 播放成功，重置重试计数
@@ -136,13 +135,11 @@ export const usePlayerCoreStore = defineStore(
       };
 
       const onPlayErrorHandler = async () => {
-        console.log('播放错误事件触发，检查是否需要重新获取URL');
         audioService.off('play', onPlayHandler);
         audioService.off('playerror', onPlayErrorHandler);
 
         // 如果有 requestId，验证其有效性
         if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
-          console.log('请求已过期，跳过重试');
           return;
         }
 
@@ -156,9 +153,6 @@ export const usePlayerCoreStore = defineStore(
 
         if (userPlayIntent.value && play.value) {
           checkPlaybackRetryCount++;
-          console.log(
-            `播放失败，尝试刷新URL并重新播放 (重试 ${checkPlaybackRetryCount}/${MAX_CHECKPLAYBACK_RETRIES})`
-          );
           // 本地音乐不需要刷新 URL
           if (!playMusic.value.playMusicUrl?.startsWith('local://')) {
             playMusic.value.playMusicUrl = undefined;
@@ -174,7 +168,6 @@ export const usePlayerCoreStore = defineStore(
       checkPlayTime = setTimeout(() => {
         // 如果有 requestId，验证其有效性
         if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
-          console.log('请求已过期，跳过超时重试');
           audioService.off('play', onPlayHandler);
           audioService.off('playerror', onPlayErrorHandler);
           return;
@@ -201,7 +194,6 @@ export const usePlayerCoreStore = defineStore(
 
         if (htmlPlaying) {
           // 底层 HTMLAudioElement 实际在播放，不需要重试
-          console.log('底层音频元素正在播放，跳过超时重试');
           audioService.off('play', onPlayHandler);
           audioService.off('playerror', onPlayErrorHandler);
           return;
@@ -220,9 +212,6 @@ export const usePlayerCoreStore = defineStore(
           }
 
           checkPlaybackRetryCount++;
-          console.log(
-            `${timeout}ms后歌曲未真正播放，尝试重新获取URL (重试 ${checkPlaybackRetryCount}/${MAX_CHECKPLAYBACK_RETRIES})`
-          );
 
           // 本地音乐不需要刷新 URL
           if (!playMusic.value.playMusicUrl?.startsWith('local://')) {
@@ -251,24 +240,20 @@ export const usePlayerCoreStore = defineStore(
 
       // 创建新的播放请求并取消之前的所有请求
       const requestId = playbackRequestManager.createRequest(music);
-      console.log(`[handlePlayMusic] 开始处理歌曲: ${music.name}, 请求ID: ${requestId}`);
 
       const currentSound = audioService.getCurrentSound();
       if (currentSound) {
-        console.log('主动停止并卸载当前音频实例');
         currentSound.stop();
         currentSound.unload();
       }
 
       // 验证请求是否仍然有效
       if (!playbackRequestManager.isRequestValid(requestId)) {
-        console.log(`[handlePlayMusic] 请求已失效: ${requestId}`);
         return false;
       }
 
       // 激活请求
       if (!playbackRequestManager.activateRequest(requestId)) {
-        console.log(`[handlePlayMusic] 无法激活请求: ${requestId}`);
         return false;
       }
 
@@ -302,7 +287,6 @@ export const usePlayerCoreStore = defineStore(
 
       // 在更新状态前再次验证请求
       if (!playbackRequestManager.isRequestValid(requestId)) {
-        console.log(`[handlePlayMusic] 加载歌词/背景色后请求已失效: ${requestId}`);
         return false;
       }
 
@@ -344,7 +328,6 @@ export const usePlayerCoreStore = defineStore(
 
         // 在获取详情后再次验证请求
         if (!playbackRequestManager.isRequestValid(requestId)) {
-          console.log(`[handlePlayMusic] 获取歌曲详情后请求已失效: ${requestId}`);
           playbackRequestManager.failRequest(requestId);
           return false;
         }
@@ -426,26 +409,17 @@ export const usePlayerCoreStore = defineStore(
 
       // 如果提供了 requestId，验证请求是否仍然有效
       if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
-        console.log(`[playAudio] 请求已失效: ${requestId}`);
         return null;
       }
 
       try {
         const shouldPlay = play.value;
-        console.log('播放音频，当前播放状态:', shouldPlay ? '播放' : '暂停');
 
         // 检查保存的进度
         let initialPosition = 0;
         const savedProgress = JSON.parse(localStorage.getItem('playProgress') || '{}');
-        console.log(
-          '[playAudio] 读取保存的进度:',
-          savedProgress,
-          '当前歌曲ID:',
-          playMusic.value.id
-        );
         if (savedProgress.songId === playMusic.value.id) {
           initialPosition = savedProgress.progress;
-          console.log('[playAudio] 恢复播放进度:', initialPosition);
         }
 
         // 本地歌曲不使用 PreloadService（LocalAudioPlayer 自行管理）
@@ -457,10 +431,8 @@ export const usePlayerCoreStore = defineStore(
           try {
             const preloadedSound = preloadService.consume(playMusic.value.id) as Howl | undefined;
             if (preloadedSound && preloadedSound.state() === 'loaded') {
-              console.log(`[playAudio] 使用预加载的音频: ${playMusic.value.name}`);
               sound = preloadedSound;
             } else {
-              console.log(`[playAudio] 没有预加载，开始加载: ${playMusic.value.name}`);
               sound = await preloadService.load(playMusic.value);
             }
           } catch (error) {
@@ -468,7 +440,6 @@ export const usePlayerCoreStore = defineStore(
             throw error;
           }
         } else {
-          console.log(`[playAudio] 本地歌曲，跳过 PreloadService: ${playMusic.value.name}`);
         }
 
         // 播放新音频，传入已加载的 sound 实例（本地歌曲传入 undefined）
@@ -482,7 +453,6 @@ export const usePlayerCoreStore = defineStore(
 
         // 播放后再次验证请求
         if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
-          console.log(`[playAudio] 播放后请求已失效: ${requestId}`);
           newSound.stop();
           newSound.unload();
           return null;
@@ -508,11 +478,9 @@ export const usePlayerCoreStore = defineStore(
 
         // 操作锁错误不应该停止播放状态，只需要重试
         if (errorMsg.includes('操作锁激活')) {
-          console.log('由于操作锁正在使用，将在1000ms后重试');
 
           try {
             audioService.forceResetOperationLock();
-            console.log('已强制重置操作锁');
           } catch (e) {
             console.error('重置操作锁失败:', e);
           }
@@ -520,7 +488,6 @@ export const usePlayerCoreStore = defineStore(
           setTimeout(() => {
             // 验证请求是否仍然有效再重试
             if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
-              console.log('重试时请求已失效，跳过重试');
               return;
             }
             if (userPlayIntent.value && play.value) {
@@ -598,14 +565,12 @@ export const usePlayerCoreStore = defineStore(
         const numericId =
           typeof currentSong.id === 'string' ? parseInt(currentSong.id, 10) : currentSong.id;
 
-        console.log(`使用音源 ${sourcePlatform} 重新解析歌曲 ${numericId}`);
 
         const songData = cloneDeep(currentSong);
         const res = await getParsingMusicUrl(numericId, songData);
 
         if (res && res.data && res.data.data && res.data.data.url) {
           const newUrl = res.data.data.url;
-          console.log(`解析成功，获取新URL: ${newUrl.substring(0, 50)}...`);
 
           const updatedMusic = {
             ...currentSong,
@@ -640,7 +605,6 @@ export const usePlayerCoreStore = defineStore(
 
       if (playMusic.value && Object.keys(playMusic.value).length > 0) {
         try {
-          console.log('恢复上次播放的音乐:', playMusic.value.name);
           const isPlaying = settingStore.setData.autoPlay;
 
           // 本地音乐（local:// 协议）不需要重新获取 URL，保留原始路径

@@ -614,7 +614,6 @@ async function downloadMusic(
       const fileType = await fileTypeFromFile(tempFilePath);
       if (fileType && fileType.ext) {
         fileExtension = `.${fileType.ext}`;
-        console.log(`文件类型检测结果: ${fileType.mime}, 扩展名: ${fileExtension}`);
       } else {
         // 如果file-type无法识别，尝试使用music-metadata
         const metadata = await mm.parseFile(tempFilePath);
@@ -642,13 +641,9 @@ async function downloadMusic(
           // 设置文件扩展名，如果没找到则默认为mp3
           fileExtension = format ? `.${format[0]}` : '.mp3';
 
-          console.log(
-            `music-metadata检测结果: 容器:${container}, 编码:${codec}, 扩展名: ${fileExtension}`
-          );
         } else {
           // 两种方法都失败，使用传入的type或默认mp3
           fileExtension = type ? `.${type}` : '.mp3';
-          console.log(`无法检测文件类型，使用默认扩展名: ${fileExtension}`);
         }
       }
     } catch (err) {
@@ -702,7 +697,6 @@ async function downloadMusic(
             }
           }
 
-          console.log('歌词已准备好，将写入元数据');
         }
       }
     } catch (lyricError) {
@@ -721,7 +715,6 @@ async function downloadMusic(
             const base64Match = picUrl.match(/^data:[^;]+;base64,(.+)$/);
             if (base64Match) {
               coverImageBuffer = Buffer.from(base64Match[1], 'base64');
-              console.log('从 base64 Data URL 提取封面');
             }
           } else {
             const coverResponse = await axios({
@@ -736,7 +729,6 @@ async function downloadMusic(
             // 检查图片大小是否超过2MB
             if (originalCoverBuffer.length > TWO_MB) {
               const originalSizeMB = (originalCoverBuffer.length / (1024 * 1024)).toFixed(2);
-              console.log(`封面图大于2MB (${originalSizeMB} MB)，开始压缩...`);
               try {
                 // 使用 Electron nativeImage 进行压缩
                 const image = nativeImage.createFromBuffer(originalCoverBuffer);
@@ -762,7 +754,6 @@ async function downloadMusic(
                 coverImageBuffer = resizedImage.toJPEG(80);
 
                 const compressedSizeMB = (coverImageBuffer.length / (1024 * 1024)).toFixed(2);
-                console.log(`封面图压缩完成，新大小: ${compressedSizeMB} MB`);
               } catch (compressionError) {
                 console.error('封面图压缩失败，将使用原图:', compressionError);
                 coverImageBuffer = originalCoverBuffer; // 如果压缩失败，则回退使用原始图片
@@ -773,7 +764,6 @@ async function downloadMusic(
             }
           }
 
-          console.log('封面已准备好，将写入元数据');
         }
       }
     } catch (coverError) {
@@ -824,7 +814,6 @@ async function downloadMusic(
         if (!success) {
           console.error('Failed to write ID3 tags');
         } else {
-          console.log('ID3 tags written successfully');
         }
       } catch (err) {
         console.error('Error writing ID3 tags:', err);
@@ -852,7 +841,6 @@ async function downloadMusic(
           },
           finalFilePath
         );
-        console.log('FLAC tags written successfully');
       } catch (err) {
         console.error('Error writing FLAC tags:', err);
       }
@@ -863,7 +851,6 @@ async function downloadMusic(
       try {
         const lrcFilePath = finalFilePath.replace(/\.[^.]+$/, '.lrc');
         await fs.promises.writeFile(lrcFilePath, lyricsContent, 'utf-8');
-        console.log('歌词文件已保存:', lrcFilePath);
       } catch (lrcError) {
         console.error('保存歌词文件失败:', lrcError);
       }

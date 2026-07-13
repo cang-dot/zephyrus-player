@@ -274,9 +274,6 @@ const getFavoriteSongs = async () => {
       }
     }
 
-    console.log('获取数据统计:', {
-      neteaseSongs: neteaseSongs.length
-    });
 
     // 合并数据，保持原有顺序
     const newSongs = currentIds
@@ -289,7 +286,6 @@ const getFavoriteSongs = async () => {
       })
       .filter((song): song is SongResult => !!song);
 
-    console.log(`最终歌曲列表: ${newSongs.length}首`);
 
     // 追加新数据而不是替换
     if (currentPage.value === 1) {

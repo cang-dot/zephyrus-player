@@ -40,18 +40,15 @@ interface NeteaseSuggestResult {
  * @param keyword 搜索关键词
  */
 export const getSearchSuggestions = async (keyword: string) => {
-  console.log('[API] getSearchSuggestions: 开始执行');
 
   if (!keyword || !keyword.trim()) {
     return Promise.resolve([]);
   }
 
-  console.log(`[API] getSearchSuggestions: 准备请求，关键词: "${keyword}"`);
 
   try {
     let responseData: KugouSuggestionResponse;
     if (isElectron) {
-      console.log('[API] Running in Electron, using IPC proxy.');
       responseData = await window.api.getSearchSuggestions(keyword);
     } else {
       // 非 Electron 环境下，使用接口
@@ -67,13 +64,11 @@ export const getSearchSuggestions = async (keyword: string) => {
 
       // 去重并截取前10个
       const unique = Array.from(new Set(names)).slice(0, 10);
-      console.log('[API] getSearchSuggestions: 解析成功:', unique);
       return unique;
     }
 
     if (responseData && Array.isArray(responseData.data)) {
       const suggestions = responseData.data.map((item) => item.keyword).slice(0, 10);
-      console.log('[API] getSearchSuggestions: 成功解析建议:', suggestions);
       return suggestions;
     }
 

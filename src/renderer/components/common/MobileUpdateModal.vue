@@ -150,7 +150,6 @@ const closeModal = () => {
 const checkForUpdates = async () => {
   // 检查是否应该显示提醒
   if (!shouldShowReminder()) {
-    console.log('更新提醒被延迟，等待24小时后再提醒');
     return;
   }
 

@@ -162,7 +162,6 @@ export function initializeWindowManager() {
     if (win) {
       // 保存当前窗口状态，以便之后恢复
       preMiniModeState = saveWindowState(win);
-      console.log('保存正常模式状态用于恢复:', JSON.stringify(preMiniModeState));
 
       // 获取屏幕工作区尺寸
       const display = screen.getDisplayMatching(win.getBounds());
@@ -202,7 +201,6 @@ export function initializeWindowManager() {
       win.setResizable(true);
       win.setMaximumSize(0, 0); // 取消最大尺寸限制
 
-      console.log('从迷你模式恢复，使用保存的状态:', JSON.stringify(preMiniModeState));
 
       // 设置适当的最小尺寸
       const { minWidth, minHeight } = calculateMinimumWindowSize();
@@ -247,9 +245,6 @@ export function initializeWindowManager() {
               Math.abs(width - preMiniModeState.width) > 2 ||
               Math.abs(height - preMiniModeState.height) > 2
             ) {
-              console.log(
-                `恢复后窗口大小不一致，再次调整: 当前=${width}x${height}, 目标=${preMiniModeState.width}x${preMiniModeState.height}`
-              );
               win.setSize(preMiniModeState.width, preMiniModeState.height, false);
             }
           }
@@ -296,7 +291,6 @@ export function initializeWindowManager() {
  * 创建主窗口
  */
 export function createMainWindow(icon: Electron.NativeImage): BrowserWindow {
-  console.log('开始创建主窗口...');
 
   // 获取窗口创建选项
   const options = getWindowOptions();
@@ -311,16 +305,6 @@ export function createMainWindow(icon: Electron.NativeImage): BrowserWindow {
     webSecurity: false
   };
 
-  console.log(
-    `创建窗口，使用选项: ${JSON.stringify({
-      width: options.width,
-      height: options.height,
-      x: options.x,
-      y: options.y,
-      minWidth: options.minWidth,
-      minHeight: options.minHeight
-    })}`
-  );
 
   // 创建窗口
   const mainWindow = new BrowserWindow(options);
@@ -393,7 +377,6 @@ export function createMainWindow(icon: Electron.NativeImage): BrowserWindow {
 
   mainWindow.on('ready-to-show', () => {
     const [width, height] = mainWindow.getSize();
-    console.log(`窗口显示前的大小: ${width}x${height}`);
 
     // 强制确保窗口使用正确的大小
     if (savedState && !savedState.isMaximized) {
@@ -414,9 +397,6 @@ export function createMainWindow(icon: Electron.NativeImage): BrowserWindow {
             Math.abs(currentWidth - savedState.width) > 2 ||
             Math.abs(currentHeight - savedState.height) > 2
           ) {
-            console.log(
-              `窗口大小不匹配，再次调整: 当前=${currentWidth}x${currentHeight}, 目标=${savedState.width}x${savedState.height}`
-            );
             mainWindow.setSize(savedState.width, savedState.height, false);
           }
         }

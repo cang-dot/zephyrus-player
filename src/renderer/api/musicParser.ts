@@ -68,12 +68,10 @@ export class CacheManager {
 
         // 如果音源配置不一致，清除缓存
         if (JSON.stringify(cachedSources.sort()) !== JSON.stringify(currentSources.sort())) {
-          console.log(`音源配置已变更，清除歌曲 ${id} 的缓存`);
           await db.deleteData('music_url_cache', id);
           return null;
         }
 
-        console.log(`使用缓存的音乐URL: ${id}`);
         return cached.data;
       }
       // 清理过期缓存
@@ -103,7 +101,6 @@ export class CacheManager {
         musicSources: cloneDeep(musicSources || []),
         createTime: Date.now()
       });
-      console.log(`缓存音乐URL成功: ${id}`);
     } catch (error) {
       console.error('缓存音乐URL失败:', error);
     }
@@ -116,7 +113,6 @@ export class CacheManager {
     const cacheKey = `${id}_${strategyName}`;
     const cachedTime = failedCacheMap.get(cacheKey);
     if (cachedTime && Date.now() - cachedTime < CACHE_CONFIG.FAILED_CACHE_TIME) {
-      console.log(`策略 ${strategyName} 在失败缓存期内，跳过`);
       return true;
     }
     // 清理过期缓存
@@ -132,9 +128,6 @@ export class CacheManager {
   static addFailedCache(id: number, strategyName: string): void {
     const cacheKey = `${id}_${strategyName}`;
     failedCacheMap.set(cacheKey, Date.now());
-    console.log(
-      `添加失败缓存成功: ${strategyName} (缓存时间: ${CACHE_CONFIG.FAILED_CACHE_TIME / 1000}秒)`
-    );
   }
 
   /**
@@ -149,7 +142,6 @@ export class CacheManager {
     });
     keysToDelete.forEach((key) => failedCacheMap.delete(key));
     if (keysToDelete.length > 0) {
-      console.log(`清除歌曲 ${id} 的失败缓存: ${keysToDelete.length} 项`);
     }
   }
 
@@ -161,7 +153,6 @@ export class CacheManager {
       const db = await getMusicDB();
       // 清除URL缓存
       await db.deleteData('music_url_cache', id);
-      console.log(`清除歌曲 ${id} 的URL缓存`);
 
       // 清除失败缓存 - 需要遍历所有策略
       const strategies = ['custom', 'gdmusic', 'unblockMusic'];
@@ -173,7 +164,6 @@ export class CacheManager {
           // 忽略删除不存在缓存的错误
         }
       }
-      console.log(`清除歌曲 ${id} 的失败缓存`);
     } catch (error) {
       console.error('清除缓存失败:', error);
     }
@@ -200,7 +190,6 @@ class RetryHelper {
       } catch (error) {
         lastError = error as Error;
         if (i < maxRetries) {
-          console.log(`重试第 ${i + 1} 次，延迟 ${delay}ms`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           delay *= 2; // 指数退避
         }
@@ -238,7 +227,6 @@ const getGDMusicAudio = async (id: number, data: SongResult): Promise<ParsedMusi
  */
 const getUnblockMusicAudio = (id: number, data: SongResult, sources: any[]) => {
   const filteredSources = sources.filter((source) => source !== 'gdmusic');
-  console.log(`使用unblockMusic解析，音源:`, filteredSources);
   return window.api.unblockMusic(id, cloneDeep(data), cloneDeep(filteredSources));
 };
 
@@ -317,14 +305,12 @@ class CustomApiStrategy implements MusicSourceStrategy {
     }
 
     try {
-      console.log('尝试使用自定义API解析...');
       const result = await RetryHelper.withRetry(async () => {
         return await parseFromCustomApi(id, data, quality);
       });
 
       const adaptedResult = adaptParseResult(result);
       if (adaptedResult?.data?.data?.url) {
-        console.log('自定义API解析成功');
         return adaptedResult;
       }
 
@@ -357,14 +343,12 @@ class GDMusicStrategy implements MusicSourceStrategy {
     }
 
     try {
-      console.log('尝试使用GD音乐台解析...');
       const result = await RetryHelper.withRetry(async () => {
         return await getGDMusicAudio(id, data);
       });
 
       const adaptedResult = adaptParseResult(result);
       if (adaptedResult?.data?.data?.url) {
-        console.log('GD音乐台解析成功');
         return adaptedResult;
       }
 
@@ -406,7 +390,6 @@ class UnblockMusicStrategy implements MusicSourceStrategy {
       const unblockSources = (sources || []).filter(
         (source) => !['custom', 'gdmusic'].includes(source)
       );
-      console.log('尝试使用UnblockMusic解析:', unblockSources);
 
       const result = await RetryHelper.withRetry(async () => {
         return await getUnblockMusicAudio(id, data, unblockSources);
@@ -414,7 +397,6 @@ class UnblockMusicStrategy implements MusicSourceStrategy {
 
       const adaptedResult = adaptParseResult(result);
       if (adaptedResult?.data?.data?.url) {
-        console.log('UnblockMusic解析成功');
         return adaptedResult;
       }
 
@@ -468,13 +450,11 @@ const getMusicConfig = (id: number, settingsStore?: any) => {
     const songConfig = SongSourceConfigManager.getConfig(id);
     if (songConfig && songConfig.sources.length > 0) {
       musicSources = songConfig.sources;
-      console.log(`使用歌曲 ${id} 自定义音源:`, musicSources);
     }
 
     // 如果没有自定义音源，使用全局设置
     if (musicSources.length === 0) {
       musicSources = settingsStore?.setData?.enabledMusicSources || [];
-      console.log('使用全局音源设置:', musicSources);
     }
 
     quality = settingsStore?.setData?.musicQuality || 'higher';
@@ -503,7 +483,6 @@ export class MusicParser {
     try {
       // 非Electron环境直接使用API请求
       if (!isElectron) {
-        console.log('非Electron环境，使用API请求');
         return await requestMusic.get<any>('/music', { params: { id } });
       }
 
@@ -520,18 +499,14 @@ export class MusicParser {
       const { musicSources, quality } = getMusicConfig(id, settingsStore);
 
       // 检查缓存（传入音源配置用于验证缓存有效性）
-      console.log(`检查歌曲 ${id} 的缓存...`);
       const cachedResult = await CacheManager.getCachedMusicUrl(id, musicSources);
       if (cachedResult) {
         const endTime = performance.now();
-        console.log(`✅ 命中缓存，歌曲 ${id}，耗时: ${(endTime - startTime).toFixed(2)}ms`);
         return cachedResult;
       }
-      console.log(`❌ 未命中缓存，歌曲 ${id}，开始解析...`);
 
       // 检查音乐解析功能是否启用
       if (!settingsStore?.setData?.enableMusicUnblock) {
-        console.log('音乐解析功能已禁用');
         return {
           data: {
             code: 404,
@@ -557,10 +532,6 @@ export class MusicParser {
         return await requestMusic.get<any>('/music', { params: { id } });
       }
 
-      console.log(
-        `开始解析歌曲 ${id}，可用策略:`,
-        availableStrategies.map((s) => s.name)
-      );
 
       // 按优先级依次尝试解析策略
       for (const strategy of availableStrategies) {
@@ -568,16 +539,12 @@ export class MusicParser {
           const result = await strategy.parse(id, data, quality, musicSources);
           if (result?.data?.data?.url) {
             const endTime = performance.now();
-            console.log(
-              `解析成功，使用策略: ${strategy.name}，耗时: ${(endTime - startTime).toFixed(2)}ms`
-            );
 
             // 缓存成功结果（包含音源配置）
             await CacheManager.setCachedMusicUrl(id, result, musicSources);
 
             return result;
           }
-          console.log(`策略 ${strategy.name} 解析失败，继续尝试下一个策略`);
         } catch (error) {
           console.error(`策略 ${strategy.name} 解析异常:`, error);
           // 继续尝试下一个策略
@@ -591,12 +558,10 @@ export class MusicParser {
 
     // 后备方案：使用API请求
     try {
-      console.log('使用后备方案：API请求');
       const result = await requestMusic.get<any>('/music', { params: { id } });
 
       // 如果后备方案成功，也进行缓存
       if (result?.data?.data?.url) {
-        console.log('后备方案成功，缓存结果');
         await CacheManager.setCachedMusicUrl(id, result, []);
       }
 
@@ -604,7 +569,6 @@ export class MusicParser {
     } catch (apiError) {
       console.error('API请求也失败了:', apiError);
       const endTime = performance.now();
-      console.log(`总耗时: ${(endTime - startTime).toFixed(2)}ms`);
       return {
         data: {
           code: 500,

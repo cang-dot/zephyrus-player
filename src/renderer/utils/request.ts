@@ -94,7 +94,6 @@ request.interceptors.response.use(
       // 使用 store mutation 清除用户信息
       const userStore = useUserStore();
       userStore.handleLogout();
-      console.log(`301 状态码，清除登录信息后重试第 ${config.retryCount} 次`);
       config.retryCount = 3;
     }
 

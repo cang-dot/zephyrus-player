@@ -73,7 +73,6 @@ async function downloadWithProgress(
 ): Promise<string> {
   sender.send('plugin:install-progress', { pluginId, status: 'requesting' });
 
-  console.log(`[PluginManager] Downloading ${pluginId} from: ${url}`);
   const response = await net.fetch(url);
   if (!response.ok) throw new Error(`下载失败: HTTP ${response.status}`);
 

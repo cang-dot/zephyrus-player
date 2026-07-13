@@ -119,7 +119,6 @@ onMounted(() => {
   styleEngine.syncCoverColors();
 
   if (playerStore.currentSong?.id) {
-    console.log('[GrittyPlayer] onMounted loading songId:', playerStore.currentSong.id);
     styleEngine.loadClimaxData(String(playerStore.currentSong.id));
   }
 });
@@ -128,7 +127,6 @@ onMounted(() => {
 watch(
   () => playerStore.currentSong?.id,
   (songId) => {
-    console.log('[GrittyPlayer] watch songId:', songId);
     if (songId) {
       styleEngine.loadClimaxData(String(songId));
     }
@@ -138,7 +136,6 @@ watch(
 onUnmounted(() => {
   window.removeEventListener('music-full-config-updated', handleConfigUpdate);
   communityData.clear();
-  console.log('[GrittyPlayer] onUnmounted, communityData cleared');
 });
 
 // 歌词数据

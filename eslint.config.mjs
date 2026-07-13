@@ -11,7 +11,7 @@ import globals from 'globals';
 export default [
   // 忽略文件配置
   {
-    ignores: ['node_modules/**', 'dist/**', 'out/**', '.gitignore']
+    ignores: ['node_modules/**', 'dist/**', 'out/**', '.gitignore', '**/components.d.ts']
   },
 
   // 基础 JavaScript 配置
@@ -193,6 +193,18 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-interface': 'off'
+    }
+  },
+
+  // 需要非 scoped 全局样式的组件（覆盖子组件/第三方组件样式）
+  {
+    files: [
+      '**/layout/OverlayLayout.vue',
+      '**/layout/components/OverlayTitleBar.vue',
+      '**/components/player/PlayBar.vue'
+    ],
+    rules: {
+      'vue-scoped-css/enforce-style-type': 'off'
     }
   },
 

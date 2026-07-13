@@ -115,7 +115,6 @@ export const preloadCoverImage = (
 
   try {
     const imageUrl = getImgUrl(picUrl, '500y500');
-    console.log('预加载封面图片:', imageUrl);
 
     // 创建一个 Image 对象来预加载图片
     const img = new Image();
@@ -123,7 +122,6 @@ export const preloadCoverImage = (
 
     // 可选：添加加载完成和错误的回调
     img.onload = () => {
-      console.log('封面图片预加载成功:', imageUrl);
     };
 
     img.onerror = () => {

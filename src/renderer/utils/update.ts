@@ -212,7 +212,6 @@ export const checkUpdate = async (
 ): Promise<UpdateResult | null> => {
   try {
     const releaseInfo = await getLatestReleaseInfo();
-    console.log('releaseInfo', releaseInfo);
     if (!releaseInfo) {
       return null;
     }
@@ -222,8 +221,6 @@ export const checkUpdate = async (
     if (compareVersions(latestVersion, currentVersion) <= 0) {
       return null;
     }
-    console.log('latestVersion', latestVersion);
-    console.log('currentVersion', currentVersion);
 
     return {
       hasUpdate: true,

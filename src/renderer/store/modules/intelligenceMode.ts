@@ -116,20 +116,12 @@ export const useIntelligenceModeStore = defineStore('intelligenceMode', () => {
    * @param skipPlayModeChange 是否跳过播放模式切换
    */
   const clearIntelligenceMode = (skipPlayModeChange: boolean = false) => {
-    console.log(
-      '[IntelligenceMode] clearIntelligenceMode 被调用，skipPlayModeChange:',
-      skipPlayModeChange
-    );
 
     isIntelligenceMode.value = false;
     intelligenceModeInfo.value = null;
     setLocalStorageItem('isIntelligenceMode', false);
     localStorage.removeItem('intelligenceModeInfo');
 
-    console.log(
-      '[IntelligenceMode] 心动模式状态已清除，isIntelligenceMode:',
-      isIntelligenceMode.value
-    );
 
     // 自动切换播放模式为顺序播放 (playMode = 0)
     if (!skipPlayModeChange) {
@@ -138,7 +130,6 @@ export const useIntelligenceModeStore = defineStore('intelligenceMode', () => {
         const playlistStore = usePlaylistStore();
 
         if (playlistStore.playMode === 3) {
-          console.log('[IntelligenceMode] 退出心动模式，自动切换播放模式为顺序播放');
           playlistStore.playMode = 0;
         }
       })();
