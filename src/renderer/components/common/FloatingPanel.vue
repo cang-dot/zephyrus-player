@@ -208,8 +208,15 @@ const close = () => {
   min-height: 0;
 }
 
+:deep(.n-scrollbar-container) {
+  height: 100%;
+}
+:deep(.n-scrollbar-content) {
+  height: 100%;
+}
+
 .fp-content-inner {
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }

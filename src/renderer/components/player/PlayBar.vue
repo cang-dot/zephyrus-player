@@ -729,7 +729,7 @@ onBeforeUnmount(() => {
 .music-time .n-slider { position: absolute; top: 0; left: 0; padding: 0; border-radius: 0; }
 .music-time {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 4px;
   z-index: 5;
 }
@@ -906,4 +906,18 @@ onBeforeUnmount(() => {
 .play-bar-root .n-slider-handle-indicator { display: none !important; }
 .play-bar-root .n-slider-handle { opacity: 0 !important; pointer-events: none !important; width: 8px !important; height: 8px !important; }
 .play-bar-root .mini-bar-progress .n-slider-handle { opacity: 0 !important; }
+
+/* Overlay mode: play bar transparent + glassmorphism */
+html.overlay-mode .music-play-bar:not(.play-bar-opcity):not(.play-bar-collapsed) {
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: none !important;
+}
+html.overlay-mode.dark .music-play-bar:not(.play-bar-opcity):not(.play-bar-collapsed) {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+html.overlay-mode:not(.dark) .music-play-bar:not(.play-bar-opcity):not(.play-bar-collapsed) {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
 </style>
