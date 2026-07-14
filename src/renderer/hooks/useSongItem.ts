@@ -1,7 +1,6 @@
 import { useMessage } from 'naive-ui';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 
 import { usePlayerStore, useRecommendStore } from '@/store';
 import type { SongResult } from '@/types/music';
@@ -11,15 +10,16 @@ import { getImageBackground } from '@/utils/linearColor';
 import { dislikeRecommendedSong } from '../api/music';
 import { useArtist } from './useArtist';
 import { useDownload } from './useDownload';
+import { useOverlayNavigate } from './useOverlayNavigate';
 
 export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
   const { t } = useI18n();
-  const router = useRouter();
   const playerStore = usePlayerStore();
   const recommendStore = useRecommendStore();
   const message = useMessage();
   const { downloadMusic, downloadLyric } = useDownload();
   const { navigateToArtist } = useArtist();
+  const { navigate } = useOverlayNavigate();
 
   // 状态变量
   const showDropdown = ref(false);
@@ -185,7 +185,7 @@ export function useSongItem(props: { item: SongResult; canRemove?: boolean }) {
 
   // 处理专辑点击
   const handleAlbumClick = (id: number) => {
-    router.push(`/music-list/${id}?type=album`);
+    navigate(`/music-list/${id}?type=album`);
   };
 
   // 鼠标悬停处理

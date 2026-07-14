@@ -240,17 +240,20 @@ const drag = (event: MouseEvent) => {
   color: #fff;
 }
 
-/* 亮色主题下使用深色文字 */
-:global(html:not(.dark)) .titlebar-btn {
+</style>
+
+<style lang="scss">
+/* 亮色主题下使用深色文字（非 scoped，避免 :global 在 SCSS 中编译异常） */
+html:not(.dark) .titlebar-btn {
   background: rgba(0, 0, 0, 0.05);
   color: #4b5563;
 }
 
-:global(html:not(.dark)) .titlebar-btn:hover {
+html:not(.dark) .titlebar-btn:hover {
   background: rgba(0, 0, 0, 0.12);
 }
 
-:global(html:not(.dark)) .titlebar-btn--close:hover {
+html:not(.dark) .titlebar-btn--close:hover {
   background: #ef4444;
   color: #fff;
 }

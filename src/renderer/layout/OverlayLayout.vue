@@ -2,8 +2,8 @@
   <div class="overlay-layout" id="layout-main">
     <title-bar />
 
-    <!-- Layer 0: 播放界面背景（始终可见） -->
-    <music-full-background v-if="isPlay" :background="background" />
+    <!-- Layer 0: 播放界面背景（始终可见，根据播放器样式动态切换） -->
+    <overlay-player-host v-if="isPlay" :background="background" />
 
     <!-- 无音乐时的背景 -->
     <div v-else class="overlay-empty-bg"></div>
@@ -43,8 +43,8 @@ import { playMusic as playMusicRef } from '@/hooks/MusicHook';
 
 import FloatingSidebar from './components/FloatingSidebar.vue';
 import FloatingSearchBar from './components/FloatingSearchBar.vue';
+import OverlayPlayerHost from './components/OverlayPlayerHost.vue';
 import TitleBar from './components/TitleBar.vue';
-import MusicFullBackground from '@/components/lyric/MusicFullBackground.vue';
 import FloatingWindowManager from '@/components/common/FloatingWindowManager.vue';
 
 const UpdateModal = defineAsyncComponent(() => import('@/components/common/UpdateModal.vue'));

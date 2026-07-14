@@ -6,7 +6,21 @@ import otherRouter from '@/router/other';
 
 const allRoutes = [...homeRouter, ...otherRouter];
 function findRoute(path: string) {
-  return allRoutes.find((r) => r.path === path);
+  // 去除查询参数
+  const basePath = path.split('?')[0];
+  // 先尝试精确匹配
+  let route = allRoutes.find((r) => r.path === basePath);
+  if (route) return route;
+  // 动态路由匹配（如 /music-list/:id? /artist/detail/:id）
+  route = allRoutes.find((r) => {
+    if (!r.path.includes(':')) return false;
+    const pattern = r.path
+      .replace(/:\w+\?/g, '([^/]+)') // 可选参数
+      .replace(/:\w+/g, '([^/]+)'); // 必需参数
+    const regex = new RegExp(`^${pattern}$`);
+    return regex.test(basePath);
+  });
+  return route;
 }
 
 export const useWindowStore = defineStore('windowStore', () => {

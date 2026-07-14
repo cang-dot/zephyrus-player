@@ -94,6 +94,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import icon from '@/assets/icon.png';
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { useOverlayNavigate } from '@/hooks/useOverlayNavigate';
 import { useWindowStore } from '@/store/modules/windowStore';
 import { useSettingsStore, useUserStore } from '@/store';
 import { getImgUrl } from '@/utils';
@@ -193,8 +194,9 @@ const collectedPlaylists = computed(() => {
 
 const collectedAlbums = computed(() => userStore.albumList);
 
-const navigateToPlaylist = (id: number) => router.push('/music-list/' + id + '?type=playlist');
-const navigateToAlbum = (id: number) => router.push('/music-list/' + id + '?type=album');
+const { navigate } = useOverlayNavigate();
+const navigateToPlaylist = (id: number) => navigate('/music-list/' + id + '?type=playlist');
+const navigateToAlbum = (id: number) => navigate('/music-list/' + id + '?type=album');
 
 const activeColor = computed(() => props.selectColor || primaryColor.value || '#888888');
 

@@ -5,16 +5,16 @@
       v-if="isFullMode"
       class="music-play-bar animate__animated animate__bounceInUp"
       :class="[
-        musicFullVisible ? 'play-bar-opcity' : '',
-        musicFullVisible && forcedBarTextColor === 'black' ? 'play-bar-forced-black' : '',
-        musicFullVisible && forcedBarTextColor === 'white' ? 'play-bar-forced-white' : '',
-        musicFullVisible && playBarCollapsed ? 'play-bar-collapsed' : '',
-        musicFullVisible && MusicFullRef?.musicFullRef?.config?.hidePlayBar
+        showFullStyle ? 'play-bar-opcity' : '',
+        showFullStyle && forcedBarTextColor === 'black' ? 'play-bar-forced-black' : '',
+        showFullStyle && forcedBarTextColor === 'white' ? 'play-bar-forced-white' : '',
+        showFullStyle && playBarCollapsed ? 'play-bar-collapsed' : '',
+        showFullStyle && MusicFullRef?.musicFullRef?.config?.hidePlayBar
           ? 'play-bar-fade-out' : ''
       ]"
       @mousemove="handlePlayBarMouseMove"
       :style="{
-        color: musicFullVisible
+        color: showFullStyle
           ? forcedBarTextColor === 'black'
             ? '#000000'
             : forcedBarTextColor === 'white'
@@ -52,12 +52,12 @@
       </div>
 
       <!-- Cover -->
-      <div class="play-bar-img-wrapper" @click="setMusicFull">
+      <div class="play-bar-img-wrapper" :class="{ 'no-hover-effect': isOverlayMode }" @click="setMusicFull">
         <n-image :src="getImgUrl(playMusic?.picUrl, '100y100')" class="play-bar-img" lazy preview-disabled />
         <div v-if="playMusic?.playLoading" class="loading-overlay">
           <i class="ri-loader-4-line loading-icon"></i>
         </div>
-        <div class="hover-arrow">
+        <div v-if="!isOverlayMode" class="hover-arrow">
           <div class="hover-content">
             <i class="text-3xl" :class="musicFullVisible ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'"></i>
             <span class="hover-text">{{ musicFullVisible ? t('player.playBar.collapse') : t('player.playBar.expand') }}</span>
@@ -205,7 +205,7 @@
         class="floating-bar mini-bar"
         :class="{
           'mini-expanded': miniHovered,
-          'bar-hidden': musicFullVisible && MusicFullRef?.musicFullRef?.config?.hidePlayBar
+          'bar-hidden': showFullStyle && MusicFullRef?.musicFullRef?.config?.hidePlayBar
         }"
         :style="miniBarStyle"
         @mouseenter="miniHovered = true"
@@ -502,7 +502,11 @@ const musicFullVisible = computed({
   set: (value) => playerStore.setMusicFull(value)
 });
 
+// overlay 模式下始终显示全屏样式（透明背景、渐隐等），不依赖 musicFullVisible
+const showFullStyle = computed(() => isOverlayMode.value || musicFullVisible.value);
+
 const setMusicFull = () => {
+  if (isOverlayMode.value) return; // overlay 模式下不切换全屏状态
   musicFullVisible.value = !musicFullVisible.value;
   if (musicFullVisible.value) settingsStore.showArtistDrawer = false;
 };
@@ -546,16 +550,16 @@ function clearCollapseTimer() {
 }
 
 const handlePlayBarMouseMove = () => {
-  if (musicFullVisible.value) resetCollapseTimer();
+  if (showFullStyle.value) resetCollapseTimer();
 };
 
 const handleWindowMouseMove = (e: MouseEvent) => {
-  if (!musicFullVisible.value) return;
+  if (!showFullStyle.value) return;
   const isNearBottom = e.clientY >= window.innerHeight - HOVER_ZONE;
   if (isNearBottom && playBarCollapsed.value) resetCollapseTimer();
 };
 
-watch(musicFullVisible, (visible) => {
+watch(showFullStyle, (visible) => {
   if (visible) {
     try {
       const saved = localStorage.getItem('music-full-config');

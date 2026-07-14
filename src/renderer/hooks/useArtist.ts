@@ -1,14 +1,14 @@
-import { useRouter } from 'vue-router';
+import { useOverlayNavigate } from '@/hooks/useOverlayNavigate';
 
 export const useArtist = () => {
-  const router = useRouter();
+  const { navigate } = useOverlayNavigate();
 
   /**
    * 跳转到歌手详情页
    * @param id 歌手ID
    */
   const navigateToArtist = (id: number) => {
-    router.push(`/artist/detail/${id}`);
+    navigate(`/artist/detail/${id}`);
   };
 
   return {

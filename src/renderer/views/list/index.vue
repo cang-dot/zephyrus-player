@@ -40,14 +40,14 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
+import { useOverlayNavigate } from '@/hooks/useOverlayNavigate';
 import { useUserStore } from '@/store';
 import { getImgUrl } from '@/utils';
 
 defineOptions({ name: 'MyMusic' });
 
-const router = useRouter();
+const { navigate } = useOverlayNavigate();
 const userStore = useUserStore();
 
 const items = computed(() => {
@@ -126,7 +126,7 @@ const onPointerUp = () => { isDragging.value = false; };
 // === 点击 ===
 const handleItemClick = (item: any) => {
   if (hasMoved.value) return;
-  router.push(`/music-list/${item.id}?type=${item.type === 'album' ? 'album' : 'playlist'}`);
+  navigate(`/music-list/${item.id}?type=${item.type === 'album' ? 'album' : 'playlist'}`);
 };
 
 onMounted(() => {

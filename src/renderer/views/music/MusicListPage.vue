@@ -81,7 +81,7 @@
                       />
                       <span
                         class="text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:text-[var(--accent-color)] cursor-pointer transition-colors"
-                        @click="router.push(`/artist/detail/${listInfo.artist.id}`)"
+                        @click="navigateToArtist(listInfo.artist.id)"
                         >{{ listInfo.artist.name }}</span
                       >
                     </div>
@@ -341,7 +341,7 @@ import { useMessage } from 'naive-ui';
 import PinyinMatch from 'pinyin-match';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { getAlbum, getListDetail } from '@/api/list';
 import {
@@ -354,6 +354,7 @@ import PlayBottom from '@/components/common/PlayBottom.vue';
 import SongItem from '@/components/common/SongItem.vue';
 import { useDownload } from '@/hooks/useDownload';
 import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
+import { useOverlayNavigate } from '@/hooks/useOverlayNavigate';
 import { useScrollTitle } from '@/hooks/useScrollTitle';
 import { useMusicStore, usePlayerStore, useRecommendStore, useUserStore } from '@/store';
 import { usePlayHistoryStore } from '@/store/modules/playHistory';
@@ -369,7 +370,8 @@ const { confirmPlaylistReplace } = usePlaylistConfirm();
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
+const { navigate } = useOverlayNavigate();
+const navigateToArtist = (id: number) => navigate(`/artist/detail/${id}`);
 const playerStore = usePlayerStore();
 const musicStore = useMusicStore();
 const recommendStore = useRecommendStore();

@@ -202,8 +202,12 @@ const close = () => {
 }
 
 .fp-content-inner {
-  height: 100%;
-  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 // 加载状态
