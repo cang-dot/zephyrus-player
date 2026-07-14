@@ -18,31 +18,19 @@
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="loading" class="grid gap-6" :style="gridStyle">
-      <div v-for="i in displayCount" :key="i" class="space-y-3">
-        <div class="aspect-square skeleton-shimmer rounded-2xl" />
-        <div class="h-4 w-3/4 skeleton-shimmer rounded-lg" />
-        <div class="h-3 w-1/2 skeleton-shimmer rounded-lg" />
+    <div v-if="loading" class="flex gap-4 overflow-hidden">
+      <div v-for="i in 8" :key="i" class="flex-shrink-0">
+        <div class="aspect-square skeleton-shimmer rounded-2xl" style="width: 160px; height: 160px;" />
       </div>
     </div>
 
-    <!-- Playlist Grid -->
-    <div v-else-if="displayPlaylists.length > 0" class="grid gap-6" :style="gridStyle">
-      <home-list-item
-        v-for="(item, index) in displayPlaylists"
-        :key="item.id"
-        :cover="item.picUrl"
-        :title="item.name"
-        :subtitle="item.copywriter"
-        :tracks="isElectron ? playlistTracksMap[item.id] || [] : []"
-        :show-hover-tracks="isElectron"
-        :play-count="item.playCount"
-        :animation-delay="calculateAnimationDelay(index, 0.04)"
-        @click="handlePlaylistClick(item)"
-        @play="playPlaylist(item)"
-        @mouseenter="isElectron && loadTracksOnHover(item.id)"
-      />
-    </div>
+    <!-- Infinite Cover Grid -->
+    <infinite-cover-grid
+      v-else-if="displayPlaylists.length > 0"
+      :items="gridItems"
+      @item-click="handlePlaylistClick"
+      @item-play="playPlaylist"
+    />
 
     <!-- Empty State -->
     <div v-else class="flex flex-col items-center justify-center py-20 text-neutral-400">
@@ -53,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -62,9 +50,9 @@ import { getListDetail } from '@/api/list';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
 import { usePlaylistStore } from '@/store/modules/playlist';
-import { calculateAnimationDelay, isElectron, isMobile } from '@/utils';
+import { isMobile } from '@/utils';
 
-import HomeListItem from './HomeListItem.vue';
+import InfiniteCoverGrid from '@/components/common/InfiniteCoverGrid.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -88,7 +76,6 @@ const { t } = useI18n();
 const router = useRouter();
 const playlists = ref<any[]>([]);
 const loading = ref(true);
-const playlistTracksMap = reactive<Record<number, any[]>>({});
 
 const effectiveColumns = computed(() =>
   isMobile.value ? Math.min(2, props.columns) : props.columns
@@ -99,13 +86,18 @@ const effectiveRows = computed(() => (isMobile.value ? 2 : props.rows));
 const displayCount = computed(() => effectiveColumns.value * effectiveRows.value);
 
 const displayPlaylists = computed(() => {
-  const count = displayCount.value;
-  return playlists.value.slice(0, count);
+  return playlists.value;
 });
 
-const gridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(${effectiveColumns.value}, minmax(0, 1fr))`
-}));
+const gridItems = computed(() => {
+  return displayPlaylists.value.map((item: any) => ({
+    id: item.id,
+    name: item.name,
+    subtitle: item.copywriter || '',
+    cover: item.picUrl || '',
+    _raw: item
+  }));
+});
 
 const fetchPlaylists = async () => {
   try {
@@ -120,29 +112,14 @@ const fetchPlaylists = async () => {
   }
 };
 
-/** Lazy load tracks for a single playlist on hover */
-const loadTracksOnHover = async (id: number) => {
-  if (playlistTracksMap[id]) return;
-  try {
-    const { data } = await getListDetail(id);
-    if (data.playlist?.tracks) {
-      playlistTracksMap[id] = data.playlist.tracks.slice(0, 3).map((s: any) => ({
-        id: s.id,
-        name: s.name
-      }));
-    }
-  } catch {
-    // silent 鈥?user can retry by hovering again
-  }
-};
-
 const handlePlaylistClick = async (item: any) => {
+  const raw = item._raw || item;
   try {
     navigateToMusicList(router, {
-      id: item.id,
+      id: raw.id,
       type: 'playlist',
-      name: item.name,
-      listInfo: item,
+      name: raw.name,
+      listInfo: raw,
       canRemove: false
     });
   } catch (error) {
@@ -151,8 +128,9 @@ const handlePlaylistClick = async (item: any) => {
 };
 
 const playPlaylist = async (item: any) => {
+  const raw = item._raw || item;
   try {
-    const { data } = await getListDetail(item.id);
+    const { data } = await getListDetail(raw.id);
     if (data.playlist?.tracks?.length > 0) {
       const playerCore = usePlayerCoreStore();
       const playlistStore = usePlaylistStore();
@@ -160,7 +138,7 @@ const playPlaylist = async (item: any) => {
       const playlist = data.playlist.tracks.map((s: any) => ({
         id: s.id,
         name: s.name,
-        picUrl: s.al?.picUrl || item.picUrl,
+        picUrl: s.al?.picUrl || raw.picUrl,
         source: 'netease',
         song: s,
         ...s,

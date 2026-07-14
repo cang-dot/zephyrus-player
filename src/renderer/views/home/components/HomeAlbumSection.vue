@@ -18,32 +18,19 @@
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      <div v-for="i in displayCount" :key="i" class="space-y-3">
-        <div class="aspect-square skeleton-shimmer rounded-2xl" />
-        <div class="h-4 w-3/4 skeleton-shimmer rounded-lg" />
-        <div class="h-3 w-1/2 skeleton-shimmer rounded-lg" />
+    <div v-if="loading" class="flex gap-4 overflow-hidden">
+      <div v-for="i in 8" :key="i" class="flex-shrink-0">
+        <div class="aspect-square skeleton-shimmer rounded-2xl" style="width: 160px; height: 160px;" />
       </div>
     </div>
 
-    <!-- Album Grid -->
-    <div
+    <!-- Infinite Cover Grid -->
+    <infinite-cover-grid
       v-else-if="displayAlbums.length > 0"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
-    >
-      <home-list-item
-        v-for="(album, index) in displayAlbums"
-        :key="album.id"
-        :cover="album.picUrl"
-        :title="album.name"
-        :subtitle="getArtistNames(album)"
-        :tracks="albumTracksMap[album.id] || []"
-        :show-hover-tracks="!isMobile"
-        :animation-delay="calculateAnimationDelay(index, 0.04)"
-        @click="handleAlbumClick(album)"
-        @play="playAlbum(album)"
-      />
-    </div>
+      :items="gridItems"
+      @item-click="handleAlbumClick"
+      @item-play="playAlbum"
+    />
 
     <!-- Empty State -->
     <div v-else class="flex flex-col items-center justify-center py-20 text-neutral-400">
@@ -54,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -63,9 +50,9 @@ import { getAlbum } from '@/api/list';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
 import { usePlaylistStore } from '@/store/modules/playlist';
-import { calculateAnimationDelay, isElectron, isMobile } from '@/utils';
+import { isMobile } from '@/utils';
 
-import HomeListItem from './HomeListItem.vue';
+import InfiniteCoverGrid from '@/components/common/InfiniteCoverGrid.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -89,30 +76,29 @@ const { t } = useI18n();
 const router = useRouter();
 const albums = ref<any[]>([]);
 const loading = ref(true);
-const albumTracksMap = reactive<Record<number, any[]>>({});
 
-// Calculate display count to fill exactly N rows
 const displayCount = computed(() => {
-  if (isMobile.value) {
-    return 6;
-  }
+  if (isMobile.value) return 6;
   return props.columns * props.rows;
 });
 
-const displayAlbums = computed(() => {
-  const count = displayCount.value;
-  return albums.value.slice(0, count);
+const displayAlbums = computed(() => albums.value);
+
+const gridItems = computed(() => {
+  return displayAlbums.value.map((album: any) => ({
+    id: album.id,
+    name: album.name,
+    subtitle: getArtistNames(album),
+    cover: album.picUrl || '',
+    _raw: album
+  }));
 });
 
 const fetchAlbums = async () => {
   try {
-    const { data } = await getTopAlbum({ limit: props.limit || displayCount.value + 5 });
+    const { data } = await getTopAlbum({ limit: props.limit || 20 });
     if (data.code === 200) {
       albums.value = data.weekData || data.monthData || data.albums || [];
-      // Preload tracks for displayed albums (Electron only)
-      if (isElectron && !isMobile.value) {
-        preloadAllTracks();
-      }
     }
   } catch (error) {
     console.error('Failed to fetch albums:', error);
@@ -121,51 +107,20 @@ const fetchAlbums = async () => {
   }
 };
 
-const preloadAllTracks = async () => {
-  const albumsToLoad = displayAlbums.value;
-
-  // Load tracks in parallel with concurrency limit
-  const batchSize = 4;
-  for (let i = 0; i < albumsToLoad.length; i += batchSize) {
-    const batch = albumsToLoad.slice(i, i + batchSize);
-    await Promise.all(
-      batch.map(async (album) => {
-        if (albumTracksMap[album.id]) return;
-        try {
-          const { data } = await getAlbum(album.id);
-          if (data.code === 200 && data.songs) {
-            albumTracksMap[album.id] = data.songs.slice(0, 3).map((s: any) => ({
-              id: s.id,
-              name: s.name
-            }));
-          }
-        } catch (error) {
-        }
-      })
-    );
-  }
-};
-
 const getArtistNames = (album: any) => {
-  if (album.artists) {
-    return album.artists.map((ar: any) => ar.name).join(' / ');
-  }
-  if (album.artist) {
-    return album.artist.name;
-  }
+  if (album.artists) return album.artists.map((ar: any) => ar.name).join(' / ');
+  if (album.artist) return album.artist.name;
   return '';
 };
 
-const handleAlbumClick = async (album: any) => {
+const handleAlbumClick = async (item: any) => {
+  const album = item._raw || item;
   try {
     navigateToMusicList(router, {
       id: album.id,
       type: 'album',
       name: album.name,
-      listInfo: {
-        ...album,
-        coverImgUrl: album.picUrl
-      },
+      listInfo: { ...album, coverImgUrl: album.picUrl },
       canRemove: false
     });
   } catch (error) {
@@ -173,7 +128,8 @@ const handleAlbumClick = async (album: any) => {
   }
 };
 
-const playAlbum = async (album: any) => {
+const playAlbum = async (item: any) => {
+  const album = item._raw || item;
   try {
     const { data } = await getAlbum(album.id);
     if (data.code === 200 && data.songs?.length > 0) {

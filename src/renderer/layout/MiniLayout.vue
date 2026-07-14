@@ -63,7 +63,7 @@ const drag = (event: MouseEvent) => {
 <style lang="scss" scoped>
 .mini-layout {
   @apply w-full h-full flex flex-col;
-  background: var(--bg-color, #fff);
+  background: #f5f5f5;
   overflow: hidden;
   border-radius: 8px;
 }

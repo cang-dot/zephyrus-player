@@ -10,7 +10,7 @@
         musicFullVisible && forcedBarTextColor === 'white' ? 'play-bar-forced-white' : '',
         musicFullVisible && playBarCollapsed ? 'play-bar-collapsed' : '',
         musicFullVisible && MusicFullRef?.musicFullRef?.config?.hidePlayBar
-          ? 'animate__slideOutDown' : ''
+          ? 'play-bar-fade-out' : ''
       ]"
       @mousemove="handlePlayBarMouseMove"
       :style="{
@@ -654,18 +654,18 @@ onBeforeUnmount(() => {
     :deep(.iconfont):hover { color: var(--accent-color, #888) !important; }
   }
 
-  // Auto-collapse: shrink to progress-bar-only
+  // Auto-collapse: fade out instead of shrinking height
   &.play-bar-collapsed {
-    height: 6px !important;
-    padding: 0 !important;
-    background: rgba(0, 0, 0, 0.1) !important;
-    transition: height 0.3s ease;
-
-    .music-time { width: 100%; padding: 0 4px; height: 6px; display: flex; align-items: center; }
-    .play-bar-img-wrapper, .music-content, .music-buttons, .audio-button { display: none !important; }
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.4s ease;
   }
 
-  &.animate__slideOutDown { animation-duration: 0.3s !important; }
+  &.play-bar-fade-out {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.4s ease;
+  }
 
   .music-content {
     width: 200px; @apply ml-4;

@@ -108,6 +108,12 @@ provide('openPlaylistDrawer', openPlaylistDrawer);
 
 <style>
 /* Overlay mode global styles — non-scoped to affect body/naive-ui components */
+html.overlay-mode {
+  background: #1a1a1a;
+}
+html.overlay-mode.dark {
+  background: #000000;
+}
 html.overlay-mode body {
   background: #1a1a1a !important;
 }
