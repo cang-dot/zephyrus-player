@@ -19,6 +19,14 @@
       </n-button>
       <template v-if="isElectron">
         <div
+          v-if="isOverlayMode"
+          class="titlebar-btn"
+          :title="isFullScreen ? '退出全屏' : '全屏'"
+          @click="toggleFullScreen"
+        >
+          <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
+        </div>
+        <div
           class="titlebar-btn"
           title="小窗模式"
           @click="miniWindow"
@@ -131,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useSettingsStore } from '@/store/modules/settings';
@@ -142,6 +150,34 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const showCloseModal = ref(false);
 const rememberChoice = ref(false);
+
+// 是否为悬浮覆盖布局
+const isOverlayMode = computed(() => settingsStore.setData?.layoutMode === 'overlay' && !settingsStore.isMobile);
+
+// 全屏切换
+const isFullScreen = ref(false);
+
+const toggleFullScreen = async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+      isFullScreen.value = true;
+    } else {
+      await document.exitFullscreen();
+      isFullScreen.value = false;
+    }
+  } catch (e) {
+    console.error('全屏切换失败:', e);
+  }
+};
+
+const handleFullScreenChange = () => {
+  isFullScreen.value = !!document.fullscreenElement;
+};
+
+if (typeof window !== 'undefined') {
+  document.addEventListener('fullscreenchange', handleFullScreenChange);
+}
 
 const openDownloadPage = () => {
   if (!isElectron) {

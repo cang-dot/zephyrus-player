@@ -1,5 +1,5 @@
 <template>
-  <teleport to="body">
+  <teleport v-if="!overlayMode" to="body">
     <transition name="typo-fade">
       <div
         v-if="isVisible"
@@ -101,6 +101,63 @@
       </div>
     </transition>
   </teleport>
+
+  <!-- overlay 模式：直接渲染，不 teleport，低 z-index，pointer-events 穿透 -->
+  <div
+    v-if="overlayMode && isVisible"
+    class="magazine-player overlay-mode"
+    :style="dynamicBgStyle"
+  >
+    <!-- 永久色块：乐队名 -->
+    <transition name="block-enter">
+      <div
+        v-if="bandBlock && bandName"
+        class="color-block permanent-block"
+        :style="bandBlockStyle"
+      >
+        <span
+          class="block-text band-name"
+          :style="{ fontSize: (bandBlock?.fontSize || bandTextFontSize) + 'px' }"
+          >{{ bandName }}</span
+        >
+      </div>
+    </transition>
+
+    <!-- 永久色块：歌曲名 -->
+    <transition name="block-enter">
+      <div
+        v-if="titleBlock && songTitle"
+        class="color-block permanent-block"
+        :style="titleBlockStyle"
+      >
+        <span class="block-text song-title" :style="{ fontSize: songTextFontSize + 'px' }">{{
+          songTitle
+        }}</span>
+      </div>
+    </transition>
+
+    <!-- 装饰色块 -->
+    <transition-group name="block-slide">
+      <div
+        v-for="block in decorBlocks"
+        :key="block.id"
+        class="color-block decor-block"
+        :style="decorBlockStyle(block)"
+      ></div>
+    </transition-group>
+
+    <!-- 歌词词组 -->
+    <transition-group name="word-anim">
+      <div
+        v-for="word in currentWords"
+        :key="word.id"
+        class="lyric-word"
+        :style="wordStyle(word)"
+      >
+        {{ word.text }}
+      </div>
+    </transition-group>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -135,7 +192,8 @@ import LyricSettings from './LyricSettings.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  background: { type: String, default: '' }
+  background: { type: String, default: '' },
+  overlayMode: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -609,6 +667,12 @@ onBeforeUnmount(() => {
   z-index: 9998;
   cursor: default;
   font-family: var(--current-font-family, 'Inter', system-ui, sans-serif);
+
+  // overlay 模式：低 z-index + pointer-events 穿透
+  &.overlay-mode {
+    z-index: 1;
+    pointer-events: none;
+  }
 }
 
 // ==================== 控制按钮 ====================

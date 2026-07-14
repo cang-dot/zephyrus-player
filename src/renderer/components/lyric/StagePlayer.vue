@@ -1,5 +1,5 @@
 <template>
-  <teleport to="body">
+  <teleport v-if="!overlayMode" to="body">
     <transition name="stage-fade">
       <div
         v-if="isVisible"
@@ -65,6 +65,49 @@
       </div>
     </transition>
   </teleport>
+
+  <!-- overlay 模式：直接渲染，不 teleport，低 z-index，pointer-events 穿透 -->
+  <div
+    v-if="overlayMode && isVisible"
+    class="stage-player overlay-mode"
+    :style="{ '--accent-color': accentColor, '--accent-color-rgb': accentColorRgb }"
+  >
+    <div class="background-cover" :style="backgroundCoverStyle"></div>
+    <aurora
+      :colorStops="auroraColorStops"
+      :amplitude="auroraAmplitude"
+      :blend="0.5"
+      :speed="auroraSpeed"
+    />
+    <div class="beat-flash" :style="{ opacity: beatSpike }"></div>
+
+    <!-- 顶部：歌曲信息 -->
+    <div class="song-info-top">
+      <div class="song-name">{{ playMusic?.name }}</div>
+      <div class="song-artist">
+        <span v-for="(item, index) in artistList" :key="index" class="artist-name">
+          {{ item.name }}{{ index < artistList.length - 1 ? ' / ' : '' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- 中央：歌词显示区 -->
+    <div class="lyric-container">
+      <transition name="bg-fade">
+        <div v-if="backgroundLine?.text" class="background-lyric" :style="lyricStyle">
+          {{ backgroundLine.text }}
+        </div>
+      </transition>
+      <div ref="lyricRef" class="single-lyric" :style="lyricStyle">
+        {{ displayText }}
+      </div>
+      <transition name="tr-fade">
+        <div v-if="currentLine?.trText" class="lyric-translation">
+          {{ currentLine.trText }}
+        </div>
+      </transition>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -163,7 +206,8 @@ watch(animationIntensity, () => {
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  background: { type: String, default: '' }
+  background: { type: String, default: '' },
+  overlayMode: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -775,6 +819,17 @@ onBeforeUnmount(() => {
   background: #1a1510;
   z-index: 9998;
   cursor: default;
+
+  // overlay 模式：低 z-index + pointer-events 穿透，让侧边栏可交互
+  &.overlay-mode {
+    z-index: 1;
+    pointer-events: none;
+
+    .song-info-top,
+    .lyric-container {
+      pointer-events: none;
+    }
+  }
 }
 
 // ==================== 背景 ====================

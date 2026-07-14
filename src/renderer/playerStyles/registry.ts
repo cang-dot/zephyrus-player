@@ -18,6 +18,8 @@ export interface PlayerStyleDefinition {
   key: string;
   label: string;
   component: Component;
+  /** 浮动覆盖布局专用组件（可选）。如未提供，OverlayPlayerHost 会使用 component + overlayMode prop */
+  overlayComponent?: Component;
   isFullScreen?: boolean;
   theme?: 'light' | 'dark';
   showStyleSwitch?: boolean;

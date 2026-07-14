@@ -12,6 +12,7 @@
     :key="playerStyle"
     :model-value="true"
     :background="background"
+    :overlay-mode="true"
   />
 </template>
 

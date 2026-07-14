@@ -1,32 +1,38 @@
 <template>
+  <!-- 透明遮罩层：点击空白区域关闭面板 -->
   <div
     v-if="windowStore.activePath"
-    class="floating-panel"
-    :style="panelStyle"
-    @mousedown="focus"
+    class="fp-backdrop"
+    @mousedown="onBackdropMouseDown"
   >
-    <!-- 标题栏（细薄，仅标题+关闭） -->
-    <div class="fp-header">
-      <span class="fp-title">{{ windowStore.panelTitle }}</span>
-      <button class="fp-close" @click="close" title="关闭">
-        <i class="ri-close-line" />
-      </button>
-    </div>
+    <div
+      class="floating-panel"
+      :style="panelStyle"
+      @mousedown.stop="focus"
+    >
+      <!-- 标题栏（细薄，仅标题+关闭） -->
+      <div class="fp-header">
+        <span class="fp-title">{{ windowStore.panelTitle }}</span>
+        <button class="fp-close" @click="close" title="关闭">
+          <i class="ri-close-line" />
+        </button>
+      </div>
 
-    <!-- 内容区域 -->
-    <div class="fp-content">
-      <div class="fp-content-inner">
-        <!-- 加载中 -->
-        <div v-if="componentLoading" class="fp-loading">
-          <n-spin size="medium" />
-          <span class="fp-loading-text">加载中...</span>
+      <!-- 内容区域 -->
+      <div class="fp-content">
+        <div class="fp-content-inner">
+          <!-- 加载中 -->
+          <div v-if="componentLoading" class="fp-loading">
+            <n-spin size="medium" />
+            <span class="fp-loading-text">加载中...</span>
+          </div>
+          <!-- 已加载 -->
+          <component
+            :is="loadedComponent"
+            v-else-if="loadedComponent"
+            :key="windowStore.panelKey"
+          />
         </div>
-        <!-- 已加载 -->
-        <component
-          :is="loadedComponent"
-          v-else-if="loadedComponent"
-          :key="windowStore.panelKey"
-        />
       </div>
     </div>
   </div>
@@ -94,12 +100,39 @@ const focus = () => {
   // 面板始终在最前，无需额外操作
 };
 
+// 点击空白区域关闭面板（仅在 mousedown 位置未移动时触发，避免拖选文本误关闭）
+let backdropDownX = 0;
+let backdropDownY = 0;
+const onBackdropMouseDown = (e: MouseEvent) => {
+  // 只响应左键
+  if (e.button !== 0) return;
+  backdropDownX = e.clientX;
+  backdropDownY = e.clientY;
+  // 在 mouseup 时检查是否为点击（非拖选）
+  const onUp = (upEvent: MouseEvent) => {
+    document.removeEventListener('mouseup', onUp, { capture: true });
+    const dx = Math.abs(upEvent.clientX - backdropDownX);
+    const dy = Math.abs(upEvent.clientY - backdropDownY);
+    // 移动超过 5px 视为拖选，不关闭
+    if (dx < 5 && dy < 5) {
+      close();
+    }
+  };
+  document.addEventListener('mouseup', onUp, { capture: true, once: true });
+};
+
 const close = () => {
   windowStore.closePanel();
 };
 </script>
 
 <style lang="scss" scoped>
+.fp-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 149;
+}
+
 .floating-panel {
   position: fixed;
   display: flex;

@@ -2,11 +2,13 @@
   <div
     v-if="isVisible"
     class="frenzy-player"
+    :class="{ 'overlay-mode': overlayMode }"
     ref="playerRef"
     :style="{ background: backgroundColor }"
   >
-    <!-- 通用控件（左上关闭 + 右上设置/全屏） -->
+    <!-- 通用控件（overlay 模式下隐藏） -->
     <player-controls
+      v-if="!overlayMode"
       :isFullScreen="isFullScreen"
       :showStyleSwitch="false"
       theme="dark"
@@ -55,7 +57,8 @@ import GlitchBackground from './GlitchBackground.vue';
 import PlayerControls from './PlayerControls.vue';
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false }
+  modelValue: { type: Boolean, default: false },
+  overlayMode: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -297,6 +300,19 @@ watch(
   z-index: 9998;
   overflow: hidden;
   font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* overlay 模式：低 z-index + pointer-events 穿透 */
+  &:has(.overlay-mode),
+  .overlay-mode & {
+    z-index: 1;
+    pointer-events: none;
+  }
+}
+
+/* overlay 模式类 */
+.frenzy-player.overlay-mode {
+  z-index: 1;
+  pointer-events: none;
 }
 
 .frenzy-player__lyrics {

@@ -911,17 +911,11 @@ onBeforeUnmount(() => {
 .play-bar-root .n-slider-handle { opacity: 0 !important; pointer-events: none !important; width: 8px !important; height: 8px !important; }
 .play-bar-root .mini-bar-progress .n-slider-handle { opacity: 0 !important; }
 
-/* Overlay mode: play bar always glassmorphism, regardless of full player state */
+/* Overlay mode: play bar fully transparent */
 html.overlay-mode .music-play-bar {
-  background: rgba(0, 0, 0, 0.25) !important;
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none !important;
-}
-html.overlay-mode.dark .music-play-bar {
-  background: rgba(0, 0, 0, 0.4) !important;
-}
-html.overlay-mode:not(.dark) .music-play-bar {
-  background: rgba(255, 255, 255, 0.15) !important;
 }
 </style>
