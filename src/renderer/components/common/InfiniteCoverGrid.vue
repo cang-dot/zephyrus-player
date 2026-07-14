@@ -14,8 +14,8 @@
         <div
           v-for="(item, idx) in displayItems"
           :key="`${copy}-${item.id}-${idx}`"
-          class="grid-card group"
-          @click="$emit('item-click', item)"
+          class="grid-card"
+          @click="emit('item-click', item)"
         >
           <div class="card-cover">
             <img
@@ -37,7 +37,7 @@
               <button
                 v-if="showPlayButton"
                 class="card-play-btn"
-                @click.stop="$emit('item-play', item)"
+                @click.stop="emit('item-play', item)"
               >
                 <i class="ri-play-fill text-lg" />
               </button>
@@ -73,7 +73,7 @@ const props = withDefaults(
   }
 );
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'item-click', item: GridItem): void;
   (e: 'item-play', item: GridItem): void;
 }>();
@@ -95,9 +95,36 @@ const displayItems = computed(() => {
   position: relative;
   overflow: hidden;
   width: 100%;
-  /* Mask edges for smooth fade */
-  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+
+/* Edge fade via pseudo-elements (mask-image can break pointer-events) */
+.infinite-cover-grid::before,
+.infinite-cover-grid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.infinite-cover-grid::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-fade, #fff), transparent);
+}
+
+.infinite-cover-grid::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-fade, #fff), transparent);
+}
+
+:global(.dark) .infinite-cover-grid::before {
+  background: linear-gradient(to right, #000, transparent);
+}
+
+:global(.dark) .infinite-cover-grid::after {
+  background: linear-gradient(to left, #000, transparent);
 }
 
 .grid-track {
@@ -105,10 +132,6 @@ const displayItems = computed(() => {
   gap: 16px;
   width: max-content;
   animation: scroll-left 60s linear infinite;
-}
-
-.grid-track:hover {
-  /* JS controls pause via animationPlayState */
 }
 
 @keyframes scroll-left {
@@ -130,6 +153,8 @@ const displayItems = computed(() => {
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
+  /* Ensure clicks always register even during animation */
+  pointer-events: auto;
 }
 
 .card-cover {
@@ -153,6 +178,7 @@ const displayItems = computed(() => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  pointer-events: none;
 }
 
 .cover-placeholder {
@@ -162,6 +188,7 @@ const displayItems = computed(() => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, rgba(var(--accent-color-rgb, 136, 136, 136), 0.15), rgba(var(--accent-color-rgb, 136, 136, 136), 0.05));
+  pointer-events: none;
 }
 
 /* Hover overlay — shows album/playlist name */
@@ -174,6 +201,8 @@ const displayItems = computed(() => {
   padding: 14px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
   opacity: 0;
+  /* Let clicks pass through to the card; only the play button needs interaction */
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
@@ -217,6 +246,8 @@ const displayItems = computed(() => {
   border: none;
   cursor: pointer;
   flex-shrink: 0;
+  /* Play button needs to be clickable even when overlay is not */
+  pointer-events: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
 }
