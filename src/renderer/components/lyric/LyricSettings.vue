@@ -669,7 +669,7 @@ defineExpose({
 }
 
 .toggle-switch:checked {
-  background: var(--accent);
+  background: var(--accent-color, #888);
 }
 
 .toggle-switch:checked::before {
@@ -700,8 +700,8 @@ defineExpose({
   transform: translateY(0) scale(0.98);
 }
 .style-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent-color, #888);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.15);
 }
 
 .style-card-preview {
@@ -804,7 +804,7 @@ defineExpose({
   writing-mode: vertical-rl;
   font-size: 8px;
   font-weight: 800;
-  color: var(--accent);
+  color: var(--accent-color, #888);
 }
 .preview-magazine::after {
   content: 'Player';
@@ -813,7 +813,7 @@ defineExpose({
   top: 35%;
   font-size: 11px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-color, #888);
 }
 
 /* 狂躁样式预览：白色背景 + 黑色文字 + 红色强调 */
@@ -914,8 +914,8 @@ defineExpose({
   appearance: none;
   background: linear-gradient(
     to right,
-    var(--accent) 0%,
-    var(--accent) var(--val-pct, 50%),
+    var(--accent-color, #888) 0%,
+    var(--accent-color, #888) var(--val-pct, 50%),
     rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
     rgba(255, 255, 255, 0.1) 100%
   );
@@ -925,20 +925,20 @@ defineExpose({
   appearance: none;
   width: 16px;
   height: 16px;
-  background: var(--accent);
+  background: var(--accent-color, #888);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 2px 8px rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
 }
 
 .slider-emerald::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: var(--accent);
+  background: var(--accent-color, #888);
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 2px 8px rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
 }
 
 .slider-marks {
@@ -1008,7 +1008,7 @@ defineExpose({
   appearance: none;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--text-color-primary);
+  border: 2px solid rgba(128, 128, 128, 0.4);
   opacity: 0.4;
   border-radius: 50%;
   margin-right: 12px;
@@ -1018,7 +1018,7 @@ defineExpose({
 }
 
 .radio-input:checked {
-  border-color: var(--accent);
+  border-color: var(--accent-color, #888);
   opacity: 1;
 }
 
@@ -1027,7 +1027,7 @@ defineExpose({
   position: absolute;
   width: 10px;
   height: 10px;
-  background: var(--accent);
+  background: var(--accent-color, #888);
   border-radius: 50%;
   left: 2px;
   top: 2px;
@@ -1121,8 +1121,8 @@ defineExpose({
 }
 
 .select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+  border-color: var(--accent-color, #888);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
 }
 
 /* 自定义字体下拉 */
@@ -1183,8 +1183,8 @@ defineExpose({
 }
 
 .font-dropdown__item.active {
-  background: rgba(var(--accent-rgb), 0.2);
-  color: var(--accent);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
+  color: var(--accent-color, #888);
 }
 
 /* 下拉动画 */

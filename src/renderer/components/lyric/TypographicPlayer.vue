@@ -636,9 +636,9 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(var(--accent-rgb), 0.1);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border: 1px solid rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
   color: var(--text-color);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
@@ -648,7 +648,7 @@ onBeforeUnmount(() => {
   }
 
   &:hover {
-    background: rgba(var(--accent-rgb), 0.2);
+    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
     transform: scale(1.1);
   }
   &:active {
@@ -657,8 +657,8 @@ onBeforeUnmount(() => {
 }
 
 .climax-btn {
-  background: rgba(var(--accent-rgb), 0.3);
-  border-color: rgba(var(--accent-rgb), 0.5);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3);
+  border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.5);
 
   .climax-mode-num {
     font-size: 14px;

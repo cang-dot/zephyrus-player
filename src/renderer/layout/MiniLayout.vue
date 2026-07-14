@@ -24,12 +24,25 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
 import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
 
 import MiniPlayBar from '@/components/player/MiniPlayBar.vue';
 
 const settingsStore = useSettingsStore();
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+});
 
 const restoreWindow = () => {
   if (!isElectron) return;

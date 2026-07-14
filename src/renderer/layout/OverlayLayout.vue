@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, onMounted, provide, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 
 import SleepTimerTop from '@/components/player/SleepTimerTop.vue';
 import { useMenuStore } from '@/store/modules/menu';
@@ -69,6 +69,11 @@ watch(() => playerStore.playMusic, () => {
 onMounted(() => {
   settingsStore.initializeSettings();
   settingsStore.initializeTheme();
+  document.documentElement.classList.add('overlay-mode');
+});
+
+onUnmounted(() => {
+  document.documentElement.classList.remove('overlay-mode');
 });
 
 const showPlaylistDrawer = ref(false);
@@ -98,5 +103,15 @@ provide('openPlaylistDrawer', openPlaylistDrawer);
 }
 .dark .overlay-empty-bg {
   background: #000000;
+}
+</style>
+
+<style>
+/* Overlay mode global styles — non-scoped to affect body/naive-ui components */
+html.overlay-mode body {
+  background: #1a1a1a !important;
+}
+html.overlay-mode.dark body {
+  background: #000000 !important;
 }
 </style>

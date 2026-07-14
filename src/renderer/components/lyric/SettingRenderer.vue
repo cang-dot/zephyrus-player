@@ -186,8 +186,18 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   color: rgba(255, 255, 255, 0.9);
 }
 
+:global(html:not(.dark)) .setting-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.85);
+}
+
 .setting-item:hover {
   background: rgba(255, 255, 255, 0.06);
+}
+
+:global(html:not(.dark)) .setting-item:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* Toggle switch */
@@ -216,7 +226,7 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
 }
 
 .toggle-switch:checked {
-  background: var(--accent);
+  background: var(--accent-color, #888);
 }
 
 .toggle-switch:checked::before {
@@ -249,6 +259,10 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   margin-bottom: 8px;
 }
 
+:global(html:not(.dark)) .slider-label {
+  color: rgba(0, 0, 0, 0.7);
+}
+
 .slider-emerald {
   width: 100%;
   height: 4px;
@@ -257,8 +271,8 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   appearance: none;
   background: linear-gradient(
     to right,
-    var(--accent) 0%,
-    var(--accent) var(--val-pct, 50%),
+    var(--accent-color, #888) 0%,
+    var(--accent-color, #888) var(--val-pct, 50%),
     rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
     rgba(255, 255, 255, 0.1) 100%
   );
@@ -268,20 +282,20 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   appearance: none;
   width: 16px;
   height: 16px;
-  background: var(--accent);
+  background: var(--accent-color, #888);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 2px 8px rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
 }
 
 .slider-emerald::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: var(--accent);
+  background: var(--accent-color, #888);
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 2px 8px rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
 }
 
 .slider-marks {
@@ -291,6 +305,10 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   font-size: 11px;
   color: rgba(255, 255, 255, 0.8);
   opacity: 0.5;
+}
+
+:global(html:not(.dark)) .slider-marks {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /* Radio group */
@@ -310,6 +328,10 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   color: rgba(255, 255, 255, 0.8);
   opacity: 0.7;
   margin-bottom: 12px;
+}
+
+:global(html:not(.dark)) .radio-label {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* Color picker */
@@ -352,6 +374,12 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   transition: border-color 0.2s;
 }
 
+:global(html:not(.dark)) .font-dropdown__trigger {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.85);
+}
+
 .font-dropdown__trigger:hover {
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -385,13 +413,17 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   transition: background 0.15s;
 }
 
+:global(html:not(.dark)) .font-dropdown__item {
+  color: rgba(0, 0, 0, 0.8);
+}
+
 .font-dropdown__item:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
 .font-dropdown__item.active {
-  background: rgba(var(--accent-rgb), 0.2);
-  color: var(--accent);
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
+  color: var(--accent-color, #888);
 }
 
 /* Dropdown transition */

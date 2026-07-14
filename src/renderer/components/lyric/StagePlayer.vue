@@ -4,7 +4,7 @@
       <div
         v-if="isVisible"
         class="stage-player"
-        :style="{ '--accent': accentColor, '--accent-rgb': accentColorRgb }"
+        :style="{ '--accent-color': accentColor, '--accent-color-rgb': accentColorRgb }"
         @mousemove="handleMouseMove"
         @mouseleave="handleMouseLeave"
       >
@@ -768,7 +768,7 @@ onBeforeUnmount(() => {
 // ==================== 容器 ====================
 
 .stage-player {
-  --accent: rgb(180, 150, 100);
+  --accent-color: rgb(180, 150, 100);
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -858,7 +858,7 @@ onBeforeUnmount(() => {
 
   &:hover {
     background: rgba(0, 0, 0, 0.35);
-    color: rgb(var(--accent-rgb));
+    color: rgb(var(--accent-color-rgb, 136, 136, 136));
     transform: scale(1.1);
   }
 
