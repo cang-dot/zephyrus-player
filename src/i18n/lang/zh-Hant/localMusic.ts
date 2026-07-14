@@ -9,5 +9,21 @@ export default {
   emptyState: '暫無本地音樂，請先選擇資料夾進行掃描',
   fileNotFound: '檔案不存在或已被移動',
   rescan: '重新掃描',
-  songCount: '{count} 首歌曲'
+  songCount: '{count} 首歌曲',
+  tabSongs: '歌曲',
+  tabArtists: '歌手',
+  tabAlbums: '專輯',
+  sortBy: '排序',
+  sortDefault: '預設',
+  sortTitle: '標題',
+  sortArtist: '歌手',
+  sortAlbum: '專輯',
+  sortYear: '年份',
+  sortDuration: '時長',
+  unknownArtist: '未知藝術家',
+  unknownAlbum: '未知專輯',
+  backToList: '返回列表',
+  showAll: '全部',
+  filterArtist: '按歌手篩選',
+  filterAlbum: '按專輯篩選'
 };

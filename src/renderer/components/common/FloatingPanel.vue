@@ -15,21 +15,19 @@
 
     <!-- 内容区域 -->
     <div class="fp-content">
-      <n-scrollbar class="fp-scroll">
-        <div class="fp-content-inner">
-          <!-- 加载中 -->
-          <div v-if="componentLoading" class="fp-loading">
-            <n-spin size="medium" />
-            <span class="fp-loading-text">加载中...</span>
-          </div>
-          <!-- 已加载 -->
-          <component
-            :is="loadedComponent"
-            v-else-if="loadedComponent"
-            :key="windowStore.panelKey"
-          />
+      <div class="fp-content-inner">
+        <!-- 加载中 -->
+        <div v-if="componentLoading" class="fp-loading">
+          <n-spin size="medium" />
+          <span class="fp-loading-text">加载中...</span>
         </div>
-      </n-scrollbar>
+        <!-- 已加载 -->
+        <component
+          :is="loadedComponent"
+          v-else-if="loadedComponent"
+          :key="windowStore.panelKey"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -203,22 +201,9 @@ const close = () => {
   flex-direction: column;
 }
 
-.fp-scroll {
-  flex: 1;
-  min-height: 0;
-}
-
-:deep(.n-scrollbar-container) {
-  height: 100%;
-}
-:deep(.n-scrollbar-content) {
-  height: 100%;
-}
-
 .fp-content-inner {
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
 // 加载状态

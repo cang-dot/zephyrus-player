@@ -50,7 +50,10 @@ export function buildFallbackMeta(filePath: string): LocalMusicMeta {
     cover: null,
     lyrics: null,
     fileSize: 0,
-    modifiedTime: 0
+    modifiedTime: 0,
+    diskNumber: 0,
+    trackNumber: 0,
+    year: 0
   };
 }
 
@@ -216,9 +219,51 @@ export function filterByKeyword(list: LocalMusicEntry[], keyword: string): Local
   return list.filter((entry) => {
     return (
       entry.title.toLowerCase().includes(lowerKeyword) ||
-      entry.artist.toLowerCase().includes(lowerKeyword)
+      entry.artist.toLowerCase().includes(lowerKeyword) ||
+      entry.album.toLowerCase().includes(lowerKeyword)
     );
   });
+}
+
+export type SortKey = 'default' | 'title' | 'artist' | 'album' | 'year' | 'duration';
+
+export function sortMusicList(
+  list: LocalMusicEntry[],
+  sortKey: SortKey = 'default'
+): LocalMusicEntry[] {
+  const sorted = [...list];
+  switch (sortKey) {
+    case 'title':
+      return sorted.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'));
+    case 'artist':
+      return sorted.sort((a, b) => {
+        const cmp = a.artist.localeCompare(b.artist, 'zh-CN');
+        return cmp !== 0 ? cmp : a.album.localeCompare(b.album, 'zh-CN');
+      });
+    case 'album':
+      return sorted.sort((a, b) => {
+        const cmp = a.album.localeCompare(b.album, 'zh-CN');
+        if (cmp !== 0) return cmp;
+        const diskDiff = (a.diskNumber || 0) - (b.diskNumber || 0);
+        if (diskDiff !== 0) return diskDiff;
+        return (a.trackNumber || 0) - (b.trackNumber || 0);
+      });
+    case 'year':
+      return sorted.sort((a, b) => (b.year || 0) - (a.year || 0));
+    case 'duration':
+      return sorted.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+    case 'default':
+    default:
+      return sorted.sort((a, b) => {
+        const artistCmp = a.artist.localeCompare(b.artist, 'zh-CN');
+        if (artistCmp !== 0) return artistCmp;
+        const albumCmp = a.album.localeCompare(b.album, 'zh-CN');
+        if (albumCmp !== 0) return albumCmp;
+        const diskDiff = (a.diskNumber || 0) - (b.diskNumber || 0);
+        if (diskDiff !== 0) return diskDiff;
+        return (a.trackNumber || 0) - (b.trackNumber || 0);
+      });
+  }
 }
 
 /**

@@ -9,5 +9,21 @@ export default {
   emptyState: 'ローカル音楽がありません。フォルダを選択してスキャンしてください。',
   fileNotFound: 'ファイルが見つからないか、移動されました',
   rescan: '再スキャン',
-  songCount: '{count} 曲'
+  songCount: '{count} 曲',
+  tabSongs: '曲',
+  tabArtists: 'アーティスト',
+  tabAlbums: 'アルバム',
+  sortBy: '並び替え',
+  sortDefault: 'デフォルト',
+  sortTitle: 'タイトル',
+  sortArtist: 'アーティスト',
+  sortAlbum: 'アルバム',
+  sortYear: '年',
+  sortDuration: '長さ',
+  unknownArtist: '不明なアーティスト',
+  unknownAlbum: '不明なアルバム',
+  backToList: '戻る',
+  showAll: 'すべて',
+  filterArtist: 'アーティストで絞り込み',
+  filterAlbum: 'アルバムで絞り込み'
 };

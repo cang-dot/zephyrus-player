@@ -17,24 +17,18 @@ const MAX_COVER_BYTES = 5 * 1024 * 1024;
  * 与渲染进程 LocalMusicMeta 类型保持一致
  */
 type LocalMusicMeta = {
-  /** 文件绝对路径 */
   filePath: string;
-  /** 歌曲标题 */
   title: string;
-  /** 艺术家名称 */
   artist: string;
-  /** 专辑名称 */
   album: string;
-  /** 时长（毫秒） */
   duration: number;
-  /** base64 Data URL 格式的封面图片，无封面时为 null */
   cover: string | null;
-  /** LRC 格式歌词文本，无歌词时为 null */
   lyrics: string | null;
-  /** 文件大小（字节） */
   fileSize: number;
-  /** 文件修改时间戳 */
   modifiedTime: number;
+  diskNumber: number;
+  trackNumber: number;
+  year: number;
 };
 
 type ScannedMusicFile = {
@@ -51,18 +45,29 @@ function isSupportedFormat(ext: string): boolean {
   return (SUPPORTED_AUDIO_FORMATS as readonly string[]).includes(ext.toLowerCase());
 }
 
-/**
- * 从文件路径中提取歌曲标题（去除目录和扩展名）
- * @param filePath 文件路径
- * @returns 歌曲标题
- */
 function extractTitleFromFilename(filePath: string): string {
   const basename = path.basename(filePath);
   const dotIndex = basename.lastIndexOf('.');
-  if (dotIndex > 0) {
-    return basename.slice(0, dotIndex);
-  }
+  if (dotIndex > 0) return basename.slice(0, dotIndex);
   return basename;
+}
+
+function extractTrackNumberFromFilename(filePath: string): number {
+  const basename = path.basename(filePath);
+  const nameWithoutExt = basename.replace(/\.[^.]+$/, '');
+  const match = nameWithoutExt.match(/^(\d+)/);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    if (num > 0 && num < 1000) return num;
+  }
+  return 0;
+}
+
+function extractYearFromFilename(filePath: string): number {
+  const basename = path.basename(filePath);
+  const match = basename.match(/\[?(19|20)\d{2}\]?/);
+  if (match) return parseInt(match[0].replace(/[\[\]()]/g, ''), 10);
+  return 0;
 }
 
 /**
@@ -93,14 +98,24 @@ function extractCoverAsDataUrl(picture: mm.IPicture | undefined): string | null 
  * @returns 歌词文本，提取失败返回 null
  */
 function extractLyrics(lyrics: mm.ILyricsTag[] | undefined): string | null {
-  if (!lyrics || lyrics.length === 0) {
-    return null;
-  }
+  if (!lyrics || lyrics.length === 0) return null;
   try {
-    const firstLyric = lyrics[0];
-    if (!firstLyric?.text) return null;
-    // music-metadata 的 text 可能是 string 或 string[]
-    return Array.isArray(firstLyric.text) ? firstLyric.text.join('\n') : firstLyric.text;
+    // 优先使用 syncText（时间戳歌词）
+    const syncLyric = lyrics.find((l) => l.syncText && l.syncText.length > 0);
+    if (syncLyric?.syncText) {
+      return syncLyric.syncText.map((line) => {
+        const mm = Math.floor(line.timestamp / 60000);
+        const ss = Math.floor((line.timestamp % 60000) / 1000);
+        const ms = Math.floor(line.timestamp % 1000);
+        return `[${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${String(ms).padStart(3, '0')}]${line.text || ''}`;
+      }).join('\n');
+    }
+    // 回退到纯文本歌词
+    const textLyric = lyrics.find((l) => l.text);
+    if (textLyric?.text) {
+      return Array.isArray(textLyric.text) ? textLyric.text.join('\n') : textLyric.text;
+    }
+    return null;
   } catch (error) {
     console.error('歌词提取失败:', error);
     return null;
@@ -228,7 +243,9 @@ async function parseMetadata(filePath: string): Promise<LocalMusicMeta> {
     console.error(`获取文件信息失败: ${filePath}`, error);
   }
 
-  // 构建 fallback 默认值
+  const fallbackTrackNo = extractTrackNumberFromFilename(filePath);
+  const fallbackYear = extractYearFromFilename(filePath);
+
   const fallback: LocalMusicMeta = {
     filePath,
     title: extractTitleFromFilename(filePath),
@@ -238,13 +255,19 @@ async function parseMetadata(filePath: string): Promise<LocalMusicMeta> {
     cover: null,
     lyrics: null,
     fileSize,
-    modifiedTime
+    modifiedTime,
+    diskNumber: 0,
+    trackNumber: fallbackTrackNo,
+    year: fallbackYear
   };
 
   try {
     const metadata = await mm.parseFile(filePath);
     const { common, format } = metadata;
 
+    const trackNo = common.track?.no ?? fallbackTrackNo;
+    const diskNo = common.disk?.no ?? 0;
+    const yr = common.year ?? fallbackYear;
 
     return {
       filePath,
@@ -255,7 +278,10 @@ async function parseMetadata(filePath: string): Promise<LocalMusicMeta> {
       cover: extractCoverAsDataUrl(common.picture?.[0]),
       lyrics: extractLyrics(common.lyrics),
       fileSize,
-      modifiedTime
+      modifiedTime,
+      diskNumber: diskNo,
+      trackNumber: trackNo,
+      year: yr
     };
   } catch (error) {
     // 解析失败使用 fallback，不中断流程

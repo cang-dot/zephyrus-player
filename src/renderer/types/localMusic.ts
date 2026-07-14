@@ -32,6 +32,12 @@ export type LocalMusicMeta = {
   fileSize: number;
   /** 文件修改时间戳 */
   modifiedTime: number;
+  /** 碟号 */
+  diskNumber: number;
+  /** 音轨号 */
+  trackNumber: number;
+  /** 年份 */
+  year: number;
 };
 
 /**

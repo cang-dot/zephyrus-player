@@ -9,5 +9,21 @@ export default {
   emptyState: '로컬 음악이 없습니다. 폴더를 선택하여 스캔하세요.',
   fileNotFound: '파일을 찾을 수 없거나 이동되었습니다',
   rescan: '다시 스캔',
-  songCount: '{count}곡'
+  songCount: '{count}곡',
+  tabSongs: '곡',
+  tabArtists: '아티스트',
+  tabAlbums: '앨범',
+  sortBy: '정렬',
+  sortDefault: '기본',
+  sortTitle: '제목',
+  sortArtist: '아티스트',
+  sortAlbum: '앨범',
+  sortYear: '연도',
+  sortDuration: '길이',
+  unknownArtist: '알 수 없는 아티스트',
+  unknownAlbum: '알 수 없는 앨범',
+  backToList: '뒤로',
+  showAll: '전체',
+  filterArtist: '아티스트별 필터',
+  filterAlbum: '앨범별 필터'
 };

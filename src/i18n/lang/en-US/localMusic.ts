@@ -9,5 +9,21 @@ export default {
   emptyState: 'No local music found. Please select a folder to scan.',
   fileNotFound: 'File not found or has been moved',
   rescan: 'Rescan',
-  songCount: '{count} songs'
+  songCount: '{count} songs',
+  tabSongs: 'Songs',
+  tabArtists: 'Artists',
+  tabAlbums: 'Albums',
+  sortBy: 'Sort',
+  sortDefault: 'Default',
+  sortTitle: 'Title',
+  sortArtist: 'Artist',
+  sortAlbum: 'Album',
+  sortYear: 'Year',
+  sortDuration: 'Duration',
+  unknownArtist: 'Unknown Artist',
+  unknownAlbum: 'Unknown Album',
+  backToList: 'Back',
+  showAll: 'All',
+  filterArtist: 'Filter by Artist',
+  filterAlbum: 'Filter by Album'
 };

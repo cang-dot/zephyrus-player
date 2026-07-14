@@ -9,5 +9,21 @@ export default {
   emptyState: '暂无本地音乐，请先选择文件夹进行扫描',
   fileNotFound: '文件不存在或已被移动',
   rescan: '重新扫描',
-  songCount: '{count} 首歌曲'
+  songCount: '{count} 首歌曲',
+  tabSongs: '歌曲',
+  tabArtists: '歌手',
+  tabAlbums: '专辑',
+  sortBy: '排序',
+  sortDefault: '默认',
+  sortTitle: '标题',
+  sortArtist: '歌手',
+  sortAlbum: '专辑',
+  sortYear: '年份',
+  sortDuration: '时长',
+  unknownArtist: '未知艺术家',
+  unknownAlbum: '未知专辑',
+  backToList: '返回列表',
+  showAll: '全部',
+  filterArtist: '按歌手筛选',
+  filterAlbum: '按专辑筛选'
 };

@@ -10,7 +10,7 @@ import useIndexedDB from '@/hooks/IndexDBHook';
 import type { LocalMusicEntry } from '@/types/localMusic';
 
 // 扫描版本号，代码变更后递增可强制重新解析所有文件（解决封面/歌词提取逻辑变更后的缓存问题）
-const SCAN_VERSION = 2;
+const SCAN_VERSION = 3;
 import { removeStaleEntries } from '@/utils/localMusicUtils';
 
 const { message } = createDiscreteApi(['message']);
