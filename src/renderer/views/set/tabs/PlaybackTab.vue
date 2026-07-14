@@ -1,4 +1,4 @@
-﻿<template>
+﻿﻿<template>
   <div>
     <setting-section :title="t('settings.sections.playback')">
       <setting-item
@@ -66,6 +66,16 @@
       </setting-item>
     </setting-section>
 
+    <!-- 智能混音引擎 -->
+    <setting-section title="智能混音">
+      <setting-item
+        title="智能混音引擎"
+        description="切歌时自动平滑过渡，避免硬切中断"
+      >
+        <smart-mix-settings />
+      </setting-item>
+    </setting-section>
+
     <music-source-settings
       v-if="isElectron"
       v-model:show="showMusicSourcesModal"
@@ -80,6 +90,7 @@ import { useI18n } from 'vue-i18n';
 
 import AudioDeviceSettings from '@/components/settings/AudioDeviceSettings.vue';
 import MusicSourceSettings from '@/components/settings/MusicSourceSettings.vue';
+import SmartMixSettings from '@/components/settings/SmartMixSettings.vue';
 import { type Platform } from '@/types/music';
 import { isElectron } from '@/utils';
 

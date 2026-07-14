@@ -367,6 +367,43 @@ class DrumDetector {
     // ms → BPM
     return Math.round(60000 / medianMs);
   }
+
+  /**
+   * 获取三频段能量数据（供 Level 3 频域拼接和 UI 频谱可视化使用）
+   *
+   * 低频 (20-250Hz): 贝斯/底鼓
+   * 中频 (250-4000Hz): 人声/旋律
+   * 高频 (4000-20000Hz): 镲片/空气感
+   */
+  public getBandEnergies(): { low: number; mid: number; high: number } {
+    if (!this.context || !this.frequencyData || this.frequencyData.length === 0) {
+      return { low: 0, mid: 0, high: 0 };
+    }
+
+    const sampleRate = this.context.sampleRate;
+    const binResolution = sampleRate / (this.frequencyData.length * 2);
+
+    const lowStart = Math.max(1, Math.floor(20 / binResolution));
+    const lowEnd = Math.min(this.frequencyData.length - 1, Math.ceil(250 / binResolution));
+    const midEnd = Math.min(this.frequencyData.length - 1, Math.ceil(4000 / binResolution));
+    const highEnd = Math.min(this.frequencyData.length - 1, Math.ceil(20000 / binResolution));
+
+    const avgRange = (start: number, end: number): number => {
+      let sum = 0;
+      let count = 0;
+      for (let i = start; i <= end; i++) {
+        sum += this.frequencyData[i];
+        count++;
+      }
+      return count > 0 ? sum / count / 255 : 0;
+    };
+
+    return {
+      low: avgRange(lowStart, lowEnd),
+      mid: avgRange(lowEnd + 1, midEnd),
+      high: avgRange(midEnd + 1, highEnd)
+    };
+  }
 }
 
 /** 全局单例 */

@@ -896,6 +896,33 @@ class AudioService {
     return this.currentTrack;
   }
 
+  // ==================== 智能混音接口 ====================
+
+  /** 获取 AudioContext（供 useSmartAudio 使用） */
+  getAudioContext(): AudioContext | null {
+    return this.context;
+  }
+
+  /** 获取混音挂载点（gainNode），crossfade 节点在此之后插入 */
+  getMixNode(): GainNode | null {
+    return this.gainNode;
+  }
+
+  /** 获取 masterGain（最终输出节点） */
+  getMasterGain(): GainNode | null {
+    return (Howler as any).masterGain ?? null;
+  }
+
+  /** 获取三频段能量（复用 drumDetector） */
+  getBandEnergies(): { low: number; mid: number; high: number } {
+    return drumDetector.getBandEnergies();
+  }
+
+  /** 获取当前实时 BPM（复用 drumDetector） */
+  getRealtimeBpm(): number {
+    return drumDetector.bpm;
+  }
+
   stop() {
     try {
       if (this.currentSound) {
