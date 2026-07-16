@@ -18,6 +18,7 @@ export interface BeatAlignOptions {
   gainOut: GainNode;
   gainIn: GainNode;
   defaultDuration: number; // 默认过渡时长（秒），降级时使用
+  volumeScale?: number;    // 音量缩放，透传给 applyEqualPowerCrossfade
 }
 
 export interface BeatAlignResult {
@@ -32,12 +33,13 @@ export interface BeatAlignResult {
  */
 export function calculateBeatAlignedTransition(opts: BeatAlignOptions): BeatAlignResult {
   const { bpm, beatOffset, currentTime, remainingTime, ctx, defaultDuration } = opts;
+  const volumeScale = opts.volumeScale ?? 1;
 
   // 检查 BPM 有效性
   if (!bpm || bpm < 50 || bpm > 250) {
     // 降级为 Level 1 等功率
     const startTime = ctx.currentTime;
-    applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, defaultDuration);
+    applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, defaultDuration, volumeScale);
     return {
       startTime,
       duration: defaultDuration,
@@ -54,7 +56,7 @@ export function calculateBeatAlignedTransition(opts: BeatAlignOptions): BeatAlig
     // 剩余时间不足，降级为 Level 1（缩短时长）
     const duration = Math.max(2, remainingTime * 0.8);
     const startTime = ctx.currentTime;
-    applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, duration);
+    applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, duration, volumeScale);
     return {
       startTime,
       duration,
@@ -95,7 +97,7 @@ export function calculateBeatAlignedTransition(opts: BeatAlignOptions): BeatAlig
   }
 
   // 应用等功率 crossfade
-  applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, duration);
+  applyEqualPowerCrossfade(ctx, opts.gainOut, opts.gainIn, startTime, duration, volumeScale);
 
   return { startTime, duration, reason, level: 2 };
 }

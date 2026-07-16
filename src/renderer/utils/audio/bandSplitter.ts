@@ -148,27 +148,38 @@ export function destroyBandSplitChain(
  * 使用 setTargetAtTime 实现指数衰减，比线性更自然。
  * tau = 时间常数，约等于 -60dB 衰减所需时间的 1/6
  *
+ * 注意：调用方应在调用前把 gainOut / gainIn 的 .gain 设为 1（_passthrough），
+ * 把音量缩放完全交给频段 gain，避免与外层 EQ gainNode 的用户音量相乘导致双重缩放。
+ *
  * @param ctx AudioContext
  * @param chainOut 淡出歌曲的分裂链
  * @param chainIn 淡入歌曲的分裂链
  * @param startTime 过渡开始时间（AudioContext.currentTime）
  * @param duration 过渡时长（秒）
+ * @param volumeScale 音量缩放（0~1），各频段起始/目标值会乘以该系数
  */
 export function applyBandSplitCrossfade(
   ctx: AudioContext,
   chainOut: BandSplitChain,
   chainIn: BandSplitChain,
   startTime: number,
-  duration: number
+  duration: number,
+  volumeScale: number = 1
 ): void {
   const tau = duration / 3;  // 时间常数
+  const v = Math.max(0, Math.min(1, volumeScale));
 
   // === 淡出歌曲 A ===
+  // 起始值设为音量缩放（保持过渡前响度连续）
+  chainOut.low.gain.setValueAtTime(v, startTime);
+  chainOut.mid.gain.setValueAtTime(v, startTime);
+  chainOut.high.gain.setValueAtTime(v, startTime);
+
   // 低频：在过渡段 70% 处开始衰减
   chainOut.low.gain.setTargetAtTime(0, startTime + duration * BAND_FADE_TIMING.low.fadeOutStart, tau);
   // 中频：在过渡段 20% 处开始衰减（早淡出，避免人声打架）
   chainOut.mid.gain.setTargetAtTime(0, startTime + duration * BAND_FADE_TIMING.mid.fadeOutStart, tau);
-  // 高频：在过渡段 50% 处开始衰减
+  // 高频：在过渡段 50% 处衰减
   chainOut.high.gain.setTargetAtTime(0, startTime + duration * BAND_FADE_TIMING.high.fadeOutStart, tau);
 
   // === 淡入歌曲 B ===
@@ -178,18 +189,18 @@ export function applyBandSplitCrossfade(
   chainIn.high.gain.setValueAtTime(0, startTime);
 
   // 中频先入（30% 处）
-  chainIn.mid.gain.setTargetAtTime(1, startTime + duration * BAND_FADE_TIMING.mid.fadeInStart, tau);
+  chainIn.mid.gain.setTargetAtTime(v, startTime + duration * BAND_FADE_TIMING.mid.fadeInStart, tau);
   // 高频中入（50% 处）
-  chainIn.high.gain.setTargetAtTime(1, startTime + duration * BAND_FADE_TIMING.high.fadeInStart, tau);
+  chainIn.high.gain.setTargetAtTime(v, startTime + duration * BAND_FADE_TIMING.high.fadeInStart, tau);
   // 低频最后入（80% 处，保留节奏感）
-  chainIn.low.gain.setTargetAtTime(1, startTime + duration * BAND_FADE_TIMING.low.fadeInStart, tau);
+  chainIn.low.gain.setTargetAtTime(v, startTime + duration * BAND_FADE_TIMING.low.fadeInStart, tau);
 
   // 过渡结束后确保终值精确
   const endTime = startTime + duration + 0.1;
   chainOut.low.gain.setValueAtTime(0, endTime);
   chainOut.mid.gain.setValueAtTime(0, endTime);
   chainOut.high.gain.setValueAtTime(0, endTime);
-  chainIn.low.gain.setValueAtTime(1, endTime);
-  chainIn.mid.gain.setValueAtTime(1, endTime);
-  chainIn.high.gain.setValueAtTime(1, endTime);
+  chainIn.low.gain.setValueAtTime(v, endTime);
+  chainIn.mid.gain.setValueAtTime(v, endTime);
+  chainIn.high.gain.setValueAtTime(v, endTime);
 }

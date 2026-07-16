@@ -5,7 +5,7 @@ import { defineStore, storeToRefs } from 'pinia';
 import { computed, ref, shallowRef, triggerRef } from 'vue';
 
 import i18n from '@/../i18n/renderer';
-import { useLocalMusic, isLocalSong } from '@/hooks/useLocalMusic';
+import { isLocalSong,useLocalMusic } from '@/hooks/useLocalMusic';
 import { useSongDetail } from '@/hooks/usePlayerHooks';
 import { preloadService } from '@/services/preloadService';
 import type { SongResult } from '@/types/music';
@@ -147,6 +147,18 @@ export const usePlaylistStore = defineStore(
               await preloadService.load(nextSong);
             } catch (error) {
               console.warn('预加载下一首音频失败:', error);
+            }
+            // 触发 BPM 预分析（智能混音 Level 2/3 节拍对齐需要）
+            try {
+              const { getSmartAudio } = await import('@/composables/useSmartAudio');
+              const smartAudio = getSmartAudio();
+              const { useMixEngineStore } = await import('./mixEngine');
+              const mixEngine = useMixEngineStore();
+              if (smartAudio && mixEngine.bpmPreAnalysis && !mixEngine.getCachedBpm(String(nextSong.id))) {
+                smartAudio.preloadAndAnalyzeBpm(String(nextSong.id), nextSong.playMusicUrl).catch(() => {});
+              }
+            } catch (e) {
+              console.warn('BPM 预分析触发失败:', e);
             }
           }
           if (nextSong.picUrl) {
@@ -677,7 +689,6 @@ export const usePlaylistStore = defineStore(
       if (playMode.value === 2 && playList.value.length > 0) {
         if (originalPlayList.value.length === 0) {
           shufflePlayList();
-        } else {
         }
       }
     };

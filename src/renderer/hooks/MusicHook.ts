@@ -1,11 +1,12 @@
-import { cloneDeep } from 'lodash';
 import { Howl } from 'howler';
+import { cloneDeep } from 'lodash';
 import { createDiscreteApi } from 'naive-ui';
 import { computed, type ComputedRef, nextTick, ref, watch } from 'vue';
 
 import useIndexedDB from '@/hooks/IndexDBHook';
 import { audioService } from '@/services/audioService';
 import { LocalAudioPlayer } from '@/services/localAudioPlayer';
+import { smartMixService } from '@/services/smartMixService';
 import type { usePlayerStore } from '@/store';
 import type { Artist, ILyricText, SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
@@ -294,6 +295,9 @@ const setupAudioListeners = () => {
         nowTime.value = currentTime;
         allTime.value = currentSound.duration() as number;
 
+        // 智能混音 crossfade 检查（异步，不阻塞进度更新）
+        smartMixService.checkCrossfade(currentTime, allTime.value).catch(() => {});
+
         // === 歌词索引更新 ===
         const newIndex = getLrcIndex(nowTime.value);
         if (newIndex !== nowIndex.value) {
@@ -483,6 +487,11 @@ const setupAudioListeners = () => {
   audioService.on('end', async () => {
     clearInterval();
 
+    // 智能混音 crossfade 期间跳过 nextPlay
+    if (smartMixService.getIsCrossfading()) {
+      return;
+    }
+
     if (getPlayerStore().playMode === 1) {
       // 单曲循环模式
       replayMusic();
@@ -529,6 +538,33 @@ const setupAudioListeners = () => {
 
   audioService.on('nexttrack', () => {
     getPlayerStore().nextPlay();
+  });
+
+  // ===== Smart Mix crossfade 事件：UI 桥接 + 进度 interval 恢复 =====
+
+  // crossfade 开始：通知 transition store 更新 UI
+  audioService.on('crossfade-start', (payload: { track: SongResult; duration: number }) => {
+    import('@/store/modules/transition').then(({ useTransitionStore }) => {
+      useTransitionStore().begin(payload.track, payload.duration);
+    });
+  });
+
+  // crossfade 完成：重启进度 interval
+  // transitionStore.end() 由 smartMixService.completeTransition 的 finally 块调用，
+  // 确保在 playerCore.playMusic 更新后才结束 UI 过渡，避免 displaySrc 闪回旧封面
+  audioService.on('crossfade-complete', () => {
+    startProgressInterval();
+  });
+
+  // crossfade 取消：结束 UI 过渡 + 尝试重启 interval
+  audioService.on('crossfade-cancelled', () => {
+    import('@/store/modules/transition').then(({ useTransitionStore }) => {
+      useTransitionStore().end();
+    });
+    const currentSound = audioService.getCurrentSound();
+    if (currentSound && currentSound.playing()) {
+      startProgressInterval();
+    }
   });
 
   return () => {

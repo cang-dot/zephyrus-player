@@ -31,17 +31,24 @@
           class="left-side"
           :class="{ 'only-cover': config.hideLyrics }"
         >
-          <div class="img-container">
+          <div class="img-container" :style="coverTransition.blurStyle.value">
             <cover3-d
               ref="PicImgRef"
-              :src="getImgUrl(playMusic?.picUrl, '500y500')"
+              :src="coverTransition.displaySrc.value"
               :loading="playMusic?.playLoading"
               :max-tilt="12"
               :scale="1.03"
               :shine-intensity="0.25"
             />
+            <div
+              v-if="coverTransition.overlaySrc.value"
+              class="cover-overlay"
+              :style="{ opacity: coverTransition.overlayOpacity.value }"
+            >
+              <img :src="coverTransition.overlaySrc.value" class="cover-overlay-img" />
+            </div>
           </div>
-          <div class="music-info">
+          <div class="music-info" :style="coverTransition.blurStyle.value">
             <div class="music-content-name" v-html="playMusic.name"></div>
             <div class="music-content-singer">
               <n-ellipsis
@@ -173,6 +180,7 @@ import LyricCorrectionControl from '@/components/lyric/LyricCorrectionControl.vu
 import LyricSettings from '@/components/lyric/LyricSettings.vue';
 import PlayerControls from '@/components/lyric/PlayerControls.vue';
 import SimplePlayBar from '@/components/player/SimplePlayBar.vue';
+import { useCoverTransition } from '@/composables/useCoverTransition';
 import {
   adjustCorrectionTime,
   artistList,
@@ -188,17 +196,25 @@ import {
 import { useArtist } from '@/hooks/useArtist';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSettingsStore } from '@/store/modules/settings';
+import { useTransitionStore } from '@/store/modules/transition';
 import { DEFAULT_LYRIC_CONFIG, LyricConfig } from '@/types/lyric';
 import { getImgUrl, isMobile } from '@/utils';
 import { animateGradient, getHoverBackgroundColor, getTextColors } from '@/utils/linearColor';
 
 const { t } = useI18n();
+const transitionStore = useTransitionStore();
 // 定义 refs
 const lrcSider = ref<any>(null);
 const isMouse = ref(false);
 const currentBackground = ref('');
 const animationFrame = ref<number | null>(null);
 const isDark = ref(false);
+
+// ==================== 封面过渡动画（GSAP 驱动动态模糊 + 覆盖层渐显 swap）====================
+const coverTransition = useCoverTransition({
+  currentSrc: computed(() => getImgUrl(playMusic?.value?.picUrl, '500y500')),
+  formatNextUrl: (raw) => getImgUrl(raw, '500y500')
+});
 
 // 计算自定义背景样式
 const customBackgroundStyle = computed(() => {
@@ -427,6 +443,40 @@ watch(
   { immediate: true }
 );
 
+// ==================== Smart Mix crossfade UI ====================
+// crossfade 开始时渐变到下一首背景色，结束时渐回当前曲背景色
+watch(
+  () => transitionStore.isCrossfadingUI,
+  (isCrossfading) => {
+    if (isCrossfading && transitionStore.nextBackgroundColor) {
+      if (animationFrame.value) cancelAnimationFrame(animationFrame.value);
+      const result = animateGradient(
+        currentBackground.value,
+        transitionStore.nextBackgroundColor,
+        (v) => {
+          currentBackground.value = v;
+        },
+        400
+      );
+      if (typeof result === 'number') animationFrame.value = result;
+    } else {
+      const targetBg = playMusic?.value?.backgroundColor as string;
+      if (targetBg) {
+        if (animationFrame.value) cancelAnimationFrame(animationFrame.value);
+        const result = animateGradient(
+          currentBackground.value,
+          targetBg,
+          (v) => {
+            currentBackground.value = v;
+          },
+          400
+        );
+        if (typeof result === 'number') animationFrame.value = result;
+      }
+    }
+  }
+);
+
 const { getLrcStyle: originalLrcStyle } = useLyricProgress();
 
 const getLrcStyle = (index: number) => {
@@ -515,6 +565,7 @@ onBeforeUnmount(() => {
   if (animationFrame.value) {
     cancelAnimationFrame(animationFrame.value);
   }
+  coverTransition.dispose();
 });
 
 const settingsStore = useSettingsStore();
@@ -762,6 +813,24 @@ defineExpose({
     .img-container {
       @apply relative w-[45vh] mb-8 aspect-square;
       max-width: 100%;
+
+      // 封面过渡覆盖层（经典模式）
+      .cover-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .cover-overlay-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: inherit;
+        }
+      }
     }
 
     .music-info {

@@ -1,9 +1,9 @@
 import { Howl, Howler } from 'howler';
 
+import { isLocalSong } from '@/hooks/useLocalMusic';
 import type { AudioOutputDevice } from '@/types/audio';
 import type { SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
-import { isLocalSong } from '@/hooks/useLocalMusic';
 
 import { climaxDetector } from './climaxDetector';
 import { drumDetector } from './drumDetector';
@@ -60,6 +60,11 @@ class AudioService {
   private operationLockTimeout = 5000; // 5秒超时
   private operationLockStartTime: number = 0;
   private operationLockId: string = '';
+
+  // ==================== 智能混音状态 ====================
+  private crossfadingSound: Howl | LocalAudioPlayer | null = null;
+  private crossfadeGain: GainNode | null = null;
+  private crossfadeCleanupTimeout: number | null = null;
 
   constructor() {
     if ('mediaSession' in navigator) {
@@ -367,6 +372,10 @@ class AudioService {
       climaxDetector.connect(this.context, this.gainNode);
       drumDetector.connect(this.context, this.gainNode);
 
+      // 启动检测器（idempotent，styleEngine 也会调用）
+      drumDetector.start();
+      climaxDetector.start();
+
       // 应用EQ状态
       this.applyBypassState();
 
@@ -412,6 +421,9 @@ class AudioService {
 
     climaxDetector.connect(this.context, this.gainNode);
     drumDetector.connect(this.context, this.gainNode);
+
+    drumDetector.start();
+    climaxDetector.start();
 
     this.applyBypassState();
 
@@ -468,6 +480,8 @@ class AudioService {
       try { drumDetector.disconnect(); } catch {}
       climaxDetector.connect(this.context, this.gainNode);
       drumDetector.connect(this.context, this.gainNode);
+      drumDetector.start();
+      climaxDetector.start();
     } catch (error) {
       console.error('Error applying EQ state, attempting fallback:', error);
       // Fallback: connect source directly to destination
@@ -565,6 +579,274 @@ class AudioService {
     localStorage.removeItem('audioOperationLock');
   }
 
+  // ==================== 智能混音 ====================
+
+  /** 取消正在进行的 crossfade */
+  private cancelCrossfade(): void {
+    if (this.crossfadingSound) {
+      try { this.crossfadingSound.stop(); this.crossfadingSound.unload(); } catch {}
+      this.crossfadingSound = null;
+    }
+    if (this.crossfadeGain) {
+      try { this.crossfadeGain.disconnect(); } catch {}
+      this.crossfadeGain = null;
+    }
+    if (this.crossfadeCleanupTimeout) {
+      clearTimeout(this.crossfadeCleanupTimeout);
+      this.crossfadeCleanupTimeout = null;
+    }
+    // 恢复 gainNode 的音量（取消 crossfade 的淡出曲线）
+    if (this.gainNode && this.context) {
+      try {
+        this.gainNode.gain.cancelScheduledValues(this.context.currentTime);
+        const vol = parseFloat(localStorage.getItem('volume') || '1');
+        this.gainNode.gain.setValueAtTime(vol, this.context.currentTime);
+      } catch {}
+    }
+    this.emit('crossfade-cancelled');
+  }
+
+  /** 是否正在 crossfade */
+  public isCrossfading(): boolean {
+    return this.crossfadingSound !== null;
+  }
+
+  /**
+   * 智能混音 crossfade —— 在当前歌曲结束前预加载下一首并平滑过渡
+   *
+   * 本方法负责音频图拓扑（创建 crossfadeGain、连接 source、清理旧实例），
+   * 曲线策略委托给 useSmartAudio 的三级策略（等功率 / 节拍对齐 / 频域拼接）。
+   *
+   * @param nextSound 下一首的音频实例（已加载）
+   * @param nextTrack 下一首的 track 信息
+   * @param duration 过渡时长（秒）
+   * @param level 过渡等级 (1=等功率, 2=节拍对齐, 3=频域拼接)
+   * @returns 是否成功启动 crossfade
+   */
+  public async crossfadeToNext(
+    nextSound: Howl | LocalAudioPlayer,
+    nextTrack: SongResult,
+    duration: number,
+    level: 1 | 2 | 3
+  ): Promise<boolean> {
+    const ctx = this.context;
+    if (!ctx || !this.currentSound || !this.gainNode) return false;
+
+    // 1. 确保下一首已加载
+    if (nextSound instanceof LocalAudioPlayer) {
+      try { await nextSound.load(); } catch { return false; }
+    } else if (nextSound.state() !== 'loaded') {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          (nextSound as Howl).once('load', () => resolve());
+          (nextSound as Howl).once('loaderror', () => reject(new Error('load error')));
+        });
+      } catch { return false; }
+    }
+
+    // 2. 为新歌曲创建独立的 gain 节点
+    this.crossfadeGain = ctx.createGain();
+    this.crossfadeGain.gain.value = 0;
+    this.crossfadeGain.connect(ctx.destination);
+
+    // 3. 获取新歌曲的 source 节点
+    let nextSource: AudioNode;
+    if (nextSound instanceof LocalAudioPlayer) {
+      nextSource = nextSound.getInputNode();
+    } else {
+      const howl = nextSound as any;
+      const audioNode = howl._sounds?.[0]?._node;
+      if (!audioNode || !(audioNode instanceof HTMLMediaElement)) {
+        try { this.crossfadeGain.disconnect(); } catch {}
+        this.crossfadeGain = null;
+        return false;
+      }
+      const existing = (audioNode as any).source as MediaElementAudioSourceNode;
+      if (existing?.context === ctx) {
+        nextSource = existing;
+      } else {
+        nextSource = ctx.createMediaElementSource(audioNode);
+        (audioNode as any).source = nextSource;
+      }
+    }
+
+    // 4. 连接: nextSource → crossfadeGain → destination
+    nextSource.connect(this.crossfadeGain);
+
+    // 5. 保存引用并设置事件监听
+    this.crossfadingSound = nextSound;
+    this.setupSoundEvents(nextSound);
+
+    // 6. 开始播放新歌曲
+    nextSound.play();
+
+    // 7. 委托智能引擎应用 crossfade 曲线（三级策略）
+    const now = ctx.currentTime;
+    const savedVolume = parseFloat(localStorage.getItem('volume') || '1');
+
+    // 当前歌曲的播放位置 / 剩余时间（Level 2 节拍对齐需要）
+    let currentTime = 0;
+    let songDuration = 0;
+    try {
+      currentTime = (this.currentSound.seek() as number) || 0;
+      songDuration = (this.currentSound.duration() as number) || 0;
+    } catch { /* 位置/时长读取失败，使用默认 0 */ }
+
+    const remainingTime = songDuration > 0 ? Math.max(0, songDuration - currentTime) : duration;
+
+    let actualDuration = duration;
+    let usedLevel: 1 | 2 | 3 = level;
+
+    // 延迟导入避免循环依赖
+    try {
+      const { getSmartAudio } = await import('@/composables/useSmartAudio');
+      const smartAudio = getSmartAudio();
+      if (smartAudio) {
+        const result = smartAudio.crossfadeTo({
+          gainOut: this.gainNode,
+          gainIn: this.crossfadeGain,
+          masterGain: this.getMasterGain() ?? (ctx as any).destination,
+          duration,
+          level,
+          currentTime,
+          remainingTime,
+          nextTrackId: String(nextTrack.id),
+          volume: savedVolume
+        });
+        actualDuration = result.duration;
+        usedLevel = result.level;
+
+        // Level 1/2 没有调度清理，需在过渡结束复位 isTransitioning
+        if (usedLevel !== 3) {
+          smartAudio.scheduleTransitionEnd(actualDuration);
+        }
+      } else {
+        // 引擎未挂载：回退到内置等功率曲线
+        this.applyEqualPowerFallback(savedVolume, duration);
+      }
+    } catch (e) {
+      console.warn('[AudioService] 智能混音引擎不可用，回退等功率:', e);
+      this.applyEqualPowerFallback(savedVolume, duration);
+    }
+
+    // 8. 调度清理（过渡结束后）
+    this.crossfadeCleanupTimeout = window.setTimeout(() => {
+      this.completeCrossfadeCleanup(nextSound, nextTrack);
+    }, actualDuration * 1000 + 200);
+
+    // 9. 发出事件
+    this.emit('crossfade-start', { track: nextTrack, duration: actualDuration, level: usedLevel });
+
+    return true;
+  }
+
+  /** 等功率回退：智能引擎不可用时使用 */
+  private applyEqualPowerFallback(savedVolume: number, duration: number): void {
+    const ctx = this.context;
+    if (!ctx || !this.gainNode || !this.crossfadeGain) return;
+    const now = ctx.currentTime;
+    const samples = Math.max(64, Math.ceil(duration * 100));
+    const curveOut = new Float32Array(samples);
+    const curveIn = new Float32Array(samples);
+    for (let i = 0; i < samples; i++) {
+      const t = i / (samples - 1);
+      const angle = (Math.PI * t) / 2;
+      curveOut[i] = Math.cos(angle) * savedVolume;
+      curveIn[i] = Math.sin(angle) * savedVolume;
+    }
+    this.gainNode.gain.cancelScheduledValues(now);
+    this.gainNode.gain.setValueAtTime(savedVolume, now);
+    this.gainNode.gain.setValueCurveAtTime(curveOut, now, duration);
+    this.gainNode.gain.setValueAtTime(0, now + duration + 0.001);
+    this.crossfadeGain.gain.setValueAtTime(0, now);
+    this.crossfadeGain.gain.setValueCurveAtTime(curveIn, now, duration);
+    this.crossfadeGain.gain.setValueAtTime(savedVolume, now + duration + 0.001);
+  }
+
+  /** crossfade 完成后的清理：停止旧歌曲、重建 EQ */
+  private completeCrossfadeCleanup(
+    nextSound: Howl | LocalAudioPlayer,
+    nextTrack: SongResult
+  ): void {
+    // 保存旧歌曲引用
+    const oldSound = this.currentSound;
+
+    // ⚠️ 先更新引用再 stop 旧歌曲——这样旧曲 stop() 触发的 'pause' 事件
+    // 在 setupSoundEvents 的守卫 (this.currentSound === sound) 检查时
+    // 会因为 currentSound 已指向新曲而跳过，避免误发 pause 事件
+    // 导致 MusicHook 将 play 状态设为 false 并清除进度 interval
+    this.currentSound = nextSound;
+    this.currentTrack = nextTrack;
+    this.crossfadingSound = null;
+    this.crossfadeCleanupTimeout = null;
+
+    // 停止旧歌曲
+    if (oldSound && oldSound !== nextSound) {
+      try { oldSound.stop(); oldSound.unload(); } catch (e) {
+        console.warn('[AudioService] 停止旧音频失败:', e);
+      }
+    }
+
+    // 断开 crossfadeGain
+    if (this.crossfadeGain) {
+      try { this.crossfadeGain.disconnect(); } catch {}
+      this.crossfadeGain = null;
+    }
+
+    // 重建 EQ 链
+    this.disposeEQ(true).then(() => {
+      return this.setupEQ(nextSound);
+    }).then(() => {
+      const savedVolume = parseFloat(localStorage.getItem('volume') || '1');
+      this.applyVolume(savedVolume);
+      this.updateMediaSessionMetadata(nextTrack);
+      this.updateMediaSessionState(true);
+      this.emit('load');
+    }).catch(e => {
+      console.error('[AudioService] crossfade EQ 重建失败:', e);
+    }).finally(() => {
+      this.emit('crossfade-complete', { track: nextTrack });
+    });
+  }
+
+  /** 设置音频事件监听（提取自 play 方法，crossfade 复用） */
+  private setupSoundEvents(sound: Howl | LocalAudioPlayer): void {
+    sound.off('play');
+    sound.off('pause');
+    sound.off('end');
+    sound.off('seek');
+
+    sound.on('play', () => {
+      if (this.currentSound === sound || this.crossfadingSound === sound) {
+        this.updateMediaSessionState(true);
+        this.emit('play');
+      }
+    });
+
+    sound.on('pause', () => {
+      if (this.currentSound === sound || this.crossfadingSound === sound) {
+        this.updateMediaSessionState(false);
+        this.emit('pause');
+      }
+    });
+
+    sound.on('end', () => {
+      if (this.currentSound === sound) {
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'none';
+        }
+        this.emit('end');
+      }
+    });
+
+    sound.on('seek', () => {
+      if (this.currentSound === sound || this.crossfadingSound === sound) {
+        this.updateMediaSessionPositionState();
+        this.emit('seek');
+      }
+    });
+  }
+
   // 播放控制相关
   public play(
     url: string,
@@ -582,6 +864,9 @@ class AudioService {
       this.currentSound.play();
       return Promise.resolve(this.currentSound);
     }
+
+    // 取消正在进行的 crossfade
+    this.cancelCrossfade();
 
     // 新播放请求：强制重置旧锁，确保不会被遗留锁阻塞
     this.forceResetOperationLock();
@@ -834,46 +1119,8 @@ class AudioService {
             this.currentSound = newSound;
           }
 
-          // 设置音频事件监听 (play, pause, end, seek)
-          // ... (保持原有的事件监听逻辑不变，但需要确保绑定到 newSound)
-          const soundInstance = newSound;
-          if (soundInstance) {
-            // 清除旧的监听器以防重复
-            soundInstance.off('play');
-            soundInstance.off('pause');
-            soundInstance.off('end');
-            soundInstance.off('seek');
-
-            soundInstance.on('play', () => {
-              if (this.currentSound === soundInstance) {
-                this.updateMediaSessionState(true);
-                this.emit('play');
-              }
-            });
-
-            soundInstance.on('pause', () => {
-              if (this.currentSound === soundInstance) {
-                this.updateMediaSessionState(false);
-                this.emit('pause');
-              }
-            });
-
-            soundInstance.on('end', () => {
-              if (this.currentSound === soundInstance) {
-                if ('mediaSession' in navigator) {
-                  navigator.mediaSession.playbackState = 'none';
-                }
-                this.emit('end');
-              }
-            });
-
-            soundInstance.on('seek', () => {
-              if (this.currentSound === soundInstance) {
-                this.updateMediaSessionPositionState();
-                this.emit('seek');
-              }
-            });
-          }
+          // 设置音频事件监听
+          this.setupSoundEvents(newSound);
         } catch (error) {
           console.error('Error creating audio instance:', error);
           this.releaseOperationLock();
@@ -924,6 +1171,8 @@ class AudioService {
   }
 
   stop() {
+    // 取消正在进行的 crossfade
+    this.cancelCrossfade();
     try {
       if (this.currentSound) {
         try {
@@ -987,6 +1236,10 @@ class AudioService {
       } catch (error) {
         console.error('暂停音频失败:', error);
       }
+    }
+    // crossfade 期间暂停也暂停新歌曲
+    if (this.crossfadingSound) {
+      try { this.crossfadingSound.pause(); } catch {}
     }
   }
 

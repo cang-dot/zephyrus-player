@@ -1,7 +1,6 @@
 <template>
   <!-- 透明遮罩层：点击空白区域关闭面板 -->
   <div
-    v-if="windowStore.activePath"
     class="fp-backdrop"
     @mousedown="onBackdropMouseDown"
   >

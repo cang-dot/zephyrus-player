@@ -107,7 +107,7 @@ const bpmPreAnalysis = ref(mixEngine.bpmPreAnalysis);
 
 const recommendedLevel = computed(() => mixEngine.hardwareScore?.level ?? 1);
 const hardwareCores = computed(() => mixEngine.hardwareScore?.cpuCores ?? navigator.hardwareConcurrency ?? 4);
-const hardwareMem = computed((navigator as any).deviceMemory ?? 4);
+const hardwareMem = computed(() => (navigator as any).deviceMemory ?? 4);
 const hardwareReason = computed(() => mixEngine.hardwareScore?.reason ?? '');
 
 // 模式定义

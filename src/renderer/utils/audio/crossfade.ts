@@ -41,23 +41,31 @@ export function equalPowerCurve(
  * @param gainIn 淡入的 GainNode（下一首歌）
  * @param startTime 开始时间（AudioContext.currentTime）
  * @param duration 过渡时长（秒）
+ * @param volumeScale 音量缩放（0~1），曲线终值/起始值会乘以该系数，
+ *                    用于与全局音量保持一致，避免过渡段音量跳变
  */
 export function applyEqualPowerCrossfade(
   ctx: AudioContext,
   gainOut: GainNode,
   gainIn: GainNode,
   startTime: number,
-  duration: number
+  duration: number,
+  volumeScale: number = 1
 ): void {
-  const sampleRate = ctx.sampleRate;
-  // 每秒至少 100 个采样点，精度足够且不影响性能
   const samples = Math.max(64, Math.ceil(duration * 100));
+  const scale = Math.max(0, Math.min(1, volumeScale));
 
-  const curveOut = equalPowerCurve(samples, 'out');
-  const curveIn = equalPowerCurve(samples, 'in');
+  const curveOut = new Float32Array(samples);
+  const curveIn = new Float32Array(samples);
+  for (let i = 0; i < samples; i++) {
+    const t = i / (samples - 1);
+    const angle = (Math.PI * t) / 2;
+    curveOut[i] = Math.cos(angle) * scale;
+    curveIn[i] = Math.sin(angle) * scale;
+  }
 
   // 确保起始值正确
-  gainOut.gain.setValueAtTime(1, startTime);
+  gainOut.gain.setValueAtTime(scale, startTime);
   gainIn.gain.setValueAtTime(0, startTime);
 
   // 应用曲线
@@ -66,7 +74,7 @@ export function applyEqualPowerCrossfade(
 
   // 过渡结束后确保终值精确
   gainOut.gain.setValueAtTime(0, startTime + duration + 0.001);
-  gainIn.gain.setValueAtTime(1, startTime + duration + 0.001);
+  gainIn.gain.setValueAtTime(scale, startTime + duration + 0.001);
 }
 
 /**

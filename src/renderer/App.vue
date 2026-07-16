@@ -26,6 +26,8 @@ import { useRouter } from 'vue-router';
 import DisclaimerModal from '@/components/common/DisclaimerModal.vue';
 import SplashScreen from '@/components/splash/SplashScreen.vue';
 import TrafficWarningDrawer from '@/components/TrafficWarningDrawer.vue';
+import { setSmartAudioInstance, useSmartAudio } from '@/composables/useSmartAudio';
+import { registerBuiltinFeatures } from '@/features/register';
 import { usePlayerStore } from '@/store/modules/player';
 import { usePlayerCoreStore } from '@/store/modules/playerCore';
 import { useSettingsStore } from '@/store/modules/settings';
@@ -33,7 +35,6 @@ import { useUserStore } from '@/store/modules/user';
 import { isElectron, isLyricWindow } from '@/utils';
 import { checkLoginStatus } from '@/utils/auth';
 
-import { registerBuiltinFeatures } from '@/features/register';
 import { initAudioListeners, initMusicHook } from './hooks/MusicHook';
 import { initCoverColor, useCoverColor } from './hooks/useCoverColor';
 import { audioService } from './services/audioService';
@@ -196,6 +197,15 @@ const handleSetLanguage = (value: string) => {
   }
 };
 
+// 挂载智能混音引擎：触发 AudioScheduler / BPM Worker / 硬件评估初始化，
+// 并注册为全局单例供 audioService.crossfadeToNext 在过渡时调用三级策略。
+const smartAudio = useSmartAudio();
+let smartAudioRegistered = false;
+if (!isLyricWindow.value) {
+  setSmartAudioInstance(smartAudio);
+  smartAudioRegistered = true;
+}
+
 if (!isLyricWindow.value) {
   settingsStore.initializeSettings();
   settingsStore.initializeTheme();
@@ -251,7 +261,12 @@ onMounted(async () => {
       el.setAttribute('tabindex', '-1');
     });
   });
-  focusTrapObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex', 'aria-hidden'] });
+  focusTrapObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['tabindex', 'aria-hidden']
+  });
   document.querySelectorAll('[aria-hidden="true"][tabindex="0"]').forEach((el) => {
     el.setAttribute('tabindex', '-1');
   });
@@ -320,6 +335,9 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   styleEngine.dispose();
   focusTrapObserver?.disconnect();
+  if (smartAudioRegistered) {
+    smartAudio.dispose();
+  }
 });
 </script>
 
