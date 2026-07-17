@@ -353,24 +353,53 @@ const navigateToAlbum = (id: number) => {
     bottom: 0;
     left: 0;
     z-index: 99999;
-    @apply bg-light dark:bg-black border-none border-gray-200 dark:border-gray-700;
+    background: var(--m-bg, var(--bg-color));
+    border: none;
 
     &-header {
       display: none;
     }
 
     &-list {
-      @apply flex justify-between px-4;
+      @apply flex justify-around px-4;
       max-height: none !important;
       overflow: visible !important;
+      padding-top: 4px;
+      padding-bottom: 4px;
     }
 
     &-item {
       &-link {
-        @apply my-2 w-auto px-2;
+        @apply flex flex-col items-center gap-1;
         width: auto !important;
-        margin-top: 8px;
-        margin-bottom: 8px;
+        margin: 4px 0;
+        padding: 4px 8px;
+
+        .app-menu-item-icon {
+          font-size: 22px;
+          color: var(--m-text-muted, #9a9590);
+          transition: color 0.2s;
+        }
+
+        &:hover {
+          .app-menu-item-icon {
+            color: var(--accent-color);
+            transform: none !important;
+          }
+        }
+      }
+
+      &-text {
+        font-size: 10px;
+        color: var(--m-text-muted, #9a9590);
+      }
+    }
+
+    /* 激活状态：图标使用强调色 */
+    .app-menu-item-link.router-link-active {
+      .app-menu-item-icon,
+      .app-menu-item-text {
+        color: var(--accent-color);
       }
     }
 
