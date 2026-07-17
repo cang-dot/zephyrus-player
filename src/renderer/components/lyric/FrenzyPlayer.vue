@@ -5,13 +5,16 @@
     :class="{ 'overlay-mode': overlayMode }"
     ref="playerRef"
     :style="{ background: backgroundColor }"
+    @click="handleTapToggle"
   >
     <!-- 通用控件（overlay 模式下隐藏） -->
     <player-controls
       v-if="!overlayMode"
+      v-show="controlsVisible"
       :isFullScreen="isFullScreen"
       :showStyleSwitch="false"
       theme="dark"
+      class="no-toggle"
       @close="closePlayer"
       @toggleFullscreen="toggleFullScreen"
     />
@@ -51,6 +54,7 @@ import { usePlayerStore } from '@/store/modules/player';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
 import { setCurrentSongId } from '@/utils/emotionalDetector';
+import { isMobile } from '@/utils';
 
 import FrenzyLyrics from './FrenzyLyrics.vue';
 import GlitchBackground from './GlitchBackground.vue';
@@ -70,6 +74,18 @@ const isVisible = computed({
 
 function closePlayer() {
   isVisible.value = false;
+}
+
+// 移动端控件显隐状态
+const controlsVisible = ref(!isMobile.value);
+
+// 移动端：点击屏幕切换控件显隐
+function handleTapToggle(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (target?.closest('.no-toggle')) return;
+  if (isMobile.value) {
+    controlsVisible.value = !controlsVisible.value;
+  }
 }
 
 // 全屏控制

@@ -7,6 +7,7 @@
         :style="{ '--accent-color': accentColor, '--accent-color-rgb': accentColorRgb }"
         @mousemove="handleMouseMove"
         @mouseleave="handleMouseLeave"
+        @click="handleTapToggle"
       >
         <!-- 背景层：封面模糊 + Aurora 极光 -->
         <div class="background-cover" :style="backgroundCoverStyle"></div>
@@ -140,7 +141,7 @@ import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { usePlayerStore } from '@/store/modules/player';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import type { ILyricText, IWordData } from '@/types/music';
-import { getImgUrl } from '@/utils';
+import { getImgUrl, isMobile } from '@/utils';
 import { AnimationSelector } from '@/utils/animationSelector';
 // 舞台动画预设库
 import { normalAnimations, powerAnimations, softAnimations } from '@/utils/stageAnimations';
@@ -235,7 +236,7 @@ const backgroundLine = computed(() => {
   return undefined;
 });
 
-const controlsVisible = ref(true);
+const controlsVisible = ref(!isMobile.value);
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 // ==================== 播放器样式切换 ====================
@@ -704,6 +705,15 @@ function resetHideTimer() {
   hideTimer = setTimeout(() => {
     controlsVisible.value = false;
   }, 3000);
+}
+
+// 移动端：点击屏幕切换控件显隐
+function handleTapToggle(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (target?.closest('.no-toggle')) return;
+  if (isMobile.value) {
+    controlsVisible.value = !controlsVisible.value;
+  }
 }
 
 // ==================== 播放控制 ====================
