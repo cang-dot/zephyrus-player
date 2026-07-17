@@ -52,6 +52,18 @@
   --m-radius-xl: 20px;
   --m-radius-full: 9999px;
 
+  /* ── 动画缓动曲线（Emil Kowalski / Apple 风格） ── */
+  --m-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --m-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --m-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ── 动画时长 ── */
+  --m-duration-press: 160ms;
+  --m-duration-tooltip: 125ms;
+  --m-duration-dropdown: 200ms;
+  --m-duration-modal: 300ms;
+  --m-duration-stagger: 50ms;
+
   /* ── 动态强调色（由 useCoverColor 注入，此处仅声明 fallback） ── */
   /* --accent-color / --accent-color-rgb 等保持由 index.css 全局注入 */
 
@@ -157,6 +169,128 @@
 
 .mobile .safe-area-bottom {
   padding-bottom: var(--safe-area-inset-bottom, 0px);
+}
+
+/* ==================== 交互反馈（Emil Kowalski / Apple 风格） ==================== */
+
+/* 按钮按压反馈：pointer-down 即时响应 */
+.mobile .pressable {
+  transition: transform var(--m-duration-press) var(--m-ease-out);
+  cursor: pointer;
+}
+
+.mobile .pressable:active {
+  transform: scale(0.97);
+}
+
+/* 触摸设备 hover 门控（避免 tap 误触） */
+@media (hover: hover) and (pointer: fine) {
+  .mobile .pressable:hover {
+    /* 仅在精确指针设备上启用 hover 状态 */
+  }
+}
+
+/* ==================== 半透明材质（Apple 风格） ==================== */
+
+.mobile .m-material {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.mobile .m-material-header {
+  background: color-mix(in srgb, var(--m-bg) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* 滚动边缘渐变（替代硬边框） */
+.mobile .scroll-edge-top {
+  mask-image: linear-gradient(to bottom, transparent, black 24px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 24px);
+}
+
+/* ==================== 入场动画 ==================== */
+
+/* 通用渐入：从 scale(0.95) + opacity:0 开始，绝不从 scale(0) */
+.mobile .enter-fade {
+  opacity: 0;
+  transform: scale(0.97);
+  animation: m-enter-fade var(--m-duration-modal) var(--m-ease-out) forwards;
+}
+
+@keyframes m-enter-fade {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 从下方滑入（toast、sheet 等） */
+.mobile .enter-slide-up {
+  opacity: 0;
+  transform: translateY(100%);
+  animation: m-enter-slide-up var(--m-duration-modal) var(--m-ease-drawer) forwards;
+}
+
+@keyframes m-enter-slide-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 列表交错入场（30-80ms 间隔） */
+.mobile .enter-stagger {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: m-enter-stagger 300ms var(--m-ease-out) forwards;
+}
+
+.mobile .enter-stagger:nth-child(1) { animation-delay: 0ms; }
+.mobile .enter-stagger:nth-child(2) { animation-delay: 50ms; }
+.mobile .enter-stagger:nth-child(3) { animation-delay: 100ms; }
+.mobile .enter-stagger:nth-child(4) { animation-delay: 150ms; }
+.mobile .enter-stagger:nth-child(5) { animation-delay: 200ms; }
+.mobile .enter-stagger:nth-child(6) { animation-delay: 250ms; }
+.mobile .enter-stagger:nth-child(7) { animation-delay: 300ms; }
+.mobile .enter-stagger:nth-child(8) { animation-delay: 350ms; }
+.mobile .enter-stagger:nth-child(9) { animation-delay: 400ms; }
+
+@keyframes m-enter-stagger {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== 减少动画支持 ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile .enter-fade,
+  .mobile .enter-slide-up,
+  .mobile .enter-stagger {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobile .pressable {
+    transition: opacity var(--m-duration-press) ease;
+  }
+
+  .mobile .pressable:active {
+    transform: none;
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .mobile .m-material,
+  .mobile .m-material-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--m-bg);
+  }
 }
 
 /* ==================== Naive UI Message 样式（保留原有） ==================== */
