@@ -14,9 +14,11 @@
 <script setup lang="ts">
 import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
+import FrenzyMobilePlayer from '@/components/lyric/FrenzyMobilePlayer.vue';
 import MagazineMobilePlayer from '@/components/lyric/MagazineMobilePlayer.vue';
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
+import StageMobilePlayer from '@/components/lyric/StageMobilePlayer.vue';
 import { getStyle } from '@/playerStyles';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 import { isMobile } from '@/utils';
@@ -70,10 +72,18 @@ const isFullScreenStyle = computed(() => {
 const componentToUse = computed(() => {
   const style = getStyle(playerStyle.value);
   if (style) {
-    // Magazine 在移动端使用专用组件
-    if (style.key === 'magazine' && isMobile.value) {
-      return markRaw(MagazineMobilePlayer);
+    // 移动端竖屏：三种特殊样式各使用专用变体
+    if (isMobile.value) {
+      switch (style.key) {
+        case 'magazine':
+          return markRaw(MagazineMobilePlayer);
+        case 'stage':
+          return markRaw(StageMobilePlayer);
+        case 'frenzy':
+          return markRaw(FrenzyMobilePlayer);
+      }
     }
+    // 横屏或桌面端：直接使用原始组件
     return markRaw(style.component);
   }
   return isMobile.value ? MusicFullMobile : MusicFull;
