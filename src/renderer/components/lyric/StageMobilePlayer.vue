@@ -100,7 +100,7 @@ import { usePlayerStore } from '@/store/modules/player';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { secondToMinute } from '@/utils';
 
-import { useTapToggle } from '../../composables/useTapToggle';
+import { useTapToggle } from '@/composables/useTapToggle';
 
 // ==================== Props ====================
 
