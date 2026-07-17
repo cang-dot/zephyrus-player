@@ -1,3 +1,166 @@
+/* ============================================================
+   Zephyrus Player — 移动端设计系统
+   ------------------------------------------------------------
+   设计令牌（Design Tokens）：
+   - 暖色基底（背景/表面/卡片/文字/边框）
+   - 动态强调色保持不变（由 useCoverColor 从封面注入 --accent-color）
+   - 字体族变量
+   - 通用组件样式（底部导航、迷你播放栏、搜索 pill 等）
+   - Naive UI message 样式（保留原有）
+   ============================================================ */
+
+/* ==================== 设计令牌 ==================== */
+
+.mobile {
+  /* ── 浅色主题 ── */
+  --m-bg: #f5f1eb;
+  --m-surface: #eae6df;
+  --m-surface-alt: #e0dbd3;
+  --m-card: #e8e4dc;
+  --m-card-light: #e8e4dc;
+  --m-text-primary: #2c2c2c;
+  --m-text-secondary: #6b6560;
+  --m-text-muted: #9a9590;
+  --m-border: #d5d0c9;
+  --m-white: #ffffff;
+  --m-shadow: rgba(0, 0, 0, 0.06);
+
+  /* ── 深色主题覆盖 ── */
+  &.dark,
+  .dark & {
+    --m-bg: #1a1a1a;
+    --m-surface: #252525;
+    --m-surface-alt: #2a2a2a;
+    --m-card: #333333;
+    --m-card-light: #3a3a3a;
+    --m-text-primary: #f0ece4;
+    --m-text-secondary: #aaaaaa;
+    --m-text-muted: #666666;
+    --m-border: #3a3a3a;
+    --m-shadow: rgba(0, 0, 0, 0.3);
+  }
+
+  /* ── 字体族 ── */
+  --m-font-serif: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  --m-font-sans: 'Noto Sans SC', -apple-system, 'PingFang SC', sans-serif;
+  --m-font-art: 'Inter', 'Noto Sans SC', sans-serif;
+
+  /* ── 圆角 ── */
+  --m-radius-sm: 8px;
+  --m-radius-md: 12px;
+  --m-radius-lg: 16px;
+  --m-radius-xl: 20px;
+  --m-radius-full: 9999px;
+
+  /* ── 动态强调色（由 useCoverColor 注入，此处仅声明 fallback） ── */
+  /* --accent-color / --accent-color-rgb 等保持由 index.css 全局注入 */
+
+  /* ── 底部导航高度 ── */
+  --m-bottom-nav-height: 64px;
+  --m-mini-player-height: 64px;
+}
+
+/* ==================== 字体引入 ==================== */
+/* 在 index.html 中通过 <link> 引入 Google Fonts，此处仅声明 fallback */
+/* 如需离线，可将字体文件放入 resources/ 并用 @font-face 声明 */
+
+/* ==================== 通用组件样式 ==================== */
+
+/* ── 顶部栏 ── */
+.mobile .mobile-header {
+  background: var(--m-bg);
+  border-bottom: 1px solid var(--m-border);
+}
+
+.mobile .mobile-header .logo-text {
+  font-family: var(--m-font-serif);
+  font-weight: 700;
+}
+
+/* ── 搜索 pill ── */
+.mobile .search-pill {
+  background: var(--m-surface);
+  border-radius: var(--m-radius-full);
+  color: var(--m-text-muted);
+}
+
+/* ── 迷你播放栏 ── */
+.mobile .mini-player {
+  background: var(--m-surface);
+  border-radius: var(--m-radius-lg);
+  box-shadow: 0 2px 12px var(--m-shadow);
+}
+
+.mobile .mini-player-title {
+  color: var(--m-text-primary);
+}
+
+.mobile .mini-player-artist {
+  color: var(--m-text-muted);
+}
+
+/* ── 底部导航 ── */
+.mobile .mobile-bottom-nav {
+  background: var(--m-bg);
+  border-top: 1px solid var(--m-border);
+}
+
+.mobile .nav-item .nav-dot {
+  background: var(--m-card);
+  transition: background 0.2s;
+}
+
+.mobile .nav-item.active .nav-dot {
+  background: var(--accent-color);
+}
+
+.mobile .nav-item .nav-label {
+  color: var(--m-text-muted);
+  font-size: 10px;
+}
+
+.mobile .nav-item.active .nav-label {
+  color: var(--m-text-primary);
+}
+
+/* ── 卡片 ── */
+.mobile .m-card {
+  background: var(--m-card);
+  border-radius: var(--m-radius-md);
+}
+
+/* ── 艺术过渡页 ── */
+.mobile .art-text {
+  font-family: var(--m-font-art);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+/* ── 歌词聚焦 ── */
+.mobile .lyric-focus-main {
+  font-family: var(--m-font-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mobile .lyric-focus-translation {
+  font-weight: 300;
+  color: var(--m-text-muted);
+}
+
+/* ==================== 安全区域 ==================== */
+
+.mobile .safe-area-top {
+  padding-top: calc(var(--safe-area-inset-top, 0px) + 16px);
+}
+
+.mobile .safe-area-bottom {
+  padding-bottom: var(--safe-area-inset-bottom, 0px);
+}
+
+/* ==================== Naive UI Message 样式（保留原有） ==================== */
+
 /* 移动端 message 容器：移到底部 */
 .mobile .n-message-container {
   top: auto !important;
