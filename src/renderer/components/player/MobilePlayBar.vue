@@ -17,9 +17,9 @@
           : '#000000'
     }"
   >
-    <!-- Mini妯″紡 - 鍦╩usicFullVisible涓篺alse鏃舵樉绀?-->
+    <!-- 迷你模式 - musicFull 为 false 时显示 -->
     <div v-if="!playerStore.musicFull" class="mobile-mini-controls">
-      <!-- 姝屾洸淇℃伅 -->
+      <!-- 歌曲信息 -->
       <div class="mini-song-info" @click="setMusicFull">
         <n-image
           :src="getImgUrl(playMusic?.picUrl, '100y100')"
@@ -50,7 +50,7 @@
       </div>
     </div>
 
-    <!-- 鍏ㄥ睆鎾斁鍣?-->
+    <!-- 全屏播放器 -->
     <music-full-wrapper
       ref="MusicFullRef"
       v-model="playerStore.musicFull"
@@ -75,12 +75,12 @@ const shouldShowMobileMenu = inject('shouldShowMobileMenu') as Ref<boolean>;
 const playerStore = usePlayerStore();
 const settingsStore = useSettingsStore();
 
-// 鏄惁鎾斁
+// 是否播放
 const play = computed(() => playerStore.isPlay);
-// 鑳屾櫙棰滆壊
+// 背景颜色
 const background = ref('#000');
 
-// 鎾斁鎺у埗
+// 播放控制
 function handleNext() {
   playerStore.nextPlay();
 }
@@ -89,10 +89,10 @@ function handlePrev() {
   playerStore.prevPlay();
 }
 
-// 鍏ㄥ睆鎾斁鍣
+// 全屏播放器引用
 const MusicFullRef = ref<any>(null);
 
-// 璁剧疆musicFull
+// 设置 musicFull
 const setMusicFull = () => {
   playerStore.setMusicFull(!playerStore.musicFull);
   if (playerStore.musicFull) {
@@ -103,26 +103,26 @@ const setMusicFull = () => {
 watch(
   () => playerStore.musicFull,
   (_newVal) => {
-    // 鐘舵€佹爮鏍峰紡鏇存柊宸插湪 Web 鐜涓嬬鐢
+    // 状态栏样式更新已在 Web 环境中禁用
   }
 );
 
-// 鎵撳紑鎾斁鍒楄〃鎶藉眽
+// 打开播放列表抽屉
 const openPlayListDrawer = () => {
   playerStore.setPlayListDrawerVisible(true);
 };
 
-// 鎾斁鏆傚仠鎸夐挳浜嬩欢
+// 播放暂停按钮事件
 const playMusicEvent = async () => {
   try {
     playerStore.setPlay(playMusic.value);
   } catch (error) {
-    console.error('鎾斁鍑洪敊:', error);
+    console.error('播放出错:', error);
     playerStore.nextPlay();
   }
 };
 
-// 婊戝姩鍒囨瓕
+// 滑动切歌
 const playBarRef = ref<HTMLElement | null>(null);
 onMounted(() => {
   if (playBarRef.value) {
@@ -161,8 +161,8 @@ watch(
 
   &.play-bar-expanded {
     @apply bg-transparent;
-    height: auto; /* 鑷姩閫傚簲鍐呭楂樺害 */
-    max-height: 230px; /* 闄愬埗鏈€澶ч珮搴?*/
+    height: auto;
+    max-height: 230px;
     background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0) 0%,
@@ -176,7 +176,7 @@ watch(
     @apply h-14 py-0;
   }
 
-  // 杩涘害鏉
+  // 进度条
   .music-progress-bar {
     @apply flex items-center justify-between px-4 py-2 relative z-10;
 
@@ -196,20 +196,20 @@ watch(
           --n-rail-color: rgba(255, 255, 255, 0.15);
           --n-rail-color-dark: rgba(255, 255, 255, 0.15);
           --n-fill-color: var(--accent-color);
-          --n-handle-size: 0px; /* 闅愯棌婊戝潡 */
+          --n-handle-size: 0px;
           --n-handle-color: var(--accent-color);
 
           &:hover {
-            --n-handle-size: 10px; /* 榧犳爣鎮仠鏃舵樉绀烘粦鍧?*/
+            --n-handle-size: 10px;
           }
 
           .n-slider-rail {
-            @apply rounded-full !important; /* 鍦嗚杩涘害鏉?*/
+            @apply rounded-full !important;
           }
 
           .n-slider-fill {
             @apply rounded-full !important;
-            box-shadow: 0 0 4px rgba(30, 215, 96, 0.5); /* 鍙戝厜鏁堟灉 */
+            box-shadow: 0 0 4px rgba(30, 215, 96, 0.5);
           }
 
           .n-slider-handle {
@@ -231,7 +231,7 @@ watch(
     }
   }
 
-  // 涓绘帶鍒跺尯
+  // 主控区
   .player-controls {
     @apply flex items-center justify-between px-8 py-3 relative z-10 pb-8;
 
@@ -270,15 +270,17 @@ watch(
     }
   }
 
-  // Mini妯″紡鏍峰紡
+  // 迷你模式样式
   .mobile-mini-controls {
-    @apply flex items-center justify-between pr-4 mx-3 h-12 rounded-full bg-light-100 dark:bg-dark-100 shadow-lg;
+    @apply flex items-center justify-between pr-4 mx-3 h-12 rounded-full shadow-lg;
+    background: var(--m-surface, #eae6df);
 
     .mini-song-info {
       @apply flex items-center flex-1 min-w-0 cursor-pointer;
 
       .mini-song-cover {
-        @apply w-12 h-12 rounded-full border-8 border-dark-300 dark:border-light-300;
+        @apply w-12 h-12 rounded-full;
+        border: 8px solid var(--m-surface-alt, #e0dbd3);
       }
 
       .mini-song-text {
@@ -286,10 +288,12 @@ watch(
 
         .mini-song-title {
           @apply text-sm font-medium;
+          color: var(--m-text-primary, #2c2c2c);
         }
 
         .mini-song-artist {
-          @apply text-xs text-gray-500 dark:text-gray-400;
+          @apply text-xs;
+          color: var(--m-text-muted, #9a9590);
         }
       }
     }
@@ -302,17 +306,21 @@ watch(
 
         &.play {
           @apply w-9 h-9 rounded-full flex items-center justify-center mr-2;
-          @apply bg-gray-100 dark:bg-gray-800;
 
           .iconfont {
-            @apply text-xl text-[var(--accent-color)] transition hover:text-[var(--accent-color-dark)];
+            @apply text-xl transition;
+            color: var(--accent-color);
           }
         }
       }
 
       .mini-list-icon {
         @apply text-xl p-1 transition cursor-pointer;
-        @apply hover:text-[var(--accent-color)];
+        color: var(--m-text-secondary, #6b6560);
+
+        &:active {
+          color: var(--accent-color);
+        }
       }
     }
   }

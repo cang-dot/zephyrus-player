@@ -1,6 +1,6 @@
 <template>
   <div class="mobile-header" :class="{ 'safe-area-top': hasSafeArea }">
-    <!-- 宸︿晶鍖哄煙 -->
+    <!-- 左侧区域 -->
     <div class="header-left">
       <div v-if="showBack" class="header-btn" @click="goBack">
         <i class="ri-arrow-left-s-line"></i>
@@ -10,12 +10,12 @@
       </div>
     </div>
 
-    <!-- 涓棿鏍囬 -->
+    <!-- 中间标题 -->
     <div class="header-title">
       <span v-if="title">{{ t(title) }}</span>
     </div>
 
-    <!-- 鍙充晶鍖哄煙 -->
+    <!-- 右侧区域 -->
     <div class="header-right">
       <div class="header-btn" @click="openSearch">
         <i class="ri-search-line"></i>
@@ -63,9 +63,10 @@ const openSettings = () => {
 <style lang="scss" scoped>
 .mobile-header {
   @apply flex items-center justify-between px-4 py-3;
-  @apply bg-light dark:bg-black;
-  @apply border-b border-gray-100 dark:border-gray-800;
+  border-bottom: 1px solid var(--m-border, transparent);
+  background: var(--m-bg, var(--bg-color));
   min-height: 56px;
+  flex-shrink: 0;
 
   &.safe-area-top {
     padding-top: calc(var(--safe-area-inset-top, 0px) + 16px);
@@ -81,7 +82,10 @@ const openSettings = () => {
   @apply flex items-center;
 
   .logo-text {
-    @apply text-lg font-bold text-[var(--accent-color)];
+    font-family: var(--m-font-serif, 'Cormorant Garamond', serif);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--m-text-primary, var(--text-color));
   }
 }
 
@@ -89,7 +93,9 @@ const openSettings = () => {
   @apply flex-1 text-center;
 
   span {
-    @apply text-base font-medium text-gray-900 dark:text-white;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--m-text-primary, var(--text-color));
   }
 }
 
@@ -102,8 +108,13 @@ const openSettings = () => {
 .header-btn {
   @apply flex items-center justify-center;
   @apply w-10 h-10 rounded-full;
-  @apply text-xl text-gray-600 dark:text-gray-300;
-  @apply active:bg-gray-100 dark:active:bg-gray-800;
+  @apply text-xl;
+  color: var(--m-text-secondary, #6b6560);
   @apply transition-colors duration-150;
+  cursor: pointer;
+
+  &:active {
+    background: var(--m-surface, rgba(0, 0, 0, 0.05));
+  }
 }
 </style>

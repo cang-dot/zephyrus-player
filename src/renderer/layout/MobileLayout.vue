@@ -97,33 +97,42 @@ provide('openPlaylistDrawer', openPlaylistDrawer);
 <style lang="scss" scoped>
 .mobile-layout {
   @apply w-screen h-screen flex flex-col;
-  @apply bg-light dark:bg-black;
   @apply overflow-hidden;
   position: relative;
+  background: var(--m-bg, var(--bg-color));
 }
 
 .mobile-content {
   @apply flex-1 overflow-auto;
 
-  // // 只有底部菜单
-  // &.has-bottom-menu:not(.has-player) {
-  //   padding-bottom: calc(60px + var(--safe-area-inset-bottom, 0px));
-  // }
+  /* 有底部菜单时：留出导航栏空间 */
+  &.has-bottom-menu:not(.has-player) {
+    padding-bottom: calc(var(--m-bottom-nav-height, 64px) + var(--safe-area-inset-bottom, 0px));
+  }
 
-  // // 只有播放栏
-  // &.has-player:not(.has-bottom-menu) {
-  //   padding-bottom: calc(70px + var(--safe-area-inset-bottom, 0px));
-  // }
+  /* 只有播放栏时 */
+  &.has-player:not(.has-bottom-menu) {
+    padding-bottom: calc(var(--m-mini-player-height, 64px) + var(--safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  /* 同时有播放栏和底部菜单时 */
+  &.has-bottom-menu.has-player {
+    padding-bottom: calc(
+      var(--m-bottom-nav-height, 64px) + var(--m-mini-player-height, 64px) +
+      var(--safe-area-inset-bottom, 0px) + 16px
+    );
+  }
 }
 
 .mobile-page {
   @apply h-full;
 }
 
-// 底部菜单固定在底部
+/* 底部菜单固定在底部 */
 .mobile-bottom-menu {
-  @apply bg-light dark:bg-black;
-  @apply border-t border-gray-200 dark:border-gray-800;
+  background: var(--m-bg, var(--bg-color));
+  border-top: 1px solid var(--m-border, transparent);
+  flex-shrink: 0;
 }
 
 .mobile-menu {
