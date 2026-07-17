@@ -257,13 +257,13 @@ onMounted(() => {
 <style lang="scss" scoped>
 .mobile-search-page {
   @apply fixed inset-0 z-50;
-  @apply bg-light dark:bg-black;
   @apply flex flex-col;
+  background: var(--m-bg, var(--bg-color));
 }
 
 .search-header {
   @apply flex items-center gap-3 pl-1 pr-3 py-3;
-  @apply border-b border-gray-100 dark:border-gray-800;
+  border-bottom: 1px solid var(--m-border, transparent);
 
   &.safe-area-top {
     padding-top: calc(var(--safe-area-inset-top, 0px) + 12px);
@@ -273,14 +273,20 @@ onMounted(() => {
 .header-back {
   @apply flex items-center justify-center;
   @apply w-8 h-8 rounded-full text-2xl;
-  @apply text-gray-600 dark:text-gray-300;
-  @apply active:bg-gray-100 dark:active:bg-gray-800;
+  color: var(--m-text-secondary, #6b6560);
+  transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+  &:active {
+    transform: scale(0.97);
+    background: var(--m-surface, rgba(0, 0, 0, 0.05));
+  }
 }
 
 .search-input-wrapper {
   @apply flex-1 flex items-center gap-2;
-  @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+  @apply rounded-full;
   @apply px-4 py-1;
+  background: var(--m-surface, #eae6df);
 }
 
 .search-icon {
@@ -289,20 +295,22 @@ onMounted(() => {
 
 .search-input {
   @apply flex-1 bg-transparent border-none outline-none;
-  @apply text-gray-900 dark:text-white text-base;
+  @apply text-base;
+  color: var(--m-text-primary, #2c2c2c);
 
   &::placeholder {
-    @apply text-gray-400;
+    color: var(--m-text-muted, #9a9590);
   }
 }
 
 .clear-icon {
-  @apply text-gray-400 text-lg cursor-pointer;
+  @apply text-lg cursor-pointer;
+  color: var(--m-text-muted, #9a9590);
 }
 
 .search-types {
   @apply flex gap-2 px-4 py-3 overflow-x-auto;
-  @apply border-b border-gray-100 dark:border-gray-800;
+  border-bottom: 1px solid var(--m-border, transparent);
 
   &::-webkit-scrollbar {
     display: none;
@@ -311,11 +319,19 @@ onMounted(() => {
 
 .type-tag {
   @apply px-4 py-1.5 rounded-full text-sm whitespace-nowrap;
-  @apply bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300;
-  @apply transition-colors duration-200;
+  background: var(--m-surface, #eae6df);
+  color: var(--m-text-secondary, #6b6560);
+  transition: background var(--m-duration-press, 160ms) var(--m-ease-out, ease-out),
+              color var(--m-duration-press, 160ms) var(--m-ease-out, ease-out),
+              transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+  &:active {
+    transform: scale(0.97);
+  }
 
   &.active {
-    @apply bg-[var(--accent-color)] text-white;
+    background: var(--accent-color);
+    color: #ffffff;
   }
 }
 
@@ -332,11 +348,13 @@ onMounted(() => {
 }
 
 .section-title {
-  @apply text-sm font-medium text-gray-500 dark:text-gray-400 mb-3;
+  @apply text-sm font-medium mb-3;
+  color: var(--m-text-muted, #9a9590);
 }
 
 .clear-history {
-  @apply text-sm text-gray-400 dark:text-gray-500;
+  @apply text-sm;
+  color: var(--m-text-muted, #9a9590);
 }
 
 .suggestion-list {
@@ -345,11 +363,15 @@ onMounted(() => {
 
 .suggestion-item {
   @apply flex items-center gap-3 py-3;
-  @apply text-gray-700 dark:text-gray-200;
-  @apply active:bg-gray-50 dark:active:bg-gray-800;
+  color: var(--m-text-primary, #2c2c2c);
+  transition: background var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+  &:active {
+    background: var(--m-surface, rgba(0, 0, 0, 0.03));
+  }
 
   i {
-    @apply text-gray-400;
+    color: var(--m-text-muted, #9a9590);
   }
 }
 
@@ -359,8 +381,14 @@ onMounted(() => {
 
 .history-tag {
   @apply px-3 py-1.5 rounded-full text-sm;
-  @apply bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300;
-  @apply active:bg-gray-200 dark:active:bg-gray-700;
+  background: var(--m-surface, #eae6df);
+  color: var(--m-text-secondary, #6b6560);
+  transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+  &:active {
+    transform: scale(0.97);
+    background: var(--m-surface-alt, #e0dbd3);
+  }
 }
 
 .hot-list {
@@ -369,11 +397,16 @@ onMounted(() => {
 
 .hot-item {
   @apply flex items-center gap-3 py-2.5;
-  @apply active:bg-gray-50 dark:active:bg-gray-800;
+  transition: background var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+  &:active {
+    background: var(--m-surface, rgba(0, 0, 0, 0.03));
+  }
 }
 
 .hot-rank {
-  @apply w-5 text-center text-sm font-medium text-gray-400;
+  @apply w-5 text-center text-sm font-medium;
+  color: var(--m-text-muted, #9a9590);
 
   &.top {
     @apply text-red-500;
