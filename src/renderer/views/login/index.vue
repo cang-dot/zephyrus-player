@@ -314,12 +314,51 @@ const handleLoginError = (error: string) => {
 .mobile {
   .login-page {
     @apply pt-0;
+    padding-top: calc(var(--safe-area-inset-top, 0px) + 40px);
   }
 
   .phone-login {
     width: 90vw;
     max-width: 350px;
     height: 500px;
+  }
+
+  /* Tab 按钮触觉反馈 */
+  .tab-item {
+    transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out),
+                background var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    /* 移除 hover 位移（触摸设备不适用） */
+    &:hover {
+      transform: none;
+    }
+
+    &.active {
+      transform: none;
+    }
+  }
+
+  /* 登录按钮触觉反馈 */
+  .btn-login {
+    transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out),
+                brightness 0.2s ease;
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  /* 输入框聚焦不位移（触摸设备） */
+  .phone-input:focus {
+    transform: none;
   }
 }
 </style>
