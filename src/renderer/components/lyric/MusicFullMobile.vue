@@ -9,6 +9,7 @@
   >
     <div
       id="mobile-drawer-target"
+      @click="handleTapToggle"
       :class="[
         config.theme,
         `cover-style-${config.mobileCoverStyle}`,
@@ -21,7 +22,8 @@
         <i class="ri-loader-4-line loading-icon"></i>
       </div>
       <div
-        class="control-btn absolute left-5"
+        v-show="controlsVisible"
+        class="control-btn absolute left-5 no-toggle"
         :class="{ 'pure-mode': config.pureModeEnabled }"
         @click="closeMusicFull"
       >
@@ -30,7 +32,8 @@
 
       <!-- 右上角设置按钮 -->
       <div
-        class="control-btn absolute right-5 flex items-center gap-2"
+        v-show="controlsVisible"
+        class="control-btn absolute right-5 flex items-center gap-2 no-toggle"
         :class="[
           { 'pure-mode': config.pureModeEnabled },
           hasSleepTimerActive ? '!w-auto !px-2' : ''
@@ -1029,9 +1032,19 @@ const togglePlayMode = () => {
 };
 
 const closeMusicFull = () => {
-  isVisible.value = false;
-  playerStore.setMusicFull(false);
+isVisible.value = false;
+playerStore.setMusicFull(false);
 };
+
+// 移动端控件显隐状态（默认隐藏，点击屏幕弹出）
+const controlsVisible = ref(false);
+
+// 移动端：点击屏幕切换控件显隐
+function handleTapToggle(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (target?.closest('.no-toggle')) return;
+  controlsVisible.value = !controlsVisible.value;
+}
 
 // 添加对 playMusic.id 的监听，歌曲切换时滚动到顶部
 watch(
