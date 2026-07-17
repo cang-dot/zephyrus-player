@@ -215,6 +215,13 @@
       >
         <login-component @login-success="handleLoginSuccess" />
       </div>
+      <!-- 非移动端未登录时的占位（路由会自动跳转到 /login） -->
+      <div
+        v-else-if="!isLoggedIn && !isMobile"
+        class="flex h-full w-full items-center justify-center"
+      >
+        <n-spin size="large" />
+      </div>
     </template>
   </div>
 </template>

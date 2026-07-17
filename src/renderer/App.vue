@@ -220,6 +220,10 @@ if (!isLyricWindow.value) {
     if (loginInfo.loginType && !userStore.loginType) {
       userStore.setLoginType(loginInfo.loginType);
     }
+    // 异步加载歌单、专辑、收藏列表（不阻塞渲染）
+    userStore.initializeUser().catch((err) => {
+      console.error('[App] 初始化用户数据失败:', err);
+    });
   }
 }
 

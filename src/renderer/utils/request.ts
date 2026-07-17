@@ -12,9 +12,37 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   noRetry?: boolean;
 }
 
-const baseURL = window.electron
-  ? `http://127.0.0.1:${setData?.musicApiPort}`
-  : import.meta.env.VITE_API;
+/**
+ * 检测 Capacitor 环境（Android/iOS 原生壳）
+ * Capacitor 会在 window 上注入 Capacitor 对象
+ */
+function isCapacitor(): boolean {
+  return typeof window !== 'undefined' && !!(window as any).Capacitor;
+}
+
+/**
+ * 计算 API baseURL
+ * - Electron: 本地 Express 服务（netease-cloud-music-api）
+ * - Capacitor: 远程 API（通过 VITE_API 环境变量配置）
+ * - Web: VITE_API 环境变量
+ */
+function computeBaseURL(): string {
+  if (window.electron) {
+    // Electron: 本地 API 服务
+    const port = setData?.musicApiPort || 30488;
+    return `http://127.0.0.1:${port}`;
+  }
+  // 非 Electron（Web / Capacitor）: 使用环境变量
+  const api = import.meta.env.VITE_API;
+  if (api) return api;
+  // 兜底：开发环境默认
+  if (import.meta.env.DEV) return 'http://localhost:30488';
+  // 生产环境无 API 地址时返回空字符串（请求会失败但不崩溃）
+  console.warn('[request] VITE_API 未配置，非 Electron 环境下 API 请求将失败');
+  return '';
+}
+
+const baseURL = computeBaseURL();
 
 const request = axios.create({
   baseURL,
@@ -30,10 +58,13 @@ const RETRY_DELAY = 500;
 // 请求拦截器
 request.interceptors.request.use(
   (config: CustomAxiosRequestConfig) => {
-    setData = getSetData();
-    config.baseURL = window.electron
-      ? `http://127.0.0.1:${setData?.musicApiPort}`
-      : import.meta.env.VITE_API;
+    try {
+      setData = getSetData();
+    } catch (e) {
+      // 在 Pinia 未激活时（如 Axios 拦截器早期调用），使用空对象
+      setData = setData || {};
+    }
+    config.baseURL = computeBaseURL();
     // 只在retryCount未定义时初始化为0
     if (config.retryCount === undefined) {
       config.retryCount = 0;
@@ -44,7 +75,7 @@ request.interceptors.request.use(
     config.params = {
       ...config.params,
       timestamp: Date.now(),
-      device: isElectron ? 'pc' : isMobile ? 'mobile' : 'web'
+      device: isElectron ? 'pc' : isMobile ? 'mobile' : isCapacitor() ? 'capacitor' : 'web'
     };
     const token = localStorage.getItem('token');
     if (token && config.method !== 'post') {
