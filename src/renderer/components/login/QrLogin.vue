@@ -204,6 +204,11 @@ onUnmounted(() => {
   width: 200px;
   height: 200px;
   @apply mx-auto;
+  background: var(--m-card-light, #e8e4dc);
+  border-radius: var(--m-radius-lg, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .qr-loading {
