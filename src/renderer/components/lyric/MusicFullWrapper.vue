@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
+import MagazineMobilePlayer from '@/components/lyric/MagazineMobilePlayer.vue';
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
 import { getStyle } from '@/playerStyles';
@@ -68,7 +69,13 @@ const isFullScreenStyle = computed(() => {
 
 const componentToUse = computed(() => {
   const style = getStyle(playerStyle.value);
-  if (style) return markRaw(style.component);
+  if (style) {
+    // Magazine 在移动端使用专用组件
+    if (style.key === 'magazine' && isMobile.value) {
+      return markRaw(MagazineMobilePlayer);
+    }
+    return markRaw(style.component);
+  }
   return isMobile.value ? MusicFullMobile : MusicFull;
 });
 
