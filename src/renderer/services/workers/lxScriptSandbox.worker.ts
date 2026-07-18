@@ -70,6 +70,19 @@ let requestHandler: ((data: any) => Promise<any>) | null = null;
 let initialized = false;
 let requestCounter = 0;
 
+// 异步初始化等待状态
+// LX Music 脚本的 lx.send(EVENT_NAMES.inited) 常出现在异步上下文中
+// （async IIFE / setTimeout / 顶层 await 的依赖任务），
+// 而 import() 只等待模块顶层同步代码完成，无法感知这些异步初始化。
+// 因此需要在 import() 完成后等待 inited 事件被触发。
+let initWaitResolve: (() => void) | null = null;
+let initWaitReject: ((error: Error) => void) | null = null;
+let initWaitTimeoutId: number | null = null;
+
+// Worker 内部初始化等待超时（毫秒）
+// 留出余量给 Runner 层的 15 秒超时
+const INIT_WAIT_TIMEOUT_MS = 10000;
+
 const pendingHttpCallbacks = new Map<
   string,
   (error: Error | null, response: any, body: any) => void
@@ -97,10 +110,19 @@ const hardenGlobalScope = () => {
 
   blockedKeys.forEach((key) => {
     try {
+      // 使用 getter 抛出可读错误，而非静默返回 undefined。
+      // 这样脚本误用 fetch 等会得到明确提示改用 lx.request，
+      // 而不是后续出现 "Cannot read properties of undefined" 之类的二次错误。
       Object.defineProperty(globalThis, key, {
         configurable: true,
-        writable: false,
-        value: undefined
+        get() {
+          throw new Error(
+            `脚本中禁止直接使用 ${String(key)}，请改用 lx.request() 发起网络请求。`
+          );
+        },
+        set() {
+          // 禁止脚本重新赋值绕过限制
+        }
       });
     } catch {
       // ignore
@@ -131,6 +153,16 @@ const createLxApi = (scriptInfo: LxScriptInfo) => {
     send: (eventName: string, data: any) => {
       if (eventName === 'inited') {
         initialized = true;
+        // resolve 等待中的 init promise（异步初始化场景）
+        if (initWaitResolve) {
+          if (initWaitTimeoutId) {
+            clearTimeout(initWaitTimeoutId);
+            initWaitTimeoutId = null;
+          }
+          initWaitResolve();
+          initWaitResolve = null;
+          initWaitReject = null;
+        }
         postToHost({
           type: 'initialized',
           data: data as LxInitedData
@@ -243,6 +275,44 @@ const resetWorkerState = () => {
   initialized = false;
   pendingHttpCallbacks.clear();
   requestCounter = 0;
+  // 清理异步初始化等待状态
+  if (initWaitTimeoutId) {
+    clearTimeout(initWaitTimeoutId);
+    initWaitTimeoutId = null;
+  }
+  initWaitResolve = null;
+  initWaitReject = null;
+};
+
+/**
+ * 清理异步初始化等待状态（用于抛错路径）
+ */
+const clearInitWaitState = () => {
+  if (initWaitTimeoutId) {
+    clearTimeout(initWaitTimeoutId);
+    initWaitTimeoutId = null;
+  }
+  initWaitResolve = null;
+  initWaitReject = null;
+};
+
+/**
+ * 收集脚本诊断信息，用于错误提示
+ */
+const buildScriptDiagnostics = (script: string): string => {
+  const diagnostics = {
+    scriptLength: script.length,
+    hasLxOn: script.includes('lx.on'),
+    hasLxSend: script.includes('lx.send'),
+    hasInited: script.includes('inited'),
+    hasTopLevelAwait: /^\s*await\s/m.test(script),
+    hasTopLevelReturn: /^\s*return\s/m.test(script),
+    hasImportStatement: /^\s*import\s/m.test(script),
+    hasExportStatement: /^\s*export\s/m.test(script),
+    hasRequire: /\brequire\s*\(/.test(script),
+    hasModuleExports: /\bmodule\.exports\b/.test(script)
+  };
+  return JSON.stringify(diagnostics, null, 2);
 };
 
 const initializeScript = async (script: string, scriptInfo: LxScriptInfo) => {
@@ -265,9 +335,32 @@ const initializeScript = async (script: string, scriptInfo: LxScriptInfo) => {
 
   try {
     await import(/* @vite-ignore */ scriptUrl);
-    if (!initialized) {
-      throw new Error('脚本未调用 lx.send(EVENT_NAMES.inited, data)');
+    if (initialized) {
+      // 脚本在同步阶段就调用了 lx.send(EVENT_NAMES.inited)，直接通过
+      return;
     }
+
+    // 脚本同步部分已完成但未调用 inited，等待异步初始化。
+    // LX Music 脚本常通过 async IIFE / setTimeout / 顶层 await 依赖任务
+    // 异步调用 lx.send(EVENT_NAMES.inited)，import() 无法感知这些异步流程。
+    await new Promise<void>((resolve, reject) => {
+      initWaitResolve = resolve;
+      initWaitReject = reject;
+      initWaitTimeoutId = setTimeout(() => {
+        const diag = buildScriptDiagnostics(script);
+        reject(
+          new Error(
+            `脚本未在 ${INIT_WAIT_TIMEOUT_MS / 1000} 秒内调用 lx.send(EVENT_NAMES.inited, data)\n` +
+              `请确认脚本遵循 LX Music 自定义源协议：https://lxmusic.toside.cn/desktop/custom-source\n` +
+              `诊断信息：${diag}`
+          )
+        );
+      }, INIT_WAIT_TIMEOUT_MS) as unknown as number;
+    });
+  } catch (error) {
+    // 清理等待状态，避免泄漏
+    clearInitWaitState();
+    throw error;
   } finally {
     URL.revokeObjectURL(scriptUrl);
   }

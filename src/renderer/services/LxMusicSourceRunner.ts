@@ -363,9 +363,11 @@ export class LxMusicSourceRunner {
     this.initPromise = new Promise<LxInitedData>((resolve, reject) => {
       this.initResolver = resolve;
       this.initRejecter = reject;
+      // 超时设为 15 秒：Worker 内部有 10 秒的异步初始化等待窗口，
+      // 加上 import() 和脚本同步执行耗时，这里需留足余量。
       this.initTimeoutId = window.setTimeout(() => {
-        this.rejectInitialization(new Error('脚本初始化超时'));
-      }, 10000);
+        this.rejectInitialization(new Error('脚本初始化超时（15秒）'));
+      }, 15000);
     });
 
     this.postToWorker({
