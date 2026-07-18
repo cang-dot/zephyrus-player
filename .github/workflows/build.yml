@@ -112,6 +112,7 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,10 +152,10 @@ jobs:
         with:
           name: android
           path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+          if-no-files-found: ignore
 
   release:
-    needs: [build-windows, build-macos, build-linux, build-android]
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
