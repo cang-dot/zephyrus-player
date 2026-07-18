@@ -106,7 +106,7 @@ function close() { isVisible.value = false; }
 </script>
 
 <style lang="scss" scoped>
-.neon-player { position: absolute; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #0a0a0a; }
+.neon-player { position: fixed; inset: 0; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #0a0a0a; }
 .concrete-bg {
   position: absolute; inset: 0; z-index: 0; background-color: #1a1a1a;
   background-image:

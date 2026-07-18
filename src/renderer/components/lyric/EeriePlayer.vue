@@ -208,7 +208,7 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 
 <style lang="scss" scoped>
 .eerie-player {
-  position: absolute; inset: 0; z-index: 9999;
+  position: fixed; inset: 0; z-index: 9998;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: hidden; background: var(--bg-color);
 }
