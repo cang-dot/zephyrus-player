@@ -6,9 +6,9 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--dynamic-primary, #22c55e)',
-          light: 'var(--dynamic-primary, #22c55e)',
-          dark: '#1eb154ff'
+          DEFAULT: 'var(--accent-color, #888888)',
+          light: 'var(--accent-color-light, #9c9c9c)',
+          dark: 'var(--accent-color-dark, #747474)'
         },
         secondary: {
           DEFAULT: '#6c757d',
@@ -33,7 +33,7 @@ export default {
           200: '#bbf7d0',
           300: '#86efac',
           400: '#4ade80',
-          500: 'var(--dynamic-primary, #22c55e)',
+          500: 'var(--accent-color, #888888)',
           600: '#16a34a',
           700: '#15803d',
           800: '#166534',
@@ -42,12 +42,12 @@ export default {
         }
       },
       boxShadow: {
-        'primary': '0 4px 14px 0 var(--dynamic-primary, #22c55e)',
-        'primary-sm': '0 2px 7px 0 var(--dynamic-primary, #22c55e)',
-        'primary-lg': '0 10px 25px 0 var(--dynamic-primary, #22c55e)',
+        'primary': '0 4px 14px 0 var(--accent-color, #888888)',
+        'primary-sm': '0 2px 7px 0 var(--accent-color, #888888)',
+        'primary-lg': '0 10px 25px 0 var(--accent-color, #888888)',
       },
       ringColor: {
-        primary: 'var(--dynamic-primary, #22c55e)',
+        primary: 'var(--accent-color, #888888)',
       },
       ringWidth: {
         primary: '2px',

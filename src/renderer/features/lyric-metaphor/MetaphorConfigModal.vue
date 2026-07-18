@@ -260,7 +260,7 @@ function handleSave() {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--primary-color, #888888);
+  background: var(--accent-color);
   color: white;
   font-size: 12px;
   font-weight: 700;

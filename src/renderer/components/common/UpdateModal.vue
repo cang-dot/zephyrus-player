@@ -361,7 +361,7 @@ onUnmounted(() => {
 }
 
 .update-body :deep(a) {
-  color: rgb(var(--primary-color));
+  color: var(--accent-color);
   text-decoration: underline;
 }
 

@@ -1033,7 +1033,7 @@ onMounted(() => {
 @keyframes highlightPulse {
   0%,
   30% {
-    background-color: rgba(var(--primary-color-rgb, 64, 128, 255), 0.15);
+    background-color: rgba(var(--accent-color-rgb), 0.15);
     border-radius: 12px;
   }
   100% {

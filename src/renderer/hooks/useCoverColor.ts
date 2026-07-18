@@ -113,9 +113,7 @@ function updateCSSVariables(r: number, g: number, b: number) {
   const color = `rgb(${r}, ${g}, ${b})`;
   const colorRgb = `${r}, ${g}, ${b}`;
 
-  // 更新根元素 CSS 变量
-  document.documentElement.style.setProperty('--primary-color', color);
-  document.documentElement.style.setProperty('--dynamic-primary', color);
+  // 更新根元素 CSS 变量（统一使用 --accent-color）
   document.documentElement.style.setProperty('--accent-color', color);
   document.documentElement.style.setProperty('--accent-color-rgb', colorRgb);
 
@@ -127,9 +125,6 @@ function updateCSSVariables(r: number, g: number, b: number) {
   document.documentElement.style.setProperty('--accent-color-dark', `rgb(${darker})`);
   document.documentElement.style.setProperty('--accent-color-10', `rgba(${colorRgb}, 0.1)`);
   document.documentElement.style.setProperty('--accent-color-20', `rgba(${colorRgb}, 0.2)`);
-
-  // 更新 Tailwind 自定义颜色（通过 CSS 变量）
-  document.documentElement.style.setProperty('--tw-primary', `${r} ${g} ${b}`);
 }
 
 /**
