@@ -414,7 +414,7 @@ class UnblockMusicStrategy implements MusicSourceStrategy {
 /**
  * 音源策略工厂
  */
-class MusicSourceStrategyFactory {
+export class MusicSourceStrategyFactory {
   private static strategies: MusicSourceStrategy[] = [
     new LxMusicStrategy(),
     new CustomApiStrategy(),
@@ -441,7 +441,7 @@ class MusicSourceStrategyFactory {
  * @param settingsStore 设置存储
  * @returns 音源列表和音质设置
  */
-const getMusicConfig = (id: number, settingsStore?: any) => {
+export const getMusicConfig = (id: number, settingsStore?: any) => {
   let musicSources: string[] = [];
   let quality = 'higher';
 

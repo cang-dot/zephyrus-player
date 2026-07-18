@@ -28,5 +28,12 @@ export default {
   },
   history: 'Search History',
   hot: 'Hot Searches',
-  suggestions: 'Search Suggestions'
+  suggestions: 'Search Suggestions',
+  filter: {
+    source: 'Source Filter',
+    all: 'All',
+    probing: 'Probing sources',
+    probeProgress: 'Probing {done}/{total}',
+    noSource: 'No source available'
+  }
 };

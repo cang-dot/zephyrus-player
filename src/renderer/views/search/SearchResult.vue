@@ -35,6 +35,45 @@
                 {{ type.label }}
               </button>
             </div>
+
+            <!-- Source Filter (仅单曲搜索时显示) -->
+            <div
+              v-if="searchType === SEARCH_TYPE.MUSIC && searchDetail?.songs?.length"
+              class="flex items-center gap-2 flex-wrap"
+            >
+              <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0">
+                {{ t('search.filter.source') }}
+              </span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button
+                  v-for="opt in sourceFilterOptions"
+                  :key="opt.key"
+                  class="px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1"
+                  :class="
+                    activeSourceFilter === opt.key
+                      ? 'bg-[var(--accent-color)] text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                  "
+                  @click="activeSourceFilter = opt.key"
+                >
+                  <span
+                    v-if="opt.key !== 'all' && opt.key !== 'pending'"
+                    class="w-1.5 h-1.5 rounded-full"
+                    :style="{ backgroundColor: opt.color }"
+                  ></span>
+                  {{ opt.label }}
+                  <span class="opacity-60">{{ opt.count }}</span>
+                </button>
+              </div>
+              <!-- 探测进度 -->
+              <span
+                v-if="probeProgress.total > 0 && probeProgress.done < probeProgress.total"
+                class="text-[10px] text-neutral-400 ml-1 flex items-center gap-1"
+              >
+                <i class="ri-loader-4-line animate-spin text-xs"></i>
+                {{ t('search.filter.probeProgress', { done: probeProgress.done, total: probeProgress.total }) }}
+              </span>
+            </div>
           </div>
         </section>
 
@@ -127,11 +166,19 @@
               <!-- Music List Style (Songs) -->
               <div v-if="searchType === SEARCH_TYPE.MUSIC" class="song-results-list">
                 <div
-                  v-for="(item, index) in searchDetail?.songs"
+                  v-for="(item, index) in filteredSongs"
                   :key="item.id"
-                  class="mb-2 animate-item"
+                  class="mb-2 animate-item relative"
                   :style="{ animationDelay: calculateAnimationDelay(index % 30, 0.04) }"
                 >
+                  <!-- 来源标签 -->
+                  <span
+                    v-if="getSourceLabel(item.id)"
+                    class="absolute right-2 top-2 z-10 px-1.5 py-0.5 rounded text-[10px] font-medium pointer-events-none"
+                    :style="getSourceBadgeStyle(item.id)"
+                  >
+                    {{ getSourceLabel(item.id) }}
+                  </span>
                   <song-item
                     :index="index"
                     :item="formatSong(item)"
@@ -248,6 +295,15 @@ import { SEARCH_TYPE, SEARCH_TYPES } from '@/const/bar-const';
 import { useDownload } from '@/hooks/useDownload';
 import { usePlaylistConfirm } from '@/hooks/usePlaylistConfirm';
 import { useScrollTitle } from '@/hooks/useScrollTitle';
+import {
+  clearProbeCache,
+  getCachedLabel,
+  probeSongsBatch,
+  quickClassify,
+  setLabel,
+  SOURCE_LABEL_CONFIG,
+  type SourceLabel
+} from '@/services/sourceProbeService';
 import { usePlayerStore } from '@/store/modules/player';
 import { useSearchStore } from '@/store/modules/search';
 import type { SongResult } from '@/types/music';
@@ -280,6 +336,11 @@ const formatSong = (item: any) => {
 const searchDetail = ref<any>();
 const searchType = computed(() => searchStore.searchType as number);
 const searchDetailLoading = ref(false);
+
+// ==================== 来源筛选状态 ====================
+const activeSourceFilter = ref<SourceLabel | 'all'>('all');
+const probeProgress = ref({ done: 0, total: 0 });
+const sourceLabelVersion = ref(0); // 触发响应式更新
 
 const ITEMS_PER_PAGE = 30;
 const page = ref(0);
@@ -370,6 +431,10 @@ const loadSearch = async (isLoadMore = false) => {
     page.value = 0;
     hasMore.value = true;
     searchDetailLoading.value = true;
+    // 新搜索清除旧探测缓存和筛选状态
+    clearProbeCache();
+    activeSourceFilter.value = 'all';
+    probeProgress.value = { done: 0, total: 0 };
   } else {
     if (isLoadingMore.value || !hasMore.value) return;
     isLoadingMore.value = true;
@@ -427,6 +492,11 @@ const loadSearch = async (isLoadMore = false) => {
       searchDetail.value = { songs, albums, mvs, playlists, djRadios };
     }
 
+    // 对新加载的歌曲触发来源探测（仅单曲类型）
+    if (searchType.value === SEARCH_TYPE.MUSIC && songs.length > 0) {
+      probeSources(songs);
+    }
+
     hasMore.value =
       songs.length === ITEMS_PER_PAGE ||
       albums.length === ITEMS_PER_PAGE ||
@@ -462,6 +532,128 @@ const handleScroll = (e: any) => {
 };
 
 const dateFormat = (time: any) => useDateFormat(time, 'YYYY.MM.DD').value;
+
+// ==================== 来源筛选逻辑 ====================
+/**
+ * 获取歌曲的来源标签文本（响应式，依赖 sourceLabelVersion）
+ */
+const getSourceLabel = (songId: number | string): string | null => {
+  // 触发依赖追踪
+  void sourceLabelVersion.value;
+  const label = getCachedLabel(songId);
+  if (!label || label === 'pending') return null;
+  return SOURCE_LABEL_CONFIG[label].text;
+};
+
+/**
+ * 获取歌曲来源徽章样式
+ */
+const getSourceBadgeStyle = (songId: number | string): Record<string, string> => {
+  const label = getCachedLabel(songId);
+  if (!label || label === 'pending') return {};
+  const config = SOURCE_LABEL_CONFIG[label];
+  return {
+    color: config.color,
+    backgroundColor: config.bg
+  };
+};
+
+/**
+ * 按来源筛选后的歌曲列表
+ */
+const filteredSongs = computed(() => {
+  const songs = searchDetail.value?.songs || [];
+  if (activeSourceFilter.value === 'all') return songs;
+  void sourceLabelVersion.value;
+  return songs.filter((song: any) => getCachedLabel(song.id) === activeSourceFilter.value);
+});
+
+/**
+ * 来源筛选选项（动态生成）
+ */
+const sourceFilterOptions = computed(() => {
+  const songs = searchDetail.value?.songs || [];
+  void sourceLabelVersion.value;
+  const counts = new Map<SourceLabel, number>();
+  let pendingCount = 0;
+
+  for (const song of songs) {
+    const label = getCachedLabel(song.id);
+    if (label && label !== 'pending') {
+      counts.set(label, (counts.get(label) || 0) + 1);
+    } else {
+      pendingCount++;
+    }
+  }
+
+  const options: Array<{ key: SourceLabel | 'all'; label: string; count: number; color?: string }> = [
+    { key: 'all', label: t('search.filter.all'), count: songs.length }
+  ];
+
+  for (const [label, count] of counts) {
+    options.push({
+      key: label,
+      label: SOURCE_LABEL_CONFIG[label].text,
+      count,
+      color: SOURCE_LABEL_CONFIG[label].color
+    });
+  }
+
+  // 未探测完的歌曲归入 pending
+  if (pendingCount > 0) {
+    options.push({
+      key: 'pending',
+      label: t('search.filter.probing'),
+      count: pendingCount,
+      color: SOURCE_LABEL_CONFIG.pending.color
+    });
+  }
+
+  return options;
+});
+
+/**
+ * 对搜索结果进行来源探测
+ * 先用 quickClassify 即时标注，再对 pending 的歌曲懒探测
+ */
+const probeSources = (songs: any[]) => {
+  if (!songs || songs.length === 0) return;
+
+  // 第一层：即时分类（零请求）
+  for (const song of songs) {
+    const existing = getCachedLabel(song.id);
+    if (!existing) {
+      const label = quickClassify(song);
+      setLabel(song.id, label);
+    }
+  }
+  sourceLabelVersion.value++;
+
+  // 第二层：对 pending 的歌曲懒探测（需要解锁的无版权歌曲）
+  const toProbe = songs.filter((song: any) => {
+    const label = getCachedLabel(song.id);
+    return label === 'pending';
+  });
+
+  if (toProbe.length === 0) return;
+
+  // 转换为 SongResult 格式
+  const songResults = toProbe.map(formatSong).filter(Boolean) as SongResult[];
+
+  probeProgress.value = { done: 0, total: songResults.length };
+
+  probeSongsBatch(
+    songResults,
+    (done, total) => {
+      probeProgress.value = { done, total };
+      sourceLabelVersion.value++;
+    },
+    () => {
+      // 单首探测完成，触发响应式更新
+      sourceLabelVersion.value++;
+    }
+  );
+};
 
 const handlePlay = (item: any) => {
   playerStore.addToNextPlay(item);

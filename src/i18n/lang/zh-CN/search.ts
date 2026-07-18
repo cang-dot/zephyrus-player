@@ -28,5 +28,12 @@ export default {
   },
   history: '搜索历史',
   hot: '热门搜索',
-  suggestions: '搜索建议'
+  suggestions: '搜索建议',
+  filter: {
+    source: '来源筛选',
+    all: '全部',
+    probing: '探测来源中',
+    probeProgress: '探测来源 {done}/{total}',
+    noSource: '无可用源'
+  }
 };
