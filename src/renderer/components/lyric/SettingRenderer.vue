@@ -178,26 +178,16 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  transition: all 0.2s;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-md, 12px);
+  transition: var(--d-transition-colors);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-:global(html:not(.dark)) .setting-item {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.85);
+  color: var(--d-text-primary);
 }
 
 .setting-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-:global(html:not(.dark)) .setting-item:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--d-surface-hover);
 }
 
 /* Toggle switch */
@@ -205,11 +195,11 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   appearance: none;
   width: 44px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--d-surface-active);
   border-radius: 12px;
   position: relative;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: var(--d-transition-colors);
   flex-shrink: 0;
 }
 
@@ -236,16 +226,16 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
 /* Divider */
 .radio-group-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--d-border-light);
   margin: 6px 0;
 }
 
 /* Slider */
 .slider-group {
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .slider-label {

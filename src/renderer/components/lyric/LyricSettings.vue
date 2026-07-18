@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-80 rounded-d-2xl border shadow-d-xl overflow-hidden d-glass"
+    class="lyric-settings-panel w-80 rounded-d-2xl border shadow-d-xl overflow-hidden d-glass"
   >
     <!-- 标题栏 -->
     <div class="px-6 py-4 d-border-bottom">
@@ -587,6 +587,28 @@ defineExpose({
 </script>
 
 <style scoped>
+/*
+ * 设置面板始终使用暗色主题。
+ * 它是浮在播放画面之上的玻璃浮层，暗色玻璃在白色或深色播放背景上
+ * 都能提供稳定的高对比度，避免「白底白字」问题。
+ */
+.lyric-settings-panel {
+  --d-surface: #161616;
+  --d-surface-alt: #1e1e1e;
+  --d-surface-hover: #2a2a2a;
+  --d-surface-active: #333333;
+  --d-card: #1a1a1a;
+  --d-card-hover: #222222;
+  --d-border: #2d2d2d;
+  --d-border-light: #1e1e1e;
+  --d-border-strong: #3d3d3d;
+  --d-text-primary: #f8f9fa;
+  --d-text-secondary: #adb5bd;
+  --d-text-muted: #6c757d;
+  --d-glass-bg: rgba(22, 22, 22, 0.82);
+  --d-glass-border: rgba(255, 255, 255, 0.08);
+}
+
 /* 设置项 */
 .setting-item {
   display: flex;
@@ -871,7 +893,7 @@ defineExpose({
   padding: 8px 10px;
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--d-text-primary);
   text-align: center;
 }
 
@@ -913,9 +935,9 @@ defineExpose({
 /* 滑块 */
 .slider-group {
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .slider-label {
@@ -924,7 +946,7 @@ defineExpose({
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary);
   opacity: 0.8;
   margin-bottom: 8px;
 }
@@ -939,8 +961,8 @@ defineExpose({
     to right,
     var(--accent-color, #888) 0%,
     var(--accent-color, #888) var(--val-pct, 50%),
-    rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
-    rgba(255, 255, 255, 0.1) 100%
+    var(--d-border-strong) var(--val-pct, 50%),
+    var(--d-border-strong) 100%
   );
 }
 
@@ -969,16 +991,16 @@ defineExpose({
   justify-content: space-between;
   margin-top: 8px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-muted);
   opacity: 0.5;
 }
 
 /* 单选框组 */
 .radio-group {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border-light);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .radio-label {
@@ -987,7 +1009,7 @@ defineExpose({
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary);
   opacity: 0.7;
   margin-bottom: 12px;
 }
@@ -996,15 +1018,15 @@ defineExpose({
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--d-radius-sm, 8px);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--d-transition-colors);
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary);
 }
 
 .radio-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--d-surface-hover);
 }
 
 /* 紧凑版单选项（用于横向布局） */
@@ -1013,18 +1035,18 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 10px 8px;
-  border-radius: 8px;
+  border-radius: var(--d-radius-sm, 8px);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--d-transition-colors);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--d-text-secondary);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border-light);
 }
 
 .radio-item-compact:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--d-surface-hover);
+  border-color: var(--d-border);
 }
 
 .radio-input {
@@ -1059,9 +1081,9 @@ defineExpose({
 /* 颜色选择器 */
 .color-picker-group {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border-light);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .color-picker-label {
@@ -1070,7 +1092,7 @@ defineExpose({
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary);
   opacity: 0.7;
   margin-bottom: 12px;
 }
@@ -1079,7 +1101,7 @@ defineExpose({
   width: 100%;
   height: 48px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--d-radius-sm, 8px);
   cursor: pointer;
   background: transparent;
 }
@@ -1089,8 +1111,8 @@ defineExpose({
 }
 
 .color-picker::-webkit-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm, 8px);
 }
 
 /* 小尺寸颜色选择器（用于渐变） */
@@ -1098,7 +1120,7 @@ defineExpose({
   width: 56px;
   height: 56px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--d-radius-md, 12px);
   cursor: pointer;
   background: transparent;
 }
@@ -1108,16 +1130,16 @@ defineExpose({
 }
 
 .color-picker-small::-webkit-color-swatch {
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border: 2px solid var(--d-border-strong);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 /* 下拉选择 */
 .select-group {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border-light);
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .select-label {
@@ -1126,7 +1148,7 @@ defineExpose({
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary);
   opacity: 0.7;
   margin-bottom: 12px;
 }
@@ -1134,10 +1156,10 @@ defineExpose({
 .select-input {
   width: 100%;
   padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--d-surface-active);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm, 8px);
+  color: var(--d-text-secondary);
   font-size: 14px;
   cursor: pointer;
   outline: none;
@@ -1159,22 +1181,22 @@ defineExpose({
   justify-content: space-between;
   width: 100%;
   padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--d-surface-active);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm, 8px);
+  color: var(--d-text-primary);
   font-size: 14px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color var(--d-duration-fast, 0.2s);
 }
 
 .font-dropdown__trigger:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--d-border-strong);
 }
 
 .font-dropdown__trigger i {
-  transition: transform 0.2s;
-  color: rgba(255, 255, 255, 0.5);
+  transition: transform var(--d-duration-fast, 0.2s);
+  color: var(--d-text-muted);
 }
 
 .font-dropdown__panel {
@@ -1184,25 +1206,25 @@ defineExpose({
   right: 0;
   max-height: 280px;
   overflow-y: auto;
-  background: #1a1a1e;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  z-index: 100;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm, 8px);
+  box-shadow: var(--d-shadow-xl);
+  z-index: var(--d-z-dropdown, 100);
   padding: 4px;
 }
 
 .font-dropdown__item {
   padding: 8px 12px;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.85);
+  border-radius: var(--d-radius-xs, 6px);
+  color: var(--d-text-primary);
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--d-duration-fast, 0.15s);
 }
 
 .font-dropdown__item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--d-surface-hover);
 }
 
 .font-dropdown__item.active {
@@ -1233,11 +1255,11 @@ defineExpose({
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--d-border-strong);
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--d-text-muted);
 }
 </style>
