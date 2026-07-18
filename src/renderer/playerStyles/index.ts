@@ -4,6 +4,7 @@ import './stage';
 import './magazine';
 import './frenzy';
 import './eerie';
+import './neon';
 
 // 导出注册表 API
 export type { PlayerStyleDefinition, SettingItem } from './registry';
