@@ -14,6 +14,13 @@ const api = {
   miniTray: () => ipcRenderer.send('mini-tray'),
   miniWindow: () => ipcRenderer.send('mini-window'),
   restore: () => ipcRenderer.send('restore-window'),
+  toggleFullScreen: () => ipcRenderer.send('toggle-fullscreen'),
+  isFullScreen: () => ipcRenderer.invoke('is-fullscreen'),
+  onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => {
+    const handler = (_event: unknown, isFullScreen: boolean) => callback(isFullScreen);
+    ipcRenderer.on('fullscreen-changed', handler);
+    return () => ipcRenderer.removeListener('fullscreen-changed', handler);
+  },
   restart: () => ipcRenderer.send('restart'),
   resizeWindow: (width, height) => ipcRenderer.send('resize-window', width, height),
   resizeMiniWindow: (showPlaylist) => ipcRenderer.send('resize-mini-window', showPlaylist),

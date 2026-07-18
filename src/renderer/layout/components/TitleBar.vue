@@ -164,32 +164,30 @@ const rememberChoice = ref(false);
 const isOverlayMode = computed(() => settingsStore.setData?.layoutMode === 'overlay' && !settingsStore.isMobile);
 
 // ==================== 全屏切换 ====================
+// 使用 Electron 原生窗口全屏（win.setFullScreen），而非浏览器全屏 API。
+// frame:false 无边框窗口下 document.requestFullscreen() 行为不一致，可能失效。
 const isFullScreen = ref(false);
 
-const toggleFullScreen = async () => {
-  try {
-    if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-      isFullScreen.value = true;
-    } else {
-      await document.exitFullscreen();
-      isFullScreen.value = false;
-    }
-  } catch (e) {
-    console.error('全屏切换失败:', e);
+const toggleFullScreen = () => {
+  if (!isElectron) return;
+  window.api.toggleFullScreen();
+};
+
+const onFullScreenChanged = (fs: boolean) => {
+  isFullScreen.value = fs;
+};
+
+let removeFullScreenListener: (() => void) | null = null;
+
+onMounted(async () => {
+  if (isElectron) {
+    isFullScreen.value = await window.api.isFullScreen();
+    removeFullScreenListener = window.api.onFullScreenChanged(onFullScreenChanged);
   }
-};
-
-const handleFullScreenChange = () => {
-  isFullScreen.value = !!document.fullscreenElement;
-};
-
-onMounted(() => {
-  document.addEventListener('fullscreenchange', handleFullScreenChange);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  removeFullScreenListener?.();
 });
 
 // ==================== 自动收起（仅 Overlay 模式） ====================

@@ -12,6 +12,9 @@ interface API {
   miniTray: () => void;
   miniWindow: () => void;
   restore: () => void;
+  toggleFullScreen: () => void;
+  isFullScreen: () => Promise<boolean>;
+  onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;
   restart: () => void;
   resizeWindow: (width: number, height: number) => void;
   resizeMiniWindow: (showPlaylist: boolean) => void;

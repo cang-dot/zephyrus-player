@@ -253,6 +253,23 @@ export function initializeWindowManager() {
     }
   });
 
+  // ==================== 全屏切换 ====================
+  // 使用 Electron 原生 win.setFullScreen() 而非浏览器全屏 API，
+  // 因为 frame:false 的无边框窗口下 document.requestFullscreen() 行为不一致。
+  ipcMain.on('toggle-fullscreen', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return;
+    const next = !win.isFullScreen();
+    win.setFullScreen(next);
+    // 通知渲染进程全屏状态变化（按钮图标需要同步切换）
+    win.webContents.send('fullscreen-changed', next);
+  });
+
+  ipcMain.handle('is-fullscreen', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    return win ? win.isFullScreen() : false;
+  });
+
   ipcMain.on('update-play-state', (_, playing: boolean) => {
     isPlaying = playing;
     if (mainWindowInstance) {
