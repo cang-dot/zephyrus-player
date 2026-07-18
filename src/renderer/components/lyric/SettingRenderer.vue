@@ -254,13 +254,9 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary, rgba(255, 255, 255, 0.8));
   opacity: 0.8;
   margin-bottom: 8px;
-}
-
-:global(html:not(.dark)) .slider-label {
-  color: rgba(0, 0, 0, 0.7);
 }
 
 .slider-emerald {
@@ -273,8 +269,8 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
     to right,
     var(--accent-color, #888) 0%,
     var(--accent-color, #888) var(--val-pct, 50%),
-    rgba(255, 255, 255, 0.1) var(--val-pct, 50%),
-    rgba(255, 255, 255, 0.1) 100%
+    var(--d-border-strong, rgba(255, 255, 255, 0.1)) var(--val-pct, 50%),
+    var(--d-border-strong, rgba(255, 255, 255, 0.1)) 100%
   );
 }
 
@@ -303,20 +299,16 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   justify-content: space-between;
   margin-top: 8px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-muted, rgba(255, 255, 255, 0.8));
   opacity: 0.5;
-}
-
-:global(html:not(.dark)) .slider-marks {
-  color: rgba(0, 0, 0, 0.5);
 }
 
 /* Radio group */
 .radio-group {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: var(--d-surface-alt, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--d-border-light, rgba(255, 255, 255, 0.05));
+  border-radius: var(--d-radius-md, 12px);
 }
 
 .radio-label {
@@ -325,13 +317,9 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--d-text-secondary, rgba(255, 255, 255, 0.8));
   opacity: 0.7;
   margin-bottom: 12px;
-}
-
-:global(html:not(.dark)) .radio-label {
-  color: rgba(0, 0, 0, 0.6);
 }
 
 /* Color picker */
@@ -350,8 +338,8 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
 }
 
 .color-picker::-webkit-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border: 1px solid var(--d-border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--d-radius-sm, 8px);
 }
 
 /* Font dropdown */
@@ -365,28 +353,22 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   justify-content: space-between;
   width: 100%;
   padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--d-surface-active, rgba(0, 0, 0, 0.4));
+  border: 1px solid var(--d-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--d-radius-sm, 8px);
+  color: var(--d-text-primary, rgba(255, 255, 255, 0.9));
   font-size: 14px;
   cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-:global(html:not(.dark)) .font-dropdown__trigger {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: rgba(0, 0, 0, 0.85);
+  transition: border-color var(--d-duration-fast, 0.2s);
 }
 
 .font-dropdown__trigger:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--d-border-strong, rgba(255, 255, 255, 0.2));
 }
 
 .font-dropdown__trigger i {
-  transition: transform 0.2s;
-  color: rgba(255, 255, 255, 0.5);
+  transition: transform var(--d-duration-fast, 0.2s);
+  color: var(--d-text-muted, rgba(255, 255, 255, 0.5));
 }
 
 .font-dropdown__panel {
@@ -396,29 +378,25 @@ function checkCondition(condition: { key: string; is?: string; not?: string; and
   right: 0;
   max-height: 280px;
   overflow-y: auto;
-  background: #1a1a1e;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  z-index: 100;
+  background: var(--d-card, #1a1a1e);
+  border: 1px solid var(--d-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--d-radius-sm, 8px);
+  box-shadow: var(--d-shadow-xl, 0 8px 32px rgba(0, 0, 0, 0.6));
+  z-index: var(--d-z-dropdown, 100);
   padding: 4px;
 }
 
 .font-dropdown__item {
   padding: 8px 12px;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.85);
+  border-radius: var(--d-radius-xs, 6px);
+  color: var(--d-text-primary, rgba(255, 255, 255, 0.85));
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s;
-}
-
-:global(html:not(.dark)) .font-dropdown__item {
-  color: rgba(0, 0, 0, 0.8);
+  transition: background var(--d-duration-fast, 0.15s);
 }
 
 .font-dropdown__item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--d-surface-hover, rgba(255, 255, 255, 0.08));
 }
 
 .font-dropdown__item.active {

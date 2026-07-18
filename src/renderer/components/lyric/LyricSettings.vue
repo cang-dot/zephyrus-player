@@ -1,11 +1,11 @@
 <template>
   <div
-    class="w-80 rounded-2xl bg-black/30 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden"
+    class="w-80 rounded-d-2xl border shadow-d-xl overflow-hidden d-glass"
   >
     <!-- 标题栏 -->
-    <div class="px-6 py-4 border-b border-white/5">
+    <div class="px-6 py-4 d-border-bottom">
       <div class="flex items-center gap-3">
-        <h2 class="text-lg font-semibold tracking-tight text-white/90">
+        <h2 class="text-lg font-semibold tracking-tight d-text-primary">
           {{ t('settings.lyricSettings.title') }}
         </h2>
       </div>
@@ -593,16 +593,16 @@ defineExpose({
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  transition: all 0.2s;
+  background: var(--d-surface-alt, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--d-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--d-radius-md, 12px);
+  transition: var(--d-transition-colors);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--d-text-primary, rgba(255, 255, 255, 0.9));
 }
 
 .setting-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--d-surface-hover, rgba(255, 255, 255, 0.06));
 }
 
 /* 切换开关 */
@@ -610,11 +610,11 @@ defineExpose({
   appearance: none;
   width: 44px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--d-surface-active, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   position: relative;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: var(--d-transition-colors);
 }
 
 .toggle-switch::before {
@@ -647,14 +647,14 @@ defineExpose({
 
 .style-card {
   position: relative;
-  border-radius: 14px;
+  border-radius: var(--d-radius-md, 14px);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: var(--d-transition-all);
+  background: var(--d-surface-alt, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--d-border-light, rgba(255, 255, 255, 0.08));
 }
 .style-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--d-surface-hover, rgba(255, 255, 255, 0.08));
   transform: translateY(-1px);
 }
 .style-card:active {
