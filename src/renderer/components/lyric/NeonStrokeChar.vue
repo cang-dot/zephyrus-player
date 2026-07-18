@@ -74,7 +74,7 @@
  */
 import { computed, onMounted, ref } from 'vue';
 
-import { useStyleEngineStore } from '@/store/modules/player';
+import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { getStrokes, loadDictionary } from '@/lib/hanziStrokes';
 
 const props = defineProps<{
