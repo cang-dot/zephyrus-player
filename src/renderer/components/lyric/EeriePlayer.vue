@@ -74,17 +74,17 @@
 /**
  * EeriePlayer — 诡谲模式播放器
  */
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { lrcArray, nowIndex, playMusic } from '@/hooks/MusicHook';
 import { useCoverColor } from '@/hooks/useCoverColor';
 import { usePlayerStore } from '@/store/modules/player';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
+import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
 
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
 import { startNoiseAnimation } from '@/lib/noiseCanvas';
-import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
 import PlayerControls from './PlayerControls.vue';
@@ -105,6 +105,38 @@ const { controlsVisible, handleTapToggle } = useTapToggle();
 const isVisible = computed({ get: () => props.modelValue, set: (v) => emit('update:modelValue', v) });
 const isInClimax = computed(() => styleEngine.isInClimax);
 
+// ==================== 响应式配置 ====================
+const config = ref<LyricConfig>({ ...DEFAULT_LYRIC_CONFIG });
+
+function loadConfig() {
+  const saved = localStorage.getItem('music-full-config');
+  if (saved) {
+    try {
+      config.value = { ...DEFAULT_LYRIC_CONFIG, ...JSON.parse(saved) };
+    } catch {
+      config.value = { ...DEFAULT_LYRIC_CONFIG };
+    }
+  }
+}
+loadConfig();
+
+function handleConfigUpdate() {
+  loadConfig();
+}
+
+onMounted(() => {
+  window.addEventListener('music-full-config-updated', handleConfigUpdate);
+  styleEngine.syncFromPlayerStore();
+  styleEngine.syncCoverColors();
+  if (playerStore.currentSong?.id) {
+    styleEngine.loadClimaxData(String(playerStore.currentSong.id));
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('music-full-config-updated', handleConfigUpdate);
+});
+
 // 颜色
 const accentColor = computed(() => primaryColor.value || '#888888');
 const accentDark = computed(() => {
@@ -116,19 +148,13 @@ const accentDark = computed(() => {
 const isIntro = computed(() => nowIndex.value <= 0);
 const bgColor = computed(() => isIntro.value ? accentDark.value : '#0a0a0a');
 
-// 读取配置
-function readEerieConfig() {
-  const ctx = useStyleContext();
-  return {
-    fontFamily: ctx.getConfigValue('eerieFontFamily') || 'KaiTi',
-    maxFontSize: ctx.getConfigValue('eerieMaxFontSize') ?? 48,
-    minFontSize: ctx.getConfigValue('eerieMinFontSize') ?? 32,
-    climaxFontSize: ctx.getConfigValue('eerieClimaxFontSize') ?? 100,
-  };
-}
-const eerieConfig = computed(() => readEerieConfig());
+// 配置值
+const eerieFontFamily = computed(() => (config.value as any).eerieFontFamily || 'KaiTi');
+const eerieMaxFontSize = computed(() => (config.value as any).eerieMaxFontSize ?? 48);
+const eerieMinFontSize = computed(() => (config.value as any).eerieMinFontSize ?? 32);
+const eerieClimaxFontSize = computed(() => (config.value as any).eerieClimaxFontSize ?? 100);
 
-// 哑铃型字号：两端大中间小，差距可控
+// 哑铃型字号：两端大中间小
 const currentChars = computed(() => {
   const idx = nowIndex.value;
   if (idx < 0 || idx >= lrcArray.value.length) return [];
@@ -137,12 +163,11 @@ const currentChars = computed(() => {
   const chars = Array.from(text);
   const n = chars.length;
   if (n === 0) return [];
-  const cfg = eerieConfig.value;
-  const maxSize = cfg.maxFontSize;
-  const minSize = cfg.minFontSize;
+  const maxSize = eerieMaxFontSize.value;
+  const minSize = eerieMinFontSize.value;
   return chars.map((char, i) => {
-    // 哑铃型：两端大中间小，使用平滑的 sin 曲线
-    const ratio = n === 1 ? 1 : Math.sin(Math.PI * (i / (n - 1)));
+    // 两端大中间小：i=0 和 i=n-1 时 ratio=1（maxSize），i=n/2 时 ratio=0（minSize）
+    const ratio = n === 1 ? 1 : 1 - Math.sin(Math.PI * (i / (n - 1)));
     const size = minSize + (maxSize - minSize) * ratio;
     return { char, size, margin: -size * 0.08 };
   });
@@ -150,8 +175,7 @@ const currentChars = computed(() => {
 
 // 字体族
 const fontFamily = computed(() => {
-  const f = eerieConfig.value.fontFamily;
-  // 常见书法字体回退链
+  const f = eerieFontFamily.value;
   const fallbacks: Record<string, string> = {
     'KaiTi': "'KaiTi', 'STKaiti', 'Noto Serif SC', serif",
     'STKaiti': "'STKaiti', 'KaiTi', 'Noto Serif SC', serif",
@@ -164,7 +188,7 @@ const fontFamily = computed(() => {
 });
 
 // 高潮重点词字号
-const climaxFontSizePx = computed(() => `${eerieConfig.value.climaxFontSize}px`);
+const climaxFontSizePx = computed(() => `${eerieClimaxFontSize.value}px`);
 
 const climaxKeywords = computed(() => styleEngine.currentLineKeywords || []);
 
