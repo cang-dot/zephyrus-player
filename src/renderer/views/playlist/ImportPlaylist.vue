@@ -62,7 +62,7 @@
           <!-- 左侧：输入区域-->
           <div class="lg:col-span-2 space-y-6">
             <div
-              class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden p-1 transition-all duration-300"
+              class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-d-lg dark:shadow-none overflow-hidden p-1 transition-all duration-300"
             >
               <!-- 閾炬帴瀵煎叆鍐呭 -->
               <div v-if="currentTab === 'link'" class="p-6 space-y-6 animate-fade-in">
@@ -179,7 +179,7 @@
           <div class="space-y-6">
             <!-- 选项卡片 -->
             <div
-              class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6"
+              class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-d-lg dark:shadow-none p-6"
             >
               <h3 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <i class="ri-settings-4-line text-[var(--accent-color)]"></i>
@@ -256,7 +256,7 @@
             <!-- 状态反馈-->
             <div v-if="taskId" class="animate-fade-in-up">
               <div
-                class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6"
+                class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-d-lg dark:shadow-none p-6"
               >
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">

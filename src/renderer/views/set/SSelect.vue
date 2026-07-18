@@ -2,7 +2,7 @@
   <div class="relative inline-block" :class="widthClass" ref="wrapperRef">
     <button
       :disabled="disabled"
-      class="flex w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-1.5 text-sm transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed"
+      class="flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-1.5 text-sm transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed"
       :class="
         isOpen
           ? 'border-[var(--accent-color)] bg-white dark:bg-neutral-900 ring-2 ring-primary ring-opacity-20'
