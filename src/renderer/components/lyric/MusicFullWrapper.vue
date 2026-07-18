@@ -14,10 +14,12 @@
 <script setup lang="ts">
 import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
+import EerieMobilePlayer from '@/components/lyric/EerieMobilePlayer.vue';
 import FrenzyMobilePlayer from '@/components/lyric/FrenzyMobilePlayer.vue';
 import MagazineMobilePlayer from '@/components/lyric/MagazineMobilePlayer.vue';
 import MusicFull from '@/components/lyric/MusicFull.vue';
 import MusicFullMobile from '@/components/lyric/MusicFullMobile.vue';
+import NeonMobilePlayer from '@/components/lyric/NeonMobilePlayer.vue';
 import StageMobilePlayer from '@/components/lyric/StageMobilePlayer.vue';
 import { getStyle } from '@/playerStyles';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
@@ -81,6 +83,10 @@ const componentToUse = computed(() => {
           return markRaw(StageMobilePlayer);
         case 'frenzy':
           return markRaw(FrenzyMobilePlayer);
+        case 'eerie':
+          return markRaw(EerieMobilePlayer);
+        case 'neon':
+          return markRaw(NeonMobilePlayer);
       }
     }
     // 横屏或桌面端：直接使用原始组件
