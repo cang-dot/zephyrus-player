@@ -34,7 +34,7 @@ if (!existsSync(outputDir)) {
 }
 
 // 处理参数
-const OPACITY = 0.35;       // 半透明度（0-1），35% 不透明度
+const OPACITY = 0.35;       // 最大不透明度（0-1），暗部像素的上限
 const TARGET_WIDTH = 800;   // 目标宽度（缩放，保持比例）
 
 async function processImage(inputPath, index) {
@@ -63,45 +63,41 @@ async function processImage(inputPath, index) {
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    // 遍历像素，设置 alpha = 255 * OPACITY
     const channels = info.channels;
+    const pixelCount = data.length / channels;
+
+    // 生成 RGBA 数据：白色扣透明 + 半透明
+    // 灰度图 R=G=B=value，亮度越高（越白）alpha 越低
+    // alpha = (255 - value) / 255 * MAX_ALPHA
+    const newData = Buffer.alloc(pixelCount * 4);
+    const maxAlpha = Math.round(255 * OPACITY);
+
     if (channels === 4) {
-      // 已有 alpha 通道，直接覆盖
-      for (let i = 3; i < data.length; i += 4) {
-        data[i] = Math.round(255 * OPACITY);
+      // 已有 alpha，用 RGB 值重新计算
+      for (let i = 0, j = 0; i < data.length; i += 4, j += 4) {
+        const gray = data[i]; // R=G=B after grayscale
+        newData[j] = gray;
+        newData[j + 1] = gray;
+        newData[j + 2] = gray;
+        // 白色(255)→alpha=0  黑色(0)→alpha=maxAlpha
+        newData[j + 3] = Math.round((255 - gray) / 255 * maxAlpha);
       }
     } else if (channels === 3) {
-      // 无 alpha 通道，需要添加
-      const newData = Buffer.alloc(data.length / 3 * 4);
+      // 无 alpha 通道
       for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
-        newData[j] = data[i];         // R
-        newData[j + 1] = data[i + 1]; // G
-        newData[j + 2] = data[i + 2]; // B
-        newData[j + 3] = Math.round(255 * OPACITY); // A
+        const gray = data[i];
+        newData[j] = gray;
+        newData[j + 1] = gray;
+        newData[j + 2] = gray;
+        newData[j + 3] = Math.round((255 - gray) / 255 * maxAlpha);
       }
-      // 用新数据生成图片
-      const outputName = `newspaper-${String(index + 1).padStart(2, '0')}.png`;
-      const outputPath = join(outputDir, outputName);
-
-      await sharp(newData, {
-        raw: {
-          width: info.width,
-          height: info.height,
-          channels: 4
-        }
-      })
-        .png()
-        .toFile(outputPath);
-
-      console.log(`  ✓ 已保存: ${outputName} (${info.width}×${info.height}, opacity=${OPACITY})`);
-      return outputPath;
     }
 
-    // channels === 4 的情况
+    // 保存
     const outputName = `newspaper-${String(index + 1).padStart(2, '0')}.png`;
     const outputPath = join(outputDir, outputName);
 
-    await sharp(data, {
+    await sharp(newData, {
       raw: {
         width: info.width,
         height: info.height,
@@ -111,7 +107,7 @@ async function processImage(inputPath, index) {
       .png()
       .toFile(outputPath);
 
-    console.log(`  ✓ 已保存: ${outputName} (${info.width}×${info.height}, opacity=${OPACITY})`);
+    console.log(`  ✓ 已保存: ${outputName} (${info.width}×${info.height}, 白扣透明+maxOpacity=${OPACITY})`);
     return outputPath;
   } catch (err) {
     console.error(`  ✗ 处理失败: ${err.message}`);
