@@ -1,53 +1,60 @@
 <template>
   <div
-    id="title-bar"
-    class="flex justify-between px-6 py-2 select-none relative text-dark dark:text-white"
-    @mousedown="drag"
+    class="tb-zone"
+    @mouseenter="handleZoneEnter"
+    @mouseleave="handleZoneLeave"
   >
-    <div id="title">Zephyrus</div>
-    <div id="buttons">
-      <n-button
-        v-if="!isElectron"
-        type="primary"
-        size="small"
-        text
-        title="下载应用"
-        @click="openDownloadPage"
-      >
-        <i class="ri-download-line"></i>
-        下载桌面版
-      </n-button>
-      <template v-if="isElectron">
-        <div
-          v-if="isOverlayMode"
-          class="titlebar-btn"
-          :title="isFullScreen ? '退出全屏' : '全屏'"
-          @click="toggleFullScreen"
+    <div
+      id="title-bar"
+      class="flex justify-between items-center px-6 py-2 select-none relative text-dark dark:text-white"
+      :class="{ 'tb-hidden': isHidden && isOverlayMode }"
+      @mousedown="drag"
+    >
+      <div id="title" :class="{ 'text-sm font-semibold opacity-60': isOverlayMode }">Zephyrus</div>
+      <div id="buttons">
+        <n-button
+          v-if="!isElectron"
+          type="primary"
+          size="small"
+          text
+          title="下载应用"
+          @click="openDownloadPage"
         >
-          <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
-        </div>
-        <div
-          class="titlebar-btn"
-          title="小窗模式"
-          @click="miniWindow"
-        >
-          <i class="ri-picture-in-picture-line"></i>
-        </div>
-        <div
-          class="titlebar-btn"
-          title="最小化"
-          @click="minimize"
-        >
-          <i class="ri-subtract-line"></i>
-        </div>
-        <div
-          class="titlebar-btn titlebar-btn--close"
-          title="关闭"
-          @click="handleClose"
-        >
-          <i class="ri-close-line"></i>
-        </div>
-      </template>
+          <i class="ri-download-line"></i>
+          下载桌面版
+        </n-button>
+        <template v-if="isElectron">
+          <div
+            v-if="isOverlayMode"
+            class="titlebar-btn"
+            :title="isFullScreen ? '退出全屏' : '全屏'"
+            @click="toggleFullScreen"
+          >
+            <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
+          </div>
+          <div
+            class="titlebar-btn"
+            title="小窗模式"
+            @click="miniWindow"
+          >
+            <i class="ri-picture-in-picture-line"></i>
+          </div>
+          <div
+            class="titlebar-btn"
+            title="最小化"
+            @click="minimize"
+          >
+            <i class="ri-subtract-line"></i>
+          </div>
+          <div
+            class="titlebar-btn titlebar-btn--close"
+            title="关闭"
+            @click="handleClose"
+          >
+            <i class="ri-close-line"></i>
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 
@@ -66,11 +73,11 @@
         @click.self="showCloseModal = false"
       >
         <div
-          class="relative w-[360px] transform overflow-hidden rounded-2xl bg-white p-6 shadow-2xl transition-all dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800"
+          class="relative w-[360px] transform overflow-hidden rounded-d-2xl bg-white p-6 shadow-d-xl transition-all dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800"
         >
           <!-- Close Icon -->
           <button
-            class="absolute top-4 right-4 p-1 rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 transition-colors focus:outline-none"
+            class="absolute top-4 right-4 p-1 rounded-d-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 transition-colors focus:outline-none"
             @click="showCloseModal = false"
           >
             <i class="ri-close-line text-xl leading-none"></i>
@@ -114,19 +121,19 @@
 
           <div class="mt-6 flex justify-end gap-3">
             <button
-              class="rounded-full px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 transition-colors focus:outline-none"
+              class="rounded-d-full px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:bg-neutral-800 transition-colors focus:outline-none"
               @click="showCloseModal = false"
             >
               {{ t('common.cancel') }}
             </button>
             <button
-              class="rounded-full px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800 transition-colors focus:outline-none"
+              class="rounded-d-full px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800 transition-colors focus:outline-none"
               @click="handleAction('close')"
             >
               {{ t('comp.titleBar.exitApp') }}
             </button>
             <button
-              class="rounded-full bg-[var(--accent-color)] px-6 py-2 text-sm font-medium text-white hover:bg-[var(--accent-color-dark)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 transition-colors shadow-lg shadow-[var(--accent-color)]/20"
+              class="rounded-d-full bg-[var(--accent-color)] px-6 py-2 text-sm font-medium text-white hover:bg-[var(--accent-color-dark)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 transition-colors shadow-lg shadow-[var(--accent-color)]/20"
               @click="handleAction('minimize')"
             >
               {{ t('comp.titleBar.minimizeToTray') }}
@@ -139,22 +146,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useSettingsStore } from '@/store/modules/settings';
+import { useWindowStore } from '@/store/modules/windowStore';
 import { isElectron } from '@/utils';
 
 const { t } = useI18n();
 
 const settingsStore = useSettingsStore();
+const windowStore = useWindowStore();
 const showCloseModal = ref(false);
 const rememberChoice = ref(false);
 
 // 是否为悬浮覆盖布局
 const isOverlayMode = computed(() => settingsStore.setData?.layoutMode === 'overlay' && !settingsStore.isMobile);
 
-// 全屏切换
+// ==================== 全屏切换 ====================
 const isFullScreen = ref(false);
 
 const toggleFullScreen = async () => {
@@ -175,10 +184,90 @@ const handleFullScreenChange = () => {
   isFullScreen.value = !!document.fullscreenElement;
 };
 
-if (typeof window !== 'undefined') {
+onMounted(() => {
   document.addEventListener('fullscreenchange', handleFullScreenChange);
-}
+});
 
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', handleFullScreenChange);
+});
+
+// ==================== 自动收起（仅 Overlay 模式） ====================
+const isHidden = ref(false);
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+const getAutoCollapseDelay = () => {
+  return (settingsStore.setData?.overlayAutoCollapseDelay || 5) * 1000;
+};
+
+const isAutoCollapseEnabled = () => {
+  return settingsStore.setData?.overlayAutoCollapse !== false;
+};
+
+const startHideTimer = () => {
+  if (!isOverlayMode.value) return; // 仅 Overlay 模式生效
+  if (!isAutoCollapseEnabled()) return;
+  if (windowStore.activePath) return; // 有悬浮面板时不收起
+  if (showCloseModal.value) return; // 有弹窗时不收起
+  cancelHideTimer();
+  hideTimer = setTimeout(() => {
+    if (windowStore.activePath || showCloseModal.value) return;
+    isHidden.value = true;
+  }, getAutoCollapseDelay());
+};
+
+const cancelHideTimer = () => {
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+};
+
+const handleZoneEnter = () => {
+  if (!isOverlayMode.value) return;
+  cancelHideTimer();
+  isHidden.value = false;
+};
+
+const handleZoneLeave = () => {
+  if (!isOverlayMode.value) return;
+  startHideTimer();
+};
+
+// 面板状态变化时更新
+watch(
+  () => windowStore.activePath,
+  (newPath) => {
+    if (!isOverlayMode.value) return;
+    if (!newPath) {
+      isHidden.value = false;
+      startHideTimer();
+    } else {
+      cancelHideTimer();
+      isHidden.value = false;
+    }
+  }
+);
+
+watch(showCloseModal, (open) => {
+  if (!isOverlayMode.value) return;
+  if (open) {
+    cancelHideTimer();
+    isHidden.value = false;
+  } else {
+    startHideTimer();
+  }
+});
+
+onMounted(() => {
+  startHideTimer();
+});
+
+onUnmounted(() => {
+  cancelHideTimer();
+});
+
+// ==================== 窗口操作 ====================
 const openDownloadPage = () => {
   if (!isElectron) {
     window.open('https://github.com/cang-dot/zephyrus-player/releases', '_blank');
@@ -238,31 +327,50 @@ const drag = (event: MouseEvent) => {
 </script>
 
 <style scoped lang="scss">
+/* 顶部触发区域 — 桌面模式下正常文档流，Overlay 模式下固定定位 */
+.tb-zone {
+  position: relative;
+  z-index: 3000;
+}
+
 #title-bar {
   -webkit-app-region: drag;
-  z-index: 3000;
+  transition:
+    opacity var(--d-duration-slow, 0.3s) var(--d-ease-out, ease),
+    transform var(--d-duration-slow, 0.3s) var(--d-ease-out, ease);
+}
+
+#title-bar.tb-hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+#title {
+  -webkit-app-region: drag;
 }
 
 #buttons {
   -webkit-app-region: no-drag;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--d-space-2, 8px);
 }
 
-/* 与 PlayerControls 全屏按钮一致的视觉风格 */
+/* 统一按钮风格（使用设计令牌） */
 .titlebar-btn {
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--d-radius-full, 50%);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: var(--d-glass-blur, blur(8px));
+  -webkit-backdrop-filter: var(--d-glass-blur, blur(8px));
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background var(--d-duration-normal, 0.2s) var(--d-ease-out, ease),
+              color var(--d-duration-normal, 0.2s) var(--d-ease-out, ease);
   color: #fff;
   font-size: 15px;
 }
@@ -276,6 +384,28 @@ const drag = (event: MouseEvent) => {
   color: #fff;
 }
 
+/* Overlay 模式下按钮稍大 */
+:global(html.overlay-mode) .titlebar-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+
+/* Overlay 模式下标题栏固定在顶部 */
+:global(html.overlay-mode) .tb-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Overlay 模式下标题栏内边距调整 */
+:global(html.overlay-mode) #title-bar {
+  padding-left: var(--d-space-4, 16px);
+  padding-right: var(--d-space-4, 16px);
+  padding-top: var(--d-space-1, 4px);
+  padding-bottom: var(--d-space-1, 4px);
+}
 </style>
 
 <style lang="scss">
