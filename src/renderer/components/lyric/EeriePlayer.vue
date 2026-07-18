@@ -1,16 +1,15 @@
 <template>
-  <teleport to="body">
-    <transition name="eerie-fade">
-      <div
-        v-if="isVisible"
-        class="eerie-player"
-        :style="{
-          '--accent-color': accentColor,
-          '--accent-dark': accentDark,
-          '--bg-color': bgColor,
-        }"
-        @click="handleTapToggle"
-      >
+  <transition name="eerie-fade">
+    <div
+      v-if="isVisible"
+      class="eerie-player"
+      :style="{
+        '--accent-color': accentColor,
+        '--accent-dark': accentDark,
+        '--bg-color': bgColor,
+      }"
+      @click="handleTapToggle"
+    >
         <!-- 背景层：噪点 / 裂纹 -->
         <canvas ref="bgCanvasRef" class="bg-canvas"></canvas>
 
@@ -69,7 +68,6 @@
         />
       </div>
     </transition>
-  </teleport>
 </template>
 
 <script setup lang="ts">
@@ -210,7 +208,7 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 
 <style lang="scss" scoped>
 .eerie-player {
-  position: fixed; inset: 0; z-index: 9999;
+  position: absolute; inset: 0; z-index: 9999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: hidden; background: var(--bg-color);
 }

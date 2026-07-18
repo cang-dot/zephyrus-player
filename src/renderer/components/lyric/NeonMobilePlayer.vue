@@ -1,12 +1,11 @@
 <template>
-  <teleport to="body">
-    <transition name="neon-fade">
-      <div
-        v-if="isVisible"
-        class="neon-mobile-player"
-        :style="{ '--neon-color': neonColor, '--neon-bright': neonBright, '--neon-dim': neonDim }"
-        @click="handleTapToggle"
-      >
+  <transition name="neon-fade">
+    <div
+      v-if="isVisible"
+      class="neon-mobile-player"
+      :style="{ '--neon-color': neonColor, '--neon-bright': neonBright, '--neon-dim': neonDim }"
+      @click="handleTapToggle"
+    >
         <div class="concrete-bg"></div>
         <div class="ambient-glow" :style="{ opacity: beatGlowOpacity }"></div>
 
@@ -31,7 +30,6 @@
         />
       </div>
     </transition>
-  </teleport>
 </template>
 
 <script setup lang="ts">
@@ -100,7 +98,7 @@ function close() { isVisible.value = false; }
 </script>
 
 <style lang="scss" scoped>
-.neon-mobile-player { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #0a0a0a; }
+.neon-mobile-player { position: absolute; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #0a0a0a; }
 .concrete-bg {
   position: absolute; inset: 0; z-index: 0; background-color: #1a1a1a;
   background-image:

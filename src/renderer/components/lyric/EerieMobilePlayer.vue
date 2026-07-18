@@ -1,12 +1,11 @@
 <template>
-  <teleport to="body">
-    <transition name="eerie-fade">
-      <div
-        v-if="isVisible"
-        class="eerie-mobile-player"
-        :style="{ '--accent-color': accentColor, '--accent-dark': accentDark, '--bg-color': bgColor }"
-        @click="handleTapToggle"
-      >
+  <transition name="eerie-fade">
+    <div
+      v-if="isVisible"
+      class="eerie-mobile-player"
+      :style="{ '--accent-color': accentColor, '--accent-dark': accentDark, '--bg-color': bgColor }"
+      @click="handleTapToggle"
+    >
         <canvas ref="bgCanvasRef" class="bg-canvas"></canvas>
 
         <transition-group name="newspaper-flash" tag="div" class="newspaper-layer">
@@ -38,7 +37,6 @@
         />
       </div>
     </transition>
-  </teleport>
 </template>
 
 <script setup lang="ts">
@@ -160,7 +158,7 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 </script>
 
 <style lang="scss" scoped>
-.eerie-mobile-player { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-color); }
+.eerie-mobile-player { position: absolute; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-color); }
 .bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
 .newspaper-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .newspaper-item { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; mix-blend-mode: overlay; }
