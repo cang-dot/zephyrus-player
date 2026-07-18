@@ -475,6 +475,8 @@ const playerStyles = computed(() => {
       if (s.key === 'stage') return isFeatureEnabled('stage-style');
       if (s.key === 'magazine') return isFeatureEnabled('magazine-style');
       if (s.key === 'frenzy') return isFeatureEnabled('frenzy-style');
+      if (s.key === 'eerie') return isFeatureEnabled('eerie-style');
+      if (s.key === 'neon') return isFeatureEnabled('neon-style');
       return false;
     })
     .map((s) => ({ key: s.key, label: s.label }));
@@ -801,6 +803,69 @@ defineExpose({
   background: #cc0000;
   transform: translate(-50%, -50%) skewX(-8deg);
   opacity: 0.9;
+}
+
+/* 诡谲样式预览：黑色背景 + 书法字 + 裂纹质感 */
+.preview-eerie {
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+}
+.preview-eerie::before {
+  content: '诡';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'KaiTi', 'STKaiti', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #b08040;
+  text-shadow: 0 0 4px #b08040, 0 0 1px #fff;
+  opacity: 0.85;
+}
+.preview-eerie::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 15%;
+  width: 70%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  transform: rotate(-15deg);
+  box-shadow:
+    0 12px 0 rgba(255,255,255,0.08),
+    0 24px 0 rgba(255,255,255,0.05);
+}
+
+/* 霓虹样式预览：黑色背景 + 绿色霓虹光晕 */
+.preview-neon {
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+}
+.preview-neon::before {
+  content: 'NEON';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #aaffcc;
+  text-shadow:
+    0 0 4px #00ff88,
+    0 0 8px #00ff88,
+    0 0 16px #00ff88,
+    0 0 24px #00ff88;
+}
+.preview-neon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,255,136,0.15) 100%);
 }
 
 .style-card-name {

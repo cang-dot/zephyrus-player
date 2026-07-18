@@ -41,4 +41,20 @@ export function registerBuiltinFeatures() {
     icon: 'ri-fire-line',
     type: 'playerStyle'
   });
+
+  registerFeature({
+    id: 'eerie-style',
+    name: '诡谲样式',
+    description: '书法字体+裂纹噪点背景+报纸滤镜的艺术风格歌词展示',
+    icon: 'ri-ghost-line',
+    type: 'playerStyle'
+  });
+
+  registerFeature({
+    id: 'neon-style',
+    name: '霓虹样式',
+    description: '歌词拆笔画霓虹灯管效果+水泥墙背景',
+    icon: 'ri-lightbulb-flash-line',
+    type: 'playerStyle'
+  });
 }
