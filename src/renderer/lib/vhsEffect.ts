@@ -16,6 +16,9 @@
  *   mode 叠加到目标画布。
  */
 
+/** 底色：可以是静态字符串，也可以是每帧动态获取的 getter 函数 */
+type BgColor = string | (() => string);
+
 export interface VHSOptions {
   /** 总体强度 0-1，控制所有效果的可见度 */
   intensity?: number;
@@ -52,19 +55,23 @@ const DEFAULT_OPTIONS: Required<VHSOptions> = {
  * @param ctx 目标 canvas 的 2D 上下文
  * @param width 画布逻辑宽度（CSS 像素）
  * @param height 画布逻辑高度（CSS 像素）
- * @param bgColor 底色（每帧重新填充）
+ * @param bgColor 底色（每帧重新填充）。支持传入 getter 函数实现动态底色，
+ *                避免在底色变化时频繁重启动画（如过渡阶段封面色变化）
  * @param options 效果配置
- * @returns 停止函数，调用后停止动画并释放资源
+ * @returns 停止函数，调用后停止动画并清除画布
  */
 export function startVHSAnimation(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  bgColor: string,
+  bgColor: BgColor,
   options: VHSOptions = {}
 ): () => void {
   const opts: Required<VHSOptions> = { ...DEFAULT_OPTIONS, ...options };
   let running = true;
+
+  // 每帧获取最新底色（支持动态值）
+  const resolveBg = typeof bgColor === 'function' ? bgColor : () => bgColor;
 
   // 帧率控制
   const frameInterval = 1000 / opts.fps;
@@ -112,12 +119,21 @@ export function startVHSAnimation(
     if (!running) return;
 
     const masterIntensity = opts.intensity;
+    const currentBg = resolveBg();
 
     // ==================== 0. 重置画布到底色 ====================
+    // 先 clearRect 确保完全清除（即使 bgColor 无效也不会残留上帧内容），
+    // 再用 source-over + 不透明底色 fillRect 覆盖。
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // 重置 transform 到像素级，确保 clearRect 覆盖全画布
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (currentBg) {
+      ctx.fillStyle = currentBg;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+    ctx.restore(); // 恢复调用方的 transform（scale(dpr,dpr)）
 
     // ==================== 1. 雪花噪点 ====================
     // 填充噪点 ImageData 到离屏画布，然后通过 drawImage + overlay 混合
@@ -242,5 +258,12 @@ export function startVHSAnimation(
   return () => {
     running = false;
     if (rafId) cancelAnimationFrame(rafId);
+    // 停止时清除画布，避免残留最后一帧的叠加效果
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
   };
 }

@@ -305,33 +305,41 @@ const bgCanvasRef = ref<HTMLCanvasElement | null>(null);
 let noiseStopFn: (() => void) | null = null;
 
 function updateBackground() {
-  const canvas = bgCanvasRef.value;
-  if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = window.innerWidth, h = window.innerHeight;
-  canvas.width = w * dpr; canvas.height = h * dpr;
-  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = bgColor.value;
-  ctx.fillRect(0, 0, w, h);
-  if (isIntro.value) {
-    if (noiseStopFn) noiseStopFn();
-    noiseStopFn = startVHSAnimation(ctx, w, h, bgColor.value, {
-      intensity: 0.7,
-      snow: 0.4,
-      scanlines: 0.15,
-      interference: 0.18,
-      colorBleed: 2,
-      rollingBar: true,
-      fps: 24
-    });
-  } else {
-    if (noiseStopFn) { noiseStopFn(); noiseStopFn = null; }
-    if (!isInClimax.value) drawCracks(ctx, w, h, { count: 5 + Math.floor(Math.random() * 3), opacity: 0.12, color: accentColor.value, maxDepth: 4 });
-  }
+const canvas = bgCanvasRef.value;
+if (!canvas) return;
+const dpr = window.devicePixelRatio || 1;
+const w = window.innerWidth, h = window.innerHeight;
+
+// 只在尺寸真正变化时才设置 canvas.width（设置会重置画布全部状态）
+const targetW = w * dpr, targetH = h * dpr;
+if (canvas.width !== targetW || canvas.height !== targetH) {
+canvas.width = targetW;
+canvas.height = targetH;
+canvas.style.width = w + 'px';
+canvas.style.height = h + 'px';
+}
+const ctx = canvas.getContext('2d');
+if (!ctx) return;
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // 用 setTransform 替代 scale，避免累积
+ctx.clearRect(0, 0, w, h);
+ctx.fillStyle = bgColor.value;
+ctx.fillRect(0, 0, w, h);
+if (isIntro.value) {
+// 传入 getter 函数让 VHS 每帧动态获取最新底色
+if (noiseStopFn) noiseStopFn();
+noiseStopFn = startVHSAnimation(ctx, w, h, () => bgColor.value, {
+intensity: 0.7,
+snow: 0.4,
+scanlines: 0.15,
+interference: 0.18,
+colorBleed: 2,
+rollingBar: true,
+fps: 24
+});
+} else {
+if (noiseStopFn) { noiseStopFn(); noiseStopFn = null; }
+if (!isInClimax.value) drawCracks(ctx, w, h, { count: 5 + Math.floor(Math.random() * 3), opacity: 0.12, color: accentColor.value, maxDepth: 4 });
+}
 }
 
 watch(nowIndex, () => nextTick(() => updateBackground()));
