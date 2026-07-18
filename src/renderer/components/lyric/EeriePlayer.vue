@@ -89,6 +89,35 @@ import { startNoiseAnimation } from '@/lib/noiseCanvas';
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
 import PlayerControls from './PlayerControls.vue';
 
+// ==================== 署名类歌词检测（参考 SmartMixService）====================
+const ATTRIBUTION_KEYWORDS: readonly string[] = [
+  '作词', '作曲', '编曲', '填词', '谱曲',
+  '制作人', '监制', '统筹', '企划',
+  '吉他', '贝斯', '鼓', '键盘', '钢琴', '小提琴', '大提琴', '萨克斯', '笛子', '二胡', '琵琶', '古筝',
+  '和声', '伴唱', '合唱', '童声',
+  '混音', '母带', '录音', '后期', '编曲混音',
+  '录音室', '录音棚', '混音棚',
+  '出品', '出品人', '出品方', '发行', '发行公司', '唱片公司',
+  '版权', '著作权', '制作公司', '工作室', '厂牌',
+  '感谢', '鸣谢', '致谢', '特别感谢', '献给', '谨以此歌',
+  'lyrics', 'composed', 'arranged', 'produced', 'mixed', 'mastered',
+  'guitar', 'bass', 'drums', 'keyboard', 'piano', 'violin',
+  'vocal', 'vocals', 'backing vocal', 'choir',
+  'recording', 'mixing', 'mastering',
+  'recording studio', 'mixing studio',
+  'presented by', 'released by', 'record label',
+  'copyright', 'all rights reserved',
+  'production company', 'studio', 'label',
+  'thanks to', 'acknowledgments', 'dedicated to', 'special thanks',
+  'goodbye', 'goodnight', 'thank you', 'thanks for listening', 'to be continued'
+];
+
+function isAttributionLyric(text: string): boolean {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return ATTRIBUTION_KEYWORDS.some(kw => lower.includes(kw.toLowerCase()));
+}
+
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   background: { type: String, default: '' },
@@ -145,7 +174,17 @@ const accentDark = computed(() => {
   return `rgb(${rgb.map((v: string) => Math.round(Number(v) * 0.4)).join(', ')})`;
 });
 
-const isIntro = computed(() => nowIndex.value <= 0);
+const isIntro = computed(() => {
+  // 前奏 = 第一句非署名类歌词之前
+  const idx = nowIndex.value;
+  if (idx < 0) return true;
+  // 检查当前行及之前所有行是否都是署名类
+  for (let i = 0; i <= idx && i < lrcArray.value.length; i++) {
+    const text = lrcArray.value[i]?.text || '';
+    if (!isAttributionLyric(text)) return false;
+  }
+  return true;
+});
 const bgColor = computed(() => isIntro.value ? accentDark.value : '#0a0a0a');
 
 // 配置值
@@ -191,6 +230,11 @@ const fontFamily = computed(() => {
 const climaxFontSizePx = computed(() => `${eerieClimaxFontSize.value}px`);
 
 const climaxKeywords = computed(() => styleEngine.currentLineKeywords || []);
+
+// 切歌词时同步重点词到 styleEngine
+watch(nowIndex, (idx) => {
+  styleEngine.updateCurrentLineKeywords(idx);
+}, { immediate: true });
 
 // 背景画布
 const bgCanvasRef = ref<HTMLCanvasElement | null>(null);
