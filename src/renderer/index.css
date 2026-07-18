@@ -57,6 +57,28 @@
   /* 向后兼容别名 */
   --primary-color: var(--accent-color);
   --dynamic-primary: var(--accent-color);
+
+  /* ── 桌面端表面/边框/阴影令牌 ── */
+  --d-surface: #161616;
+  --d-surface-alt: #1e1e1e;
+  --d-surface-hover: #2a2a2a;
+  --d-surface-active: #333333;
+  --d-card: #1a1a1a;
+  --d-card-hover: #222222;
+  --d-border: #2d2d2d;
+  --d-border-light: #1e1e1e;
+  --d-border-strong: #3d3d3d;
+  --d-text-primary: #f8f9fa;
+  --d-text-secondary: #adb5bd;
+  --d-text-muted: #6c757d;
+  --d-shadow-color: rgba(0, 0, 0, 0.5);
+  --d-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --d-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --d-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --d-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --d-overlay: rgba(0, 0, 0, 0.7);
+  --d-glass-bg: rgba(22, 22, 22, 0.8);
+  --d-glass-border: rgba(255, 255, 255, 0.08);
 }
 
 .theme-light {
@@ -72,6 +94,28 @@
   /* 向后兼容别名 */
   --primary-color: var(--accent-color);
   --dynamic-primary: var(--accent-color);
+
+  /* ── 桌面端表面/边框/阴影令牌 ── */
+  --d-surface: #ffffff;
+  --d-surface-alt: #f8f9fa;
+  --d-surface-hover: #f1f3f5;
+  --d-surface-active: #e9ecef;
+  --d-card: #ffffff;
+  --d-card-hover: #f8f9fa;
+  --d-border: #e9ecef;
+  --d-border-light: #f1f3f5;
+  --d-border-strong: #dee2e6;
+  --d-text-primary: #1a1a1a;
+  --d-text-secondary: #495057;
+  --d-text-muted: #868e96;
+  --d-shadow-color: rgba(0, 0, 0, 0.08);
+  --d-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --d-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --d-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --d-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.1);
+  --d-overlay: rgba(0, 0, 0, 0.5);
+  --d-glass-bg: rgba(255, 255, 255, 0.8);
+  --d-glass-border: rgba(0, 0, 0, 0.06);
 }
 
 .theme-gray {
@@ -87,6 +131,28 @@
   /* 向后兼容别名 */
   --primary-color: var(--accent-color);
   --dynamic-primary: var(--accent-color);
+
+  /* ── 桌面端表面/边框/阴影令牌（灰主题，介于明暗之间） ── */
+  --d-surface: #f1f3f5;
+  --d-surface-alt: #e9ecef;
+  --d-surface-hover: #dee2e6;
+  --d-surface-active: #ced4da;
+  --d-card: #f8f9fa;
+  --d-card-hover: #f1f3f5;
+  --d-border: #dee2e6;
+  --d-border-light: #e9ecef;
+  --d-border-strong: #ced4da;
+  --d-text-primary: #212529;
+  --d-text-secondary: #495057;
+  --d-text-muted: #868e96;
+  --d-shadow-color: rgba(0, 0, 0, 0.06);
+  --d-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --d-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --d-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.07);
+  --d-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.09);
+  --d-overlay: rgba(0, 0, 0, 0.4);
+  --d-glass-bg: rgba(248, 249, 250, 0.85);
+  --d-glass-border: rgba(0, 0, 0, 0.05);
 }
 
 :root {
@@ -108,6 +174,94 @@
   --accent-color-dark: rgb(116, 116, 116);
   --accent-color-10: rgba(136, 136, 136, 0.1);
   --accent-color-20: rgba(136, 136, 136, 0.2);
+
+  /* ═══════════════════════════════════════════════
+     桌面端设计令牌（Design Tokens）
+     主题无关的令牌：圆角 / 字体 / 动画 / z-index / 间距
+     ═══════════════════════════════════════════════ */
+
+  /* ── 圆角（与移动端 --m-radius-* 保持一致） ── */
+  --d-radius-xs: 4px;
+  --d-radius-sm: 8px;
+  --d-radius-md: 12px;
+  --d-radius-lg: 16px;
+  --d-radius-xl: 20px;
+  --d-radius-2xl: 24px;
+  --d-radius-full: 9999px;
+
+  /* ── 字体族 ── */
+  --d-font-sans: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Segoe UI', sans-serif;
+  --d-font-serif: 'Cormorant Garamond', 'Noto Serif SC', Georgia, serif;
+  --d-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* ── 字号 ── */
+  --d-text-xs: 0.75rem;    /* 12px */
+  --d-text-sm: 0.875rem;   /* 14px */
+  --d-text-base: 1rem;     /* 16px */
+  --d-text-lg: 1.125rem;   /* 18px */
+  --d-text-xl: 1.25rem;    /* 20px */
+  --d-text-2xl: 1.5rem;    /* 24px */
+  --d-text-3xl: 1.875rem;  /* 30px */
+
+  /* ── 字重 ── */
+  --d-font-normal: 400;
+  --d-font-medium: 500;
+  --d-font-semibold: 600;
+  --d-font-bold: 700;
+
+  /* ── 行高 ── */
+  --d-leading-tight: 1.25;
+  --d-leading-normal: 1.5;
+  --d-leading-relaxed: 1.75;
+
+  /* ── 动画缓动曲线（Emil Kowalski / Apple 风格） ── */
+  --d-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --d-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --d-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ── 动画时长 ── */
+  --d-duration-instant: 75ms;
+  --d-duration-fast: 125ms;
+  --d-duration-normal: 200ms;
+  --d-duration-slow: 300ms;
+  --d-duration-slower: 500ms;
+
+  /* ── z-index 层级 ── */
+  --d-z-base: 0;
+  --d-z-dropdown: 1000;
+  --d-z-sticky: 1100;
+  --d-z-fixed: 1200;
+  --d-z-modal-backdrop: 1300;
+  --d-z-modal: 1400;
+  --d-z-popover: 1500;
+  --d-z-tooltip: 1600;
+  --d-z-toast: 1700;
+  --d-z-notification: 1800;
+
+  /* ── 间距（基于 4px 基准） ── */
+  --d-space-0: 0px;
+  --d-space-1: 4px;
+  --d-space-2: 8px;
+  --d-space-3: 12px;
+  --d-space-4: 16px;
+  --d-space-5: 20px;
+  --d-space-6: 24px;
+  --d-space-8: 32px;
+  --d-space-10: 40px;
+  --d-space-12: 48px;
+  --d-space-16: 64px;
+
+  /* ── 过渡（预设组合） ── */
+  --d-transition-colors: color var(--d-duration-fast) var(--d-ease-out),
+                         background-color var(--d-duration-fast) var(--d-ease-out),
+                         border-color var(--d-duration-fast) var(--d-ease-out);
+  --d-transition-opacity: opacity var(--d-duration-fast) var(--d-ease-out);
+  --d-transition-transform: transform var(--d-duration-normal) var(--d-ease-out);
+  --d-transition-all: all var(--d-duration-normal) var(--d-ease-out);
+
+  /* ── 玻璃材质（ backdrop-filter） ── */
+  --d-glass-blur: blur(20px) saturate(180%);
 }
 
 /* PC 端：有左侧菜单，左边距为 0 */
@@ -254,4 +408,108 @@
 /* 覆盖 n-spin */
 :root .n-spin-container .n-spin-dot {
   color: var(--accent-color) !important;
+}
+
+/* ============================================================
+   桌面端设计令牌工具类
+   基于设计令牌的通用样式，减少硬编码值
+   ============================================================ */
+
+/* ── 卡片表面 ── */
+.d-card {
+  background: var(--d-card);
+  border-radius: var(--d-radius-lg);
+  box-shadow: var(--d-shadow-md);
+  transition: var(--d-transition-all);
+}
+
+.d-card-hover:hover {
+  background: var(--d-card-hover);
+  box-shadow: var(--d-shadow-lg);
+}
+
+/* ── 表面背景 ── */
+.d-surface {
+  background: var(--d-surface);
+  border-radius: var(--d-radius-md);
+}
+
+.d-surface-hover {
+  transition: var(--d-transition-colors);
+}
+
+.d-surface-hover:hover {
+  background: var(--d-surface-hover);
+}
+
+/* ── 玻璃材质（毛玻璃效果） ── */
+.d-glass {
+  background: var(--d-glass-bg);
+  backdrop-filter: var(--d-glass-blur);
+  -webkit-backdrop-filter: var(--d-glass-blur);
+  border: 1px solid var(--d-glass-border);
+}
+
+/* ── 边框 ── */
+.d-border {
+  border: 1px solid var(--d-border);
+}
+
+.d-border-light {
+  border: 1px solid var(--d-border-light);
+}
+
+.d-border-bottom {
+  border-bottom: 1px solid var(--d-border);
+}
+
+/* ── 按压反馈（桌面端，与移动端 .pressable 保持一致） ── */
+.pressable {
+  transition: transform var(--d-duration-fast) var(--d-ease-out);
+  cursor: pointer;
+}
+
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* ── 文字省略 ── */
+.d-text-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ── 文字层级 ── */
+.d-text-primary {
+  color: var(--d-text-primary);
+}
+
+.d-text-secondary {
+  color: var(--d-text-secondary);
+}
+
+.d-text-muted {
+  color: var(--d-text-muted);
+}
+
+/* ── 减少动画支持 ── */
+@media (prefers-reduced-motion: reduce) {
+  .pressable {
+    transition: opacity var(--d-duration-fast) ease;
+  }
+
+  .pressable:active {
+    transform: none;
+    opacity: 0.7;
+  }
+}
+
+/* ── 减少透明度支持 ── */
+@media (prefers-reduced-transparency: reduce) {
+  .d-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--d-surface);
+  }
 }
