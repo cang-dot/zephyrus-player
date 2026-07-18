@@ -17,6 +17,19 @@
   padding-right: var(--page-pr);
 }
 
+/* 页面背景工具类（自动适配主题） */
+.page-bg {
+  background-color: var(--bg-color, #fff);
+  color: var(--text-color, #000);
+}
+
+/* 页面内容卡片背景（自动适配主题） */
+.page-card {
+  background-color: var(--d-card, #ffffff);
+  border-radius: var(--d-radius-2xl, 1.5rem);
+  box-shadow: var(--d-shadow-md);
+}
+
 .n-image img {
   background-color: #111111;
   width: 100%;

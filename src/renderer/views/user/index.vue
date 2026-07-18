@@ -86,7 +86,7 @@
         class="relative z-20 -mt-16 px-4 pb-4 md:px-6 md:pb-6 flex-1 min-h-0"
         :class="setAnimationClass('animate__fadeIn')"
       >
-        <div class="h-full overflow-hidden rounded-3xl bg-white shadow-xl dark:bg-[#1e1e1e]">
+        <div class="h-full overflow-hidden page-card">
           <div class="grid md:grid-cols-2 h-full">
             <div
               class="flex flex-col overflow-hidden p-5 md:border-r md:border-gray-200 dark:md:border-gray-700"

@@ -8,7 +8,7 @@
             <div class="absolute inset-0 skeleton-shimmer" />
           </div>
           <div class="px-5 md:px-8 xl:px-16 -mt-8 relative z-20 max-w-7xl mx-auto">
-            <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
+            <div class="page-card overflow-hidden">
               <div class="grid grid-cols-1 md:grid-cols-2">
                 <div
                   class="p-5 md:p-6 space-y-4 border-b md:border-b-0 md:border-r border-neutral-100 dark:border-neutral-800"
@@ -124,7 +124,7 @@
 
           <!-- Two-column content -->
           <div class="px-5 md:px-8 xl:px-16 -mt-8 relative z-20 max-w-7xl mx-auto w-full pb-8">
-            <div class="rounded-3xl bg-white dark:bg-[#1e1e1e] overflow-hidden">
+            <div class="page-card overflow-hidden">
               <div class="grid grid-cols-1 md:grid-cols-2">
                 <!-- Left: Playlists -->
                 <div
