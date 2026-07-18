@@ -8,7 +8,7 @@
     </div>
   </transition>
 
-  <!-- 右上角：设置 + 模式切换 + 全屏 -->
+  <!-- 右上角：设置 + 模式切换 + 额外按钮 + 全屏 -->
   <transition name="controls-fade">
     <div v-show="visible" class="player-controls__right" :class="'theme-' + theme">
       <n-popover v-if="!hideSettings" trigger="click" placement="bottom-end" :z-index="99999" raw to="body">
@@ -27,6 +27,8 @@
       >
         <i :class="styleIcon"></i>
       </div>
+      <!-- 额外按钮插槽（如颜色反转、高潮模式等） -->
+      <slot name="extra" />
       <div class="player-controls__btn" @click="$emit('toggleFullscreen')">
         <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
       </div>
@@ -35,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 import LyricSettings from './LyricSettings.vue';
 
@@ -107,16 +109,17 @@ onUnmounted(() => {
   position: absolute;
   top: 24px;
   left: 24px;
-  z-index: 9999;
+  z-index: var(--d-z-popover, 9999);
 }
 
 .player-controls__right {
   position: absolute;
   top: 24px;
   right: 24px;
-  z-index: 9999;
+  z-index: var(--d-z-popover, 9999);
   display: flex;
-  gap: 12px;
+  gap: var(--d-space-3, 12px);
+  align-items: center;
 }
 
 .player-controls__btn {
@@ -125,11 +128,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--d-radius-full, 50%);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
+  backdrop-filter: var(--d-glass-blur, blur(8px));
+  -webkit-backdrop-filter: var(--d-glass-blur, blur(8px));
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background var(--d-duration-normal, 0.2s) var(--d-ease-out, ease),
+              transform var(--d-duration-fast, 0.125s) var(--d-ease-out, ease);
   color: #fff;
   font-size: 20px;
 }
@@ -147,12 +152,16 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.12);
 }
 
+.player-controls__btn:active {
+  transform: scale(0.95);
+}
+
 /* 过渡动画 */
 .controls-fade-enter-active,
 .controls-fade-leave-active {
   transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+    opacity var(--d-duration-slow, 0.3s) var(--d-ease-out, ease),
+    transform var(--d-duration-slow, 0.3s) var(--d-ease-out, ease);
 }
 .controls-fade-enter-from,
 .controls-fade-leave-to {

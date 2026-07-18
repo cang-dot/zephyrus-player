@@ -8,44 +8,34 @@
         @mousemove="handleMouseMove"
         @mouseleave="handleMouseLeave"
       >
-        <!-- 左上角：关闭按钮 -->
-        <transition name="ctrl-fade">
-          <div v-show="controlsVisible" class="control-left">
-            <div class="control-btn" @click="close" title="关闭">
-              <i class="ri-arrow-down-s-line"></i>
-            </div>
-          </div>
-        </transition>
-
-        <!-- 右上角：功能按钮组 -->
-        <transition name="ctrl-fade">
-          <div v-show="controlsVisible" class="control-right">
-            <n-popover trigger="click" placement="bottom-end" :z-index="99999" raw to="body">
-              <template #trigger>
-                <div class="control-btn">
-                  <i class="ri-settings-3-line"></i>
-                </div>
-              </template>
-              <lyric-settings />
-            </n-popover>
-            <div class="control-btn" @click="cyclePlayerStyle" :title="playerStyleLabel">
-              <i :class="playerStyleIcon"></i>
-            </div>
-            <div class="control-btn" @click="toggleColorInversion" title="颜色反转">
+        <!-- 通用控件（左上关闭 + 右上设置/模式切换/额外按钮/全屏） -->
+        <player-controls
+          :isFullScreen="isFullScreen"
+          :styleIcon="playerStyleIcon"
+          :styleLabel="playerStyleLabel"
+          :autoHide="true"
+          :theme="isColorInverted ? 'dark' : 'light'"
+          @close="close"
+          @cycleStyle="cyclePlayerStyle"
+          @toggleFullscreen="toggleFullScreen"
+        >
+          <template #extra>
+            <div
+              class="player-controls__btn"
+              @click="toggleColorInversion"
+              title="颜色反转"
+            >
               <i class="ri-contrast-2-line"></i>
             </div>
             <div
               v-if="climax.isInClimax.value"
-              class="control-btn climax-btn"
+              class="player-controls__btn climax-btn"
               @click="climax.cycleMode()"
             >
               <span class="climax-mode-num">{{ climax.currentMode.value }}</span>
             </div>
-            <div class="control-btn" @click="toggleFullScreen">
-              <i :class="isFullScreen ? 'ri-fullscreen-exit-line' : 'ri-fullscreen-line'"></i>
-            </div>
-          </div>
-        </transition>
+          </template>
+        </player-controls>
 
         <!-- 永久色块：乐队名 -->
         <transition name="block-enter">
@@ -186,7 +176,7 @@ import {
 import { usePlayerStore } from '@/store/modules/player';
 import { DEFAULT_LYRIC_CONFIG } from '@/types/lyric';
 
-import LyricSettings from './LyricSettings.vue';
+import PlayerControls from './PlayerControls.vue';
 
 // ==================== Props & Emits ====================
 
@@ -208,8 +198,6 @@ const isVisible = computed({
   set: (v) => emit('update:modelValue', v)
 });
 
-const controlsVisible = ref(true);
-let hideTimer: ReturnType<typeof setTimeout> | null = null;
 const isFullScreen = ref(false);
 const isColorInverted = ref(false);
 
@@ -597,34 +585,21 @@ function handleFullScreenChange() {
 }
 
 function handleMouseMove() {
-  controlsVisible.value = true;
-  resetHideTimer();
+  // PlayerControls 处理自动隐藏
 }
 
 function handleMouseLeave() {
-  resetHideTimer();
-}
-
-function resetHideTimer() {
-  if (hideTimer) clearTimeout(hideTimer);
-  hideTimer = setTimeout(() => {
-    controlsVisible.value = false;
-  }, 3000);
+  // PlayerControls 处理自动隐藏
 }
 
 // ==================== 生命周期 ====================
 
 onMounted(() => {
-  resetHideTimer();
   document.addEventListener('fullscreenchange', handleFullScreenChange);
   window.addEventListener('resize', handleResize);
 });
 
 onBeforeUnmount(() => {
-  if (hideTimer) {
-    clearTimeout(hideTimer);
-    hideTimer = null;
-  }
   document.removeEventListener('fullscreenchange', handleFullScreenChange);
   window.removeEventListener('resize', handleResize);
   climax.stopListening();
@@ -634,30 +609,25 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .typo-fade-enter-active {
-  transition: opacity 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: opacity 0.5s var(--d-ease-drawer, cubic-bezier(0.32, 0.72, 0, 1));
 }
 .typo-fade-leave-active {
-  transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: opacity 0.3s var(--d-ease-drawer, cubic-bezier(0.32, 0.72, 0, 1));
 }
 .typo-fade-enter-from,
 .typo-fade-leave-to {
   opacity: 0;
 }
 
-.ctrl-fade-enter-active {
-  transition:
-    opacity 0.4s cubic-bezier(0.32, 0.72, 0, 1),
-    transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.ctrl-fade-leave-active {
-  transition:
-    opacity 0.2s cubic-bezier(0.32, 0.72, 0, 1),
-    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.ctrl-fade-enter-from,
-.ctrl-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-16px);
+/* PlayerControls 额外按钮的高潮样式 */
+.climax-btn {
+  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3) !important;
+  border: 1px solid rgba(var(--accent-color-rgb, 136, 136, 136), 0.5);
+
+  .climax-mode-num {
+    font-size: 14px;
+    font-weight: 700;
+  }
 }
 
 .magazine-player {
@@ -675,60 +645,7 @@ onBeforeUnmount(() => {
   }
 }
 
-// ==================== 控制按钮 ====================
-
-.control-left {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  z-index: 9999;
-}
-
-.control-right {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  gap: 8px;
-}
-
-.control-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
-  color: var(--text-color);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-
-  i {
-    font-size: 18px;
-  }
-
-  &:hover {
-    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.2);
-    transform: scale(1.1);
-  }
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-.climax-btn {
-  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3);
-  border-color: rgba(var(--accent-color-rgb, 136, 136, 136), 0.5);
-
-  .climax-mode-num {
-    font-size: 14px;
-    font-weight: 700;
-  }
-}
+// ==================== 控制按钮（已由 PlayerControls 接管） ====================
 
 // ==================== 色块 ====================
 
