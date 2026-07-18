@@ -29,9 +29,9 @@ export interface NavSection {
 }
 
 interface Props {
-  /** 瀵艰埅椤瑰垪琛?*/
+  /** 导航项列表*/
   sections: NavSection[];
-  /** 褰撳墠婵€娲荤殑鍒嗙粍 ID */
+  /** 褰撳墠婵€活的分组 ID */
   currentSection: string;
 }
 

@@ -413,7 +413,7 @@ const loadSearch = async (isLoadMore = false) => {
       item.artists = item.ar;
     });
     albums.forEach((item: any) => {
-      item.type = '涓撹緫';
+      item.type = '专辑';
       item.desc = `${item.artist.name} ${item.company} ${dateFormat(item.publishTime)}`;
     });
 

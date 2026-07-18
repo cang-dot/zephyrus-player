@@ -151,7 +151,7 @@ const router = useRouter();
 const message = useMessage();
 const route = useRoute();
 
-// 鍏虫敞鍒楄〃鐩稿叧
+// 关注列表相关
 const followList = ref<IUserFollow[]>([]);
 const followOffset = ref(0);
 const followLimit = ref(30);
@@ -197,7 +197,7 @@ const checkLoginStatus = () => {
   return true;
 };
 
-// 鍔犺浇鍏虫敞鍒楄〃
+// 加载关注列表
 const loadFollowList = async () => {
   const userId = targetUserId.value || user.value?.userId;
   if (!userId) return;
@@ -215,7 +215,7 @@ const loadFollowList = async () => {
     followList.value = [...followList.value, ...newFollows];
     hasMoreFollows.value = newFollows.length >= followLimit.value;
   } catch (error) {
-    console.error('鍔犺浇鍏虫敞鍒楄〃澶辫触:', error);
+    console.error('加载关注列表失败:', error);
     message.error(t('common.loadFailed'));
   } finally {
     followListLoading.value = false;

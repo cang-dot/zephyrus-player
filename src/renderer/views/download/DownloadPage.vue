@@ -269,7 +269,7 @@
       </div>
     </n-scrollbar>
 
-    <!-- 鍒犻櫎纭瀵硅瘽妗?-->
+    <!-- 鍒犻櫎纭对话框-->
     <n-modal
       v-model:show="showDeleteConfirm"
       preset="dialog"
@@ -285,7 +285,7 @@
       @positive-click="confirmDelete"
     />
 
-    <!-- 娓呯┖纭瀵硅瘽妗?-->
+    <!-- 娓呯┖纭对话框-->
     <n-modal
       v-model:show="showClearConfirm"
       preset="dialog"
@@ -297,7 +297,7 @@
       @positive-click="clearDownloadRecords"
     />
 
-    <!-- 涓嬭浇璁剧疆鎶藉眽 -->
+    <!-- 下载设置抽屉 -->
     <n-drawer v-model:show="showSettingsDrawer" :width="400" placement="right">
       <n-drawer-content :title="t('download.settingsPanel.title')" closable>
         <div class="download-settings-content space-y-8 py-4">
@@ -544,7 +544,7 @@ const copyPath = (path: string) => {
       message.success(t('download.path.copied'));
     })
     .catch((err) => {
-      console.error('澶嶅埗澶辫触:', err);
+      console.error('复制失败:', err);
       message.error(t('download.path.copyFailed'));
     });
 };
@@ -638,17 +638,17 @@ const handlePlayMusic = async (item: DownloadedItem) => {
   }
 };
 
-// 鍒犻櫎鐩稿叧
+// 删除相关
 const showDeleteConfirm = ref(false);
 const itemToDelete = ref<DownloadedItem | null>(null);
 
-// 澶勭悊鍒犻櫎鐐瑰嚮
+// 处理删除点击
 const handleDelete = (item: DownloadedItem) => {
   itemToDelete.value = item;
   showDeleteConfirm.value = true;
 };
 
-// 纭鍒犻櫎
+// 纭删除
 const confirmDelete = async () => {
   const item = itemToDelete.value;
   if (!item) return;
@@ -673,10 +673,10 @@ const confirmDelete = async () => {
   }
 };
 
-// 娓呯┖涓嬭浇璁板綍鐩稿叧
+// 娓呯┖下载记录相关
 const showClearConfirm = ref(false);
 
-// 娓呯┖涓嬭浇璁板綍
+// 娓呯┖下载记录
 const clearDownloadRecords = async () => {
   try {
     downloadedList.value = [];
@@ -698,10 +698,10 @@ const isLoadingDownloaded = ref(false);
 const formatSongName = (songInfo) => {
   if (!songInfo) return '';
 
-  // 鑾峰彇鏍煎紡璁剧疆
+  // 获取格式设置
   const nameFormat = downloadSettings.value.nameFormat || '{songName} - {artistName}';
 
-  // 鍑嗗鏇挎崲鍙橀噺
+  // 鍑嗗替换变量
   const artistName = songInfo.ar?.map((a) => a.name).join('/') || '鏈煡鑹烘湳瀹';
   const songName = songInfo.name || songInfo.filename || '鏈煡姝屾洸';
   const albumName = songInfo.al?.name || '鏈煡涓撹緫';
@@ -715,7 +715,7 @@ const formatSongName = (songInfo) => {
 
 // 鑾峰彇宸蹭笅杞介煶涔愬垪琛
 const refreshDownloadedList = async () => {
-  if (isLoadingDownloaded.value) return; // 闃叉閲嶅鍔犺浇
+  if (isLoadingDownloaded.value) return; // 闃叉閲嶅加载
 
   try {
     isLoadingDownloaded.value = true;
@@ -729,7 +729,7 @@ const refreshDownloadedList = async () => {
 
     const songIds = list.filter((item) => item.id).map((item) => item.id);
     if (songIds.length === 0) {
-      // 澶勭悊鏄剧ず鏍煎紡鍖栨枃浠跺悕
+      // 处理显示格式化文件名
       const updatedList = list.map((item) => ({
         ...item,
         displayName: formatSongName(item) || item.filename
@@ -765,7 +765,7 @@ const refreshDownloadedList = async () => {
       localStorage.setItem('downloadedList', JSON.stringify(updatedList));
     } catch (error) {
       console.error('Failed to get music details:', error);
-      // 澶勭悊鏄剧ず鏍煎紡鍖栨枃浠跺悕
+      // 处理显示格式化文件名
       const updatedList = list.map((item) => ({
         ...item,
         displayName: formatSongName(item) || item.filename
@@ -799,11 +799,11 @@ onMounted(() => {
   // 璁板綍宸插鐞嗙殑涓嬭浇椤癸紝閬垮厤閲嶅瑙﹀彂浜嬩欢
   const processedDownloads = new Set<string>();
 
-  // 鐩戝惉涓嬭浇杩涘害
+  // 监听下载进度
   window.electron.ipcRenderer.on('music-download-progress', (_, data) => {
     const existingItem = downloadList.value.find((item) => item.filename === data.filename);
 
-    // 濡傛灉杩涘害涓?00%锛屽皢鐘舵€佽缃负宸插畬鎴
+    // 如果进度为00%锛屽皢鐘舵€佽缃负宸插畬鎴
     if (data.progress === 100) {
       data.status = 'completed';
     }
@@ -815,7 +815,7 @@ onMounted(() => {
       });
 
       // 濡傛灉涓嬭浇瀹屾垚锛屼粠鍒楄〃涓Щ闄わ紝浣嗕笉瑙﹀彂瀹屾垚閫氱煡
-      // 閫氱煡鐢?music-download-complete 浜嬩欢澶勭悊
+      // 通知由music-download-complete 事件处理
       if (data.status === 'completed') {
         downloadList.value = downloadList.value.filter((item) => item.filename !== data.filename);
       }
@@ -827,19 +827,19 @@ onMounted(() => {
     }
   });
 
-  // 鐩戝惉涓嬭浇瀹屾垚
+  // 监听下载完成
   window.electron.ipcRenderer.on('music-download-complete', async (_, data) => {
     // 濡傛灉宸茬粡澶勭悊杩囨鏂囦欢鐨勫畬鎴愪簨浠讹紝鍒欒烦杩
     if (processedDownloads.has(data.filename)) {
       return;
     }
 
-    // 鏍囪涓哄凡澶勭悊
+    // 鏍囪为已处理
     processedDownloads.add(data.filename);
 
-    // 涓嬭浇鎴愬姛澶勭悊
+    // 下载成功处理
     if (data.success) {
-      // 浠庝笅杞藉垪琛ㄤ腑绉婚櫎
+      // 从下载列表中移除
       downloadList.value = downloadList.value.filter((item) => item.filename !== data.filename);
 
       // 寤惰繜鍒锋柊宸蹭笅杞藉垪琛紝閬垮厤鏂囦欢绯荤粺鏈畬鍏ㄥ啓鍏
@@ -851,9 +851,9 @@ onMounted(() => {
       // 閬垮厤閫氱煡杩囧鍗犵敤鍐呭瓨锛岃缃竴涓秴鏃舵潵娓呯悊宸插鐞嗙殑鏍囪
       setTimeout(() => {
         processedDownloads.delete(data.filename);
-      }, 10000); // 10绉掑悗娓呴櫎
+      }, 10000); // 10秒后清除
     } else {
-      // 涓嬭浇澶辫触澶勭悊
+      // 下载失败处理
       const existingItem = downloadList.value.find((item) => item.filename === data.filename);
       if (existingItem) {
         Object.assign(existingItem, {
@@ -873,7 +873,7 @@ onMounted(() => {
     }
   });
 
-  // 鐩戝惉涓嬭浇闃熷垪
+  // 监听下载队列
   window.electron.ipcRenderer.on('music-download-queued', (_, data) => {
     const existingItem = downloadList.value.find((item) => item.filename === data.filename);
     if (!existingItem) {
@@ -890,7 +890,7 @@ onMounted(() => {
   });
 });
 
-// 涓嬭浇璁剧疆
+// 下载设置
 const showSettingsDrawer = ref(false);
 const downloadSettings = ref({
   path: '',
@@ -899,13 +899,13 @@ const downloadSettings = ref({
   saveLyric: false
 });
 
-// 鏍煎紡缁勪欢锛堢敤浜庢嫋鎷芥帓搴忥級
+// 格式组件（用于拖拽排序）
 const formatComponents = ref([
   { id: 1, type: 'songName' },
   { id: 2, type: 'artistName' }
 ]);
 
-// 澶勭悊缁勪欢鎺掑簭
+// 处理组件排序
 const handleMoveUp = (index: number) => {
   if (index > 0) {
     const temp = formatComponents.value.splice(index, 1)[0];
@@ -920,7 +920,7 @@ const handleMoveDown = (index: number) => {
   }
 };
 
-// 娣诲姞鏂扮殑鏍煎紡缁勪欢
+// 添加新的格式组件
 const addFormatComponent = (type: string) => {
   if (!formatComponents.value.some((item) => item.type === type)) {
     formatComponents.value.push({
@@ -930,12 +930,12 @@ const addFormatComponent = (type: string) => {
   }
 };
 
-// 鍒犻櫎鏍煎紡缁勪欢
+// 删除格式组件
 const removeFormatComponent = (index: number) => {
   formatComponents.value.splice(index, 1);
 };
 
-// 鐩戝惉缁勪欢鍙樺寲鏇存柊鏍煎紡
+// 监听组件变化更新格式
 watch(
   formatComponents,
   (newComponents) => {
@@ -995,7 +995,7 @@ const openDownloadPath = () => {
   }
 };
 
-// 淇濆瓨涓嬭浇璁剧疆
+// 保存下载设置
 const saveDownloadSettings = () => {
   // 淇濆瓨鍒伴厤缃
   window.electron.ipcRenderer.send(
@@ -1030,7 +1030,7 @@ const saveDownloadSettings = () => {
 
 // 鍒濆鍖栦笅杞借缃
 const initDownloadSettings = async () => {
-  // 鑾峰彇褰撳墠閰嶇疆
+  // 获取当前配置
   const path = await window.electron.ipcRenderer.invoke('get-store-value', 'set.downloadPath');
   const nameFormat = await window.electron.ipcRenderer.invoke(
     'get-store-value',
@@ -1052,10 +1052,10 @@ const initDownloadSettings = async () => {
     saveLyric: saveLyric || false
   };
 
-  // 鍒濆鍖栨帓搴忕粍浠?  updateFormatComponents();
+  // 鍒濆鍖栨帓搴忕粍从  updateFormatComponents();
 };
 
-// 鏍规嵁鏍煎紡鏇存柊缁勪欢
+// 根据格式更新组件
 const updateFormatComponents = () => {
   // 鎻愬彇鏍煎紡涓殑鍙橀噺
   const format = downloadSettings.value.nameFormat;
@@ -1075,7 +1075,7 @@ const updateFormatComponents = () => {
   }));
 };
 
-// 鐩戝惉鏍煎紡鍙樺寲鏇存柊缁勪欢
+// 监听格式变化更新组件
 watch(() => downloadSettings.value.nameFormat, updateFormatComponents);
 
 // 鐩戝惉鍛藉悕鏍煎紡鍙樺寲锛屾洿鏂板凡涓嬭浇鏂囦欢鐨勬樉绀哄悕绉
@@ -1089,7 +1089,7 @@ watch(
         displayName: formatSongName(item) || item.filename
       }));
 
-      // 淇濆瓨鍒版湰鍦板瓨鍌?      localStorage.setItem('downloadedList', JSON.stringify(downloadedList.value));
+      // 保存到本地存储      localStorage.setItem('downloadedList', JSON.stringify(downloadedList.value));
     }
   }
 );

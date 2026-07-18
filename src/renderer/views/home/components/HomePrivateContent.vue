@@ -115,7 +115,7 @@ const fetchPrivateContent = async () => {
 };
 
 const handleContentClick = (content: any) => {
-  // 鏍规嵁鍐呭绫诲瀷璺宠浆
+  // 鏍规嵁鍐呭类型跳转
   if (content.type === 'video' && content.id) {
     router.push(`/mv?id=${content.id}`);
   }
@@ -127,7 +127,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 缃戞牸 */
+/* 网格 */
 .private-content-grid {
   grid-auto-rows: auto;
 }

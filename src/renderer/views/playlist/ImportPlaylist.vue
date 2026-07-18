@@ -2,12 +2,12 @@
   <div
     class="h-full w-full bg-gray-50 dark:bg-black transition-colors duration-500 overflow-hidden flex flex-col relative"
   >
-    <!-- 鑳屾櫙瑁呴グ -->
+    <!-- 背景装饰 -->
     <div
       class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"
     ></div>
 
-    <!-- 澶撮儴鍖哄煙 -->
+    <!-- 头部区域 -->
     <div class="flex-shrink-0 z-10 page-padding pt-8 pb-4 relative">
       <div class="max-w-5xl mx-auto w-full flex items-end justify-between">
         <div>
@@ -26,10 +26,10 @@
       </div>
     </div>
 
-    <!-- 鍐呭鍖哄煙 -->
+    <!-- 鍐呭区域 -->
     <n-scrollbar class="flex-1">
       <div class="w-full max-w-5xl mx-auto p-6 pb-24">
-        <!-- 鑷畾涔?Tab 鍒囨崲 -->
+        <!-- 鑷定义Tab 切换 -->
         <div class="flex justify-center mb-8">
           <div
             class="bg-white dark:bg-white/5 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 flex gap-1 relative"
@@ -49,7 +49,7 @@
               {{ tab.label }}
             </div>
 
-            <!-- 婊戝姩鑳屾櫙 -->
+            <!-- 滑动背景 -->
             <div
               class="absolute top-1.5 bottom-1.5 bg-[var(--accent-color)] rounded-xl shadow-md transition-all duration-300 ease-out"
               :style="tabIndicatorStyle"
@@ -57,9 +57,9 @@
           </div>
         </div>
 
-        <!-- 涓诲唴瀹瑰崱鐗?-->
+        <!-- 主内容卡片-->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <!-- 宸︿晶锛氳緭鍏ュ尯鍩?-->
+          <!-- 左侧：输入区域-->
           <div class="lg:col-span-2 space-y-6">
             <div
               class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden p-1 transition-all duration-300"
@@ -106,7 +106,7 @@
                 </div>
               </div>
 
-              <!-- 鍏冩暟鎹鍏ュ唴瀹?-->
+              <!-- 鍏冩暟鎹入内容-->
               <div v-if="currentTab === 'local'" class="p-6 space-y-6 animate-fade-in">
                 <div class="space-y-3">
                   <div
@@ -151,7 +151,7 @@
               </div>
             </div>
 
-            <!-- 甯姪鎻愮ず (鏍规嵁 Tab 鍙樺寲) -->
+            <!-- 甯姪鎻愮ず (根据 Tab 变化) -->
             <div
               class="bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-5 border border-blue-100 dark:border-blue-900/20"
             >
@@ -175,9 +175,9 @@
             </div>
           </div>
 
-          <!-- 鍙充晶锛氶€夐」涓庢搷浣?-->
+          <!-- 右侧：选项与操作-->
           <div class="space-y-6">
-            <!-- 閫夐」鍗＄墖 -->
+            <!-- 选项卡片 -->
             <div
               class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6"
             >
@@ -187,7 +187,7 @@
               </h3>
 
               <div class="space-y-4">
-                <!-- 瀵煎叆鍒版槦鏍囨瓕鍗曞紑鍏?-->
+                <!-- 导入到星标歌单开关-->
                 <div
                   class="flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border-2"
                   :class="
@@ -237,7 +237,7 @@
                 </div>
               </div>
 
-              <!-- 涓绘搷浣滄寜閽?-->
+              <!-- 主操作按钮-->
               <button
                 class="w-full mt-6 py-4 rounded-2xl bg-[var(--accent-color)] text-white font-bold text-lg shadow-lg shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all duration-300 flex items-center justify-center gap-2"
                 :disabled="isImportDisabled"
@@ -253,7 +253,7 @@
               </button>
             </div>
 
-            <!-- 鐘舵€佸弽棣?-->
+            <!-- 状态反馈-->
             <div v-if="taskId" class="animate-fade-in-up">
               <div
                 class="bg-white dark:bg-neutral-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6"
@@ -330,7 +330,7 @@ import { getImportTaskStatus, importPlaylist } from '@/api/playlist';
 const { t } = useI18n();
 const message = useMessage();
 
-// Tab 閰嶇疆
+// Tab 配置
 const currentTab = ref('link');
 const tabs = computed(() => [
   { id: 'link', label: t('comp.playlist.import.linkTab'), icon: 'ri-link' },
@@ -338,25 +338,25 @@ const tabs = computed(() => [
   { id: 'local', label: t('comp.playlist.import.localTab'), icon: 'ri-file-list-3-line' }
 ]);
 
-// 璁＄畻 Tab 鎸囩ず鍣ㄤ綅缃
+// 计算 Tab 鎸囩ず鍣ㄤ綅缃
 const tabIndicatorStyle = computed(() => {
   const index = tabs.value.findIndex((tab) => tab.id === currentTab.value);
-  // 鍋囪姣忎釜 tab 瀹藉害澶ф涓€鑷达紝杩欓噷绠€鍗曡绠楃櫨鍒嗘瘮
-  // 鍦ㄧ湡瀹為」鐩腑鍙兘闇€瑕佽幏鍙?DOM 鍏冪礌瀹藉害
+  // 鍋囪每个 tab 瀹藉害澶ф涓€鑷达紝杩欓噷绠€鍗曡算百分比
+  // 鍦ㄧ湡瀹為」鐩腑鍙兘闇€要获取DOM 元素宽度
   return {
     left: `calc(${(100 / 3) * index}% + 6px)`,
     width: `calc(${100 / 3}% - 12px)`
   };
 });
 
-// 琛ㄥ崟鏁版嵁
+// 表单数据
 const linkInputs = ref([{ value: '' }]);
 const textInput = ref('');
 const localMetadata = ref([{ name: '', artist: '', album: '' }]);
 const playlistName = ref('');
 const importToStarPlaylist = ref(false);
 
-// 閾炬帴鐩稿叧鍑芥暟
+// 链接相关函数
 const addLinkRow = () => {
   linkInputs.value.push({ value: '' });
 };
@@ -374,7 +374,7 @@ const removeMetadataRow = (index: number) => {
   localMetadata.value.splice(index, 1);
 };
 
-// 楠岃瘉閫昏緫
+// 验证逻辑
 const isLinkInputValid = computed(() => linkInputs.value.some((item) => item.value.trim() !== ''));
 const isLocalMetadataValid = computed(() =>
   localMetadata.value.some((item) => item.name.trim() !== '')
@@ -388,7 +388,7 @@ const isImportDisabled = computed(() => {
   return true;
 });
 
-// 缁熶竴瀵煎叆澶勭悊
+// 统一导入处理
 const importing = ref(false);
 const taskId = ref('');
 const taskStatus = ref('');
@@ -432,7 +432,7 @@ const handleImport = async () => {
       message.error(res.data.message || t('comp.playlist.import.importFailed'));
     }
   } catch (error) {
-    console.error('瀵煎叆姝屽崟澶辫触:', error);
+    console.error('导入歌单失败:', error);
     message.error(t('comp.playlist.import.importFailed'));
   } finally {
     importing.value = false;
@@ -470,7 +470,7 @@ const checkTaskStatus = async () => {
       }
     }
   } catch (error) {
-    console.error('妫€鏌ヤ换鍔＄姸鎬佸け璐?', error);
+    console.error('妫€查任务状态失败', error);
   } finally {
     checkingStatus.value = false;
   }

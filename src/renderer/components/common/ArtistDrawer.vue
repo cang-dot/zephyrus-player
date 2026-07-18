@@ -31,7 +31,7 @@
         </div>
       </div>
 
-      <!-- 鏍囩椤靛垏鎹?-->
+      <!-- 鏍囩页切换-->
       <n-tabs v-model:value="activeTab" class="flex-1" type="line" animated>
         <n-tab-pane name="songs" :tab="t('artist.hotSongs')">
           <div ref="songListRef" class="songs-list">
@@ -66,7 +66,7 @@
                     name: album.name,
                     desc: formatPublishTime(album.publishTime),
                     size: album.size,
-                    type: '涓撹緫'
+                    type: '专辑'
                   }"
                 />
                 <div v-if="albumLoading" class="loading-more">{{ t('common.loading') }}</div>
@@ -126,7 +126,7 @@ const albums = ref<any[]>([]);
 const songLoading = ref(false);
 const albumLoading = ref(false);
 
-// 鍒嗛〉鍙傛暟
+// 分页参数
 const songPage = ref({
   page: 1,
   pageSize: 30,
@@ -157,7 +157,7 @@ const loadArtistInfo = async (id: number) => {
     if (info.data?.data?.artist) {
       artistInfo.value = info.data.data.artist;
     }
-    // 閲嶇疆鍒嗛〉骞跺姞杞藉垵濮嬫暟鎹?    resetPagination();
+    // 重置分页并加载初始数据    resetPagination();
     await Promise.all([loadSongs(), loadAlbums()]);
   } catch (error) {
     console.error('鍔犺浇姝屾墜淇℃伅澶辫触:', error);
@@ -166,7 +166,7 @@ const loadArtistInfo = async (id: number) => {
   }
 };
 
-// 閲嶇疆鍒嗛〉
+// 重置分页
 const resetPagination = () => {
   songPage.value = {
     page: 1,
@@ -182,7 +182,7 @@ const resetPagination = () => {
   albums.value = [];
 };
 
-// 鍔犺浇姝屾洸
+// 加载歌曲
 const loadSongs = async () => {
   if (!currentArtistId.value || !songPage.value.hasMore || songLoading.value) return;
 
@@ -215,13 +215,13 @@ const loadSongs = async () => {
       songPage.value.page++;
     }
   } catch (error) {
-    console.error('鍔犺浇姝屾洸澶辫触:', error);
+    console.error('加载歌曲失败:', error);
   } finally {
     songLoading.value = false;
   }
 };
 
-// 鍔犺浇涓撹緫
+// 加载专辑
 const loadAlbums = async () => {
   if (!currentArtistId.value || !albumPage.value.hasMore || albumLoading.value) return;
 
@@ -241,13 +241,13 @@ const loadAlbums = async () => {
       albumPage.value.page++;
     }
   } catch (error) {
-    console.error('鍔犺浇涓撹緫澶辫触:', error);
+    console.error('加载专辑失败:', error);
   } finally {
     albumLoading.value = false;
   }
 };
 
-// 澶勭悊婊氬姩鍔犺浇
+// 处理滚动加载
 const handleSongScroll = (e: { target: any }) => {
   const { scrollTop, scrollHeight, clientHeight } = e.target;
   if (scrollHeight - scrollTop - clientHeight < 50) {
@@ -276,7 +276,7 @@ const handlePlay = () => {
   );
 };
 
-// 鏆撮湶鏂规硶缁欑埗缁勪欢
+// 暴露方法给父组件
 defineExpose({
   loadArtistInfo
 });

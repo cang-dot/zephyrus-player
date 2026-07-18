@@ -838,34 +838,33 @@ defineExpose({
     0 24px 0 rgba(255,255,255,0.05);
 }
 
-/* 霓虹样式预览：黑色背景 + 绿色霓虹光晕 */
+/* 陈旧样式预览：老旧墙面背景 + 泛黄褪色文字 */
 .preview-neon {
-  background: #0a0a0a;
+  background: #2a2620;
   position: relative;
   overflow: hidden;
 }
 .preview-neon::before {
-  content: 'NEON';
+  content: '陈';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  color: #aaffcc;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #c9a96e;
   text-shadow:
-    0 0 4px #00ff88,
-    0 0 8px #00ff88,
-    0 0 16px #00ff88,
-    0 0 24px #00ff88;
+    0 0 2px #c9a96e88,
+    0 0 6px #5c4a2e;
 }
 .preview-neon::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,255,136,0.15) 100%);
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(201,169,110,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at center, transparent 40%, rgba(92,74,46,0.3) 100%);
 }
 
 .style-card-name {

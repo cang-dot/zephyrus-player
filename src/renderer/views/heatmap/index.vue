@@ -24,7 +24,7 @@
         </div>
 
         <div v-else-if="heatmapData.length > 0" class="heatmap-container">
-          <!-- 棰滆壊涓婚閫夋嫨鍣?-->
+          <!-- 棰滆壊涓婚选择器-->
           <div class="color-theme-selector">
             <span class="selector-label">{{ t('history.heatmap.colorTheme') }}:</span>
             <div class="color-options">
@@ -80,7 +80,7 @@
             </template>
           </n-heatmap>
 
-          <!-- 缁熻鏁版嵁灞曠ず -->
+          <!-- 缁熻数据展示 -->
           <div class="stats-cards">
             <div class="stat-card">
               <div class="stat-icon">
@@ -197,7 +197,7 @@ const formatDate = (timestamp: number): string => {
   });
 };
 
-// 鑾峰彇鎸囧畾鏃ユ湡鐨勫墠涓夊悕姝屾洸
+// 获取指定日期的前三名歌曲
 const getTopSongsForDate = (timestamp: number): DailySongPlay[] => {
   const dateKey = new Date(timestamp).toLocaleDateString('zh-CN');
   const dayData = dailyDataMap.value[dateKey];
@@ -211,7 +211,7 @@ const getTopSongsForDate = (timestamp: number): DailySongPlay[] => {
     .slice(0, 3);
 };
 
-// 澶勭悊鍘嗗彶鏁版嵁骞剁敓鎴愮儹鍔涘浘鏁版嵁
+// 处理历史数据并生成热力图数据
 const processHistoryData = () => {
   loading.value = true;
 
@@ -219,15 +219,15 @@ const processHistoryData = () => {
     const dailyMap: DailyData = {};
     const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
 
-    // 閬嶅巻闊充箰鍘嗗彶璁板綍
+    // 遍历音乐历史记录
     playHistoryStore.musicHistory.forEach((music: SongResult & { count?: number }) => {
-      // 鍋囪姣忔鎾斁閮借褰曞湪褰撳墠鏃堕棿锛屾垜浠牴鎹?count 鍒嗘暎鍒版渶杩戠殑鏃ユ湡
+      // 鍋囪姣忔鎾斁閮借褰曞湪褰撳墠鏃堕棿锛屾垜浠根据count 分散到最近的日期
       const playCount = music.count || 1;
       const now = Date.now();
 
-      // 灏嗘挱鏀捐褰曞垎鏁ｅ埌鏈€杩戝嚑澶╋紙绠€鍖栧鐞嗭級
+      // 灏嗘挱鏀捐褰曞垎鏁ｅ埌鏈€杩戝嚑澶╋紙绠€鍖栧理）
       for (let i = 0; i < playCount; i++) {
-        // 闅忔満鍒嗛厤鍒版渶杩?0澶╁唴
+        // 随机分配到最近0澶╁唴
         const randomDays = Math.floor(Math.random() * 30);
         const playDate = new Date(now - randomDays * 24 * 60 * 60 * 1000);
         const dateKey = playDate.toLocaleDateString('zh-CN');
@@ -277,7 +277,7 @@ const processHistoryData = () => {
 
     heatmapData.value = heatmapDataArray;
   } catch (error) {
-    console.error('澶勭悊鐑姏鍥炬暟鎹け璐?', error);
+    console.error('澶勭悊鐑姏鍥炬暟鎹失败', error);
   } finally {
     loading.value = false;
   }
@@ -293,7 +293,7 @@ const activeDays = computed(() => {
   return heatmapData.value.filter((item) => item.value > 0).length;
 });
 
-// 璁＄畻鎾斁鏈€澶氱殑姝屾洸
+// 璁＄畻鎾斁鏈€多的歌曲
 const mostPlayedSong = computed<{
   id: string | number;
   name: string;
@@ -358,7 +358,7 @@ const mostActiveDay = computed<{ date: string; plays: number } | null>(() => {
   return maxDay;
 });
 
-// 璁＄畻鏈€鏅氭挱鏀剧殑姝屾洸锛堝噷鏅?鐐逛箣鍓嶏級
+// 璁＄畻鏈€晚播放的歌曲（凌晨点之前）
 const latestNightSong = computed<{
   id: string | number;
   name: string;
@@ -367,7 +367,7 @@ const latestNightSong = computed<{
 } | null>(() => {
   if (playHistoryStore.musicHistory.length === 0) return null;
 
-  // 妯℃嫙涓€浜涙挱鏀炬椂闂存暟鎹紙瀹為檯搴旇浠庡巻鍙茶褰曚腑鑾峰彇锛?  // 杩欓噷绠€鍖栧鐞嗭紝闅忔満閫夋嫨涓€棣栨瓕浣滀负鍑屾櫒鎾斁
+  // 妯℃嫙涓€浜涙挱鏀炬椂闂存暟鎹紙瀹為檯搴旇浠庡巻鍙茶录中获取：  // 杩欓噷绠€鍖栧鐞嗭紝闅忔満閫夋嫨涓€棣栨瓕浣滀负鍑屾櫒鎾斁
   const nightSongs = playHistoryStore.musicHistory.filter(() => Math.random() > 0.8);
 
   if (nightSongs.length === 0 && playHistoryStore.musicHistory.length > 0) {
@@ -382,7 +382,7 @@ const latestNightSong = computed<{
       id: randomSong.id,
       name: randomSong.name || 'Unknown',
       artist: randomSong.ar?.[0]?.name || randomSong.artists?.[0]?.name || 'Unknown Artist',
-      time: `鍑屾櫒 ${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`
+      time: `凌晨 ${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`
     };
   }
 
@@ -395,7 +395,7 @@ const latestNightSong = computed<{
       id: song.id,
       name: song.name || 'Unknown',
       artist: song.ar?.[0]?.name || song.artists?.[0]?.name || 'Unknown Artist',
-      time: `鍑屾櫒 ${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`
+      time: `凌晨 ${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`
     };
   }
 

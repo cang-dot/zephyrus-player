@@ -6,7 +6,7 @@
  * 2. jieba 高频词分析 → 临时字典 → 跨歌曲计数 → 长效字典
  */
 
-import { splitLyrics } from './wordSplitter';
+import { splitLyrics, splitLyricsWithTags, isVerbOrNoun } from './wordSplitter';
 
 /** 内置情感词典 */
 const DEFAULT_EMOTIONAL_WORDS = new Set([
@@ -256,6 +256,185 @@ export function detectEmotionalWords(
   }
 
   return { fullText: text, blackText, redWords };
+}
+
+/**
+ * 获取歌词中所有情感词候选（按优先级排序）
+ *
+ * 与 detectEmotionalWords 不同，本函数返回全部候选词而非仅第一个命中。
+ * 用于高潮阶段每句歌词选择不同的词汇，避免重复。
+ *
+ * 优先级与 detectEmotionalWords 一致：
+ * 1. 临时字典多字词（含内置单字的优先）
+ * 2. 临时字典多字词（其他）
+ * 3. 内置字典
+ * 4. 长效字典多字词
+ * 5. 临时字典单字
+ * 6. 长效字典单字
+ * 7. 兜底 jieba 分词
+ *
+ * @param text - 歌词文本
+ * @param customDict - 用户自定义情感词典（可选）
+ * @returns 按优先级排序的候选词数组（已去重）
+ */
+export function getEmotionalWordCandidates(
+  text: string,
+  customDict?: string[]
+): string[] {
+  if (!text) return [];
+
+  const candidates: string[] = [];
+  const seen = new Set<string>();
+
+  /** 收集词集中所有在文本中出现的词，按出现位置排序后加入候选 */
+  function addCandidates(words: Iterable<string>, minLen = 1): void {
+    const found: Array<{ word: string; index: number }> = [];
+    for (const w of words) {
+      if (w.length < minLen) continue;
+      const idx = text.indexOf(w);
+      if (idx === -1 || seen.has(w)) continue;
+      found.push({ word: w, index: idx });
+      seen.add(w);
+    }
+    // 同一优先级内按出现位置排序，相同位置取更长的词
+    found.sort((a, b) => a.index - b.index || b.word.length - a.word.length);
+    for (const f of found) candidates.push(f.word);
+  }
+
+  // 检查词是否包含内置字典中的单字
+  const builtInSingleChars = new Set<string>();
+  for (const w of DEFAULT_EMOTIONAL_WORDS) {
+    if (w.length === 1) builtInSingleChars.add(w);
+  }
+
+  function containsBuiltInChar(word: string): boolean {
+    for (const ch of builtInSingleChars) {
+      if (word.includes(ch)) return true;
+    }
+    return false;
+  }
+
+  // 优先级1：临时字典多字词（含内置单字的优先）
+  const tempMultiWithBuiltIn = new Set<string>();
+  const tempMultiOther = new Set<string>();
+  for (const w of tempDict) {
+    if (w.length < 2) continue;
+    if (containsBuiltInChar(w)) tempMultiWithBuiltIn.add(w);
+    else tempMultiOther.add(w);
+  }
+  addCandidates(tempMultiWithBuiltIn, 2);
+  addCandidates(tempMultiOther, 2);
+
+  // 优先级2：内置字典（全部）
+  addCandidates(DEFAULT_EMOTIONAL_WORDS);
+
+  // 优先级3：长效字典多字词
+  const longTermMulti = new Set<string>();
+  for (const w of longTermDict) {
+    if (w.length >= 2) longTermMulti.add(w);
+  }
+  addCandidates(longTermMulti, 2);
+
+  // 优先级4：临时字典单字
+  const tempSingle = new Set<string>();
+  for (const w of tempDict) {
+    if (w.length === 1) tempSingle.add(w);
+  }
+  addCandidates(tempSingle);
+
+  // 优先级5：长效字典单字
+  const longTermSingle = new Set<string>();
+  for (const w of longTermDict) {
+    if (w.length === 1) longTermSingle.add(w);
+  }
+  addCandidates(longTermSingle);
+
+  // 优先级6：兜底 jieba 分词（仅当前面无候选时）
+  if (candidates.length === 0) {
+    const words = splitLyrics(text);
+    for (const w of words) {
+      if (!seen.has(w)) {
+        candidates.push(w);
+        seen.add(w);
+      }
+    }
+  }
+
+  return candidates;
+}
+
+/**
+ * 获取高潮阶段的重点词候选（优先两字以上的动词/名词）
+ *
+ * 专为诡谲模式高潮阶段设计，使用 jieba 词性标注：
+ * 1. 两字以上的动词/名词（按出现位置排序）
+ * 2. 情感词典命中的多字词
+ * 3. 两字以上的其他词（形容词、副词等）
+ * 4. 情感词典命中的单字
+ * 5. 兜底 jieba 全部分词
+ *
+ * @param text - 歌词文本
+ * @param customDict - 用户自定义情感词典（可选）
+ * @returns 按优先级排序的候选词数组（已去重）
+ */
+export function getClimaxWordCandidates(
+  text: string,
+  customDict?: string[]
+): string[] {
+  if (!text) return [];
+
+  const candidates: string[] = [];
+  const seen = new Set<string>();
+
+  function addUnique(word: string): void {
+    const w = word.trim();
+    if (w && !seen.has(w)) {
+      seen.add(w);
+      candidates.push(w);
+    }
+  }
+
+  /** 过滤标点和空白 */
+  function isMeaningful(word: string): boolean {
+    return word.length > 0 && !/[\u3000-\u303f\uff00-\uffef\s]/.test(word);
+  }
+
+  // jieba 带词性分词
+  const tagged = splitLyricsWithTags(text);
+
+  // 优先级 1：两字以上的动词/名词
+  for (const { word, tag } of tagged) {
+    if (word.length >= 2 && isMeaningful(word) && isVerbOrNoun(tag)) {
+      addUnique(word);
+    }
+  }
+
+  // 优先级 2：情感词典命中的多字词（复用现有优先级逻辑）
+  const emotionalCandidates = getEmotionalWordCandidates(text, customDict);
+  for (const w of emotionalCandidates) {
+    if (w.length >= 2) addUnique(w);
+  }
+
+  // 优先级 3：两字以上的其他词（形容词、副词等）
+  for (const { word } of tagged) {
+    if (word.length >= 2 && isMeaningful(word)) {
+      addUnique(word);
+    }
+  }
+
+  // 优先级 4：情感词典命中的单字
+  for (const w of emotionalCandidates) {
+    if (w.length < 2) addUnique(w);
+  }
+
+  // 优先级 5：兜底 jieba 全部分词（含单字）
+  if (candidates.length === 0) {
+    for (const { word } of tagged) {
+      if (isMeaningful(word)) addUnique(word);
+    }
+  }
+
+  return candidates;
 }
 
 /**

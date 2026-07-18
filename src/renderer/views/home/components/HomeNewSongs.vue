@@ -22,7 +22,7 @@
       <div v-for="i in 10" :key="i" class="h-20 skeleton-shimmer rounded-xl md:rounded-2xl" />
     </div>
 
-    <!-- Songs Grid (Even columns: 1鈫?鈫?鈫?鈫') -->
+    <!-- Songs Grid (Even columns: 1→→→鈫') -->
     <div v-else class="songs-grid grid gap-2 md:gap-3" :class="gridClass">
       <song-item
         v-for="(song, index) in songs"
@@ -67,7 +67,7 @@ const fetchSongs = async () => {
   try {
     const { data } = await getRecommendMusic({ limit: props.limit || 12 });
     if (data.code === 200) {
-      // 杞崲鏁版嵁鏍煎紡涓?SongResult
+      // 杞换数据格式为SongResult
       songs.value = data.result.slice(0, props.limit || 12).map((item: any) => ({
         ...item,
         source: 'netease',
@@ -104,7 +104,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 缃戞牸 */
+/* 网格 */
 .songs-grid {
   grid-auto-rows: auto;
 }

@@ -151,7 +151,7 @@ const parsedReleaseNotes = computed(() => {
   try {
     return marked.parse(releaseNotes) as string;
   } catch (error) {
-    console.error('Markdown 瑙ｆ瀽澶辫触:', error);
+    console.error('Markdown 解析失败:', error);
     return releaseNotes;
   }
 });
@@ -244,7 +244,7 @@ const handlePrimaryAction = async () => {
         break;
     }
   } catch (error) {
-    console.error('鎵ц鏇存柊鎿嶄綔澶辫触:', error);
+    console.error('鎵ц更新操作失败:', error);
     message.error(t('comp.update.autoUpdateFailed'));
   }
 };
@@ -258,7 +258,7 @@ const initializeUpdateState = async () => {
       await window.api.checkAppUpdate(false);
     }
   } catch (error) {
-    console.error('鍒濆鍖栨洿鏂扮姸鎬佸け璐?', error);
+    console.error('鍒濆化更新状态失败', error);
     settingsStore.setAppUpdateState(createDefaultAppUpdateState());
   }
 };

@@ -13,15 +13,16 @@
           <div v-for="np in activeNewspapers" :key="np.id" class="newspaper-item" :style="{ backgroundImage: `url(${np.src})` }"></div>
         </transition-group>
 
+        <!-- 歌词层（前奏阶段不显示歌词，只显示噪点背景） -->
         <div class="lyrics-layer">
-          <template v-if="isInClimax && climaxKeywords.length > 0">
+          <template v-if="!isIntro && isInClimax && climaxDisplayKeywords.length > 0">
             <div class="climax-keywords">
-              <span v-for="(kw, i) in climaxKeywords" :key="i" class="keyword-char" :style="{ color: accentColor, fontSize: climaxFontSizePx }">{{ kw.text }}</span>
+              <span v-for="(kw, i) in climaxDisplayKeywords" :key="i" class="keyword-char" :style="{ color: accentColor, fontSize: climaxFontSizePx, fontWeight: eerieFontWeightValue }">{{ kw.text }}</span>
             </div>
           </template>
-          <template v-else-if="currentChars.length > 0">
+          <template v-else-if="!isIntro && currentChars.length > 0">
             <div class="calligraphy-line">
-              <span v-for="(charData, i) in currentChars" :key="i" class="calligraphy-char" :style="{ fontSize: charData.size + 'px', color: accentColor, marginLeft: charData.margin + 'px', marginRight: charData.margin + 'px' }">{{ charData.char }}</span>
+              <span v-for="(charData, i) in currentChars" :key="i" class="calligraphy-char" :style="{ fontSize: charData.size + 'px', color: accentColor, marginLeft: charData.margin + 'px', marginRight: charData.margin + 'px', fontWeight: eerieFontWeightValue }">{{ charData.char }}</span>
             </div>
           </template>
           <div v-else class="lyrics-empty"></div>
@@ -71,11 +72,13 @@ import { secondToMinute } from '@/utils';
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
 import { startNoiseAnimation } from '@/lib/noiseCanvas';
+import { getClimaxWordCandidates, setCurrentSongId } from '@/utils/emotionalDetector';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
 
 // ==================== 署名类歌词检测（参考 SmartMixService）====================
 const ATTRIBUTION_KEYWORDS: readonly string[] = [
+  // 多字关键词
   '作词', '作曲', '编曲', '填词', '谱曲',
   '制作人', '监制', '统筹', '企划',
   '吉他', '贝斯', '鼓', '键盘', '钢琴', '小提琴', '大提琴', '萨克斯', '笛子', '二胡', '琵琶', '古筝',
@@ -94,7 +97,9 @@ const ATTRIBUTION_KEYWORDS: readonly string[] = [
   'copyright', 'all rights reserved',
   'production company', 'studio', 'label',
   'thanks to', 'acknowledgments', 'dedicated to', 'special thanks',
-  'goodbye', 'goodnight', 'thank you', 'thanks for listening', 'to be continued'
+  'goodbye', 'goodnight', 'thank you', 'thanks for listening', 'to be continued',
+  // 单字简写（LRC 歌词中常见的署名行格式："词：xxx"、"曲：xxx"）
+  '词', '曲', '编', '唱', '制', '监', '混', '录', '配', '奏', '伴'
 ];
 
 function isAttributionLyric(text: string): boolean {
@@ -141,6 +146,18 @@ function handleConfigUpdate() {
   loadConfig();
 }
 
+// 切歌时重新加载高潮数据 + 同步情感词检测器
+watch(
+  () => playerStore.currentSong?.id,
+  (songId) => {
+    if (songId) {
+      setCurrentSongId(String(songId));
+      styleEngine.loadClimaxData(String(songId));
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   window.addEventListener('music-full-config-updated', handleConfigUpdate);
   styleEngine.syncFromPlayerStore();
@@ -176,6 +193,10 @@ const eerieFontFamily = computed(() => (config.value as any).eerieFontFamily || 
 const eerieMaxFontSize = computed(() => (config.value as any).eerieMaxFontSize ?? 44);
 const eerieMinFontSize = computed(() => (config.value as any).eerieMinFontSize ?? 28);
 const eerieClimaxFontSize = computed(() => (config.value as any).eerieClimaxFontSize ?? 80);
+// 歌词整体缩放（50~200，对应 0.5x~2.0x）
+const eerieLyricScale = computed(() => ((config.value as any).eerieLyricScale ?? 100) / 100);
+// 字体粗细（100~900）
+const eerieFontWeightValue = computed(() => (config.value as any).eerieFontWeight ?? 700);
 
 const currentChars = computed(() => {
   const idx = nowIndex.value;
@@ -185,8 +206,9 @@ const currentChars = computed(() => {
   const chars = Array.from(text);
   const n = chars.length;
   if (n === 0) return [];
-  const maxSize = eerieMaxFontSize.value;
-  const minSize = eerieMinFontSize.value;
+  const scale = eerieLyricScale.value;
+  const maxSize = eerieMaxFontSize.value * scale;
+  const minSize = eerieMinFontSize.value * scale;
   return chars.map((char, i) => {
     const ratio = n === 1 ? 1 : 1 - Math.sin(Math.PI * (i / (n - 1)));
     const size = minSize + (maxSize - minSize) * ratio;
@@ -207,9 +229,72 @@ const fontFamily = computed(() => {
   return fallbacks[f] || `${f}, 'KaiTi', serif`;
 });
 
-const climaxFontSizePx = computed(() => `${eerieClimaxFontSize.value}px`);
+const climaxFontSizePx = computed(() => `${eerieClimaxFontSize.value * eerieLyricScale.value}px`);
 
-const climaxKeywords = computed(() => styleEngine.currentLineKeywords || []);
+// 高潮重点词：优先服务器重点词，降级到本地情感词检测（参考 FrenzyLyrics）
+// 高潮阶段强制每句选择不同的词汇，避免重复
+const climaxDisplayKeywords = ref<{ text: string }[]>([]);
+const usedClimaxKeywords = new Set<string>();
+
+function updateClimaxDisplayKeywords() {
+  // 优先服务器重点词
+  const serverKeywords = styleEngine.currentLineKeywords;
+  if (serverKeywords && serverKeywords.length > 0) {
+    climaxDisplayKeywords.value = serverKeywords.map((kw) => ({ text: kw.text }));
+    return;
+  }
+
+  // 降级到本地情感词检测：获取全部候选词，选择第一个未使用的
+  const idx = nowIndex.value;
+  if (idx < 0 || idx >= lrcArray.value.length) {
+    climaxDisplayKeywords.value = [];
+    return;
+  }
+  const text = lrcArray.value[idx]?.text || '';
+  if (!text) {
+    climaxDisplayKeywords.value = [];
+    return;
+  }
+
+  const customDict = playerStore.currentSong?.lyric?.frenzyEmotionalDict;
+  const candidates = getClimaxWordCandidates(text, customDict);
+  if (candidates.length === 0) {
+    climaxDisplayKeywords.value = [];
+    return;
+  }
+
+  // 选择第一个未使用过的候选词
+  let selected = candidates.find((c) => !usedClimaxKeywords.has(c));
+  if (!selected) {
+    // 所有候选词都已使用过，重置已使用列表并重新选择第一个
+    usedClimaxKeywords.clear();
+    selected = candidates[0];
+  }
+  usedClimaxKeywords.add(selected);
+  climaxDisplayKeywords.value = [{ text: selected }];
+}
+
+// 切歌时清空已使用列表
+watch(
+  () => playerStore.currentSong?.id,
+  () => {
+    usedClimaxKeywords.clear();
+    climaxDisplayKeywords.value = [];
+  }
+);
+
+// 高潮状态下歌词行变化时，重新选择关键词
+watch(
+  [nowIndex, isInClimax],
+  () => {
+    if (isInClimax.value) {
+      updateClimaxDisplayKeywords();
+    } else {
+      climaxDisplayKeywords.value = [];
+    }
+  },
+  { immediate: true }
+);
 
 // 切歌词时同步重点词到 styleEngine
 watch(nowIndex, (idx) => {
@@ -298,9 +383,9 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 .newspaper-item { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; mix-blend-mode: overlay; }
 .lyrics-layer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 20px; }
 .calligraphy-line { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 100%; }
-.calligraphy-char { font-family: v-bind(fontFamily); font-weight: 700; line-height: 1.1; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); transition: color 0.3s var(--m-ease-out, ease); text-shadow: 0 0 2px currentColor; }
+.calligraphy-char { font-family: v-bind(fontFamily); line-height: 1.1; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); transition: color 0.3s var(--m-ease-out, ease); text-shadow: 0 0 2px currentColor; }
 .climax-keywords { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.1em; width: 100%; }
-.keyword-char { font-family: v-bind(fontFamily); font-weight: 900; line-height: 1; text-shadow: 0 0 20px currentColor, 0 0 4px currentColor; animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate; }
+.keyword-char { font-family: v-bind(fontFamily); line-height: 1; text-shadow: 0 0 20px currentColor, 0 0 4px currentColor; animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate; }
 @keyframes keyword-pulse { to { text-shadow: 0 0 30px currentColor, 0 0 8px currentColor; } }
 .lyrics-empty { width: 1px; height: 1px; }
 

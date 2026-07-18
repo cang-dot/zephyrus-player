@@ -62,7 +62,7 @@ const closeModal = () => {
 };
 
 onMounted(async () => {
-  // 濡傛灉鏄?electron 鐜锛屼笉鏄剧ず瀹夎鎻愮ず
+  // 如果是electron 鐜锛屼笉鏄剧ず瀹夎提示
   if (isElectron) {
     return;
   }

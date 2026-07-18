@@ -222,7 +222,7 @@ const loadRadioDetail = async () => {
   }
 };
 
-// 鍔犺浇鑺傜洰鍒楄〃
+// 加载节目列表
 const loadPrograms = async (loadMore = false) => {
   if (loadMore) {
     if (loadingMore.value || !hasMore.value) return;
@@ -245,14 +245,14 @@ const loadPrograms = async (loadMore = false) => {
 
     offset.value += limit;
   } catch (error) {
-    console.error('鑾峰彇鑺傜洰鍒楄〃澶辫触:', error);
+    console.error('获取节目列表失败:', error);
   } finally {
     isLoading.value = false;
     loadingMore.value = false;
   }
 };
 
-// 鍔犺浇璁㈤槄鍒楄〃
+// 加载订阅列表
 const loadSubscribedRadios = async () => {
   if (!userStore.user) return;
   try {
@@ -260,7 +260,7 @@ const loadSubscribedRadios = async () => {
     const radios = res.data?.djRadios || [];
     subscribedRadioIds.value = new Set(radios.map((r: DjRadio) => r.id));
   } catch (error) {
-    console.error('鑾峰彇璁㈤槄鍒楄〃澶辫触:', error);
+    console.error('获取订阅列表失败:', error);
   }
 };
 
@@ -294,13 +294,13 @@ const handlePlayAll = async () => {
         playerStore.setPlay(songList[0]);
       }
     } catch (error) {
-      console.error('鑾峰彇鍏ㄩ儴鑺傜洰澶辫触:', error);
+      console.error('获取全部节目失败:', error);
       message.error(t('common.loadFailed'));
     }
   });
 };
 
-// 璁㈤槄/鍙栨秷璁㈤槄
+// 订阅/取消订阅
 const handleSubscribe = async () => {
   if (!userStore.user) {
     message.warning(t('history.needLogin'));
@@ -326,7 +326,7 @@ const handleSubscribe = async () => {
 
     message.success(isSubed ? t('podcast.unsubscribed') : t('podcast.subscribeSuccess'));
   } catch (error) {
-    console.error('璁㈤槄鎿嶄綔澶辫触:', error);
+    console.error('订阅操作失败:', error);
     message.error(isSubed ? t('podcast.unsubscribeFailed') : t('podcast.subscribeFailed'));
   }
 };

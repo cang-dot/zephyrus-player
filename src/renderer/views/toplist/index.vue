@@ -130,7 +130,7 @@ const loadToplist = async () => {
     const { data } = await getToplist();
     topList.value = data.list || [];
   } catch (error) {
-    console.error('鍔犺浇鎺掕姒滃垪琛ㄥけ璐?', error);
+    console.error('鍔犺浇鎺掕榜列表失败', error);
   } finally {
     loading.value = false;
   }

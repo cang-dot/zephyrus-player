@@ -12,7 +12,7 @@
     class="mini-song-item"
     ref="baseItem"
   >
-    <!-- 閫夋嫨妗嗘彃妲?-->
+    <!-- 选择框插槽-->
     <template #select>
       <div v-if="baseItem && selectable" class="song-item-select" @click.stop="onToggleSelect">
         <n-checkbox :checked="selected" />
@@ -125,7 +125,7 @@ const playLoading = computed(() => baseItem.value?.playLoading || false);
 const isFavorite = computed(() => baseItem.value?.isFavorite || false);
 const artists = computed(() => baseItem.value?.artists || []);
 
-// 鍖呰鏂规硶锛岄伩鍏嶇洿鎺ヨ闂彲鑳戒负undefined鐨剅ef
+// 鍖呰鏂规硶锛岄伩鍏嶇洿鎺ヨ闂彲鑳戒负undefined的ref
 const onToggleSelect = () => {
   baseItem.value?.toggleSelect();
   emit('select', props.item.id, !props.selected);

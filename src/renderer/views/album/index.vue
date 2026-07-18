@@ -173,7 +173,7 @@ const loadList = async (area: string, isLoadMore = false) => {
     hasMore.value = albums.length === TOTAL_ITEMS;
     page.value++;
   } catch (error) {
-    console.error('鍔犺浇涓撹緫鍒楄〃澶辫触:', error);
+    console.error('加载专辑列表失败:', error);
   } finally {
     loading.value = false;
     isLoadingMore.value = false;

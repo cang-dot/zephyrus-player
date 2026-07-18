@@ -151,7 +151,7 @@ const router = useRouter();
 const message = useMessage();
 const route = useRoute();
 
-// 绮変笣鍒楄〃鐩稿叧
+// 粉丝列表相关
 const followerList = ref<IUserFollow[]>([]);
 const followerOffset = ref(0);
 const followerLimit = ref(30);
@@ -195,7 +195,7 @@ const checkLoginStatus = () => {
   return true;
 };
 
-// 鍔犺浇绮変笣鍒楄〃
+// 加载粉丝列表
 const loadFollowerList = async () => {
   const userId = targetUserId.value || user.value?.userId;
   if (!userId) return;
@@ -213,7 +213,7 @@ const loadFollowerList = async () => {
     followerList.value = [...followerList.value, ...newFollowers];
     hasMoreFollowers.value = newFollowers.length >= followerLimit.value;
   } catch (error) {
-    console.error('鍔犺浇绮変笣鍒楄〃澶辫触:', error);
+    console.error('加载粉丝列表失败:', error);
     message.error(t('common.loadFailed'));
   } finally {
     followerListLoading.value = false;

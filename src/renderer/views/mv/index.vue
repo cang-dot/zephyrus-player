@@ -127,14 +127,14 @@ const hasMore = ref(true);
 const pageRef = ref();
 
 const categories = computed(() => [
-  { label: t('comp.pages.mv.area.all'), value: '鍏ㄩ儴' },
-  { label: t('comp.pages.mv.area.mainland'), value: '鍐呭湴' },
+  { label: t('comp.pages.mv.area.all'), value: '全部' },
+  { label: t('comp.pages.mv.area.mainland'), value: '内地' },
   { label: t('comp.pages.mv.area.hktw'), value: '娓彴' },
   { label: t('comp.pages.mv.area.western'), value: '娆х編' },
-  { label: t('comp.pages.mv.area.japan'), value: '鏃ユ湰' },
+  { label: t('comp.pages.mv.area.japan'), value: '日本' },
   { label: t('comp.pages.mv.area.korea'), value: '闊╁浗' }
 ]);
-const selectedCategory = ref('鍏ㄩ儴');
+const selectedCategory = ref('全部');
 
 const router = useRouter();
 const route = useRoute();
@@ -154,7 +154,7 @@ watch(
   () => route.query,
   async (newParams) => {
     if (route.path !== '/mv') return;
-    const newArea = (newParams.area as string) || '鍏ㄩ儴';
+    const newArea = (newParams.area as string) || '全部';
     if (newArea !== selectedCategory.value) {
       selectedCategory.value = newArea;
     }
@@ -162,7 +162,7 @@ watch(
 );
 
 onMounted(async () => {
-  selectedCategory.value = (route.query.area as string) || '鍏ㄩ儴';
+  selectedCategory.value = (route.query.area as string) || '全部';
   await loadMvList();
 });
 
@@ -202,7 +202,7 @@ const playNextMv = async (setLoading: (value: boolean) => void) => {
       showMv.value = false;
     }
   } catch (error) {
-    console.error('鍔犺浇鏇村MV澶辫触:', error);
+    console.error('鍔犺浇鏇村MV失败:', error);
     showMv.value = false;
   } finally {
     setLoading(false);
@@ -221,11 +221,11 @@ const loadMvList = async () => {
     const params = {
       limit: limit.value,
       offset: offset.value,
-      area: selectedCategory.value === '鍏ㄩ儴' ? '' : selectedCategory.value
+      area: selectedCategory.value === '全部' ? '' : selectedCategory.value
     };
 
     const res =
-      selectedCategory.value === '鍏ㄩ儴' ? await getTopMv(params) : await getAllMv(params);
+      selectedCategory.value === '全部' ? await getTopMv(params) : await getAllMv(params);
 
     const { data } = res.data;
     mvList.value.push(...data);

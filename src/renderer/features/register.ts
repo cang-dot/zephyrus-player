@@ -52,9 +52,9 @@ export function registerBuiltinFeatures() {
 
   registerFeature({
     id: 'neon-style',
-    name: '霓虹样式',
-    description: '歌词拆笔画霓虹灯管效果+水泥墙背景',
-    icon: 'ri-lightbulb-flash-line',
+    name: '陈旧样式',
+    description: '歌词拆笔画陈旧褪色效果+老旧墙面背景',
+    icon: 'ri-time-line',
     type: 'playerStyle'
   });
 }

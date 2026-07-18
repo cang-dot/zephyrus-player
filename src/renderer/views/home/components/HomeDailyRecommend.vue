@@ -47,12 +47,12 @@
       >
         <!-- Cover Container -->
         <div class="cover-wrapper relative aspect-square">
-          <!-- 鑳屾櫙灞?-->
+          <!-- 背景层-->
           <div
             class="cover-bg absolute inset-0 rounded-2xl md:rounded-3xl bg-neutral-100 dark:bg-neutral-800 transition-shadow duration-300 group-hover:shadow-2xl"
           />
 
-          <!-- 鍥剧墖灞?-->
+          <!-- 图片层-->
           <div class="cover-container absolute inset-0 overflow-hidden rounded-2xl md:rounded-3xl">
             <img
               :src="getImgUrl(song.album?.picUrl || song.al?.picUrl, '500y500')"
@@ -195,12 +195,12 @@ const playAll = async () => {
 </script>
 
 <style scoped>
-/* 缃戞牸 */
+/* 网格 */
 .songs-grid {
   grid-auto-rows: auto;
 }
 
-/* 纭繚鍦嗚鍦ㄤ换浣曟儏鍐典笅閮戒繚鎸佷笉鍙?*/
+/* 纭繚鍦嗚在任何情况下都保持不变*/
 .cover-wrapper {
   will-change: transform;
   transform: translateZ(0);

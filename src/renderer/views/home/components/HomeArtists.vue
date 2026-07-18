@@ -90,7 +90,7 @@ const fetchArtists = async () => {
   try {
     const { data } = await getHotSinger({ offset: 0, limit: props.limit || 10 });
     if (data.code === 200) {
-      // 寮哄埗闄愬埗鏁伴噺锛岀‘淇濅笉瓒呰繃 limit
+      // 寮哄埗闄愬埗鏁伴噺锛岀‘保不超过 limit
       artists.value = data.artists.slice(0, props.limit || 10);
     }
   } catch (error) {
@@ -141,7 +141,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 浼樺寲姘村钩婊氬姩 */
+/* 优化水平滚动 */
 .artists-scroll {
   /* Hide scrollbar while maintaining functionality */
   scrollbar-width: none;

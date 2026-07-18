@@ -1,6 +1,6 @@
 <template>
   <div class="history-recommend-page">
-    <!-- 澶撮儴鏍囬鍜屾搷浣滄寜閽?-->
+    <!-- 澶撮儴鏍囬和操作按钮-->
     <div class="music-header h-12 flex items-center justify-between">
       <n-ellipsis :line-clamp="1" class="flex-shrink-0 mr-3">
         <div class="music-title">
@@ -8,7 +8,7 @@
         </div>
       </n-ellipsis>
 
-      <!-- 鎿嶄綔鎸夐挳缁?-->
+      <!-- 操作按钮组-->
       <div class="flex-grow flex-1 flex items-center justify-end gap-2">
         <n-tooltip placement="bottom" trigger="hover">
           <template #trigger>
@@ -28,7 +28,7 @@
           {{ t('comp.musicList.addToPlaylist') }}
         </n-tooltip>
 
-        <!-- 甯冨眬鍒囨崲鎸夐挳 -->
+        <!-- 布局切换按钮 -->
         <div class="layout-toggle" v-if="!isMobile">
           <n-tooltip placement="bottom" trigger="hover">
             <template #trigger>
@@ -70,11 +70,11 @@
     <!-- 姝屾洸鍒楄〃鍐呭 -->
     <div class="music-content">
       <n-spin :show="loadingDates || loadingSongs">
-        <!-- 姝屾洸鍒楄〃 -->
+        <!-- 歌曲列表 -->
         <div v-if="songs.length > 0" class="music-list-container">
           <div class="music-list">
             <div class="music-list-content">
-              <!-- 浣跨敤铏氭嫙鍒楄〃 -->
+              <!-- 使用虚拟列表 -->
               <n-virtual-list
                 class="song-virtual-list"
                 style="max-height: calc(100vh - 200px)"
@@ -101,7 +101,7 @@
           </div>
         </div>
 
-        <!-- 绌虹姸鎬?-->
+        <!-- 空状态-->
         <div v-else-if="!loadingSongs && selectedDate" class="empty-state">
           <i class="icon iconfont ri-disc-line"></i>
           <p>{{ t('comp.musicList.noSongs') }}</p>
@@ -159,7 +159,7 @@ const formatDate = (dateStr: string) => {
     return t('common.yesterday');
   }
 
-  // 鏍煎紡鍖栦负 MM鏈圖D鏃
+  // 格式化为 MM月DD鏃
   const month = date.getMonth() + 1;
   const day = date.getDate();
   return `${month}月${day}日`;
@@ -193,14 +193,14 @@ const fetchAvailableDates = async () => {
       }
     }
   } catch (error) {
-    console.error('鑾峰彇鍘嗗彶鏃ユ帹鏃ユ湡鍒楄〃澶辫触:', error);
+    console.error('获取历史日推日期列表失败:', error);
     message.error(t('comp.musicList.fetchDatesFailed'));
   } finally {
     loadingDates.value = false;
   }
 };
 
-// 鏍规嵁鏃ユ湡鑾峰彇姝屾洸鍒楄〃
+// 根据日期获取歌曲列表
 const fetchSongsByDate = async (date: string) => {
   try {
     loadingSongs.value = true;
@@ -211,7 +211,7 @@ const fetchSongsByDate = async (date: string) => {
       songs.value = [];
     }
   } catch (error) {
-    console.error('鑾峰彇鍘嗗彶鏃ユ帹姝屾洸澶辫触:', error);
+    console.error('获取历史日推歌曲失败:', error);
     message.error(t('comp.musicList.fetchSongsFailed'));
     songs.value = [];
   } finally {
@@ -219,13 +219,13 @@ const fetchSongsByDate = async (date: string) => {
   }
 };
 
-// 澶勭悊鏃ユ湡鍙樺寲
+// 处理日期变化
 const handleDateChange = async (date: string) => {
   selectedDate.value = date;
   await fetchSongsByDate(date);
 };
 
-// 鍒囨崲甯冨眬
+// 切换布局
 const toggleLayout = () => {
   isCompactLayout.value = !isCompactLayout.value;
   localStorage.setItem('musicListLayout', isCompactLayout.value ? 'compact' : 'normal');
@@ -238,7 +238,7 @@ const addToPlaylist = () => {
   // 鑾峰彇褰撳墠鎾斁鍒楄〃
   const currentList = playerStore.playList;
 
-  // 娣诲姞姝屾洸鍒版挱鏀惧垪琛?閬垮厤閲嶅娣诲姞)
+  // 添加歌曲到播放列表閬垮厤閲嶅添加)
   const newSongs = songs.value.filter((song) => !currentList.some((item) => item.id === song.id));
 
   if (newSongs.length === 0) {
@@ -253,7 +253,7 @@ const addToPlaylist = () => {
   message.success(t('comp.musicList.addToPlaylistSuccess', { count: newSongs.length }));
 };
 
-// 鎾斁鍗曢姝屾洸
+// 鎾斁鍗曢歌曲
 const handlePlay = () => {
   if (songs.value.length === 0) return;
   playerStore.setPlayList(songs.value.map(formatSong));
@@ -322,7 +322,7 @@ onMounted(() => {
   }
 }
 
-/* 铏氭嫙鍒楄〃鏍峰紡 */
+/* 虚拟列表样式 */
 .song-virtual-list {
   @apply w-full;
   :deep(.n-virtual-list__scroll) {

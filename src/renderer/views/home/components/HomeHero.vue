@@ -35,7 +35,7 @@
 
       <!-- Hero Cards -->
       <div class="hero-grid grid gap-3">
-        <!-- ===== 姣忔棩鎺ㄨ崘 (Left - Large Card) ===== -->
+        <!-- ===== 每日推荐 (Left - Large Card) ===== -->
         <div class="hero-card" :style="{ animationDelay: '0.12s' }">
           <!-- Card -->
           <div
@@ -104,7 +104,7 @@
           </div>
         </div>
 
-        <!-- ===== 宸茬櫥褰? 绉佷汉FM (Full Width) ===== -->
+        <!-- ===== 已登录 私人FM (Full Width) ===== -->
         <div v-if="isLoggedIn" class="hero-card" :style="{ animationDelay: '0.22s' }">
           <div
             class="fm-card fm-card--expanded group relative cursor-pointer overflow-hidden rounded-2xl shadow-sm transition-all duration-300 ease-out hover:shadow-xl"
@@ -246,7 +246,7 @@
           </div>
         </div>
 
-        <!-- ===== 鏈櫥褰? 鎺ㄨ崘姝屽崟 (Right Card) ===== -->
+        <!-- ===== 鏈登录 推荐歌单 (Right Card) ===== -->
         <div
           v-if="!isLoggedIn"
           class="hero-card group cursor-pointer"
@@ -348,7 +348,7 @@ const { primaryColor } = useCoverColor();
 
 const loading = ref(false);
 
-// FM state 鈥?current + preloaded next (YesPlayMusic pattern)
+// FM state —current + preloaded next (YesPlayMusic pattern)
 const fmCurrentSong = ref<any>(null);
 const fmNextSong = ref<any>(null);
 const fmLoading = ref(false);
@@ -550,7 +550,7 @@ const handleFmPlay = async () => {
   }
 };
 
-/** Next FM track 鈥?promote preloaded, fetch new one in background */
+/** Next FM track —promote preloaded, fetch new one in background */
 const handleFmNext = async () => {
   if (fmLoading.value) return;
   if (fmNextSong.value) {
@@ -563,7 +563,7 @@ const handleFmNext = async () => {
   await handleFmPlay();
 };
 
-/** Trash/dislike current FM song 鈥?call API then skip to next */
+/** Trash/dislike current FM song —call API then skip to next */
 const handleFmTrash = async () => {
   const song = fmCurrentSong.value;
   if (!song) return;

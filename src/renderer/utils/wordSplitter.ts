@@ -5,6 +5,14 @@
  * 用于粗粝模式和狂躁模式的文字动画
  */
 
+/** 带词性标注的分词结果 */
+export interface TaggedWord {
+  /** 词语 */
+  word: string;
+  /** jieba 词性标签（如 n/v/vn/a/d 等），降级时为 'x' */
+  tag: string;
+}
+
 let jiebaReady = false;
 let jiebaModule: any = null;
 
@@ -43,7 +51,29 @@ function splitWithJieba(text: string): string[] {
 }
 
 /**
- * 使用 Intl.Segmenter 分词（浏览器原生）
+ * 使用 jieba 分词（带词性标注）
+ *
+ * jieba-wasm 的 tag 方法返回 { word, tag } 数组
+ * 词性标签参考：n=名词 v=动词 vn=动名词 a=形容词 d=副词 等
+ */
+function splitWithJiebaTagged(text: string): TaggedWord[] {
+  if (!jiebaReady || !jiebaModule) return [];
+
+  try {
+    if (typeof jiebaModule.tag === 'function') {
+      const result = jiebaModule.tag(text) as Array<{ word: string; tag: string }>;
+      return result
+        .filter((item) => item.word && item.word.trim().length > 0)
+        .map((item) => ({ word: item.word.trim(), tag: item.tag || 'x' }));
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+/**
+ * 使用 Intl.Segmenter 分词（浏览器原生，无词性）
  */
 function splitWithSegmenter(text: string): string[] {
   try {
@@ -133,3 +163,38 @@ export function getWordByWordGroups(lyricLine: any): Array<{ text: string; start
 
 // 初始化 jieba
 initJieba();
+
+/**
+ * 分割歌词文本（带词性标注）
+ *
+ * 优先使用 jieba 的 tag 方法，降级到无词性的 splitLyrics
+ *
+ * @param text - 歌词文本
+ * @returns 带词性标注的分词结果数组
+ */
+export function splitLyricsWithTags(text: string): TaggedWord[] {
+  if (!text) return [];
+
+  // 尝试 jieba tag
+  const jiebaTagged = splitWithJiebaTagged(text);
+  if (jiebaTagged.length > 0) {
+    return jiebaTagged;
+  }
+
+  // 降级：使用 splitLyrics，标记为未知词性
+  return splitLyrics(text).map((word) => ({ word, tag: 'x' }));
+}
+
+/**
+ * 判断词性是否为动词或名词
+ *
+ * jieba 词性标签：
+ * - 名词类：n, nr, ns, nt, nz, nl, ng
+ * - 动词类：v, vn, vi, vl, vg, vd, vx, vshi, vyou
+ *
+ * @param tag - jieba 词性标签
+ * @returns 是否为动词或名词
+ */
+export function isVerbOrNoun(tag: string): boolean {
+  return /^(n|v)/i.test(tag);
+}

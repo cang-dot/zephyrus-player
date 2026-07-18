@@ -11,11 +11,11 @@
         type="primary"
         size="small"
         text
-        title="涓嬭浇搴旂敤"
+        title="下载应用"
         @click="openDownloadPage"
       >
         <i class="ri-download-line"></i>
-        涓嬭浇妗岄潰鐗?
+        下载桌面版
       </n-button>
       <template v-if="isElectron">
         <div

@@ -5,7 +5,7 @@ import settings from './settings.json';
 
 export default registerStyle({
   key: 'neon',
-  label: '霓虹',
+  label: '陈旧',
   component: NeonPlayer,
   isFullScreen: true,
   theme: 'dark',

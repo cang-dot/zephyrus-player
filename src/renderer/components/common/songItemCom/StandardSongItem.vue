@@ -12,7 +12,7 @@
     class="standard-song-item"
     ref="baseItem"
   >
-    <!-- 閫夋嫨妗嗘彃妲?-->
+    <!-- 选择框插槽-->
     <template #select>
       <div v-if="baseItem && selectable" class="song-item-select" @click.stop="onToggleSelect">
         <n-checkbox :checked="selected" />
@@ -130,14 +130,14 @@ const props = withDefaults(
 const emit = defineEmits(['play', 'select', 'remove-song']);
 const baseItem = ref<InstanceType<typeof BaseSongItem>>();
 
-// 浠巔layerStore鍜宐aseItem鑾峰彇鍝嶅簲寮忕姸鎬
+// 从playerStore和baseItem鑾峰彇鍝嶅簲寮忕姸鎬
 const play = computed(() => playerStore.isPlay);
 const isPlaying = computed(() => baseItem.value?.isPlaying || false);
 const playLoading = computed(() => baseItem.value?.playLoading || false);
 const isFavorite = computed(() => baseItem.value?.isFavorite || false);
 const artists = computed(() => baseItem.value?.artists || []);
 
-// 鍖呰鏂规硶锛岄伩鍏嶇洿鎺ヨ闂彲鑳戒负undefined鐨剅ef
+// 鍖呰鏂规硶锛岄伩鍏嶇洿鎺ヨ闂彲鑳戒负undefined的ref
 const onToggleSelect = () => {
   baseItem.value?.toggleSelect();
 };

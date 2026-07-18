@@ -30,7 +30,7 @@
 
       <!-- Item Size Badge (for Album) -->
       <div
-        v-if="item.type === '涓撹緫' && item.size"
+        v-if="item.type === '专辑' && item.size"
         class="absolute top-2 right-2 flex items-center gap-1 rounded-lg bg-black/40 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       >
         <i class="ri-music-2-line" />
@@ -98,7 +98,7 @@ const getCurrentMv = () => {
 };
 
 const handleClick = async () => {
-  if (props.item.type === '涓撹緫') {
+  if (props.item.type === '专辑') {
     navigateToMusicList(router, {
       id: props.item.id,
       type: 'album',

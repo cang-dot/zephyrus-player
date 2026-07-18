@@ -108,13 +108,13 @@ const searchStore = useSearchStore();
 
 const searchHistory = ref<Array<{ keyword: string; type: number }>>([]);
 
-// 浠?localStorage 鍔犺浇鎼滅储鍘嗗彶
+// 从localStorage 加载搜索历史
 const loadSearchHistory = () => {
   const history = localStorage.getItem('searchHistory');
   searchHistory.value = history ? JSON.parse(history) : [];
 };
 
-// 淇濆瓨鎼滅储鍘嗗彶
+// 保存搜索历史
 const saveSearchHistory = (keyword: string, type: number) => {
   if (!keyword) return;
   const history = searchHistory.value;
@@ -130,13 +130,13 @@ const saveSearchHistory = (keyword: string, type: number) => {
   localStorage.setItem('searchHistory', JSON.stringify(history));
 };
 
-// 娓呯┖鎼滅储鍘嗗彶
+// 娓呯┖搜索历史
 const clearSearchHistory = () => {
   searchHistory.value = [];
   localStorage.removeItem('searchHistory');
 };
 
-// 鍒犻櫎鍗曟潯鍘嗗彶
+// 删除单条历史
 const handleCloseSearchHistory = (item: { keyword: string; type: number }) => {
   searchHistory.value = searchHistory.value.filter((h) => h.keyword !== item.keyword);
   localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value));
