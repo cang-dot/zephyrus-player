@@ -16,7 +16,7 @@
         <div class="lyrics-layer">
           <template v-if="isInClimax && climaxKeywords.length > 0">
             <div class="climax-keywords">
-              <span v-for="(kw, i) in climaxKeywords" :key="i" class="keyword-char" :style="{ color: accentColor, fontSize: 'clamp(48px, 14vw, 120px)' }">{{ kw.text }}</span>
+              <span v-for="(kw, i) in climaxKeywords" :key="i" class="keyword-char" :style="{ color: accentColor, fontSize: climaxFontSizePx }">{{ kw.text }}</span>
             </div>
           </template>
           <template v-else-if="currentChars.length > 0">
@@ -70,6 +70,7 @@ import { secondToMinute } from '@/utils';
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
 import { startNoiseAnimation } from '@/lib/noiseCanvas';
+import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
 
@@ -101,6 +102,18 @@ const accentDark = computed(() => {
 const isIntro = computed(() => nowIndex.value <= 0);
 const bgColor = computed(() => isIntro.value ? accentDark.value : '#0a0a0a');
 
+// 读取配置
+function readEerieConfig() {
+  const ctx = useStyleContext();
+  return {
+    fontFamily: ctx.getConfigValue('eerieFontFamily') || 'KaiTi',
+    maxFontSize: ctx.getConfigValue('eerieMaxFontSize') ?? 44,
+    minFontSize: ctx.getConfigValue('eerieMinFontSize') ?? 28,
+    climaxFontSize: ctx.getConfigValue('eerieClimaxFontSize') ?? 80,
+  };
+}
+const eerieConfig = computed(() => readEerieConfig());
+
 const currentChars = computed(() => {
   const idx = nowIndex.value;
   if (idx < 0 || idx >= lrcArray.value.length) return [];
@@ -109,12 +122,30 @@ const currentChars = computed(() => {
   const chars = Array.from(text);
   const n = chars.length;
   if (n === 0) return [];
-  const maxSize = 44, minSize = 16;
+  const cfg = eerieConfig.value;
+  const maxSize = cfg.maxFontSize;
+  const minSize = cfg.minFontSize;
   return chars.map((char, i) => {
     const ratio = n === 1 ? 1 : Math.sin(Math.PI * (i / (n - 1)));
-    return { char, size: minSize + (maxSize - minSize) * ratio, margin: -(minSize + (maxSize - minSize) * ratio) * 0.1 };
+    const size = minSize + (maxSize - minSize) * ratio;
+    return { char, size, margin: -size * 0.08 };
   });
 });
+
+const fontFamily = computed(() => {
+  const f = eerieConfig.value.fontFamily;
+  const fallbacks: Record<string, string> = {
+    'KaiTi': "'KaiTi', 'STKaiti', 'Noto Serif SC', serif",
+    'STKaiti': "'STKaiti', 'KaiTi', 'Noto Serif SC', serif",
+    'FangSong': "'FangSong', 'STFangsong', 'Noto Serif SC', serif",
+    'SimSun': "'SimSun', 'STSong', serif",
+    'LiSu': "'LiSu', 'STLiti', serif",
+    'YouYuan': "'YouYuan', 'STXihei', sans-serif",
+  };
+  return fallbacks[f] || `${f}, 'KaiTi', serif`;
+});
+
+const climaxFontSizePx = computed(() => `${eerieConfig.value.climaxFontSize}px`);
 
 const climaxKeywords = computed(() => styleEngine.currentLineKeywords || []);
 
@@ -200,9 +231,9 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 .newspaper-item { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; mix-blend-mode: overlay; }
 .lyrics-layer { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 20px; }
 .calligraphy-line { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 100%; }
-.calligraphy-char { font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif; font-weight: 700; line-height: 1.1; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); transition: color 0.3s var(--m-ease-out, ease); text-shadow: 0 0 2px currentColor; }
+.calligraphy-char { font-family: v-bind(fontFamily); font-weight: 700; line-height: 1.1; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); transition: color 0.3s var(--m-ease-out, ease); text-shadow: 0 0 2px currentColor; }
 .climax-keywords { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.1em; width: 100%; }
-.keyword-char { font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif; font-weight: 900; line-height: 1; text-shadow: 0 0 20px currentColor, 0 0 4px currentColor; animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate; }
+.keyword-char { font-family: v-bind(fontFamily); font-weight: 900; line-height: 1; text-shadow: 0 0 20px currentColor, 0 0 4px currentColor; animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate; }
 @keyframes keyword-pulse { to { text-shadow: 0 0 30px currentColor, 0 0 8px currentColor; } }
 .lyrics-empty { width: 1px; height: 1px; }
 

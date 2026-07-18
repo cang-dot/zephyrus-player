@@ -1,1 +1,8 @@
-[]
+[
+  { "key": "eerieFontFamily", "type": "font", "label": "书法字体", "default": "KaiTi" },
+  { "type": "divider" },
+  { "key": "eerieMaxFontSize", "type": "slider", "label": "两端字号", "min": 24, "max": 80, "step": 2, "marks": ["小", "大"], "default": 48 },
+  { "key": "eerieMinFontSize", "type": "slider", "label": "中间字号", "min": 16, "max": 60, "step": 2, "marks": ["小", "大"], "default": 32 },
+  { "type": "divider" },
+  { "key": "eerieClimaxFontSize", "type": "slider", "label": "高潮重点词字号", "min": 40, "max": 160, "step": 4, "marks": ["小", "大"], "default": 100 }
+]

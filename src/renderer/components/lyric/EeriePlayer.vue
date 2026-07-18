@@ -32,7 +32,7 @@
                 v-for="(kw, i) in climaxKeywords"
                 :key="i"
                 class="keyword-char"
-                :style="{ color: accentColor, fontSize: 'clamp(60px, 12vw, 140px)' }"
+                :style="{ color: accentColor, fontSize: climaxFontSizePx }"
               >{{ kw.text }}</span>
             </div>
           </template>
@@ -84,6 +84,7 @@ import { useStyleEngineStore } from '@/store/modules/styleEngine';
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
 import { startNoiseAnimation } from '@/lib/noiseCanvas';
+import { useStyleContext } from '@/playerStyles/useStyleContext';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
 import PlayerControls from './PlayerControls.vue';
@@ -115,7 +116,19 @@ const accentDark = computed(() => {
 const isIntro = computed(() => nowIndex.value <= 0);
 const bgColor = computed(() => isIntro.value ? accentDark.value : '#0a0a0a');
 
-// 哑铃型字号
+// 读取配置
+function readEerieConfig() {
+  const ctx = useStyleContext();
+  return {
+    fontFamily: ctx.getConfigValue('eerieFontFamily') || 'KaiTi',
+    maxFontSize: ctx.getConfigValue('eerieMaxFontSize') ?? 48,
+    minFontSize: ctx.getConfigValue('eerieMinFontSize') ?? 32,
+    climaxFontSize: ctx.getConfigValue('eerieClimaxFontSize') ?? 100,
+  };
+}
+const eerieConfig = computed(() => readEerieConfig());
+
+// 哑铃型字号：两端大中间小，差距可控
 const currentChars = computed(() => {
   const idx = nowIndex.value;
   if (idx < 0 || idx >= lrcArray.value.length) return [];
@@ -124,12 +137,34 @@ const currentChars = computed(() => {
   const chars = Array.from(text);
   const n = chars.length;
   if (n === 0) return [];
-  const maxSize = 52, minSize = 20;
+  const cfg = eerieConfig.value;
+  const maxSize = cfg.maxFontSize;
+  const minSize = cfg.minFontSize;
   return chars.map((char, i) => {
+    // 哑铃型：两端大中间小，使用平滑的 sin 曲线
     const ratio = n === 1 ? 1 : Math.sin(Math.PI * (i / (n - 1)));
-    return { char, size: minSize + (maxSize - minSize) * ratio, margin: -(minSize + (maxSize - minSize) * ratio) * 0.1 };
+    const size = minSize + (maxSize - minSize) * ratio;
+    return { char, size, margin: -size * 0.08 };
   });
 });
+
+// 字体族
+const fontFamily = computed(() => {
+  const f = eerieConfig.value.fontFamily;
+  // 常见书法字体回退链
+  const fallbacks: Record<string, string> = {
+    'KaiTi': "'KaiTi', 'STKaiti', 'Noto Serif SC', serif",
+    'STKaiti': "'STKaiti', 'KaiTi', 'Noto Serif SC', serif",
+    'FangSong': "'FangSong', 'STFangsong', 'Noto Serif SC', serif",
+    'SimSun': "'SimSun', 'STSong', serif",
+    'LiSu': "'LiSu', 'STLiti', serif",
+    'YouYuan': "'YouYuan', 'STXihei', sans-serif",
+  };
+  return fallbacks[f] || `${f}, 'KaiTi', serif`;
+});
+
+// 高潮重点词字号
+const climaxFontSizePx = computed(() => `${eerieConfig.value.climaxFontSize}px`);
 
 const climaxKeywords = computed(() => styleEngine.currentLineKeywords || []);
 
@@ -229,7 +264,7 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 
 .calligraphy-line { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 100%; }
 .calligraphy-char {
-  font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+  font-family: v-bind(fontFamily);
   font-weight: 700; line-height: 1.1;
   filter: drop-shadow(0 0 1px rgba(0,0,0,0.5));
   transition: color 0.3s var(--m-ease-out, ease);
@@ -238,7 +273,7 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 
 .climax-keywords { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.1em; width: 100%; }
 .keyword-char {
-  font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+  font-family: v-bind(fontFamily);
   font-weight: 900; line-height: 1;
   text-shadow: 0 0 20px currentColor, 0 0 4px currentColor;
   animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate;
