@@ -1,11 +1,12 @@
 <template>
-  <transition name="eerie-fade">
-    <div
-      v-if="isVisible"
-      class="eerie-mobile-player"
-      :style="{ '--accent-color': accentColor, '--accent-dark': accentDark, '--bg-color': bgColor }"
-      @click="handleTapToggle"
-    >
+  <teleport to="body">
+    <transition name="eerie-fade">
+      <div
+        v-if="isVisible"
+        class="eerie-mobile-player"
+        :style="{ '--accent-color': accentColor, '--accent-dark': accentDark, '--bg-color': bgColor }"
+        @click="handleTapToggle"
+      >
         <canvas ref="bgCanvasRef" class="bg-canvas"></canvas>
 
         <transition-group name="newspaper-flash" tag="div" class="newspaper-layer">
@@ -26,32 +27,51 @@
           <div v-else class="lyrics-empty"></div>
         </div>
 
-        <!-- 通用顶部控件 -->
-        <player-controls
-          v-if="!overlayMode"
-          v-show="controlsVisible"
-          :showStyleSwitch="false"
-          theme="light"
-          class="no-toggle"
-          @close="close"
-        />
+        <!-- 顶部控件（tap 弹出） -->
+        <transition name="ctrl-fade">
+          <div v-show="controlsVisible" class="top-controls no-toggle">
+            <div class="ctrl-btn" @click="close"><i class="ri-arrow-down-s-line"></i></div>
+            <div style="flex:1"></div>
+            <div class="ctrl-btn" @click="cycleStyle"><i class="ri-shuffle-line"></i></div>
+          </div>
+        </transition>
+
+        <!-- 底部控件（tap 弹出） -->
+        <transition name="ctrl-fade">
+          <div v-show="controlsVisible" class="bottom-controls no-toggle">
+            <div class="progress-row">
+              <span class="time-text">{{ formatTime(currentTime) }}</span>
+              <div class="progress-bar-bg" @click="handleSeek">
+                <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
+              </div>
+              <span class="time-text">{{ formatTime(duration) }}</span>
+            </div>
+            <div class="control-buttons">
+              <div class="ctrl-btn" @click="handlePrev"><i class="ri-skip-back-fill"></i></div>
+              <div class="ctrl-btn play-btn" @click="handlePlayPause"><i :class="isPlaying ? 'ri-pause-fill' : 'ri-play-fill'"></i></div>
+              <div class="ctrl-btn" @click="handleNext"><i class="ri-skip-forward-fill"></i></div>
+            </div>
+          </div>
+        </transition>
       </div>
     </transition>
+  </teleport>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 
-import { lrcArray, nowIndex } from '@/hooks/MusicHook';
+import { lrcArray, nowIndex, playMusic } from '@/hooks/MusicHook';
 import { useCoverColor } from '@/hooks/useCoverColor';
+import { usePlayerStore } from '@/store/modules/player';
 import { useStyleEngineStore } from '@/store/modules/styleEngine';
+import { secondToMinute } from '@/utils';
 
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
 import { startNoiseAnimation } from '@/lib/noiseCanvas';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
-import PlayerControls from './PlayerControls.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -60,11 +80,16 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
+const playerStore = usePlayerStore();
 const styleEngine = useStyleEngineStore();
 const { primaryColor } = useCoverColor();
 const { controlsVisible, handleTapToggle } = useTapToggle();
 
 const isVisible = computed({ get: () => props.modelValue, set: (v) => emit('update:modelValue', v) });
+const isPlaying = computed(() => playerStore.isPlay);
+const currentTime = computed(() => playerStore.playingTime || 0);
+const duration = computed(() => (playMusic.value?.dt || playMusic.value?.duration || 0) / 1000);
+const progressPercent = computed(() => duration.value ? (currentTime.value / duration.value) * 100 : 0);
 const isInClimax = computed(() => styleEngine.isInClimax);
 
 const accentColor = computed(() => primaryColor.value || '#888888');
@@ -154,11 +179,22 @@ watch(nowIndex, () => {
 });
 
 function close() { isVisible.value = false; }
+function handlePrev() { playerStore.prevPlay(); }
+function handleNext() { playerStore.nextPlay(); }
+function handlePlayPause() { playerStore.setPlay(playMusic.value); }
+function handleSeek(e: MouseEvent) {
+  const target = e.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  playerStore.setPlayTime(((e.clientX - rect.left) / rect.width) * duration.value);
+}
+function cycleStyle() { window.dispatchEvent(new CustomEvent('music-full-config-updated')); }
+function formatTime(s: number): string { return secondToMinute(s); }
+
 onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); });
 </script>
 
 <style lang="scss" scoped>
-.eerie-mobile-player { position: absolute; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-color); }
+.eerie-mobile-player { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-color); }
 .bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
 .newspaper-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .newspaper-item { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; mix-blend-mode: overlay; }
@@ -169,8 +205,29 @@ onBeforeUnmount(() => { if (noiseStopFn) noiseStopFn(); stopClimaxNewspapers(); 
 .keyword-char { font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif; font-weight: 900; line-height: 1; text-shadow: 0 0 20px currentColor, 0 0 4px currentColor; animation: keyword-pulse 0.8s var(--m-ease-out, ease) infinite alternate; }
 @keyframes keyword-pulse { to { text-shadow: 0 0 30px currentColor, 0 0 8px currentColor; } }
 .lyrics-empty { width: 1px; height: 1px; }
+
+.top-controls { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; padding: calc(var(--safe-area-inset-top, 0px) + 16px) 20px 0; z-index: 10;
+  .ctrl-btn { @apply flex items-center justify-center w-10 h-10 rounded-full text-xl; color: #f0ece4; background: rgba(255,255,255,0.08); cursor: pointer; transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out); &:active { transform: scale(0.97); } }
+}
+.bottom-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 24px calc(var(--safe-area-inset-bottom, 0px) + 32px); z-index: 10; }
+.progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  .time-text { font-size: 12px; color: #666; flex-shrink: 0; min-width: 36px; }
+  .progress-bar-bg { flex: 1; height: 2px; background: #333; border-radius: 1px; position: relative; cursor: pointer;
+    .progress-bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent-color); border-radius: 1px; transition: width 0.1s linear; }
+  }
+}
+.control-buttons { display: flex; align-items: center; justify-content: center; gap: 16px;
+  .ctrl-btn { @apply flex items-center justify-center rounded-full cursor-pointer; background: #444; width: 42px; height: 42px; transition: transform var(--m-duration-press, 160ms) var(--m-ease-out, ease-out);
+    i { font-size: 18px; color: #f0ece4; }
+    &:active { transform: scale(0.97); }
+    &.play-btn { width: 52px; height: 52px; background: var(--accent-color); i { font-size: 24px; color: #fff; } }
+  }
+}
+
 .eerie-fade-enter-active, .eerie-fade-leave-active { transition: opacity 0.3s var(--m-ease-out, ease); }
 .eerie-fade-enter-from, .eerie-fade-leave-to { opacity: 0; }
+.ctrl-fade-enter-active, .ctrl-fade-leave-active { transition: opacity 0.2s var(--m-ease-out, ease); }
+.ctrl-fade-enter-from, .ctrl-fade-leave-to { opacity: 0; }
 .newspaper-flash-enter-active { transition: opacity 0.15s ease; }
 .newspaper-flash-leave-active { transition: opacity 0.15s ease; }
 .newspaper-flash-enter-from, .newspaper-flash-leave-to { opacity: 0; }
