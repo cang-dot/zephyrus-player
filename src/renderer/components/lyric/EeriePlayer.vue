@@ -88,7 +88,7 @@ import { DEFAULT_LYRIC_CONFIG, type LyricConfig } from '@/types/lyric';
 
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
-import { startNoiseAnimation } from '@/lib/noiseCanvas';
+import { startVHSAnimation } from '@/lib/vhsEffect';
 import { getClimaxWordCandidates, setCurrentSongId } from '@/utils/emotionalDetector';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
@@ -100,7 +100,7 @@ const ATTRIBUTION_KEYWORDS: readonly string[] = [
   '作词', '作曲', '编曲', '填词', '谱曲',
   '制作人', '监制', '统筹', '企划',
   '吉他', '贝斯', '鼓', '键盘', '钢琴', '小提琴', '大提琴', '萨克斯', '笛子', '二胡', '琵琶', '古筝',
-  '和声', '伴唱', '合唱', '童声',
+  '和声', '伴唱', '合唱', '童声','人声',
   '混音', '母带', '录音', '后期', '编曲混音',
   '录音室', '录音棚', '混音棚',
   '出品', '出品人', '出品方', '发行', '发行公司', '唱片公司',
@@ -344,7 +344,15 @@ function updateBackground() {
 
   if (isIntro.value) {
     if (noiseStopFn) noiseStopFn();
-    noiseStopFn = startNoiseAnimation(ctx, w, h, 0.15, 12);
+    noiseStopFn = startVHSAnimation(ctx, w, h, bgColor.value, {
+      intensity: 0.7,
+      snow: 0.4,
+      scanlines: 0.15,
+      interference: 0.18,
+      colorBleed: 2,
+      rollingBar: true,
+      fps: 24
+    });
   } else {
     if (noiseStopFn) { noiseStopFn(); noiseStopFn = null; }
     if (!isInClimax.value) {

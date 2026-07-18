@@ -71,7 +71,7 @@ import { secondToMinute } from '@/utils';
 
 import { useTapToggle } from '@/composables/useTapToggle';
 import { drawCracks } from '@/lib/crackRenderer';
-import { startNoiseAnimation } from '@/lib/noiseCanvas';
+import { startVHSAnimation } from '@/lib/vhsEffect';
 import { getClimaxWordCandidates, setCurrentSongId } from '@/utils/emotionalDetector';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
@@ -319,7 +319,15 @@ function updateBackground() {
   ctx.fillRect(0, 0, w, h);
   if (isIntro.value) {
     if (noiseStopFn) noiseStopFn();
-    noiseStopFn = startNoiseAnimation(ctx, w, h, 0.15, 12);
+    noiseStopFn = startVHSAnimation(ctx, w, h, bgColor.value, {
+      intensity: 0.7,
+      snow: 0.4,
+      scanlines: 0.15,
+      interference: 0.18,
+      colorBleed: 2,
+      rollingBar: true,
+      fps: 24
+    });
   } else {
     if (noiseStopFn) { noiseStopFn(); noiseStopFn = null; }
     if (!isInClimax.value) drawCracks(ctx, w, h, { count: 5 + Math.floor(Math.random() * 3), opacity: 0.12, color: accentColor.value, maxDepth: 4 });

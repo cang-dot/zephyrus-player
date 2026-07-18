@@ -881,7 +881,7 @@ onBeforeUnmount(() => {
 .climax-track,
 .fp-climax {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 4px;
@@ -909,6 +909,12 @@ onBeforeUnmount(() => {
   @apply bg-light dark:bg-dark shadow-2xl shadow-gray-300;
   z-index: 9999;
   animation-duration: 0.5s !important;
+  transition: box-shadow 0.4s ease;
+
+  // Content children (excluding progress bar) have fade transition
+  > *:not(.music-time) {
+    transition: opacity 0.4s ease;
+  }
 
   // Transparent background when full player is open
   &.play-bar-opcity {
@@ -936,17 +942,20 @@ onBeforeUnmount(() => {
     }
   }
 
-  // Auto-collapse: fade out instead of shrinking height
-  &.play-bar-collapsed {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.4s ease;
-  }
-
+  // Auto-collapse: fade out content but keep progress bar visible
+  &.play-bar-collapsed,
   &.play-bar-fade-out {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.4s ease;
+    pointer-events: none;
+    box-shadow: none;
+
+    > *:not(.music-time) {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .music-time {
+      pointer-events: auto;
+    }
   }
 
   .music-content {
@@ -1061,20 +1070,27 @@ onBeforeUnmount(() => {
 }
 
 // Full mode slider overrides
-.music-time .n-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0;
-  border-radius: 0;
-}
+// Extended hit area: container is 16px tall, rail sits at bottom 4px,
+// the 12px padding above clears the OS-level window resize zone.
 .music-time {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 16px;
   z-index: 5;
+  pointer-events: none;
+}
+.music-time .n-slider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  padding: 12px 0 0 0;
+  box-sizing: border-box;
+  border-radius: 0;
+  pointer-events: auto;
 }
 
 .custom-slider {
@@ -1100,6 +1116,11 @@ onBeforeUnmount(() => {
   }
   :deep(.n-slider-handle .n-slider-tooltip) {
     display: none !important;
+  }
+
+  // Align handle vertically with the bottom rail (extended hit area)
+  &.music-time :deep(.n-slider-handle-wrapper) {
+    top: calc(100% - var(--n-rail-height, 4px) / 2) !important;
   }
 }
 
@@ -1128,6 +1149,7 @@ onBeforeUnmount(() => {
     width 0.35s cubic-bezier(0.2, 0, 0.1, 1),
     box-shadow 0.3s ease,
     background 0.2s ease,
+    opacity 0.4s ease,
     left 0s,
     right 0s;
 
