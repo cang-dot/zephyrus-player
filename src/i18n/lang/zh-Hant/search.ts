@@ -28,5 +28,17 @@ export default {
   },
   history: '搜尋歷史',
   hot: '熱門搜尋',
-  suggestions: '搜尋建議'
+  suggestions: '搜尋建議',
+  filter: {
+    source: '來源篩選',
+    all: '全部',
+    probing: '探測來源中',
+    probeProgress: '探測來源 {done}/{total}',
+    noSource: '無可用來源'
+  },
+  crossSearch: {
+    loading: '正在跨平台搜尋...',
+    results: '跨平台補充結果',
+    failed: '跨平台搜尋失敗'
+  }
 };

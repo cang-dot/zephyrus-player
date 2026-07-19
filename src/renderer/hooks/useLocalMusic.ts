@@ -20,11 +20,13 @@ const getMessage = () => {
 };
 
 /**
- * 判断是否为本地歌曲
- */
+* 判断是否为本地歌曲
+*/
 export function isLocalSong(song: SongResult | null | undefined): boolean {
-  if (!song) return false;
-  return song.playMusicUrl?.startsWith('local://') || typeof song.id === 'string';
+if (!song) return false;
+// 跨平台歌曲（非网易云）不是本地歌曲
+if (song.platform && song.platform !== 'netease') return false;
+return song.playMusicUrl?.startsWith('local://') || typeof song.id === 'string';
 }
 
 /**

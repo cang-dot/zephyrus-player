@@ -35,5 +35,10 @@ export default {
     probing: 'Probing sources',
     probeProgress: 'Probing {done}/{total}',
     noSource: 'No source available'
+  },
+  crossSearch: {
+    loading: 'Searching across platforms...',
+    results: 'Cross-platform results',
+    failed: 'Cross-platform search failed'
   }
 };

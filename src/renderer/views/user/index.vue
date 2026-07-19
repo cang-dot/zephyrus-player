@@ -4,7 +4,7 @@
       <div class="flex-1 flex flex-col gap-4 p-4">
         <div class="rounded-2xl skeleton-shimmer" style="height: 200px" />
         <div class="grid md:grid-cols-2 gap-4">
-          <div class="rounded-2xl bg-light-200 p-4 dark:bg-dark-100 space-y-4">
+          <div class="rounded-2xl p-4 space-y-4" style="background: var(--d-surface-alt)">
             <div class="h-8 w-32 skeleton-shimmer rounded-lg" />
             <div v-for="i in 4" :key="i" class="flex gap-3">
               <div class="h-[50px] w-[50px] skeleton-shimmer rounded-xl flex-shrink-0" />
@@ -14,7 +14,7 @@
               </div>
             </div>
           </div>
-          <div class="rounded-2xl bg-light-200 p-4 dark:bg-dark-100 space-y-4">
+          <div class="rounded-2xl p-4 space-y-4" style="background: var(--d-surface-alt)">
             <div class="h-8 w-32 skeleton-shimmer rounded-lg" />
             <div v-for="i in 5" :key="i" class="flex items-center gap-3">
               <div class="h-10 w-10 skeleton-shimmer rounded-full flex-shrink-0" />
@@ -89,7 +89,8 @@
         <div class="h-full overflow-hidden page-card">
           <div class="grid md:grid-cols-2 h-full">
             <div
-              class="flex flex-col overflow-hidden p-5 md:border-r md:border-gray-200 dark:md:border-gray-700"
+              class="flex flex-col overflow-hidden p-5 md:border-r"
+              style="border-color: var(--d-border)"
             >
               <div class="tab-container mb-4 flex-shrink-0">
                 <n-tabs v-model:value="currentTab" type="segment" animated>
@@ -97,15 +98,16 @@
                 </n-tabs>
               </div>
               <div class="flex-1 overflow-y-auto min-h-0">
-                <div
-                  v-if="albumLoading && currentTab === 'album'"
-                  class="flex h-32 items-center justify-center"
-                >
-                  <n-spin size="medium" />
-                </div>
+                <!-- 平台账号 Tab -->
+                <PlatformAccounts v-if="currentTab === 'platforms'" />
+                <template v-else-if="currentTab === 'album' && albumLoading">
+                  <div class="flex h-32 items-center justify-center">
+                    <n-spin size="medium" />
+                  </div>
+                </template>
                 <div
                   v-else-if="currentTab === 'album' && currentList.length === 0"
-                  class="flex h-32 items-center justify-center text-gray-400 dark:text-gray-500"
+                  class="flex h-32 items-center justify-center d-text-muted"
                 >
                   {{ t('user.album.empty') || '暂无收藏的专辑' }}
                 </div>
@@ -113,14 +115,14 @@
                   <button
                     v-if="isElectron && currentTab === 'created'"
                     @click="goToImportPlaylist"
-                    class="flex w-full cursor-pointer items-center gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-white/5"
+                    class="import-btn flex w-full cursor-pointer items-center gap-3 rounded-[var(--d-radius-lg)] p-3"
                   >
                     <div
-                      class="flex h-[50px] w-[50px] items-center justify-center rounded-xl bg-gray-100 text-2xl dark:bg-white/10"
+                      class="flex h-[50px] w-[50px] items-center justify-center rounded-[var(--d-radius-lg)] text-2xl import-btn-icon"
                     >
                       <i class="icon iconfont ri-add-line" />
                     </div>
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <div class="text-sm font-medium d-text-secondary">
                       {{ t('comp.playlist.import.button') }}
                     </div>
                   </button>
@@ -128,19 +130,19 @@
                     v-for="(item, index) in currentList"
                     :key="index"
                     @click="handleItemClick(item)"
-                    class="flex cursor-pointer items-center gap-3 rounded-xl p-2.5 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-white/5"
+                    class="list-item-card flex cursor-pointer items-center gap-3 rounded-[var(--d-radius-lg)] p-2.5"
                   >
                     <n-image
                       :src="getImgUrl(getCoverUrl(item), '50y50')"
-                      class="h-[50px] w-[50px] flex-shrink-0 overflow-hidden rounded-xl"
+                      class="h-[50px] w-[50px] flex-shrink-0 overflow-hidden rounded-[var(--d-radius-lg)]"
                       lazy
                       preview-disabled
                     />
                     <div class="min-w-0 flex-1">
-                      <div class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                      <div class="truncate text-sm font-medium d-text-primary">
                         {{ item.name }}
                       </div>
-                      <div class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                      <div class="mt-0.5 truncate text-xs d-text-secondary">
                         {{ getItemDescription(item) }}
                       </div>
                     </div>
@@ -150,55 +152,51 @@
               </div>
             </div>
             <div class="flex flex-col overflow-hidden p-5">
-              <div class="mb-4 flex-shrink-0 text-lg font-bold text-gray-900 dark:text-white">
+              <div class="mb-4 flex-shrink-0 text-lg font-bold d-text-primary">
                 {{ t('user.ranking.title') }}
               </div>
               <div class="flex-1 overflow-y-auto min-h-0">
                 <div
                   v-for="(item, index) in recordList"
                   :key="item.id"
-                  class="group flex items-center gap-3 rounded-xl p-2 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-white/5"
+                  class="record-item group flex items-center gap-3 rounded-[var(--d-radius-lg)] p-2"
                 >
                   <div
-                    class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-gray-500 dark:text-gray-400"
+                    class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold d-text-muted"
                   >
                     {{ index + 1 }}
                   </div>
                   <n-image
                     :src="getImgUrl(item.picUrl || item.al?.picUrl, '40y40')"
-                    class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl"
+                    class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-[var(--d-radius-lg)]"
                     lazy
                     preview-disabled
                   />
                   <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                    <div class="truncate text-sm font-medium d-text-primary">
                       {{ item.name }}
                     </div>
-                    <div class="truncate text-xs text-gray-500 dark:text-gray-400">
+                    <div class="truncate text-xs d-text-secondary">
                       {{ getArtistNames(item) }}
                     </div>
                   </div>
                   <button
                     @click.stop="toggleFavorite(item)"
-                    class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-lg opacity-0 transition-colors duration-200 group-hover:opacity-100"
-                    :class="
-                      isFavorited(item.id)
-                        ? 'text-red-500 opacity-100'
-                        : 'text-gray-400 hover:text-red-400'
-                    "
+                    class="record-action flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-lg opacity-0"
+                    :class="{ 'is-favorited': isFavorited(item.id) }"
                   >
                     <i :class="isFavorited(item.id) ? 'ri-heart-3-fill' : 'ri-heart-3-line'" />
                   </button>
                   <button
                     @click.stop="handlePlayRecord(item)"
-                    class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-400 opacity-0 transition-colors duration-200 hover:text-[var(--accent-color)] group-hover:opacity-100"
+                    class="record-action record-play-btn flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full opacity-0"
                   >
                     <i class="ri-play-fill text-lg" />
                   </button>
                 </div>
                 <div
                   v-if="!recordList || recordList.length === 0"
-                  class="flex h-32 items-center justify-center text-gray-400 dark:text-gray-500"
+                  class="flex h-32 items-center justify-center d-text-muted"
                 >
                   {{ t('user.ranking.empty') || '暂无听歌记录' }}
                 </div>
@@ -236,6 +234,7 @@ import { useRouter } from 'vue-router';
 import { getUserAlbumSublist, getUserDetail, getUserPlaylist, getUserRecord } from '@/api/user';
 import { navigateToMusicList } from '@/components/common/MusicListNavigator';
 import PlayBottom from '@/components/common/PlayBottom.vue';
+import PlatformAccounts from '@/components/user/PlatformAccounts.vue';
 import { usePlayerStore } from '@/store/modules/player';
 import { useUserStore } from '@/store/modules/user';
 import { getImgUrl, isElectron, isMobile, setAnimationClass } from '@/utils';
@@ -259,7 +258,8 @@ const message = useMessage();
 const tabs = [
   { key: 'created', label: 'user.tabs.created' },
   { key: 'favorite', label: 'user.tabs.favorite' },
-  { key: 'album', label: 'user.tabs.album' }
+  { key: 'album', label: 'user.tabs.album' },
+  { key: 'platforms', label: 'user.tabs.platforms' }
 ];
 const currentTab = ref('created');
 
@@ -488,7 +488,8 @@ const currentLoginType = computed(() => userStore.loginType);
 }
 
 .login-type {
-  @apply text-sm text-[var(--accent-color)] dark:text-[var(--accent-color)];
+  @apply text-sm;
+  color: var(--accent-color);
 }
 
 .mobile {
@@ -506,5 +507,58 @@ const currentLoginType = computed(() => userStore.loginType);
   .n-tabs-capsule {
     @apply rounded-xl !important;
   }
+}
+
+/* 导入按钮 */
+.import-btn {
+  transition: var(--d-transition-colors);
+}
+
+.import-btn:hover {
+  background: var(--d-surface-hover);
+}
+
+.import-btn-icon {
+  background: var(--d-surface-alt);
+}
+
+/* 列表项卡片 */
+.list-item-card {
+  transition: var(--d-transition-colors);
+}
+
+.list-item-card:hover {
+  background: var(--d-surface-hover);
+}
+
+/* 排行榜列表项 */
+.record-item {
+  transition: var(--d-transition-colors);
+}
+
+.record-item:hover {
+  background: var(--d-surface-hover);
+
+  .record-action {
+    opacity: 1;
+  }
+}
+
+.record-action {
+  transition: var(--d-transition-colors);
+  color: var(--d-text-muted);
+}
+
+.record-action.is-favorited {
+  color: #ef4444;
+  opacity: 1;
+}
+
+.record-action:not(.is-favorited):hover {
+  color: #f87171;
+}
+
+.record-play-btn:hover {
+  color: var(--accent-color);
 }
 </style>

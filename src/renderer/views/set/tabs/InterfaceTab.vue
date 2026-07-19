@@ -59,7 +59,7 @@
     title="播放器样式"
     description="选择全屏播放界面的视觉样式"
   >
-    <setting-item title="播放器样式" description="默认 / 舞台 / 杂志 / 狂躁">
+    <setting-item title="播放器样式" :description="playerStyleDesc">
       <s-select
         :model-value="currentPlayerStyle"
         :options="playerStyleOptions"
@@ -355,6 +355,7 @@ import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { usePlayerStore } from '@/store/modules/player';
+import { getAllStyles } from '@/playerStyles';
 import {
   getLocalLyricMap,
   getLocalLyricPath,
@@ -389,12 +390,13 @@ const overlayCollapseDelay = computed({
 // ==================== 播放器样式 ====================
 const currentPlayerStyle = ref('default');
 
-const playerStyleOptions = computed(() => [
-  { label: '默认', value: 'default' },
-  { label: '舞台', value: 'stage' },
-  { label: '杂志', value: 'magazine' },
-  { label: '狂躁', value: 'frenzy' }
-]);
+const playerStyleOptions = computed(() =>
+  getAllStyles().map(s => ({ label: s.label, value: s.key }))
+);
+
+const playerStyleDesc = computed(() =>
+  getAllStyles().map(s => s.label).join(' / ')
+);
 
 // 从 localStorage 加载当前播放器样式
 function loadPlayerStyle() {

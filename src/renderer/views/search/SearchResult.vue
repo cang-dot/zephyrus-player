@@ -1,6 +1,6 @@
 <template>
   <div
-    class="search-result-page h-full w-full bg-white dark:bg-black transition-colors duration-500"
+    class="search-result-page h-full w-full page-bg transition-colors duration-500"
   >
     <n-scrollbar class="h-full" @scroll="handleScroll">
       <div class="search-result-content pb-32">
@@ -10,11 +10,11 @@
             <div>
               <h1
                 ref="titleElRef"
-                class="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 dark:text-white mb-1"
+                class="d-page-title mb-1"
               >
                 {{ currentKeyword }}
               </h1>
-              <p class="text-neutral-500 dark:text-neutral-400">
+              <p class="d-page-subtitle">
                 {{ t('search.title.searchList') }}
               </p>
             </div>
@@ -24,12 +24,8 @@
               <button
                 v-for="type in searchTypeOptions"
                 :key="type.key"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
-                :class="
-                  searchType === type.key
-                    ? 'bg-[var(--accent-color)] text-white shadow-lg shadow-primary/25'
-                    : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
-                "
+                class="d-chip"
+                :class="{ 'd-chip-active': searchType === type.key }"
                 @click="handleTypeChange(type.key)"
               >
                 {{ type.label }}
@@ -41,19 +37,15 @@
               v-if="searchType === SEARCH_TYPE.MUSIC && searchDetail?.songs?.length"
               class="flex items-center gap-2 flex-wrap"
             >
-              <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0">
+              <span class="text-xs d-text-muted shrink-0">
                 {{ t('search.filter.source') }}
               </span>
               <div class="flex items-center gap-1.5 flex-wrap">
                 <button
                   v-for="opt in sourceFilterOptions"
                   :key="opt.key"
-                  class="px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1"
-                  :class="
-                    activeSourceFilter === opt.key
-                      ? 'bg-[var(--accent-color)] text-white'
-                      : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800'
-                  "
+                  class="d-chip d-chip-sm"
+                  :class="{ 'd-chip-active': activeSourceFilter === opt.key }"
                   @click="activeSourceFilter = opt.key"
                 >
                   <span
@@ -68,10 +60,19 @@
               <!-- 探测进度 -->
               <span
                 v-if="probeProgress.total > 0 && probeProgress.done < probeProgress.total"
-                class="text-[10px] text-neutral-400 ml-1 flex items-center gap-1"
+                class="text-[10px] d-text-muted ml-1 flex items-center gap-1"
               >
                 <i class="ri-loader-4-line animate-spin text-xs"></i>
                 {{ t('search.filter.probeProgress', { done: probeProgress.done, total: probeProgress.total }) }}
+              </span>
+              <!-- 跨平台搜索加载提示 -->
+              <span
+                v-if="crossSearchLoading"
+                class="text-[10px] ml-1 flex items-center gap-1"
+                style="color: var(--accent-color)"
+              >
+                <i class="ri-loader-4-line animate-spin text-xs"></i>
+                {{ t('search.crossSearch.loading') }}
               </span>
             </div>
           </div>
@@ -80,13 +81,13 @@
         <!-- Action Bar (Sticky) -->
         <section
           v-if="searchDetail?.songs?.length && searchType === SEARCH_TYPE.MUSIC"
-          class="action-bar sticky top-0 z-20 page-padding-x py-3 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-neutral-100 dark:border-neutral-800/50"
+          class="action-bar sticky top-0 z-20 page-padding-x py-3 d-sticky-bar"
         >
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <!-- Play All Button -->
               <button
-                class="play-all-btn flex items-center gap-2 px-6 py-2.5 rounded-full bg-[var(--accent-color)] hover:bg-[var(--accent-color)]/90 text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-primary/25"
+                class="d-btn-primary"
                 @click="handlePlayAll"
               >
                 <i class="ri-play-circle-line text-lg" />
@@ -96,12 +97,12 @@
               <!-- Batch Actions -->
               <div
                 v-if="isElectron"
-                class="h-8 w-[1px] bg-neutral-200 dark:bg-neutral-800 mx-1 hidden md:block"
+                class="d-divider-vertical mx-1 hidden md:block"
               ></div>
 
               <button
                 v-if="!isSelecting && isElectron"
-                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                class="d-btn-icon"
                 @click="startSelect"
               >
                 <i class="ri-checkbox-multiple-line text-lg" />
@@ -119,7 +120,7 @@
                   {{ t('common.selectAll') }}
                 </n-checkbox>
                 <button
-                  class="px-4 py-1.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xs font-bold hover:bg-[var(--accent-color)]/20 transition-all"
+                  class="d-btn-ghost"
                   :disabled="selectedSongs.length === 0 || isDownloading"
                   @click="handleBatchDownload"
                 >
@@ -127,7 +128,7 @@
                   {{ t('favorite.download', { count: selectedSongs.length }) }}
                 </button>
                 <button
-                  class="text-xs text-neutral-400 hover:text-neutral-600"
+                  class="text-xs d-text-muted hover:d-text-primary"
                   @click="cancelSelect"
                 >
                   {{ t('common.cancel') }}
@@ -140,7 +141,7 @@
               <!-- Layout Toggle -->
               <button
                 v-if="!isMobile"
-                class="action-btn-icon w-10 h-10 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all"
+                class="d-btn-icon"
                 @click="toggleLayout"
               >
                 <i :class="isCompactLayout ? 'ri-list-check-2' : 'ri-grid-line'" class="text-lg" />
@@ -250,23 +251,23 @@
               <!-- Empty State -->
               <div
                 v-if="!searchDetailLoading && isResultEmpty"
-                class="flex flex-col items-center justify-center py-20 text-neutral-400"
+                class="d-empty-state"
               >
-                <i class="ri-search-line text-6xl mb-4 opacity-20"></i>
+                <i class="ri-search-line"></i>
                 <p>{{ t('comp.musicList.noSearchResults') }}</p>
               </div>
 
               <!-- Loading More / Footer -->
-              <div class="mt-12 py-8 border-t border-neutral-100 dark:border-neutral-800">
+              <div class="mt-12 py-8 d-divider">
                 <div v-if="isLoadingMore" class="flex flex-col items-center gap-4">
                   <n-spin size="small" />
-                  <span class="text-xs text-neutral-400 font-medium tracking-widest uppercase">
+                  <span class="d-footer-text">
                     {{ t('search.loading.more') }}
                   </span>
                 </div>
                 <div v-if="!hasMore && !isResultEmpty" class="text-center">
                   <span
-                    class="text-xs text-neutral-400 font-medium tracking-widest uppercase opacity-50"
+                    class="d-footer-text opacity-50"
                   >
                     「{{ t('search.noMore') }}」</span
                   >
@@ -288,6 +289,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import { getSearch } from '@/api/search';
+import { crossPlatformSearch } from '@/api/crossPlatformSearch';
 import PlayBottom from '@/components/common/PlayBottom.vue';
 import SearchItem from '@/components/common/SearchItem.vue';
 import SongItem from '@/components/common/SongItem.vue';
@@ -341,6 +343,7 @@ const searchDetailLoading = ref(false);
 const activeSourceFilter = ref<SourceLabel | 'all'>('all');
 const probeProgress = ref({ done: 0, total: 0 });
 const sourceLabelVersion = ref(0); // 触发响应式更新
+const crossSearchLoading = ref(false); // 跨平台搜索加载状态
 
 const ITEMS_PER_PAGE = 30;
 const page = ref(0);
@@ -435,6 +438,7 @@ const loadSearch = async (isLoadMore = false) => {
     clearProbeCache();
     activeSourceFilter.value = 'all';
     probeProgress.value = { done: 0, total: 0 };
+    crossSearchLoading.value = false;
   } else {
     if (isLoadingMore.value || !hasMore.value) return;
     isLoadingMore.value = true;
@@ -495,6 +499,16 @@ const loadSearch = async (isLoadMore = false) => {
     // 对新加载的歌曲触发来源探测（仅单曲类型）
     if (searchType.value === SEARCH_TYPE.MUSIC && songs.length > 0) {
       probeSources(songs);
+    }
+
+    // ==================== 跨平台补充搜索 ====================
+    // 单曲搜索、第一页时始终触发跨平台搜索（并发进行，不阻塞网易云结果展示）
+    // 跨平台搜索结果会异步合并进来，去重逻辑保证不重复
+    if (
+      searchType.value === SEARCH_TYPE.MUSIC &&
+      !isLoadMore
+    ) {
+      triggerCrossPlatformSearch(keywords, songs);
     }
 
     hasMore.value =
@@ -655,6 +669,34 @@ const probeSources = (songs: any[]) => {
   );
 };
 
+/**
+ * 触发跨平台补充搜索
+ * 当网易云搜索结果不足时，调用 GD 音乐台 joox 音源搜索 QQ 独占内容
+ */
+const triggerCrossPlatformSearch = async (keyword: string, neteaseSongs: any[]) => {
+  crossSearchLoading.value = true;
+  try {
+    // 将网易云歌曲转换为 SongResult 格式用于去重
+    const existingSongs = neteaseSongs.map(formatSong).filter(Boolean) as SongResult[];
+
+    const crossResults = await crossPlatformSearch(keyword, existingSongs);
+
+    if (crossResults.length > 0 && searchDetail.value) {
+      // 合并跨平台结果到歌曲列表
+      searchDetail.value.songs = [...(searchDetail.value.songs || []), ...crossResults];
+
+      // 对跨平台歌曲触发来源标注（即时分类，无需网络探测）
+      probeSources(crossResults);
+
+      sourceLabelVersion.value++;
+    }
+  } catch (error) {
+    console.error(t('search.crossSearch.failed'), error);
+  } finally {
+    crossSearchLoading.value = false;
+  }
+};
+
 const handlePlay = (item: any) => {
   playerStore.addToNextPlay(item);
 };
@@ -698,7 +740,7 @@ watch(
 }
 
 .animate-item {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: fadeInUp 0.6s var(--d-ease-out) backwards;
 }
 
 @keyframes fadeInUp {

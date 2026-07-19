@@ -7,8 +7,13 @@ import type { SongResult } from '@/types/music';
 import { isElectron } from '@/utils';
 import requestMusic from '@/utils/request_music';
 
-import type { ParsedMusicResult } from './gdmusic';
-import { parseFromGDMusic } from './gdmusic';
+import { isCrossPlatformSong } from './crossPlatformSearch';
+import {
+  type GDCrossPlatformSearchItem,
+  getUrlByPlatform,
+  parseFromGDMusic,
+  searchFromGDMusic
+} from './gdmusic';
 import { LxMusicStrategy } from './lxMusicStrategy';
 import { parseFromCustomApi } from './parseFromCustomApi';
 
@@ -412,10 +417,269 @@ class UnblockMusicStrategy implements MusicSourceStrategy {
 }
 
 /**
+ * 跨平台直链解析策略
+ *
+ * 对跨平台搜索结果（platform + platformId），按以下优先级获取播放 URL：
+ * 1. unblockMusic 指定平台（用歌曲名+歌手搜索匹配，最准确）
+ * 2. GD 音乐台直链获取（仅限 joox/kuwo/netease 平台，用 platformId 直接获取）
+ * 3. GD 音乐台精确搜索匹配（用歌名+歌手在 joox 搜索，精确匹配后获取 URL）
+ *
+ * 注意：
+ * - GD 音乐台不支持 qq/migu/kugou 作为 source（返回 400）
+ * - 不再使用 unblockMusic 多平台并发回退，因为 Promise.any 会导致匹配不精确
+ *   （可能返回同名但不同歌手的歌曲）
+ */
+class CrossPlatformStrategy implements MusicSourceStrategy {
+  name = 'crossPlatform';
+  priority = -1; // 最高优先级（小于 0）
+
+  // 支持通过 unblockMusic 解析的平台
+  private static readonly UNBLOCK_PLATFORMS = ['qq', 'migu', 'kugou', 'kuwo', 'joox', 'pyncmd'];
+  // GD 音乐台直接支持的平台（可用于 getUrlByPlatform）
+  private static readonly GD_SUPPORTED_PLATFORMS = ['joox', 'kuwo', 'netease'];
+
+  canHandle(_sources: string[], _settingsStore?: any): boolean {
+    // canHandle 在工厂层面不判断跨平台，由 parseMusic 单独处理
+    return true;
+  }
+
+  /**
+   * 尝试通过 unblockMusic 解析（仅限单平台，避免多平台并发匹配不精确）
+   * @param data 歌曲数据
+   * @param platform 要尝试的平台
+   * @returns 解析结果，失败返回 null
+   */
+  private async tryUnblockMusic(
+    data: SongResult,
+    platform: string
+  ): Promise<MusicParseResult | null> {
+    try {
+      const unblockData = {
+        name: data.name,
+        artists: (data.ar || data.artists || []).map((a) => ({ name: a.name })),
+        album: data.al || data.album || { name: '' },
+        duration: data.duration || data.dt || data.count || 0
+      };
+
+      const unblockResult = await window.api.unblockMusic(
+        0, // 跨平台歌曲没有网易云 ID，传 0（unblockMusic 内部用 data 搜索，不依赖 id）
+        unblockData,
+        [platform]
+      );
+
+      // 检测 IPC handler 返回的错误格式 { error: string }
+      if (unblockResult?.error) {
+        console.warn(
+          `[CrossPlatformStrategy] unblockMusic [${platform}] 失败: ${unblockResult.error}`
+        );
+        return null;
+      }
+
+      const adapted = adaptParseResult(unblockResult);
+      if (adapted?.data?.data?.url) {
+        console.log(`[CrossPlatformStrategy] unblockMusic [${platform}] 解析成功`);
+        return adapted;
+      }
+    } catch (unblockError) {
+      console.warn(
+        `[CrossPlatformStrategy] unblockMusic [${platform}] 异常:`,
+        unblockError
+      );
+    }
+    return null;
+  }
+
+  /**
+   * 归一化字符串用于比较（小写 + 去空格/标点）
+   */
+  private static normalizeStr(s: string): string {
+    return (s || '')
+      .toLowerCase()
+      .replace(/[\s\-_/\(\)\[\]【】（）.,，。、！？!?;；:：'"`~·]+/g, '')
+      .trim();
+  }
+
+  /**
+   * 精确匹配搜索结果：比较歌名和歌手
+   * 匹配规则：
+   * - 歌名必须完全一致（归一化后）
+   * - 歌手必须至少有一个完全一致（归一化后）
+   * @param item GD 音乐台搜索结果项
+   * @param targetName 目标歌名
+   * @param targetArtists 目标歌手列表
+   * @returns 匹配分数（0 表示不匹配，>0 表示匹配，分数越高越匹配）
+   */
+  private static matchScore(
+    item: GDCrossPlatformSearchItem,
+    targetName: string,
+    targetArtists: string[]
+  ): number {
+    const itemName = CrossPlatformStrategy.normalizeStr(item.name);
+    const targetN = CrossPlatformStrategy.normalizeStr(targetName);
+
+    // 歌名必须一致
+    if (!itemName || !targetN || itemName !== targetN) {
+      return 0;
+    }
+
+    // 歌手匹配：至少一个歌手完全一致
+    const itemArtists = (item.artist || []).map((a) => CrossPlatformStrategy.normalizeStr(a));
+    const targetArtistsNorm = targetArtists.map((a) => CrossPlatformStrategy.normalizeStr(a));
+
+    let artistMatched = false;
+    for (const ta of targetArtistsNorm) {
+      if (!ta) continue;
+      if (itemArtists.some((ia) => ia === ta || ia.includes(ta) || ta.includes(ia))) {
+        artistMatched = true;
+        break;
+      }
+    }
+
+    // 歌名一致 + 歌手匹配 = 满分
+    // 歌名一致 + 歌手不匹配 = 低分（可能是翻唱或不同版本，仍然可用）
+    return artistMatched ? 100 : 10;
+  }
+
+  /**
+   * 通过 GD 音乐台精确搜索匹配获取 URL
+   * 在 joox 音源搜索多首歌曲，精确匹配歌名+歌手后获取 URL
+   *
+   * @param data 原始歌曲数据（包含歌名和歌手）
+   * @param br 音质
+   * @returns 解析结果，失败返回 null
+   */
+  private async tryGdMusicSearchMatch(
+    data: SongResult,
+    br: string
+  ): Promise<MusicParseResult | null> {
+    const songName = data.name || '';
+    const artistNames = (data.ar || data.artists || []).map((a) => a.name).filter(Boolean);
+
+    if (!songName) {
+      return null;
+    }
+
+    const searchQuery = artistNames.length > 0
+      ? `${songName} ${artistNames.join(' ')}`
+      : songName;
+
+    try {
+      // 搜索 joox 音源，取前 10 条结果做精确匹配
+      const items = await searchFromGDMusic('joox', searchQuery, 10, 1);
+
+      if (!items || items.length === 0) {
+        return null;
+      }
+
+      // 按匹配分数排序
+      const scored = items
+        .map((item) => ({
+          item,
+          score: CrossPlatformStrategy.matchScore(item, songName, artistNames)
+        }))
+        .filter((s) => s.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      if (scored.length === 0) {
+        console.warn(
+          `[CrossPlatformStrategy] GD 搜索到 ${items.length} 条结果，但无精确匹配`,
+          { targetName: songName, targetArtists: artistNames }
+        );
+        return null;
+      }
+
+      const bestMatch = scored[0].item;
+      const matchId = String(bestMatch.url_id || bestMatch.id);
+
+      console.log(
+        `[CrossPlatformStrategy] GD 精确匹配成功: "${bestMatch.name}" by [${(bestMatch.artist || []).join(', ')}] (score=${scored[0].score})`
+      );
+
+      // 用匹配到的 ID 获取 URL
+      const result = await getUrlByPlatform('joox', matchId, br);
+      const adapted = adaptParseResult(result);
+      if (adapted?.data?.data?.url) {
+        console.log(`[CrossPlatformStrategy] GD 搜索匹配解析成功`);
+        return adapted;
+      }
+    } catch (error) {
+      console.error('[CrossPlatformStrategy] GD 搜索匹配异常:', error);
+    }
+    return null;
+  }
+
+  async parse(id: number, data: SongResult, quality = '999'): Promise<MusicParseResult | null> {
+    // 仅处理跨平台歌曲
+    if (!isCrossPlatformSong(data)) {
+      return null;
+    }
+
+    const platform = data.platform!;
+    const platformId = data.platformId!;
+
+    // 跨平台歌曲的失败缓存使用 platformId 作为 key 的一部分
+    const failCacheKey = Number(
+      String(platformId).split('').reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) | 0, 0)
+    );
+    if (CacheManager.isInFailedCache(failCacheKey, this.name)) {
+      return null;
+    }
+
+    const brMap: Record<string, string> = {
+      lossless: '999',
+      high: '320',
+      higher: '320',
+      standard: '128'
+    };
+    const br = brMap[quality] || '999';
+
+    try {
+      // ==================== 1. unblockMusic 指定平台 ====================
+      // 仅在原始平台搜索，确保匹配的歌曲来自正确的平台
+      if (CrossPlatformStrategy.UNBLOCK_PLATFORMS.includes(platform)) {
+        const result = await this.tryUnblockMusic(data, platform);
+        if (result) return result;
+      }
+
+      // ==================== 2. GD 音乐台直链获取（仅限支持的平台） ====================
+      // GD 音乐台支持 joox/kuwo/netease，可以直接用 platformId 获取 URL
+      if (CrossPlatformStrategy.GD_SUPPORTED_PLATFORMS.includes(platform)) {
+        console.log(`[CrossPlatformStrategy] 尝试 GD 音乐台直链: ${platform}/${platformId}`);
+        const result = await getUrlByPlatform(platform, platformId, br);
+        const adapted = adaptParseResult(result);
+        if (adapted?.data?.data?.url) {
+          console.log(`[CrossPlatformStrategy] GD 音乐台直链解析成功`);
+          return adapted;
+        }
+      }
+
+      // ==================== 3. GD 音乐台精确搜索匹配（最终手段） ====================
+      // 对于 GD 不支持的平台（如 qq/migu/kugou），或直链失败时，
+      // 用歌名+歌手在 joox 搜索（joox 曲库与 QQ 高度重合），
+      // 然后做精确匹配（歌名完全一致 + 歌手匹配），确保返回的是正确的歌曲
+      console.log(`[CrossPlatformStrategy] 尝试 GD 音乐台精确搜索匹配 (joox)`);
+      const searchResult = await this.tryGdMusicSearchMatch(data, br);
+      if (searchResult) {
+        return searchResult;
+      }
+
+      console.warn(`[CrossPlatformStrategy] 所有解析方式均失败: ${platform}/${platformId}`);
+      CacheManager.addFailedCache(failCacheKey, this.name);
+      return null;
+    } catch (error) {
+      console.error('[CrossPlatformStrategy] 解析失败:', error);
+      CacheManager.addFailedCache(failCacheKey, this.name);
+      return null;
+    }
+  }
+}
+
+/**
  * 音源策略工厂
  */
 export class MusicSourceStrategyFactory {
   private static strategies: MusicSourceStrategy[] = [
+    new CrossPlatformStrategy(),
     new LxMusicStrategy(),
     new CustomApiStrategy(),
     new GDMusicStrategy(),
@@ -432,6 +696,13 @@ export class MusicSourceStrategyFactory {
     return this.strategies
       .filter((strategy) => strategy.canHandle(sources, settingsStore))
       .sort((a, b) => a.priority - b.priority);
+  }
+
+  /**
+   * 获取跨平台策略实例（用于直接调用，不经过 sources 过滤）
+   */
+  static getCrossPlatformStrategy(): CrossPlatformStrategy {
+    return new CrossPlatformStrategy();
   }
 }
 
@@ -481,6 +752,30 @@ export class MusicParser {
     const startTime = performance.now();
 
     try {
+      // ==================== 跨平台歌曲专用路径 ====================
+      // 跨平台歌曲（platform + platformId）直接通过 GD 音乐台获取 URL，
+      // 不经过网易云 API 和常规策略链
+      if (isCrossPlatformSong(data)) {
+        const crossStrategy = MusicSourceStrategyFactory.getCrossPlatformStrategy();
+        try {
+          const result = await crossStrategy.parse(id, data, '999');
+          if (result?.data?.data?.url) {
+            return result;
+          }
+        } catch (error) {
+          console.error('[MusicParser] 跨平台解析失败:', error);
+        }
+
+        // 跨平台歌曲没有网易云 ID，无法回退到网易云 API
+        return {
+          data: {
+            code: 404,
+            message: '跨平台歌曲解析失败',
+            data: undefined
+          }
+        };
+      }
+
       // 非Electron环境直接使用API请求
       if (!isElectron) {
         return await requestMusic.get<any>('/music', { params: { id } });

@@ -65,6 +65,22 @@ export interface SongResult {
   backgroundColor?: string;
   primaryColor?: string;
   source?: 'netease';
+  /**
+   * 跨平台来源标识
+   * - 'netease' 或未设置：网易云歌曲（默认）
+   * - 'qq'：QQ 音乐
+   * - 'migu'：咪咕音乐
+   * - 'kugou'：酷狗音乐
+   * - 'kuwo'：酷我音乐
+   * - 'joox'：JOOX（QQ 音乐国际版）
+   * 用于标识非网易云的跨平台搜索结果
+   */
+  platform?: 'netease' | 'qq' | 'migu' | 'kugou' | 'kuwo' | 'joox' | string;
+  /**
+   * 跨平台歌曲在对应平台的原始 ID
+   * 与 platform 配合使用，用于直接获取播放 URL
+   */
+  platformId?: string;
   // 过期时间
   expiredAt?: number;
   // 获取时间

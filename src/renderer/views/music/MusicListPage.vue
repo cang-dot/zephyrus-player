@@ -1,6 +1,6 @@
 <template>
   <div class="music-list-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
-    <n-scrollbar ref="scrollbarRef" class="h-full" @scroll="handleScroll">
+    <n-scrollbar ref="scrollbarRef" class="flex-1 min-h-0" @scroll="handleScroll">
       <div class="music-list-content pb-32">
         <!-- Hero Section 和 Action Bar -->
         <n-spin :show="loading">
@@ -978,6 +978,8 @@ onMounted(() => {
 <style scoped lang="scss">
 .music-list-page {
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .hero-section {

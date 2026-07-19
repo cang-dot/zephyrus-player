@@ -10,11 +10,12 @@ export default {
     trackCount: '{count}首',
     playCount: '播放{count}次'
   },
-  tabs: {
-    created: '创建',
-    favorite: '收藏',
-    album: '专辑'
-  },
+tabs: {
+created: '创建',
+favorite: '收藏',
+album: '专辑',
+platforms: '平台账号'
+},
   ranking: {
     title: '听歌排行',
     playCount: '{count}次'

@@ -1,7 +1,12 @@
 <template>
+  <!-- 顶部触发区域：鼠标移入唤回搜索栏 -->
+  <div class="fsb-trigger-zone" @mouseenter="handleZoneEnter" @mouseleave="handleZoneLeave"></div>
   <div
     class="floating-search-bar"
-    :class="{ 'fsb-expanded': isExpanded }"
+    :class="{
+      'fsb-expanded': isExpanded,
+      'fsb-offscreen': isOffscreen
+    }"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
@@ -128,7 +133,7 @@
 
 <script lang="ts" setup>
 import { useDebounceFn } from '@vueuse/core';
-import { computed, nextTick, onMounted, ref, watch, watchEffect } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -160,11 +165,51 @@ let collapseTimer: ReturnType<typeof setTimeout> | null = null;
 const inputRef = ref<HTMLInputElement | null>(null);
 const inputFocused = ref(false);
 
+// ==================== 自动收起 = 移出屏幕（与侧栏一致） ====================
+const isOffscreen = ref(false);
+let offscreenTimer: ReturnType<typeof setTimeout> | null = null;
+
 const getCollapseDelay = () => {
   return (settingsStore.setData?.overlayAutoCollapseDelay || 5) * 1000;
 };
 const isAutoCollapseEnabled = () => {
   return settingsStore.setData?.overlayAutoCollapse !== false;
+};
+
+// 启动移出屏幕计时
+const startOffscreenTimer = () => {
+  if (!isAutoCollapseEnabled()) return;
+  // 有悬浮面板打开时不收起
+  if (windowStore.activePath) return;
+  cancelOffscreenTimer();
+  offscreenTimer = setTimeout(() => {
+    if (windowStore.activePath) return;
+    // 输入框有焦点或有搜索建议时不收起
+    if (inputFocused.value || showSuggestions.value) {
+      startOffscreenTimer();
+      return;
+    }
+    isOffscreen.value = true;
+    // 同时收起展开态
+    isExpanded.value = false;
+  }, getCollapseDelay());
+};
+
+const cancelOffscreenTimer = () => {
+  if (offscreenTimer) {
+    clearTimeout(offscreenTimer);
+    offscreenTimer = null;
+  }
+};
+
+// 顶部触发区域：鼠标移入唤回
+const handleZoneEnter = () => {
+  cancelOffscreenTimer();
+  isOffscreen.value = false;
+};
+
+const handleZoneLeave = () => {
+  startOffscreenTimer();
 };
 
 const expand = () => {
@@ -193,10 +238,13 @@ const cancelCollapseTimer = () => {
 
 const handleMouseEnter = () => {
   cancelCollapseTimer();
+  cancelOffscreenTimer();
+  isOffscreen.value = false;
 };
 
 const handleMouseLeave = () => {
   startCollapseTimer();
+  startOffscreenTimer();
 };
 
 // ==================== 搜索 ====================
@@ -350,17 +398,56 @@ onMounted(() => {
   loadHotSearch();
   loadPage();
   checkForUpdates();
+  // 启动初始自动收起计时
+  startOffscreenTimer();
+});
+
+// 面板状态变化时更新收起计时
+watch(
+  () => windowStore.activePath,
+  (newPath) => {
+    if (!newPath) {
+      // 面板关闭了，重新启动收起计时
+      isOffscreen.value = false;
+      startOffscreenTimer();
+    } else {
+      // 面板打开了，确保搜索栏可见
+      cancelOffscreenTimer();
+      isOffscreen.value = false;
+    }
+  }
+);
+
+onUnmounted(() => {
+  cancelOffscreenTimer();
+  cancelCollapseTimer();
 });
 </script>
 
 <style scoped>
+/* 顶部触发区域：鼠标移入唤回搜索栏 */
+.fsb-trigger-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  z-index: 3001;
+}
+
 .floating-search-bar {
   position: fixed;
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 200;
+  z-index: 3002;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 移出屏幕（自动收起） */
+.floating-search-bar.fsb-offscreen {
+  transform: translateX(-50%) translateY(-120%);
+  pointer-events: none;
 }
 
 /* 收起态 */

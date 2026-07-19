@@ -82,7 +82,7 @@
         <div
           class="song-item-operating-play animate__animated"
           :class="{
-            'bg-[var(--accent-color)]': isPlaying,
+            'is-playing': isPlaying,
             animate__flipInY: playLoading,
             'opacity-0': !isHovering && !isPlaying
           }"
@@ -178,10 +178,11 @@ const formatDuration = (ms: number): string => {
 
 <style lang="scss" scoped>
 .compact-song-item {
-  @apply rounded-xl p-2 h-12 mb-1 border-b dark:border-gray-800 border-gray-100;
+  @apply rounded-[var(--d-radius-lg)] p-2 h-12 mb-1;
+  border-bottom: 1px solid var(--d-border-light);
 
   &:hover {
-    @apply bg-gray-50 dark:bg-gray-700;
+    background: var(--d-surface-hover);
 
     .opacity-0 {
       opacity: 1;
@@ -189,7 +190,8 @@ const formatDuration = (ms: number): string => {
   }
 
   .song-item-index {
-    @apply w-8 text-center text-gray-500 dark:text-gray-400 text-sm;
+    @apply w-8 text-center text-sm;
+    color: var(--d-text-secondary);
   }
 
   .song-item-select {
@@ -204,19 +206,23 @@ const formatDuration = (ms: number): string => {
     }
 
     &-title {
-      @apply flex-[2.5] min-w-0 text-sm cursor-pointer text-gray-900 dark:text-white flex items-center;
+      @apply flex-[2.5] min-w-0 text-sm cursor-pointer flex items-center;
+      color: var(--d-text-primary);
     }
 
     &-artist {
-      @apply flex-[1.5] min-w-0 text-sm text-gray-500 dark:text-gray-400 flex items-center;
+      @apply flex-[1.5] min-w-0 text-sm flex items-center;
+      color: var(--d-text-secondary);
     }
 
     &-album {
-      @apply flex-[1.5] min-w-0 text-sm text-gray-500 dark:text-gray-400 flex items-center;
+      @apply flex-[1.5] min-w-0 text-sm flex items-center;
+      color: var(--d-text-secondary);
     }
 
     &-duration {
-      @apply w-14 flex-shrink-0 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-end;
+      @apply w-14 flex-shrink-0 text-sm flex items-center justify-end;
+      color: var(--d-text-secondary);
     }
   }
 
@@ -230,9 +236,18 @@ const formatDuration = (ms: number): string => {
     }
 
     .song-item-operating-play {
-      @apply w-7 h-7 flex items-center justify-center cursor-pointer rounded-full bg-gray-300 dark:bg-gray-800 border dark:border-gray-700 border-gray-200 text-gray-900 dark:text-white;
+      @apply w-7 h-7 flex items-center justify-center cursor-pointer rounded-full;
+      border: 1px solid var(--d-border);
+      background: var(--d-surface);
+      color: var(--d-text-primary);
 
       &:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+      }
+
+      &.is-playing {
         background-color: var(--accent-color);
         border-color: var(--accent-color);
         color: white;
@@ -247,10 +262,15 @@ const formatDuration = (ms: number): string => {
       @apply mr-1 ml-0 cursor-pointer;
 
       .iconfont {
-        @apply text-base transition text-gray-500 dark:text-gray-400 hover:text-red-500;
+        @apply text-base transition;
+        color: var(--d-text-secondary);
+
+        &:hover {
+          @apply text-red-500;
+        }
       }
       .like-active {
-        @apply text-red-500 dark:text-red-500;
+        @apply text-red-500;
       }
     }
 
@@ -258,7 +278,12 @@ const formatDuration = (ms: number): string => {
       @apply cursor-pointer flex items-center justify-center px-2;
 
       .iconfont {
-        @apply text-xl transition text-gray-500 dark:text-gray-400 hover:text-[var(--accent-color)];
+        @apply text-xl transition;
+        color: var(--d-text-secondary);
+
+        &:hover {
+          color: var(--accent-color);
+        }
       }
     }
 

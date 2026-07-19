@@ -125,6 +125,7 @@ export default {
       tabs: {
         sources: '音源選擇',
         lxMusic: '落雪音源',
+        platforms: '平台帳號',
         customApi: '自訂API'
       },
       scripts: {
@@ -147,6 +148,28 @@ export default {
         nameRequired: '名稱不能為空',
         renameSuccess: '重新命名成功'
       }
+    },
+    platforms: {
+      title: '平台帳號',
+      desc: '管理各音樂平台的登入狀態，登入後可解鎖高品質音源和獨佔內容',
+      loggedIn: '已登入',
+      notLoggedIn: '未登入',
+      noLoginRequired: '無需登入',
+      login: '登入',
+      relogin: '重新登入',
+      loggingIn: '登入中...',
+      logoutSuccess: '已登出',
+      loginSuccess: '{platform} 登入成功',
+      loginWindowFailed: '無法開啟登入視窗',
+      manualCookie: '手動輸入 Cookie',
+      cookiePlaceholder: '貼上 Cookie 字串，例如：uin=12345; qm_keyst=abc;',
+      saveCookie: '儲存 Cookie',
+      cookieSaved: 'Cookie 已儲存',
+      qq: { desc: '需要 uin 和 qm_keyst Cookie 才能解鎖高品質音源' },
+      migu: { desc: 'aversionid Cookie 可解鎖更高品質' },
+      joox: { desc: '需要 wmid 和 session_key Cookie' },
+      kugou: { desc: '無需登入，可直接搜尋' },
+      kuwo: { desc: '無需登入，可直接搜尋' }
     }
   },
   application: {

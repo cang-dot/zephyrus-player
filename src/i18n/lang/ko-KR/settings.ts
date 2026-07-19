@@ -130,6 +130,7 @@ export default {
       tabs: {
         sources: '음원 선택',
         lxMusic: '낙설 음원',
+        platforms: '플랫폼 계정',
         customApi: '사용자 정의 API'
       },
       scripts: {
@@ -152,6 +153,28 @@ export default {
         nameRequired: '이름은 비워둘 수 없습니다',
         renameSuccess: '이름이 변경되었습니다'
       }
+    },
+    platforms: {
+      title: '플랫폼 계정',
+      desc: '각 음악 플랫폼의 로그인 상태를 관리합니다. 로그인하면 고음질 음원과 독점 콘텐츠를 잠금 해제할 수 있습니다',
+      loggedIn: '로그인됨',
+      notLoggedIn: '로그인되지 않음',
+      noLoginRequired: '로그인 불필요',
+      login: '로그인',
+      relogin: '재로그인',
+      loggingIn: '로그인 중...',
+      logoutSuccess: '로그아웃되었습니다',
+      loginSuccess: '{platform} 로그인 성공',
+      loginWindowFailed: '로그인 창을 열 수 없습니다',
+      manualCookie: '수동 Cookie 입력',
+      cookiePlaceholder: 'Cookie 문자열 붙여넣기, 예: uin=12345; qm_keyst=abc;',
+      saveCookie: 'Cookie 저장',
+      cookieSaved: 'Cookie가 저장되었습니다',
+      qq: { desc: 'uin과 qm_keyst Cookie로 고음질 음원 잠금 해제' },
+      migu: { desc: 'aversionid Cookie로 더 높은 품질 잠금 해제' },
+      joox: { desc: 'wmid와 session_key Cookie 필요' },
+      kugou: { desc: '로그인 불필요, 직접 검색 가능' },
+      kuwo: { desc: '로그인 불필요, 직접 검색 가능' }
     }
   },
   application: {

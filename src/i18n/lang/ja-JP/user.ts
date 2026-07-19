@@ -13,7 +13,8 @@ export default {
   tabs: {
     created: '作成',
     favorite: 'お気に入り',
-    album: 'アルバム'
+    album: 'アルバム',
+    platforms: 'プラットフォーム'
   },
   ranking: {
     title: '聴取ランキング',

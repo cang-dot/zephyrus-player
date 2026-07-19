@@ -3,6 +3,7 @@
     <div
       v-if="isVisible"
       class="neon-player"
+      :class="{ 'overlay-mode': overlayMode }"
       :style="{ '--neon-color': neonColor, '--neon-bright': neonBright, '--neon-dim': neonDim }"
       @click="handleTapToggle"
     >
@@ -40,10 +41,12 @@
       <player-controls
         v-if="!overlayMode"
         v-show="controlsVisible"
+        :isFullScreen="isFullScreen"
         :showStyleSwitch="false"
         theme="dark"
         class="no-toggle"
         @close="close"
+        @toggleFullscreen="toggleFullScreen"
       />
     </div>
   </transition>
@@ -216,6 +219,7 @@ watch(
 // ==================== 生命周期 ====================
 onMounted(() => {
   window.addEventListener('music-full-config-updated', handleConfigUpdate);
+  document.addEventListener('fullscreenchange', handleFullScreenChange);
   styleEngine.syncFromPlayerStore();
   styleEngine.syncCoverColors();
   if (playerStore.currentSong?.id) {
@@ -227,8 +231,31 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('music-full-config-updated', handleConfigUpdate);
+  document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  if (document.fullscreenElement) document.exitFullscreen();
   unsubscribeDrumDetector();
 });
+
+// ==================== 全屏控制 ====================
+const isFullScreen = ref(false);
+
+async function toggleFullScreen() {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+      isFullScreen.value = true;
+    } else {
+      await document.exitFullscreen();
+      isFullScreen.value = false;
+    }
+  } catch (e) {
+    console.error('全屏切换失败:', e);
+  }
+}
+
+function handleFullScreenChange() {
+  isFullScreen.value = !!document.fullscreenElement;
+}
 
 function close() {
   isVisible.value = false;
@@ -246,6 +273,12 @@ function close() {
   justify-content: center;
   overflow: hidden;
   background: #1a1814;
+
+  /* overlay 模式：低 z-index + pointer-events 穿透，让侧边栏可交互 */
+  &.overlay-mode {
+    z-index: 1;
+    pointer-events: none;
+  }
 }
 
 /* 老旧墙面背景：SVG feTurbulence 生成的粗糙纹理 */

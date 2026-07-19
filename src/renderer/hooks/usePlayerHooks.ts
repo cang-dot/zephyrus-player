@@ -3,6 +3,8 @@ import { createDiscreteApi } from 'naive-ui';
 
 import i18n from '@/../i18n/renderer';
 import { getMusicLrc, getMusicUrl, getParsingMusicUrl } from '@/api/music';
+import { getLyricByPlatform, searchFromGDMusic } from '@/api/gdmusic';
+import { isCrossPlatformSong } from '@/api/crossPlatformSearch';
 import { playbackRequestManager } from '@/services/playbackRequestManager';
 import { SongSourceConfigManager } from '@/services/SongSourceConfigManager';
 import type { ILyric, ILyricText, IWordData, SongResult } from '@/types/music';
@@ -81,6 +83,25 @@ export const getSongUrl = async (
     if (songData.playMusicUrl) {
       if (isDownloaded) return songData.playMusicUrl;
       return await resolveCachedPlaybackUrl(songData.playMusicUrl, songData);
+    }
+
+    // ==================== 跨平台歌曲专用路径 ====================
+    // 跨平台歌曲（非网易云）直接通过 MusicParser 解析，跳过网易云 API
+    if (songData.platform && songData.platform !== 'netease' && songData.platformId) {
+      const res = await getParsingMusicUrl(numericId || 0, cloneDeep(songData));
+
+      // 验证请求
+      if (requestId && !playbackRequestManager.isRequestValid(requestId)) {
+        throw new Error('Request cancelled');
+      }
+
+      if (res && res.data && res.data.data && res.data.data.url) {
+        if (isDownloaded) return res.data.data as any;
+        return await resolveCachedPlaybackUrl(res.data.data.url, songData);
+      }
+
+      // 跨平台解析失败，抛出错误（无法回退到网易云 API）
+      throw new Error('跨平台歌曲解析失败');
     }
 
     // ==================== 自定义API最优先 ====================
@@ -248,6 +269,120 @@ const parseLyrics = (lyricsString: string): { lyrics: ILyricText[]; times: numbe
 };
 
 /**
+ * 加载跨平台歌曲歌词
+ *
+ * 跨平台歌曲（platform + platformId）无法通过网易云 API 获取歌词，
+ * 改用 GD 音乐台获取歌词。
+ *
+ * 策略：
+ * 1. 对于 GD 支持的平台（joox/kuwo/netease），直接用 platformId 获取歌词
+ * 2. 对于不支持的平台（qq/migu/kugou），用歌名+歌手在 joox 搜索，
+ *    精确匹配后用匹配歌曲的 lyric_id 获取歌词
+ *
+ * @param song 歌曲数据（包含 platform、platformId、name、ar/artists）
+ * @returns 歌词数据，失败返回空歌词
+ */
+export const loadCrossPlatformLyric = async (song: SongResult): Promise<ILyric> => {
+  const emptyLyric: ILyric = { lrcTimeArray: [], lrcArray: [], hasWordByWord: false };
+
+  if (!isCrossPlatformSong(song)) {
+    return emptyLyric;
+  }
+
+  const platform = song.platform!;
+  const platformId = song.platformId!;
+
+  // GD 音乐台直接支持的平台
+  const GD_SUPPORTED = ['joox', 'kuwo', 'netease'];
+
+  try {
+    let lyricData = null;
+
+    // 1. 直接用 platformId 获取歌词（仅限 GD 支持的平台）
+    if (GD_SUPPORTED.includes(platform)) {
+      lyricData = await getLyricByPlatform(platform, platformId);
+    }
+
+    // 2. 对于不支持的平台，通过搜索匹配后获取歌词
+    if (!lyricData) {
+      const songName = song.name || '';
+      const artistNames = (song.ar || song.artists || []).map((a) => a.name).filter(Boolean);
+
+      if (!songName) {
+        return emptyLyric;
+      }
+
+      const searchQuery = artistNames.length > 0
+        ? `${songName} ${artistNames.join(' ')}`
+        : songName;
+
+      // 在 joox 搜索，取前 10 条结果做精确匹配
+      const items = await searchFromGDMusic('joox', searchQuery, 10, 1);
+
+      if (items && items.length > 0) {
+        // 归一化比较
+        const normalize = (s: string) =>
+          (s || '').toLowerCase().replace(/[\s\-_/\(\)\[\]【】（）.,，。、！？!?;；:：'"`~·]+/g, '').trim();
+
+        const targetName = normalize(songName);
+        const targetArtists = artistNames.map(normalize);
+
+        // 找到歌名一致且歌手匹配的结果
+        const matched = items.find((item) => {
+          const itemName = normalize(item.name);
+          if (itemName !== targetName) return false;
+
+          const itemArtists = (item.artist || []).map(normalize);
+          // 至少一个歌手匹配
+          return targetArtists.some((ta) =>
+            itemArtists.some((ia) => ia === ta || ia.includes(ta) || ta.includes(ia))
+          );
+        });
+
+        if (matched && matched.lyric_id) {
+          lyricData = await getLyricByPlatform('joox', String(matched.lyric_id));
+        }
+      }
+    }
+
+    if (!lyricData) {
+      console.warn('[loadCrossPlatformLyric] 未获取到歌词:', { platform, platformId });
+      return emptyLyric;
+    }
+
+    // 解析歌词（复用现有解析逻辑）
+    const { lyrics, times } = parseLyrics(lyricData.yrc || lyricData.lyric || '');
+
+    let hasWordByWord = false;
+    for (const lyric of lyrics) {
+      if (lyric.hasWordByWord) {
+        hasWordByWord = true;
+        break;
+      }
+    }
+
+    // 处理翻译歌词
+    if (lyricData.tlyric) {
+      const { lyrics: tLyrics } = parseLyrics(lyricData.tlyric);
+      if (tLyrics.length === lyrics.length) {
+        lyrics.forEach((item, index) => {
+          item.trText = item.text && tLyrics[index] ? tLyrics[index].text : '';
+        });
+      }
+    }
+
+    return {
+      lrcTimeArray: times,
+      lrcArray: lyrics,
+      hasWordByWord
+    };
+  } catch (error) {
+    console.error('[loadCrossPlatformLyric] 加载失败:', error);
+    return emptyLyric;
+  }
+};
+
+/**
  * 加载歌词（独立函数）
  */
 export const loadLrc = async (id: string | number): Promise<ILyric> => {
@@ -360,7 +495,7 @@ export const loadLrc = async (id: string | number): Promise<ILyric> => {
  * useLyrics hook（兼容旧代码）
  */
 export const useLyrics = () => {
-  return { loadLrc, parseLyrics };
+  return { loadLrc, loadCrossPlatformLyric, parseLyrics };
 };
 
 /**

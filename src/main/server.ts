@@ -4,6 +4,14 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
+import {
+  type SearchPlatform,
+  getPlatformCookie,
+  getPlatformLoginStatus,
+  loadPlatformCookies,
+  multiPlatformSearch,
+  setPlatformCookie
+} from './multiPlatformSearch';
 import { type Platform, unblockMusic } from './unblockMusic';
 
 // 必须在 import netease-cloud-music-api-alger 之前创建 anonymous_token 文件
@@ -14,6 +22,9 @@ if (!fs.existsSync(path.resolve(os.tmpdir(), 'anonymous_token'))) {
 
 const store = new Store();
 
+// 启动时加载已保存的平台 Cookie 到 process.env
+loadPlatformCookies();
+
 // 设置音乐解析的处理程序
 ipcMain.handle('unblock-music', async (_event, id, songData, enabledSources) => {
   try {
@@ -23,6 +34,34 @@ ipcMain.handle('unblock-music', async (_event, id, songData, enabledSources) => 
     console.error('音乐解析失败:', error);
     return { error: (error as Error).message || '未知错误' };
   }
+});
+
+// ==================== 多平台搜索 IPC ====================
+
+// 多平台搜索
+ipcMain.handle('multi-platform-search', async (_event, keyword: string, platforms: SearchPlatform[], limit?: number) => {
+  try {
+    return await multiPlatformSearch(keyword, platforms, limit || 20);
+  } catch (error) {
+    console.error('多平台搜索失败:', error);
+    return [];
+  }
+});
+
+// 获取平台 Cookie 配置
+ipcMain.handle('get-platform-cookie', (_event, platform: SearchPlatform) => {
+  return getPlatformCookie(platform);
+});
+
+// 设置平台 Cookie
+ipcMain.handle('set-platform-cookie', (_event, platform: SearchPlatform, cookie: string) => {
+  setPlatformCookie(platform, cookie);
+  return true;
+});
+
+// 获取所有平台登录状态
+ipcMain.handle('get-platform-login-status', () => {
+  return getPlatformLoginStatus();
 });
 
 /**

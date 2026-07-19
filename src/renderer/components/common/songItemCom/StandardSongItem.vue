@@ -81,8 +81,8 @@
           {{ t('songItem.menu.playNext') }}
         </n-tooltip>
         <div
-          class="song-item-operating-play bg-gray-300 dark:bg-gray-800 animate__animated"
-          :class="{ 'bg-[var(--accent-color)]': isPlaying, animate__flipInY: playLoading }"
+          class="song-item-operating-play animate__animated"
+          :class="{ 'is-playing': isPlaying, animate__flipInY: playLoading }"
           @click="onPlayMusic"
         >
           <i v-if="isPlaying && play" class="iconfont icon-stop"></i>
@@ -163,42 +163,54 @@ const onPlayNext = () => {
 <style lang="scss" scoped>
 .standard-song-item {
   &:hover {
-    @apply bg-light-100 dark:bg-dark-100;
+    background: var(--d-surface-hover);
   }
 
   .song-item-img {
-    @apply w-12 h-12 rounded-xl mr-4;
+    @apply w-12 h-12 mr-4;
+    border-radius: var(--d-radius-lg);
   }
 
   .song-item-content {
     @apply flex-1;
 
     &-title {
-      @apply text-base text-gray-900 dark:text-white;
+      font-size: var(--d-text-base);
+      color: var(--d-text-primary);
     }
 
     &-name {
-      @apply text-xs text-gray-500 dark:text-gray-400;
+      font-size: var(--d-text-xs);
+      color: var(--d-text-secondary);
     }
 
     &-album {
-      @apply text-xs text-gray-400 dark:text-gray-500 mt-0.5 cursor-pointer;
+      font-size: var(--d-text-xs);
+      color: var(--d-text-muted);
+      @apply mt-0.5 cursor-pointer;
 
       &:hover {
-        @apply text-[var(--accent-color)];
+        color: var(--accent-color);
       }
     }
   }
 
   .song-item-operating {
-    @apply flex items-center rounded-full ml-4 border dark:border-gray-700 border-gray-200 bg-light dark:bg-black;
+    @apply flex items-center rounded-full ml-4;
+    border: 1px solid var(--d-border);
+    background: var(--d-surface);
 
     .iconfont {
       @apply text-xl;
     }
 
     .icon-likefill {
-      @apply text-xl transition text-gray-500 dark:text-gray-400 hover:text-red-500;
+      @apply text-xl transition;
+      color: var(--d-text-secondary);
+
+      &:hover {
+        @apply text-red-500;
+      }
     }
 
     &-like {
@@ -209,19 +221,32 @@ const onPlayNext = () => {
       @apply mr-2 cursor-pointer transition-all;
 
       .iconfont {
-        @apply text-xl transition text-gray-500 dark:text-gray-400 hover:text-[var(--accent-color)];
+        @apply text-xl transition;
+        color: var(--d-text-secondary);
+
+        &:hover {
+          color: var(--accent-color);
+        }
       }
     }
 
     .like-active {
-      @apply text-red-500 dark:text-red-500;
+      @apply text-red-500;
     }
 
     &-play {
-      @apply cursor-pointer rounded-full w-10 h-10 flex justify-center items-center transition
-             border dark:border-gray-700 border-gray-200 text-gray-900 dark:text-white;
+      @apply cursor-pointer rounded-full w-10 h-10 flex justify-center items-center transition;
+      border: 1px solid var(--d-border);
+      color: var(--d-text-primary);
+      background: var(--d-surface);
 
       &:hover {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+      }
+
+      &.is-playing {
         background-color: var(--accent-color);
         border-color: var(--accent-color);
         color: white;

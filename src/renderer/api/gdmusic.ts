@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import type { MusicSourceType } from '@/types/music';
+import type { MusicSourceType, SongResult } from '@/types/music';
 
 /**
  * GD音乐台解析服务
@@ -176,3 +176,180 @@ async function searchAndGetUrl(
     return null;
   }
 }
+
+// ==================== 跨平台搜索支持 ====================
+
+/**
+ * GD 音乐台支持的跨平台搜索音源
+ * 注意：tencent/qq 不被支持（返回 400），使用 joox 作为 QQ 音乐的替代
+ */
+export const GD_CROSS_PLATFORM_SOURCES = ['joox', 'kuwo', 'netease'] as const;
+
+/**
+ * 跨平台搜索结果项（GD 音乐台原始返回格式）
+ */
+export interface GDCrossPlatformSearchItem {
+  id: string;
+  name: string;
+  artist: string[];
+  album: string;
+  pic_id: string;
+  url_id: string;
+  lyric_id: string;
+  source: string;
+  from?: string;
+}
+
+/**
+ * 跨平台搜索结果（已转换为 SongResult 格式）
+ */
+export interface CrossPlatformSearchResult {
+  songs: SongResult[];
+  source: string;
+}
+
+/**
+ * 在 GD 音乐台指定音源搜索歌曲
+ * @param source 音源（joox/kuwo/netease）
+ * @param keyword 搜索关键词
+ * @param count 返回数量，默认 20
+ * @param page 页码，默认 1
+ * @returns 搜索结果列表
+ */
+export async function searchFromGDMusic(
+  source: string,
+  keyword: string,
+  count: number = 20,
+  page: number = 1
+): Promise<GDCrossPlatformSearchItem[]> {
+  const searchUrl = `${baseUrl}?types=search&source=${source}&name=${encodeURIComponent(keyword)}&count=${count}&pages=${page}`;
+
+  const response = await axios.get(searchUrl, { timeout: 8000 });
+
+  if (response.data && Array.isArray(response.data)) {
+    return response.data as GDCrossPlatformSearchItem[];
+  }
+
+  return [];
+}
+
+/**
+ * 通过平台和平台ID直接获取播放URL（无需再次搜索）
+ * @param platform 平台标识（joox/kuwo/netease 等）
+ * @param platformId 平台歌曲ID
+ * @param quality 音质，默认 999（最高）
+ * @param timeout 超时时间（毫秒）
+ * @returns 解析结果，失败返回 null
+ */
+export const getUrlByPlatform = async (
+  platform: string,
+  platformId: string,
+  quality: string = '999',
+  timeout: number = 8000
+): Promise<ParsedMusicResult | null> => {
+  const timeoutPromise = new Promise<null>((_, reject) => {
+    setTimeout(() => reject(new Error('跨平台URL获取超时')), timeout);
+  });
+
+  try {
+    return await Promise.race([
+      (async () => {
+        if (!platformId) {
+          throw new Error('平台ID为空');
+        }
+
+        const songUrl = `${baseUrl}?types=url&source=${platform}&id=${encodeURIComponent(platformId)}&br=${quality}`;
+
+        const response = await axios.get(songUrl, { timeout: 5000 });
+
+        if (response.data && response.data.url) {
+          return {
+            data: {
+              data: {
+                url: (response.data.url as string).replace(/\\/g, ''),
+                br: parseInt(String(response.data.br), 10) * 1000 || 320000,
+                size: response.data.size || 0,
+                md5: '',
+                platform,
+                gain: 0
+              },
+              params: {
+                id: 0,
+                type: 'song'
+              }
+            }
+          };
+        }
+
+        return null;
+      })(),
+      timeoutPromise
+    ]);
+  } catch (error: any) {
+    if (error.message === '跨平台URL获取超时') {
+      console.error('[getUrlByPlatform] 超时:', { platform, platformId });
+    } else {
+      console.error('[getUrlByPlatform] 失败:', error);
+    }
+    return null;
+  }
+};
+
+/**
+ * GD 音乐台歌词响应格式
+ */
+export interface GDMusicLyricResponse {
+  lyric?: string;
+  tlyric?: string;
+  yrc?: string;
+  yromrc?: string;
+}
+
+/**
+ * 通过平台和平台ID获取歌词（GD 音乐台）
+ *
+ * 仅支持 joox/kuwo/netease 平台。
+ * 对于 qq/migu/kugou 等不支持的平台，需先通过搜索获取匹配歌曲的 lyric_id。
+ *
+ * @param platform 平台标识（joox/kuwo/netease）
+ * @param platformId 平台歌曲 ID（或搜索结果中的 lyric_id）
+ * @param timeout 超时时间（毫秒）
+ * @returns 歌词数据，失败返回 null
+ */
+export const getLyricByPlatform = async (
+  platform: string,
+  platformId: string,
+  timeout: number = 8000
+): Promise<GDMusicLyricResponse | null> => {
+  const timeoutPromise = new Promise<null>((_, reject) => {
+    setTimeout(() => reject(new Error('跨平台歌词获取超时')), timeout);
+  });
+
+  try {
+    return await Promise.race([
+      (async () => {
+        if (!platformId) {
+          throw new Error('平台ID为空');
+        }
+
+        const lyricUrl = `${baseUrl}?types=lyric&source=${platform}&id=${encodeURIComponent(platformId)}`;
+
+        const response = await axios.get(lyricUrl, { timeout: 5000 });
+
+        if (response.data && (response.data.lyric || response.data.yrc)) {
+          return response.data as GDMusicLyricResponse;
+        }
+
+        return null;
+      })(),
+      timeoutPromise
+    ]);
+  } catch (error: any) {
+    if (error.message === '跨平台歌词获取超时') {
+      console.error('[getLyricByPlatform] 超时:', { platform, platformId });
+    } else {
+      console.error('[getLyricByPlatform] 失败:', error);
+    }
+    return null;
+  }
+};

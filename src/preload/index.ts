@@ -100,6 +100,21 @@ const api = {
   scanLyricFiles: (folderPath: string) => ipcRenderer.invoke('scan-lyric-files', folderPath),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
 
+  // 多平台搜索
+  multiPlatformSearch: (keyword: string, platforms: string[], limit?: number) =>
+    ipcRenderer.invoke('multi-platform-search', keyword, platforms, limit),
+  getPlatformCookie: (platform: string) => ipcRenderer.invoke('get-platform-cookie', platform),
+  setPlatformCookie: (platform: string, cookie: string) =>
+    ipcRenderer.invoke('set-platform-cookie', platform, cookie),
+  getPlatformLoginStatus: () => ipcRenderer.invoke('get-platform-login-status'),
+  // 平台登录窗口
+  openPlatformLogin: (platform: string) => ipcRenderer.invoke('open-platform-login', platform),
+  onPlatformLoginCookie: (callback: (platform: string, cookie: string) => void) => {
+    ipcRenderer.on('platform-login-cookie', (_event, platform, cookie) => {
+      callback(platform, cookie);
+    });
+  },
+
   // 插件商店
   plugin: {
     getRegistry: () => ipcRenderer.invoke('plugin:get-registry'),

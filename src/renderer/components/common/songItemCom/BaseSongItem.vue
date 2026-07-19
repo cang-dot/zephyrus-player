@@ -143,7 +143,8 @@ defineExpose({
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  @apply rounded-xl p-3 flex items-center transition bg-transparent dark:text-white text-gray-900;
+  @apply rounded-[var(--d-radius-lg)] p-3 flex items-center transition bg-transparent;
+  color: var(--d-text-primary);
 }
 
 .text-ellipsis {

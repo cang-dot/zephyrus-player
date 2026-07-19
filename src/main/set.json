@@ -56,5 +56,6 @@
   "playBarMiniSlots": ["playMode", "favorite", "playlist", "volume"],
   "layoutMode": "classic",
   "overlayAutoCollapse": true,
-  "overlayAutoCollapseDelay": 5
+  "overlayAutoCollapseDelay": 5,
+  "platformCookies": {}
 }

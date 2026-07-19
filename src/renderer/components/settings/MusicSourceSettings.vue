@@ -217,6 +217,126 @@
               </div>
             </div>
 
+            <!-- Platform Accounts Tab -->
+            <div v-else-if="activeTab === 'platforms'" class="space-y-3 pb-2">
+              <p class="text-xs text-gray-500 dark:text-gray-400 px-1">
+                {{ t('settings.playback.platforms.desc') }}
+              </p>
+
+              <!-- 平台列表 -->
+              <div class="space-y-2">
+                <div
+                  v-for="platform in platformList"
+                  :key="platform.key"
+                  class="flex items-center p-3 rounded-xl border transition-all duration-200"
+                  :class="
+                    platform.loginStatus
+                      ? 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20'
+                      : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'
+                  "
+                >
+                  <div
+                    class="flex items-center justify-center w-8 h-8 rounded-full mr-3 shrink-0"
+                    :style="{ backgroundColor: platform.color + '20', color: platform.color }"
+                  >
+                    <i :class="platform.icon" class="text-base"></i>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-sm text-gray-900 dark:text-white">{{
+                        platform.name
+                      }}</span>
+                      <span
+                        v-if="platform.loginStatus"
+                        class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400"
+                      >
+                        {{ t('settings.playback.platforms.loggedIn') }}
+                      </span>
+                      <span
+                        v-else-if="platform.requiresLogin"
+                        class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400"
+                      >
+                        {{ t('settings.playback.platforms.notLoggedIn') }}
+                      </span>
+                      <span
+                        v-else
+                        class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                      >
+                        {{ t('settings.playback.platforms.noLoginRequired') }}
+                      </span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {{ platform.desc }}
+                    </p>
+                  </div>
+
+                  <!-- 操作按钮 -->
+                  <div class="flex items-center gap-2 ml-2 shrink-0">
+                    <button
+                      v-if="platform.requiresLogin"
+                      @click="loginPlatform(platform.key)"
+                      :disabled="platform.loggingIn"
+                      class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      :class="
+                        platform.loginStatus
+                          ? 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20'
+                          : 'text-white bg-[var(--accent-color)] hover:brightness-90'
+                      "
+                    >
+                      <i v-if="platform.loggingIn" class="ri-loader-4-line animate-spin"></i>
+                      <i v-else :class="platform.loginStatus ? 'ri-refresh-line' : 'ri-login-circle-line'"></i>
+                      {{
+                        platform.loggingIn
+                          ? t('settings.playback.platforms.loggingIn')
+                          : platform.loginStatus
+                            ? t('settings.playback.platforms.relogin')
+                            : t('settings.playback.platforms.login')
+                      }}
+                    </button>
+                    <button
+                      v-if="platform.loginStatus && platform.requiresLogin"
+                      @click="logoutPlatform(platform.key)"
+                      class="px-2 py-1.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                    >
+                      <i class="ri-logout-circle-line"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 手动输入 Cookie -->
+              <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+                <h4 class="text-xs font-medium mb-2 text-gray-900 dark:text-white">
+                  {{ t('settings.playback.platforms.manualCookie') }}
+                </h4>
+                <div class="space-y-2">
+                  <select
+                    v-model="manualCookiePlatform"
+                    class="w-full px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs focus:outline-none focus:border-[var(--accent-color)] transition-colors"
+                  >
+                    <option value="qq">QQ 音乐</option>
+                    <option value="migu">咪咕音乐</option>
+                    <option value="joox">JOOX</option>
+                  </select>
+                  <textarea
+                    v-model="manualCookieValue"
+                    :placeholder="t('settings.playback.platforms.cookiePlaceholder')"
+                    rows="3"
+                    class="w-full px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-mono focus:outline-none focus:border-[var(--accent-color)] transition-colors resize-none"
+                  ></textarea>
+                  <button
+                    @click="saveManualCookie"
+                    :disabled="!manualCookieValue.trim()"
+                    class="px-3 py-1.5 bg-[var(--accent-color)] hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors flex items-center gap-1"
+                  >
+                    <i class="ri-save-line"></i>
+                    {{ t('settings.playback.platforms.saveCookie') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <!-- Custom API Tab -->
             <div
               v-else-if="activeTab === 'customApi'"
@@ -325,8 +445,143 @@ const { allSources } = useMusicSources();
 const tabs = computed(() => [
   { key: 'sources', label: t('settings.playback.lxMusic.tabs.sources') },
   { key: 'lxMusic', label: t('settings.playback.lxMusic.tabs.lxMusic') },
+  { key: 'platforms', label: t('settings.playback.lxMusic.tabs.platforms') },
   { key: 'customApi', label: t('settings.playback.lxMusic.tabs.customApi') }
 ]);
+
+// ==================== 多平台账号管理 ====================
+interface PlatformAccount {
+  key: string;
+  name: string;
+  icon: string;
+  color: string;
+  desc: string;
+  requiresLogin: boolean;
+  loginStatus: boolean;
+  loggingIn: boolean;
+}
+
+const platformList = ref<PlatformAccount[]>([
+  {
+    key: 'qq',
+    name: 'QQ 音乐',
+    icon: 'ri-qq-fill',
+    color: '#1296db',
+    desc: '需要 uin 和 qm_keyst Cookie 才能解锁高品质音源',
+    requiresLogin: true,
+    loginStatus: false,
+    loggingIn: false
+  },
+  {
+    key: 'migu',
+    name: '咪咕音乐',
+    icon: 'ri-music-fill',
+    color: '#ff6b35',
+    desc: 'aversionid Cookie 可解锁更高品质',
+    requiresLogin: true,
+    loginStatus: false,
+    loggingIn: false
+  },
+  {
+    key: 'joox',
+    name: 'JOOX',
+    icon: 'ri-global-line',
+    color: '#42b883',
+    desc: '需要 wmid 和 session_key Cookie',
+    requiresLogin: true,
+    loginStatus: false,
+    loggingIn: false
+  },
+  {
+    key: 'kugou',
+    name: '酷狗音乐',
+    icon: 'ri-music-2-fill',
+    color: '#2196f3',
+    desc: '无需登录，可直接搜索',
+    requiresLogin: false,
+    loginStatus: true,
+    loggingIn: false
+  },
+  {
+    key: 'kuwo',
+    name: '酷我音乐',
+    icon: 'ri-radio-fill',
+    color: '#ff9800',
+    desc: '无需登录，可直接搜索',
+    requiresLogin: false,
+    loginStatus: true,
+    loggingIn: false
+  }
+]);
+
+const manualCookiePlatform = ref('qq');
+const manualCookieValue = ref('');
+
+// 刷新平台登录状态
+const refreshPlatformStatus = async () => {
+  try {
+    const status = await window.api.getPlatformLoginStatus();
+    platformList.value.forEach((p) => {
+      if (p.requiresLogin) {
+        p.loginStatus = Boolean(status[p.key]);
+      }
+    });
+  } catch (error) {
+    console.error('获取平台登录状态失败:', error);
+  }
+};
+
+// 登录平台
+const loginPlatform = async (platformKey: string) => {
+  const platform = platformList.value.find((p) => p.key === platformKey);
+  if (!platform) return;
+
+  platform.loggingIn = true;
+  try {
+    const result = await window.api.openPlatformLogin(platformKey);
+    if (!result) {
+      message.warning(t('settings.playback.platforms.loginWindowFailed'));
+    }
+    // Cookie 到达后会通过 onPlatformLoginCookie 回调更新
+  } catch (error: any) {
+    message.error(`${t('common.error')}：${error.message}`);
+  } finally {
+    platform.loggingIn = false;
+  }
+};
+
+// 退出登录
+const logoutPlatform = async (platformKey: string) => {
+  try {
+    await window.api.setPlatformCookie(platformKey, '');
+    const platform = platformList.value.find((p) => p.key === platformKey);
+    if (platform) {
+      platform.loginStatus = false;
+    }
+    message.success(t('settings.playback.platforms.logoutSuccess'));
+  } catch (error: any) {
+    message.error(`${t('common.error')}：${error.message}`);
+  }
+};
+
+// 保存手动输入的 Cookie
+const saveManualCookie = async () => {
+  const platform = manualCookiePlatform.value;
+  const cookie = manualCookieValue.value.trim();
+  if (!cookie) return;
+
+  try {
+    await window.api.setPlatformCookie(platform, cookie);
+    const p = platformList.value.find((item) => item.key === platform);
+    if (p) {
+      p.loginStatus = true;
+    }
+    message.success(t('settings.playback.platforms.cookieSaved'));
+    manualCookieValue.value = '';
+  } catch (error: any) {
+    message.error(`${t('common.error')}：${error.message}`);
+  }
+};
 
 // 落雪音源列表（从 store 中的脚本解析）
 const lxMusicApis = computed<LxMusicScriptConfig[]>(() => {
@@ -697,11 +952,24 @@ watch(
   { deep: true }
 );
 
+// 监听平台登录 Cookie 到达
+window.api.onPlatformLoginCookie((platform: string, _cookie: string) => {
+  const p = platformList.value.find((item) => item.key === platform);
+  if (p) {
+    p.loginStatus = true;
+    p.loggingIn = false;
+  }
+  message.success(t('settings.playback.platforms.loginSuccess', { platform: p?.name || platform }));
+});
+
 // 同步外部show属性变化
 watch(
   () => props.show,
   (newVal: boolean) => {
     visible.value = newVal;
+    if (newVal) {
+      refreshPlatformStatus();
+    }
   }
 );
 

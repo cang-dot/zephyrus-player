@@ -1,12 +1,12 @@
 <template>
   <div
-    class="setting-item flex items-start justify-between p-4 transition-colors bg-transparent text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-gray-50 hover:dark:bg-white/5"
+    class="setting-item flex items-start justify-between p-4 transition-colors bg-transparent"
     :class="[
       // 移动端垂直布局
       { 'max-md:flex-col max-md:items-start max-md:gap-3': !inline },
       // 可点击样式
       {
-        'cursor-pointer active:bg-gray-100 active:dark:bg-white/10': clickable
+        'cursor-pointer': clickable
       },
       customClass
     ]"
@@ -14,12 +14,12 @@
   >
     <!-- 左侧：标题和描述 -->
     <div class="flex-1 min-w-0 mr-4">
-      <div class="text-base font-medium mb-0.5">
+      <div class="text-base font-medium mb-0.5 setting-item-title">
         <slot name="title">{{ title }}</slot>
       </div>
       <div
         v-if="description || $slots.description"
-        class="text-sm text-gray-500 dark:text-gray-400 leading-normal"
+        class="text-sm leading-normal setting-item-desc"
       >
         <slot name="description">{{ description }}</slot>
       </div>
@@ -78,3 +78,30 @@ const handleClick = (event: MouseEvent) => {
   }
 };
 </script>
+
+<style scoped>
+.setting-item {
+  color: var(--d-text-primary);
+  border-bottom: 1px solid var(--d-border-light);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item:hover {
+  background: var(--d-surface-hover);
+}
+
+.setting-item:active {
+  background: var(--d-surface-active);
+}
+
+.setting-item-title {
+  color: var(--d-text-primary);
+}
+
+.setting-item-desc {
+  color: var(--d-text-secondary);
+}
+</style>

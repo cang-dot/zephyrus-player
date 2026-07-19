@@ -5,6 +5,8 @@
     title="标记高潮段落"
     :bordered="false"
     class="climax-editor"
+    content-style="padding: 20px;"
+    style="width: 820px; max-width: 94vw; border-radius: var(--d-radius-xl); overflow: hidden;"
   >
     <div class="climax-editor-content">
       <!-- 当前歌曲信息 -->
@@ -67,21 +69,34 @@
 
       <!-- 操作按钮 -->
       <div class="editor-actions">
-        <n-button size="small" @click="clearAll" :disabled="climaxStore.segments.length === 0"
-          >清空所有</n-button
+        <button
+          class="d-btn-ghost"
+          :disabled="climaxStore.segments.length === 0"
+          @click="clearAll"
         >
-        <n-button type="primary" size="small" @click="saveToServer" :loading="saving">
+          <i class="ri-eraser-line mr-1" />
+          清空所有
+        </button>
+        <button
+          class="d-btn-primary"
+          :disabled="saving"
+          @click="saveToServer"
+        >
+          <i v-if="saving" class="ri-loader-4-line animate-spin" />
+          <i v-else class="ri-cloud-line" />
           保存到服务器
-        </n-button>
+        </button>
       </div>
 
       <!-- 段落列表 -->
       <div class="segment-list" v-if="climaxStore.segments.length > 0">
         <div class="segment-list-title">已标记段落 ({{ climaxStore.segments.length }})</div>
         <div v-for="(seg, i) in climaxStore.segments" :key="i" class="segment-item">
-          <span>{{ formatTime(seg.start) }} - {{ formatTime(seg.end) }}</span>
+          <span class="segment-time">{{ formatTime(seg.start) }} - {{ formatTime(seg.end) }}</span>
           <span class="segment-duration">({{ formatTime(seg.end - seg.start) }})</span>
-          <button class="remove-btn" @click="removeSegment(i)">×</button>
+          <button class="remove-btn" @click="removeSegment(i)">
+            <i class="ri-close-line" />
+          </button>
         </div>
       </div>
     </div>
@@ -302,14 +317,10 @@ async function saveToServer() {
 </script>
 
 <style scoped lang="scss">
-.climax-editor {
-  max-width: 600px;
-}
-
 .climax-editor-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--d-space-4);
 }
 
 .song-info {
@@ -318,12 +329,13 @@ async function saveToServer() {
   justify-content: space-between;
 
   .song-name {
-    font-weight: 600;
+    font-weight: var(--d-font-semibold);
+    color: var(--d-text-primary);
   }
 
   .song-contributor {
-    font-size: 12px;
-    color: #999;
+    font-size: var(--d-text-xs);
+    color: var(--d-text-muted);
   }
 }
 
@@ -335,13 +347,13 @@ async function saveToServer() {
 .time-scale {
   position: relative;
   height: 16px;
-  margin-bottom: 4px;
+  margin-bottom: var(--d-space-1);
 
   .time-mark {
     position: absolute;
     transform: translateX(-50%);
     font-size: 10px;
-    color: #999;
+    color: var(--d-text-muted);
     white-space: nowrap;
   }
 }
@@ -349,31 +361,28 @@ async function saveToServer() {
 // 时间轴主体
 .timeline {
   position: relative;
-  height: 36px;
-  background: #f0f0f0;
-  border-radius: 6px;
+  height: 44px;
+  background: var(--d-surface-alt);
+  border-radius: var(--d-radius-md);
   cursor: crosshair;
   overflow: visible;
 }
 
-.dark .timeline {
-  background: #333;
-}
-
-// 高潮段落区域
+// 高潮段落区域 — 居中圆角窗口，不贯穿时间轴
 .climax-region {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.4);
-  border-radius: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
+  background: rgba(var(--accent-color-rgb), 0.4);
+  border-radius: var(--d-radius-full);
   display: flex;
   align-items: center;
-  transition: background-color 0.2s;
+  transition: background-color var(--d-duration-fast) var(--d-ease-out);
   z-index: 2;
 
   &.climax-region-active {
-    background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.7);
+    background: rgba(var(--accent-color-rgb), 0.7);
   }
 }
 
@@ -394,8 +403,8 @@ async function saveToServer() {
     width: 3px;
     height: 16px;
     background: rgba(255, 255, 255, 0.6);
-    border-radius: 2px;
-    transition: background 0.2s;
+    border-radius: var(--d-radius-xs);
+    transition: background var(--d-duration-fast) var(--d-ease-out);
   }
 
   &.left::after {
@@ -421,37 +430,40 @@ async function saveToServer() {
 
   .region-label {
     font-size: 10px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--d-text-secondary);
     white-space: nowrap;
   }
 }
 
-// 拖拽预览
+// 拖拽预览 — 与高潮段落一致的圆角窗口
 .climax-preview {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.3);
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
+  background: rgba(var(--accent-color-rgb), 0.3);
+  border-radius: var(--d-radius-full);
   pointer-events: none;
   z-index: 1;
 }
 
-// 播放头
+// 播放头 — 贯穿时间轴的竖条
 .playhead {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #ff0000;
+  background: #ef4444;
   transform: translateX(-1px);
   pointer-events: none;
   z-index: 5;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
 }
 
 .editor-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--d-space-2);
 }
 
 .segment-list {
@@ -459,42 +471,56 @@ async function saveToServer() {
   overflow-y: auto;
 
   .segment-list-title {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 8px;
+    font-size: var(--d-text-xs);
+    color: var(--d-text-muted);
+    margin-bottom: var(--d-space-2);
   }
 
   .segment-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    font-size: 13px;
-    margin-bottom: 4px;
+    gap: var(--d-space-2);
+    padding: var(--d-space-2) var(--d-space-3);
+    background: var(--d-surface-alt);
+    border-radius: var(--d-radius-sm);
+    font-size: var(--d-text-sm);
+    margin-bottom: var(--d-space-1);
+    transition: var(--d-transition-colors);
+
+    &:hover {
+      background: var(--d-surface-hover);
+    }
+
+    .segment-time {
+      color: var(--d-text-primary);
+      font-variant-numeric: tabular-nums;
+    }
 
     .segment-duration {
-      color: #999;
-      font-size: 12px;
+      color: var(--d-text-muted);
+      font-size: var(--d-text-xs);
     }
 
     .remove-btn {
       margin-left: auto;
       background: none;
       border: none;
-      color: #999;
+      color: var(--d-text-muted);
       cursor: pointer;
       font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--d-radius-full);
+      transition: var(--d-transition-colors);
 
       &:hover {
-        color: #ff4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
       }
     }
   }
-}
-
-.dark .segment-item {
-  background: #2a2a2a;
 }
 </style>

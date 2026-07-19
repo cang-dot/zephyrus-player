@@ -1,8 +1,8 @@
 <template>
-  <div class="h-full w-full bg-white dark:bg-black transition-colors duration-500 flex flex-col flex-1 min-h-0">
+  <div class="h-full w-full page-bg transition-colors duration-500 flex flex-col flex-1 min-h-0">
     <div class="flex-shrink-0 page-padding pt-6 pb-2">
       <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white">
+        <h1 class="d-page-title">
           {{ t('common.settings') }}
         </h1>
         <!-- 搜索框 -->
@@ -11,7 +11,7 @@
           <input
             ref="searchInputRef"
             v-model="searchQuery"
-            class="settings-search-input"
+            class="settings-search-input d-input"
             :placeholder="t('comp.searchBar.searchPlaceholder')"
             @input="onSearchInput"
             @keydown.escape="clearSearch"
@@ -46,10 +46,10 @@
               <div
                 v-for="(result, idx) in searchResults"
                 :key="idx"
-                class="search-result-card"
+                class="d-search-card search-result-card"
                 @click="jumpToResult(result)"
               >
-                <div class="search-result-tab">{{ result.tabLabel }}</div>
+                <div class="d-tag-sm search-result-tab">{{ result.tabLabel }}</div>
                 <div class="search-result-info">
                   <div class="search-result-title" v-html="highlight(result.title)" />
                   <div v-if="result.desc" class="search-result-desc" v-html="highlight(result.desc)" />
@@ -57,8 +57,8 @@
                 <i class="ri-arrow-right-s-line search-result-arrow" />
               </div>
             </div>
-            <div v-else class="search-no-results">
-              <i class="ri-search-eye-line" />
+            <div v-else class="d-empty-state search-no-results">
+              <i class="ri-search-eye-line"></i>
               <p>未找到与 "{{ searchQuery }}" 相关的设置</p>
             </div>
           </template>
@@ -419,11 +419,11 @@ onMounted(() => {
 
 <style scoped>
 :deep(.n-select .n-base-selection) {
-  border-radius: 10px;
+  border-radius: var(--d-radius-md);
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn var(--d-duration-slow) var(--d-ease-out);
 }
 
 @keyframes fadeIn {
@@ -450,37 +450,15 @@ onMounted(() => {
   position: absolute;
   left: 12px;
   font-size: 16px;
-  color: #9ca3af;
+  color: var(--d-text-muted);
   pointer-events: none;
+  z-index: 1;
 }
 
+/* d-input 提供基础样式，这里仅补充 padding 以腾出图标位置 */
 .settings-search-input {
-  width: 100%;
-  height: 36px;
   padding: 0 32px 0 36px;
-  border-radius: 9999px;
-  border: 1.5px solid #e5e7eb;
-  background: #f9fafb;
-  font-size: 13px;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-}
-
-.settings-search-input:focus {
-  border-color: var(--accent-color, #888888);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 136, 136, 136), 0.1);
-}
-
-.dark .settings-search-input {
-  border-color: #374151;
-  background: #111827;
-  color: #f3f4f6;
-}
-
-.dark .settings-search-input:focus {
-  background: #0a0a0a;
+  height: 36px;
 }
 
 .settings-search-clear {
@@ -491,81 +469,28 @@ onMounted(() => {
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
+  border-radius: var(--d-radius-full);
   border: none;
-  background: #e5e7eb;
-  color: #6b7280;
+  background: var(--d-surface-active);
+  color: var(--d-text-secondary);
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.12s;
-}
-
-.dark .settings-search-clear {
-  background: #374151;
-  color: #9ca3af;
+  transition: background var(--d-duration-fast) var(--d-ease-out);
 }
 
 .settings-search-clear:hover {
-  background: #d1d5db;
-}
-
-.dark .settings-search-clear:hover {
-  background: #4b5563;
+  background: var(--d-border-strong);
 }
 
 /* 搜索结果 */
 .search-results-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
-
-.dark .search-results-header {
-  color: #9ca3af;
-}
-
-.search-result-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #f3f4f6;
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.15s;
-  margin-bottom: 8px;
-}
-
-.dark .search-result-card {
-  background: #111827;
-  border-color: #1f2937;
-}
-
-.search-result-card:hover {
-  border-color: var(--accent-color, #888888);
-  box-shadow: 0 2px 12px rgba(var(--accent-color-rgb, 136, 136, 136), 0.08);
-  transform: translateX(2px);
-}
-
-.search-result-tab {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: #f3f4f6;
-  color: #6b7280;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.dark .search-result-tab {
-  background: #1f2937;
-  color: #9ca3af;
+  gap: var(--d-space-2);
+  font-size: var(--d-text-sm);
+  color: var(--d-text-secondary);
+  margin-bottom: var(--d-space-4);
+  padding: 0 var(--d-space-1);
 }
 
 .search-result-info {
@@ -574,19 +499,15 @@ onMounted(() => {
 }
 
 .search-result-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #111827;
+  font-size: var(--d-text-sm);
+  font-weight: var(--d-font-medium);
+  color: var(--d-text-primary);
   margin-bottom: 2px;
 }
 
-.dark .search-result-title {
-  color: #f3f4f6;
-}
-
 .search-result-desc {
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: var(--d-text-xs);
+  color: var(--d-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -594,41 +515,17 @@ onMounted(() => {
 
 .search-result-arrow {
   font-size: 18px;
-  color: #d1d5db;
+  color: var(--d-text-muted);
   flex-shrink: 0;
-}
-
-.dark .search-result-arrow {
-  color: #4b5563;
 }
 
 .search-result-title :deep(mark),
 .search-result-desc :deep(mark) {
-  background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.15);
-  color: var(--accent-color, #888888);
+  background: rgba(var(--accent-color-rgb), 0.15);
+  color: var(--accent-color);
   border-radius: 2px;
   padding: 0 1px;
-  font-weight: 600;
-}
-
-/* 无结果 */
-.search-no-results {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #9ca3af;
-}
-
-.search-no-results i {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.4;
-}
-
-.search-no-results p {
-  font-size: 14px;
+  font-weight: var(--d-font-semibold);
 }
 
 /* 跳转后闪烁 */
@@ -638,6 +535,6 @@ onMounted(() => {
 
 @keyframes flashHighlight {
   0%, 100% { background: transparent; }
-  10%, 30% { background: rgba(var(--accent-color-rgb, 136, 136, 136), 0.08); }
+  10%, 30% { background: rgba(var(--accent-color-rgb), 0.08); }
 }
 </style>

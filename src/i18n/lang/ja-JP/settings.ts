@@ -129,6 +129,7 @@ export default {
       tabs: {
         sources: '音源選択',
         lxMusic: '落雪音源',
+        platforms: 'プラットフォームアカウント',
         customApi: 'カスタムAPI'
       },
       scripts: {
@@ -151,6 +152,28 @@ export default {
         nameRequired: '名前を空にすることはできません',
         renameSuccess: '名前を変更しました'
       }
+    },
+    platforms: {
+      title: 'プラットフォームアカウント',
+      desc: '各音楽プラットフォームのログイン状態を管理します。ログインで高音質音源と限定コンテンツを解除',
+      loggedIn: 'ログイン済み',
+      notLoggedIn: '未ログイン',
+      noLoginRequired: 'ログイン不要',
+      login: 'ログイン',
+      relogin: '再ログイン',
+      loggingIn: 'ログイン中...',
+      logoutSuccess: 'ログアウトしました',
+      loginSuccess: '{platform} ログイン成功',
+      loginWindowFailed: 'ログインウィンドウを開けません',
+      manualCookie: '手動Cookie入力',
+      cookiePlaceholder: 'Cookie文字列を貼り付け、例：uin=12345; qm_keyst=abc;',
+      saveCookie: 'Cookieを保存',
+      cookieSaved: 'Cookieが保存されました',
+      qq: { desc: 'uinとqm_keyst Cookieで高音質音源を解除' },
+      migu: { desc: 'aversionid Cookieでより高品質を解除' },
+      joox: { desc: 'wmidとsession_key Cookieが必要' },
+      kugou: { desc: 'ログイン不要、直接検索可能' },
+      kuwo: { desc: 'ログイン不要、直接検索可能' }
     }
   },
   application: {

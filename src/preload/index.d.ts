@@ -67,6 +67,33 @@ interface API {
       _callback: (data: { pluginId: string; status: string; percent?: number }) => void
     ) => () => void;
   };
+
+  /** 多平台搜索 */
+  multiPlatformSearch: (
+    keyword: string,
+    platforms: string[],
+    limit?: number
+  ) => Promise<
+    {
+      platform: string;
+      songs: {
+        id: string;
+        name: string;
+        artists: string[];
+        album: string;
+        duration: number;
+        picUrl?: string;
+        platform: string;
+        platformId: string;
+      }[];
+      error?: string;
+    }[]
+  >;
+  getPlatformCookie: (platform: string) => Promise<{ cookie: string; expiresAt: number; updatedAt: number } | null>;
+  setPlatformCookie: (platform: string, cookie: string) => Promise<boolean>;
+  getPlatformLoginStatus: () => Promise<Record<string, boolean>>;
+  openPlatformLogin: (platform: string) => Promise<boolean>;
+  onPlatformLoginCookie: (callback: (platform: string, cookie: string) => void) => void;
 }
 
 // 自定义IPC渲染进程通信接口

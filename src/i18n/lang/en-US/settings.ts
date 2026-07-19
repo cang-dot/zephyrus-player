@@ -139,6 +139,7 @@ export default {
       tabs: {
         sources: 'Source Selection',
         lxMusic: 'LX Music',
+        platforms: 'Platform Accounts',
         customApi: 'Custom API'
       },
       scripts: {
@@ -161,6 +162,28 @@ export default {
         nameRequired: 'Name cannot be empty',
         renameSuccess: 'Rename successful'
       }
+    },
+    platforms: {
+      title: 'Platform Accounts',
+      desc: 'Manage login status for each music platform. Login to unlock high-quality audio and exclusive content',
+      loggedIn: 'Logged In',
+      notLoggedIn: 'Not Logged In',
+      noLoginRequired: 'No Login Required',
+      login: 'Login',
+      relogin: 'Re-login',
+      loggingIn: 'Logging in...',
+      logoutSuccess: 'Logged out',
+      loginSuccess: '{platform} login successful',
+      loginWindowFailed: 'Failed to open login window',
+      manualCookie: 'Manual Cookie Input',
+      cookiePlaceholder: 'Paste cookie string, e.g.: uin=12345; qm_keyst=abc;',
+      saveCookie: 'Save Cookie',
+      cookieSaved: 'Cookie saved',
+      qq: { desc: 'Requires uin and qm_keyst Cookie to unlock high-quality audio' },
+      migu: { desc: 'aversionid Cookie unlocks higher quality' },
+      joox: { desc: 'Requires wmid and session_key Cookie' },
+      kugou: { desc: 'No login required, can search directly' },
+      kuwo: { desc: 'No login required, can search directly' }
     }
   },
   application: {

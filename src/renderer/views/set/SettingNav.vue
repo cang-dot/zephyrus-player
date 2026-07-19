@@ -1,16 +1,12 @@
 <template>
   <div
-    class="w-32 h-full flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-light dark:bg-dark"
+    class="setting-nav w-32 h-full flex-shrink-0"
   >
     <div
       v-for="section in sections"
       :key="section.id"
-      class="px-4 py-2.5 cursor-pointer text-sm transition-colors duration-200 border-l-2"
-      :class="[
-        currentSection === section.id
-          ? 'text-[var(--accent-color)] dark:text-white bg-gray-50 dark:bg-dark-100 !border-[var(--accent-color)] font-medium'
-          : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-[var(--accent-color)] hover:dark:text-white hover:bg-gray-50 hover:dark:bg-dark-100 hover:border-gray-300'
-      ]"
+      class="setting-nav-item"
+      :class="{ 'is-active': currentSection === section.id }"
       @click="handleClick(section.id)"
     >
       {{ section.title }}
@@ -45,3 +41,31 @@ const handleClick = (sectionId: string) => {
   emit('navigate', sectionId);
 };
 </script>
+
+<style scoped>
+.setting-nav {
+  border-right: 1px solid var(--d-border);
+  background: var(--d-surface);
+}
+
+.setting-nav-item {
+  padding: var(--d-space-2) var(--d-space-4);
+  cursor: pointer;
+  font-size: var(--d-text-sm);
+  color: var(--d-text-secondary);
+  border-left: 2px solid transparent;
+  transition: var(--d-transition-colors);
+}
+
+.setting-nav-item:hover {
+  color: var(--accent-color);
+  background: var(--d-surface-hover);
+}
+
+.setting-nav-item.is-active {
+  color: var(--accent-color);
+  background: var(--d-surface-hover);
+  border-left-color: var(--accent-color);
+  font-weight: var(--d-font-medium);
+}
+</style>

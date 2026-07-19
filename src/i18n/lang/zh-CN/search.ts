@@ -35,5 +35,10 @@ export default {
     probing: '探测来源中',
     probeProgress: '探测来源 {done}/{total}',
     noSource: '无可用源'
+  },
+  crossSearch: {
+    loading: '正在跨平台搜索...',
+    results: '跨平台补充结果',
+    failed: '跨平台搜索失败'
   }
 };

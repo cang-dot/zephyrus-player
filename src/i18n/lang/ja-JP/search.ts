@@ -29,5 +29,17 @@ export default {
 
   history: '検索履歴',
   hot: '人気検索',
-  suggestions: '検索候補'
+  suggestions: '検索候補',
+  filter: {
+    source: 'ソースフィルター',
+    all: 'すべて',
+    probing: 'ソース探測中',
+    probeProgress: '探測 {done}/{total}',
+    noSource: '利用可能なソースなし'
+  },
+  crossSearch: {
+    loading: 'クロスプラットフォーム検索中...',
+    results: 'クロスプラットフォーム結果',
+    failed: 'クロスプラットフォーム検索失敗'
+  }
 };

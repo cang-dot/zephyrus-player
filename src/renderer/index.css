@@ -526,3 +526,280 @@
     background: var(--d-surface);
   }
 }
+
+/* ============================================================
+   语义组件工具类
+   统一各页面的按钮、标签、输入框、卡片等样式
+   ============================================================ */
+
+/* ── 标签/筛选按钮（chip）── */
+.d-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--d-space-1);
+  padding: var(--d-space-2) var(--d-space-4);
+  border-radius: var(--d-radius-full);
+  font-size: var(--d-text-sm);
+  font-weight: var(--d-font-medium);
+  background: var(--d-surface-alt);
+  color: var(--d-text-secondary);
+  transition: var(--d-transition-colors);
+  cursor: pointer;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+}
+
+.d-chip:hover {
+  background: var(--d-surface-hover);
+}
+
+.d-chip:active {
+  transform: scale(0.97);
+  transition: transform var(--d-duration-fast) var(--d-ease-out);
+}
+
+.d-chip-active {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: var(--d-shadow-sm);
+}
+
+.d-chip-active:hover {
+  background: var(--accent-color);
+  filter: brightness(1.1);
+}
+
+/* ── 小尺寸标签 ── */
+.d-chip-sm {
+  padding: var(--d-space-1) var(--d-space-2-5, 10px);
+  font-size: var(--d-text-xs);
+  gap: var(--d-space-1);
+}
+
+/* ── 主按钮 ── */
+.d-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--d-space-2);
+  padding: var(--d-space-2) var(--d-space-6);
+  border-radius: var(--d-radius-full);
+  background: var(--accent-color);
+  color: #fff;
+  font-size: var(--d-text-sm);
+  font-weight: var(--d-font-semibold);
+  border: none;
+  cursor: pointer;
+  transition: var(--d-transition-colors), transform var(--d-duration-fast) var(--d-ease-out);
+  box-shadow: var(--d-shadow-sm);
+}
+
+.d-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.d-btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* ── 图标按钮（圆形）── */
+.d-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--d-radius-full);
+  background: var(--d-surface-alt);
+  color: var(--d-text-secondary);
+  border: none;
+  cursor: pointer;
+  transition: var(--d-transition-colors), transform var(--d-duration-fast) var(--d-ease-out);
+  flex-shrink: 0;
+}
+
+.d-btn-icon:hover {
+  background: var(--d-surface-hover);
+  color: var(--d-text-primary);
+}
+
+.d-btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* ── 次要按钮 ── */
+.d-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--d-space-1);
+  padding: var(--d-space-1) var(--d-space-3);
+  border-radius: var(--d-radius-full);
+  background: rgba(var(--accent-color-rgb), 0.1);
+  color: var(--accent-color);
+  font-size: var(--d-text-xs);
+  font-weight: var(--d-font-bold);
+  border: none;
+  cursor: pointer;
+  transition: var(--d-transition-colors);
+}
+
+.d-btn-ghost:hover {
+  background: rgba(var(--accent-color-rgb), 0.2);
+}
+
+.d-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── 搜索/文本输入框 ── */
+.d-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--d-space-4);
+  border-radius: var(--d-radius-full);
+  border: 1.5px solid var(--d-border);
+  background: var(--d-surface-alt);
+  font-size: var(--d-text-sm);
+  color: var(--d-text-primary);
+  outline: none;
+  transition: border-color var(--d-duration-fast) var(--d-ease-out),
+              background var(--d-duration-fast) var(--d-ease-out),
+              box-shadow var(--d-duration-fast) var(--d-ease-out);
+}
+
+.d-input::placeholder {
+  color: var(--d-text-muted);
+}
+
+.d-input:focus {
+  border-color: var(--accent-color);
+  background: var(--d-surface);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+}
+
+/* ── 粘性顶部毛玻璃栏 ── */
+.d-sticky-bar {
+  background: var(--d-glass-bg);
+  backdrop-filter: var(--d-glass-blur);
+  -webkit-backdrop-filter: var(--d-glass-blur);
+  border-bottom: 1px solid var(--d-border-light);
+}
+
+/* ── 页面空状态 ── */
+.d-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--d-space-16) var(--d-space-6);
+  color: var(--d-text-muted);
+}
+
+.d-empty-state i {
+  font-size: 3.75rem;
+  margin-bottom: var(--d-space-4);
+  opacity: 0.2;
+}
+
+.d-empty-state p {
+  font-size: var(--d-text-sm);
+}
+
+/* ── 列表项 hover 背景 ── */
+.d-list-item {
+  transition: var(--d-transition-colors);
+  border-radius: var(--d-radius-lg);
+  cursor: pointer;
+}
+
+.d-list-item:hover {
+  background: var(--d-surface-hover);
+}
+
+.d-list-item:active {
+  transform: scale(0.995);
+  transition: transform var(--d-duration-fast) var(--d-ease-out);
+}
+
+/* ── 搜索结果卡片 ── */
+.d-search-card {
+  display: flex;
+  align-items: center;
+  gap: var(--d-space-3);
+  padding: var(--d-space-3) var(--d-space-4);
+  border-radius: var(--d-radius-md);
+  border: 1px solid var(--d-border-light);
+  background: var(--d-card);
+  cursor: pointer;
+  transition: var(--d-transition-colors), transform var(--d-duration-fast) var(--d-ease-out),
+              box-shadow var(--d-duration-fast) var(--d-ease-out);
+  margin-bottom: var(--d-space-2);
+}
+
+.d-search-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 12px rgba(var(--accent-color-rgb), 0.08);
+  transform: translateX(2px);
+}
+
+/* ── 搜索结果 tab 标签 ── */
+.d-tag-sm {
+  font-size: 11px;
+  font-weight: var(--d-font-semibold);
+  padding: 3px var(--d-space-2);
+  border-radius: var(--d-radius-sm);
+  background: var(--d-surface-alt);
+  color: var(--d-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── 分隔线 ── */
+.d-divider {
+  height: 1px;
+  background: var(--d-border-light);
+}
+
+.d-divider-vertical {
+  width: 1px;
+  background: var(--d-border);
+  align-self: stretch;
+}
+
+/* ── 页面标题 ── */
+.d-page-title {
+  font-size: var(--d-text-3xl);
+  font-weight: var(--d-font-bold);
+  letter-spacing: -0.025em;
+  color: var(--d-text-primary);
+}
+
+@media (min-width: 768px) {
+  .d-page-title {
+    font-size: 2.25rem;
+  }
+}
+
+/* ── 页面副标题 ── */
+.d-page-subtitle {
+  color: var(--d-text-secondary);
+  font-size: var(--d-text-sm);
+}
+
+/* ── 区块标题 ── */
+.d-section-title {
+  font-size: var(--d-text-lg);
+  font-weight: var(--d-font-bold);
+  color: var(--d-text-primary);
+}
+
+/* ── 加载更多/页脚文字 ── */
+.d-footer-text {
+  font-size: var(--d-text-xs);
+  color: var(--d-text-muted);
+  font-weight: var(--d-font-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

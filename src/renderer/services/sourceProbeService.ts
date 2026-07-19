@@ -30,6 +30,11 @@ export type SourceLabel =
   | 'custom' // 自定义 API
   | 'gdmusic' // GD 音乐台
   | 'unblock' // 解锁音源（咪咕/酷狗/酷我/QQ）
+  | 'cross-qq' // 跨平台：QQ 音乐
+  | 'cross-migu' // 跨平台：咪咕音乐
+  | 'cross-kugou' // 跨平台：酷狗音乐
+  | 'cross-kuwo' // 跨平台：酷我音乐
+  | 'cross-joox' // 跨平台：JOOX（QQ 音乐国际版）
   | 'none' // 无可用源
   | 'pending'; // 探测中
 
@@ -46,6 +51,11 @@ export const SOURCE_LABEL_CONFIG: Record<
   custom: { text: '自定义API', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
   gdmusic: { text: 'GD音乐台', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)' },
   unblock: { text: '解锁音源', color: '#f97316', bg: 'rgba(249,115,22,0.12)' },
+  'cross-qq': { text: 'QQ音乐', color: '#1296db', bg: 'rgba(18,150,219,0.12)' },
+  'cross-migu': { text: '咪咕', color: '#ff6b35', bg: 'rgba(255,107,53,0.12)' },
+  'cross-kugou': { text: '酷狗', color: '#2196f3', bg: 'rgba(33,150,243,0.12)' },
+  'cross-joox': { text: 'JOOX', color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+  'cross-kuwo': { text: '酷我', color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)' },
   none: { text: '无可用源', color: '#9ca3af', bg: 'rgba(156,163,175,0.12)' },
   pending: { text: '探测中', color: '#6b7280', bg: 'rgba(107,114,128,0.12)' }
 };
@@ -65,8 +75,27 @@ const BATCH_CONCURRENCY = 3;
 /**
  * 即时分类（零网络请求）
  * 基于网易云搜索结果自带的 fee/privilege/noCopyrightRcmd 字段快速判断
+ * 跨平台歌曲直接根据 platform 字段标注
  */
 export function quickClassify(song: any): SourceLabel {
+  // 跨平台歌曲直接返回对应平台标签（无需探测）
+  if (song?.platform && song.platform !== 'netease') {
+    switch (song.platform) {
+      case 'qq':
+        return 'cross-qq';
+      case 'migu':
+        return 'cross-migu';
+      case 'kugou':
+        return 'cross-kugou';
+      case 'joox':
+        return 'cross-joox';
+      case 'kuwo':
+        return 'cross-kuwo';
+      default:
+        return 'none';
+    }
+  }
+
   const fee = song?.fee ?? song?.privilege?.fee ?? 0;
   const privilege = song?.privilege;
   const hasNoCopyright = Boolean(song?.noCopyrightRcmd);
@@ -94,6 +123,9 @@ export function quickClassify(song: any): SourceLabel {
  * 探测单首歌曲的可用来源（有网络请求）
  * 按策略优先级依次尝试，第一个成功策略的名称映射为来源标签
  *
+ * 注意：跨平台歌曲（platform + platformId）不需要探测，
+ * quickClassify 已直接标注对应平台标签。
+ *
  * @param song 歌曲数据（SongResult 格式）
  * @returns 来源标签
  */
@@ -104,6 +136,13 @@ export async function probeSongSource(song: SongResult): Promise<SourceLabel> {
   const cached = probeCache.get(songId);
   if (cached && cached !== 'pending') {
     return cached;
+  }
+
+  // 跨平台歌曲无需探测，直接返回平台标签
+  if (song.platform && song.platform !== 'netease') {
+    const label = quickClassify(song);
+    probeCache.set(songId, label);
+    return label;
   }
 
   // 正在探测中，等待

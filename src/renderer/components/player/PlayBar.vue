@@ -753,10 +753,14 @@ function clearCollapseTimer() {
 }
 
 const handlePlayBarMouseMove = () => {
+  // overlay 模式下不自动收起
+  if (isOverlayMode.value) return;
   if (showFullStyle.value) resetCollapseTimer();
 };
 
 const handleWindowMouseMove = (e: MouseEvent) => {
+  // overlay 模式下不自动收起
+  if (isOverlayMode.value) return;
   if (!showFullStyle.value) return;
   const isNearBottom = e.clientY >= window.innerHeight - HOVER_ZONE;
   if (isNearBottom && playBarCollapsed.value) resetCollapseTimer();
@@ -764,6 +768,12 @@ const handleWindowMouseMove = (e: MouseEvent) => {
 
 watch(showFullStyle, (visible) => {
   if (visible) {
+    // overlay 模式下所有播放器样式都不自动收起 PlayBar
+    // （overlay 模式的 PlayBar 已是透明浮动控件，收起会导致进度条和控件不可见）
+    if (isOverlayMode.value) {
+      playBarCollapsed.value = false;
+      return;
+    }
     try {
       const saved = localStorage.getItem('music-full-config');
       if (saved) {

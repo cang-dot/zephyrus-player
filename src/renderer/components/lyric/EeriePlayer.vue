@@ -3,6 +3,7 @@
     <div
       v-if="isVisible"
       class="eerie-player"
+      :class="{ 'overlay-mode': overlayMode }"
       :style="{
         '--accent-color': accentColor,
         '--accent-dark': accentDark,
@@ -65,10 +66,12 @@
         <player-controls
           v-if="!overlayMode"
           v-show="controlsVisible"
+          :isFullScreen="isFullScreen"
           :showStyleSwitch="false"
           theme="light"
           class="no-toggle"
           @close="close"
+          @toggleFullscreen="toggleFullScreen"
         />
       </div>
     </transition>
@@ -92,6 +95,9 @@ import { startVHSAnimation } from '@/lib/vhsEffect';
 import { getClimaxWordCandidates, setCurrentSongId } from '@/utils/emotionalDetector';
 
 import newspaperManifest from '@/assets/textures/newspaper/manifest.json';
+// 使用 Vite glob import 在构建时正确解析报纸纹理图片 URL
+// 避免 manifest.json 中的字符串路径在构建后失效（dev 可用 / build 404）
+const newspaperImageModules = import.meta.glob('@/assets/textures/newspaper/newspaper-*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 import PlayerControls from './PlayerControls.vue';
 
 // ==================== 署名类歌词检测（参考 SmartMixService）====================
@@ -175,6 +181,7 @@ watch(
 
 onMounted(() => {
   window.addEventListener('music-full-config-updated', handleConfigUpdate);
+  document.addEventListener('fullscreenchange', handleFullScreenChange);
   styleEngine.syncFromPlayerStore();
   styleEngine.syncCoverColors();
   if (playerStore.currentSong?.id) {
@@ -383,7 +390,12 @@ interface NewspaperItem { id: number; src: string; }
 const activeNewspapers = ref<NewspaperItem[]>([]);
 let newspaperIdCounter = 0;
 let climaxNewspaperTimer: ReturnType<typeof setInterval> | null = null;
-const newspaperTextures = (newspaperManifest as any).textures || [];
+const newspaperTextures = ((newspaperManifest as any).textures || []).map((t: any) => {
+  // 将 manifest 中的相对路径替换为 Vite 构建后的正确 URL
+  const fileName = (t.src as string).split('/').pop();
+  const matchedKey = Object.keys(newspaperImageModules).find(k => k.endsWith(fileName));
+  return { ...t, src: matchedKey ? newspaperImageModules[matchedKey] : t.src };
+});
 let climaxIndex = 0;
 
 function flashNewspaper(src: string) {
@@ -427,12 +439,35 @@ watch(isInClimax, (newVal, oldVal) => {
   }, 250);
 });
 
+// ==================== 全屏控制 ====================
+const isFullScreen = ref(false);
+
+async function toggleFullScreen() {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+      isFullScreen.value = true;
+    } else {
+      await document.exitFullscreen();
+      isFullScreen.value = false;
+    }
+  } catch (e) {
+    console.error('全屏切换失败:', e);
+  }
+}
+
+function handleFullScreenChange() {
+  isFullScreen.value = !!document.fullscreenElement;
+}
+
 function close() { isVisible.value = false; }
 
 onBeforeUnmount(() => {
   if (noiseStopFn) noiseStopFn();
   stopClimaxNewspapers();
   if (flashTimer) clearTimeout(flashTimer);
+  document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  if (document.fullscreenElement) document.exitFullscreen();
 });
 </script>
 
@@ -441,6 +476,12 @@ onBeforeUnmount(() => {
   position: fixed; inset: 0; z-index: 9998;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: hidden; background: var(--bg-color);
+
+  /* overlay 模式：低 z-index + pointer-events 穿透，让侧边栏可交互 */
+  &.overlay-mode {
+    z-index: 1;
+    pointer-events: none;
+  }
 }
 
 .bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }

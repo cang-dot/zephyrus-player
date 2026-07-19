@@ -7,6 +7,7 @@ import i18n from '@/../i18n/renderer';
 import { getParsingMusicUrl } from '@/api/music';
 import { useLocalMusic, isLocalSong } from '@/hooks/useLocalMusic';
 import { useLyrics, useSongDetail } from '@/hooks/usePlayerHooks';
+import { isCrossPlatformSong } from '@/api/crossPlatformSearch';
 import { audioService } from '@/services/audioService';
 import { playbackRequestManager } from '@/services/playbackRequestManager';
 import { preloadService } from '@/services/preloadService';
@@ -259,7 +260,7 @@ export const usePlayerCoreStore = defineStore(
 
       const originalMusic = { ...music };
 
-      const { loadLrc } = useLyrics();
+      const { loadLrc, loadCrossPlatformLyric } = useLyrics();
       const { getSongDetail } = useSongDetail();
       const localMusic = useLocalMusic();
 
@@ -269,6 +270,10 @@ export const usePlayerCoreStore = defineStore(
           // 本地歌曲始终走专属歌词加载（优先级：外部 .lrc → 内嵌歌词 → 社区歌词）
           if (isLocalSong(music)) {
             return await localMusic.loadLocalLyrics(music);
+          }
+          // 跨平台歌曲：通过 GD 音乐台获取歌词（不走网易云 API）
+          if (isCrossPlatformSong(music)) {
+            return await loadCrossPlatformLyric(music);
           }
           // 在线歌曲：如果已有歌词且有效，直接使用
           if (music.lyric && music.lyric.lrcTimeArray.length > 0) {

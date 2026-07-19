@@ -125,8 +125,13 @@ export const usePlaylistStore = defineStore(
         if (nextSong && !(nextSong.lyric && nextSong.lyric.lrcTimeArray.length > 0)) {
           try {
             const { useLyrics } = await import('@/hooks/usePlayerHooks');
-            const { loadLrc } = useLyrics();
-            nextSong.lyric = await loadLrc(nextSong.id);
+            const { loadLrc, loadCrossPlatformLyric } = useLyrics();
+            // 跨平台歌曲使用专属歌词加载逻辑
+            if (nextSong.platform && nextSong.platform !== 'netease' && nextSong.platformId) {
+              nextSong.lyric = await loadCrossPlatformLyric(nextSong);
+            } else {
+              nextSong.lyric = await loadLrc(nextSong.id);
+            }
           } catch (error) {
             console.error('加载歌词失败:', error);
           }

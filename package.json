@@ -1,6 +1,6 @@
 {
   "name": "ZephyrusPlayer",
-  "version": "0.9.9",
+  "version": "0.9.9-update",
   "description": "Zephyrus Player",
   "author": "Zephyrus <WEISTUDIOWEI@126.com>",
   "main": "./out/main/index.js",
@@ -20,7 +20,7 @@
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win --publish never",
+    "build:win": "npm run build && cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 electron-builder --win --publish never",
     "build:mac": "npm run build && electron-builder --mac --x64 --publish never && cp dist/latest-mac.yml dist/latest-mac-x64.yml && electron-builder --mac --arm64 --publish never && cp dist/latest-mac.yml dist/latest-mac-arm64.yml && node scripts/merge_latest_mac_yml.mjs dist/latest-mac-x64.yml dist/latest-mac-arm64.yml dist/latest-mac.yml",
     "build:mac:x64": "npm run build && electron-builder --mac --x64 --publish never && cp dist/latest-mac.yml dist/latest-mac-x64.yml",
     "build:mac:arm64": "npm run build && electron-builder --mac --arm64 --publish never && cp dist/latest-mac.yml dist/latest-mac-arm64.yml",
