@@ -23,6 +23,7 @@
 
 Zephyrus Player 是一款基于 Electron + Vue 3 的沉浸式桌面音乐播放器，深度集成网易云音乐生态，支持跨平台音源搜索、多平台音源解锁、本地音乐管理、逐字歌词、实时高潮检测驱动的视觉动画，以及高度可定制的播放器界面。
 在找[安卓版](https://www.github.com/cang-dot/zephyrus-player-android) ？
+
 ---
 
 ## ✨ 功能亮点
