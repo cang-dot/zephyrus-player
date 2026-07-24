@@ -1,6 +1,21 @@
-﻿<template>
+﻿﻿<template>
   <div class="local-music-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
-    <n-scrollbar class="h-full">
+    <!-- Non-Electron fallback (mobile/web) -->
+    <div
+      v-if="!isElectron"
+      class="flex h-full flex-col items-center justify-center px-8 text-center"
+    >
+      <div
+        class="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-[var(--accent-color)]/10"
+      >
+        <i class="ri-folder-music-fill text-5xl text-[var(--accent-color)] opacity-60" />
+      </div>
+      <p class="max-w-xs text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+        {{ t('localMusic.desktopOnly') }}
+      </p>
+    </div>
+
+    <n-scrollbar v-else class="h-full">
       <div class="local-music-content pb-32">
         <!-- Hero Section -->
         <section class="hero-section relative overflow-hidden rounded-tl-2xl">
@@ -349,6 +364,7 @@ import { useLocalMusicStore } from '@/store/modules/localMusic';
 import { usePlayerStore } from '@/store/modules/player';
 import type { SongResult } from '@/types/music';
 import type { LocalMusicEntry } from '@/types/localMusic';
+import { isElectron } from '@/utils';
 import { filterByKeyword, sortMusicList, toSongResult } from '@/utils/localMusicUtils';
 import type { SortKey } from '@/utils/localMusicUtils';
 
@@ -550,6 +566,7 @@ async function handlePlayAll(): Promise<void> {
 
 // ==================== Lifecycle ====================
 onMounted(async () => {
+  if (!isElectron) return;
   await localMusicStore.loadFromCache();
 });
 </script>

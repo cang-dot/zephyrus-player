@@ -37,6 +37,7 @@ import { checkLoginStatus } from '@/utils/auth';
 
 import { initAudioListeners, initMusicHook } from './hooks/MusicHook';
 import { initCoverColor, useCoverColor } from './hooks/useCoverColor';
+import { initNativeBridge, registerBackHandler } from './services/androidNative';
 import { audioService } from './services/audioService';
 import { initLxMusicRunner } from './services/LxMusicSourceRunner';
 import { useStyleEngineStore } from './store/modules/styleEngine';
@@ -334,6 +335,19 @@ onMounted(async () => {
 
   // 初始化样式引擎（启动鼓点/高潮检测器）
   styleEngine.init();
+
+  // 初始化 Android 原生桥接（状态栏、媒体通知、返回手势等）
+  initNativeBridge();
+
+  // 注册全局返回手势处理器：返回上一页而非退出应用
+  registerBackHandler(() => {
+    if (router.currentRoute.value.path === '/') {
+      // 首页时返回手势不处理（允许退出）
+      return false;
+    }
+    router.back();
+    return true;
+  });
 });
 
 onBeforeUnmount(() => {

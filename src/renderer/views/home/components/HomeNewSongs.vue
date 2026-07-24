@@ -1,9 +1,9 @@
 <template>
   <section class="new-songs-section">
     <!-- Section Header -->
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-4 md:mb-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <h2 class="text-xl font-bold tracking-tight text-neutral-900 md:text-2xl dark:text-white">
+        <h2 class="text-lg font-bold tracking-tight text-neutral-900 md:text-2xl dark:text-white">
           {{ title }}
         </h2>
         <div class="h-1.5 w-1.5 rounded-full bg-[var(--accent-color)]" />

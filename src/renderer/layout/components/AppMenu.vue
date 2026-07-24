@@ -22,9 +22,12 @@
                   :class="item.meta.icon"
                 ></i>
                 <span
-                  v-if="settingsStore.setData.isMenuExpanded"
-                  class="app-menu-item-text ml-3"
-                  :class="isChecked(index) ? 'text-[var(--accent-color)]' : ''"
+                  v-if="settingsStore.setData.isMenuExpanded || isMobile"
+                  class="app-menu-item-text"
+                  :class="[
+                    settingsStore.setData.isMenuExpanded ? 'ml-3' : '',
+                    isChecked(index) ? 'text-[var(--accent-color)]' : ''
+                  ]"
                   >{{ t(item.meta.title) }}</span
                 >
               </router-link>
@@ -32,9 +35,9 @@
             <div v-if="!settingsStore.setData.isMenuExpanded">{{ t(item.meta.title) }}</div>
           </n-tooltip>
 
-          <!-- 歌单子菜单（统一版，丝滑过渡） -->
+          <!-- 歌单子菜单（统一版，丝滑过渡）—— 仅桌面端侧边栏展示，移动端底部导航不渲染 -->
           <div
-            v-if="isMenuItemPlaylist(item)"
+            v-if="isMenuItemPlaylist(item) && !isMobile"
             class="app-menu-submenu-unified"
           >
             <div class="app-menu-submenu-scroll-unified">
@@ -374,6 +377,12 @@ const navigateToAlbum = (id: number) => {
         width: auto !important;
         margin: 4px 0;
         padding: 4px 8px;
+        border-radius: 12px;
+        transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+
+        &:active {
+          transform: scale(0.92);
+        }
 
         .app-menu-item-icon {
           font-size: 22px;
@@ -391,15 +400,17 @@ const navigateToAlbum = (id: number) => {
 
       &-text {
         font-size: 10px;
+        line-height: 1.2;
         color: var(--m-text-muted, #9a9590);
       }
     }
 
-    /* 激活状态：图标使用强调色 */
+    /* 激活状态：图标与标签使用强调色 */
     .app-menu-item-link.router-link-active {
       .app-menu-item-icon,
       .app-menu-item-text {
         color: var(--accent-color);
+        font-weight: 600;
       }
     }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="music-list-page h-full w-full bg-white dark:bg-black transition-colors duration-500">
     <n-scrollbar ref="scrollbarRef" class="flex-1 min-h-0" @scroll="handleScroll">
-      <div class="music-list-content pb-32">
+      <div class="music-list-content">
         <!-- Hero Section 和 Action Bar -->
         <n-spin :show="loading">
           <!-- Hero Section -->
@@ -1025,7 +1025,7 @@ onMounted(() => {
 }
 
 .song-list-container {
-  padding-bottom: 100px;
+  padding-bottom: 20px;
 }
 
 .song-highlight {

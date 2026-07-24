@@ -58,17 +58,24 @@
 
             <!-- Content -->
             <div class="relative flex h-full flex-col justify-between p-5 md:p-6">
-              <!-- Top: Title + Badge -->
-              <div>
-                <h3 class="text-2xl font-black leading-tight tracking-wider text-white md:text-3xl">
-                  {{ t('comp.homeHero.dailyRecommend') }}
-                </h3>
-                <span
-                  class="mt-1.5 inline-flex items-center gap-1 rounded-md bg-white/15 px-2 py-0.5 text-[11px] font-semibold text-white/80 backdrop-blur-sm"
-                >
-                  <i class="ri-calendar-check-fill" />
-                  {{ dayRecommendSongs.length }} {{ t('comp.homeHero.songs') }}
-                </span>
+              <!-- Top: Title + Badge + Date (mobile) -->
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-2xl font-black leading-tight tracking-wider text-white md:text-3xl">
+                    {{ t('comp.homeHero.dailyRecommend') }}
+                  </h3>
+                  <span
+                    class="mt-1.5 inline-flex items-center gap-1 rounded-md bg-white/15 px-2 py-0.5 text-[11px] font-semibold text-white/80 backdrop-blur-sm"
+                  >
+                    <i class="ri-calendar-check-fill" />
+                    {{ dayRecommendSongs.length }} {{ t('comp.homeHero.songs') }}
+                  </span>
+                </div>
+                <!-- 移动端日期角标（桌面端隐藏） -->
+                <div class="daily-date md:hidden">
+                  <span class="daily-date-day">{{ dayOfMonth }}</span>
+                  <span class="daily-date-week">{{ weekdayLabel }}</span>
+                </div>
               </div>
               <!-- Bottom: Song List + Play -->
               <div class="flex items-end justify-between gap-4">
@@ -94,7 +101,7 @@
                   </div>
                 </div>
                 <button
-                  class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95"
+                  class="daily-play-btn flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white/90 text-neutral-900 shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95"
                   @click.stop="playDayRecommend"
                 >
                   <i class="ri-play-fill ml-0.5 text-xl" />
@@ -126,7 +133,7 @@
             <!-- Content -->
             <div class="relative flex h-full gap-6 p-6">
               <!-- Left: Cover + Song Info -->
-              <div class="flex flex-col items-center gap-3 flex-shrink-0">
+              <div class="flex flex-col items-center gap-3 flex-shrink-0 min-w-0 overflow-hidden">
                 <!-- Album Cover -->
                 <div
                   class="fm-cover-lg relative w-28 h-28 md:w-36 md:h-36 overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
@@ -157,7 +164,7 @@
                   </div>
                 </div>
                 <!-- Song Info -->
-                <div class="text-center max-w-[180px]">
+                <div class="text-center max-w-[180px] min-w-0 overflow-hidden">
                   <h3 class="truncate text-sm font-bold text-white">
                     {{ displaySong?.name || t('comp.homeHero.discoverMusic') }}
                   </h3>
@@ -336,7 +343,11 @@ import { getImgUrl } from '@/utils';
 import { getImageBackground } from '@/utils/linearColor';
 import HomeFmLyrics from '@/views/home/components/HomeFmLyrics.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+
+// 移动端每日推荐卡日期角标
+const dayOfMonth = new Date().getDate();
+const weekdayLabel = new Date().toLocaleDateString(locale.value, { weekday: 'short' });
 const router = useRouter();
 const recommendStore = useRecommendStore();
 const intelligenceModeStore = useIntelligenceModeStore();
@@ -795,6 +806,44 @@ onActivated(() => {
   min-height: 140px;
   max-height: 180px;
 }
+
+/* ===== 移动端：每日推荐卡加高 + 日期角标 + 播放按钮加大 ===== */
+:global(.mobile) .hero-grid > .hero-card > .daily-card {
+  min-height: 200px;
+  max-height: 220px;
+}
+
+.daily-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.daily-date-day {
+  font-family: var(--m-font-serif, 'Cormorant Garamond', serif);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.daily-date-week {
+  margin-top: 3px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+:global(.mobile) .daily-play-btn {
+  width: 52px;
+  height: 52px;
+
+  i {
+    font-size: 24px;
+  }
+}
 .hero-grid > .hero-card > .fm-card {
   height: 100%;
 }
@@ -803,9 +852,41 @@ onActivated(() => {
   min-height: 380px;
   max-height: 380px;
 }
+
+/* ===== 移动端 FM 卡片适配：防止内容溢出 ===== */
+:global(.mobile) .fm-card--expanded {
+  height: auto;
+  min-height: 280px;
+  max-height: 320px;
+}
+
+:global(.mobile) .fm-card--expanded > .relative.flex {
+  gap: 12px;
+  padding: 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+:global(.mobile) .fm-card--expanded .fm-cover-lg {
+  width: 80px;
+  height: 80px;
+}
+
+:global(.mobile) .fm-card--expanded .text-center.max-w-\[180px\] {
+  max-width: 100px;
+}
+
 .hero-grid > .hero-card:has(.fm-card--expanded) {
   height: 380px;
   min-height: 380px;
+}
+
+/* 移动端覆盖：必须在桌面端规则之后 */
+:global(.mobile) .hero-grid > .hero-card:has(.fm-card--expanded) {
+  height: auto;
+  min-height: 280px;
+  max-height: 320px;
+  overflow: hidden;
 }
 
 /* Card animation */

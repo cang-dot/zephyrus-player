@@ -24,7 +24,6 @@
       <div
         v-show="controlsVisible"
         class="control-btn absolute left-5 no-toggle"
-        :class="{ 'pure-mode': config.pureModeEnabled }"
         @click="closeMusicFull"
       >
         <i class="ri-arrow-down-s-line"></i>
@@ -35,7 +34,6 @@
         v-show="controlsVisible"
         class="control-btn absolute right-5 flex items-center gap-2 no-toggle"
         :class="[
-          { 'pure-mode': config.pureModeEnabled },
           hasSleepTimerActive ? '!w-auto !px-2' : ''
         ]"
       >
@@ -1904,17 +1902,6 @@ const getWordStyle = (lineIndex: number, _wordIndex: number, word: any) => {
   i {
     @apply text-xl;
     color: var(--text-color-active);
-  }
-
-  &.pure-mode {
-    background: transparent;
-    backdrop-filter: none;
-
-    &:not(:hover) {
-      i {
-        opacity: 0;
-      }
-    }
   }
 
   &:hover {

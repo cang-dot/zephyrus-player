@@ -147,16 +147,18 @@ watch(
 
 <style lang="scss" scoped>
 .mobile-play-bar {
-  @apply fixed bottom-[76px] left-0 w-full flex flex-col;
-  z-index: 10000;
+  @apply fixed left-0 w-full flex flex-col;
+  z-index: 100000;
   animation-duration: 0.3s !important;
   transition: all 0.3s ease;
 
   &.is-menu-show {
-    bottom: calc(var(--safe-area-inset-bottom, 0) + 66px);
+    bottom: calc(
+      var(--m-bottom-nav-height, 64px) + var(--safe-area-inset-bottom, 0px) + 8px
+    );
   }
   &.is-menu-hide {
-    bottom: calc(var(--safe-area-inset-bottom, 0) + 10px);
+    bottom: calc(var(--safe-area-inset-bottom, 0px) + 10px);
   }
 
   &.play-bar-expanded {
@@ -173,7 +175,15 @@ watch(
   }
 
   &.play-bar-mini {
-    @apply h-14 py-0;
+    height: auto;
+    overflow: visible;
+    /* 让容器不拦截迷你模式区域之外的点击事件 */
+    pointer-events: none;
+
+    /* 迷你控制栏恢复事件接收 */
+    .mobile-mini-controls {
+      pointer-events: auto;
+    }
   }
 
   // 进度条
@@ -299,13 +309,13 @@ watch(
     }
 
     .mini-playback-controls {
-      @apply flex items-center;
+      @apply flex items-center flex-shrink-0 flex-nowrap whitespace-nowrap;
 
       .mini-control-btn {
-        @apply flex items-center justify-center cursor-pointer transition;
+        @apply flex items-center justify-center cursor-pointer transition flex-shrink-0;
 
         &.play {
-          @apply w-9 h-9 rounded-full flex items-center justify-center mr-2;
+          @apply w-9 h-9 rounded-full flex items-center justify-center mr-2 flex-shrink-0;
 
           .iconfont {
             @apply text-xl transition;
@@ -315,7 +325,7 @@ watch(
       }
 
       .mini-list-icon {
-        @apply text-xl p-1 transition cursor-pointer;
+        @apply text-xl p-1 transition cursor-pointer flex-shrink-0;
         color: var(--m-text-secondary, #6b6560);
 
         &:active {

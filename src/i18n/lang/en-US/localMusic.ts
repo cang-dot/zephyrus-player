@@ -7,6 +7,7 @@ export default {
   playAll: 'Play All',
   search: 'Search local music',
   emptyState: 'No local music found. Please select a folder to scan.',
+  desktopOnly: 'Local music is only available on desktop. Mobile support coming soon.',
   fileNotFound: 'File not found or has been moved',
   rescan: 'Rescan',
   songCount: '{count} songs',

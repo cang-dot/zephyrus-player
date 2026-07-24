@@ -112,14 +112,14 @@ provide('openPlaylistDrawer', openPlaylistDrawer);
 
   /* 只有播放栏时 */
   &.has-player:not(.has-bottom-menu) {
-    padding-bottom: calc(var(--m-mini-player-height, 64px) + var(--safe-area-inset-bottom, 0px) + 8px);
+    padding-bottom: calc(var(--m-mini-player-height, 56px) + var(--safe-area-inset-bottom, 0px) + 8px);
   }
 
   /* 同时有播放栏和底部菜单时 */
   &.has-bottom-menu.has-player {
     padding-bottom: calc(
-      var(--m-bottom-nav-height, 64px) + var(--m-mini-player-height, 64px) +
-      var(--safe-area-inset-bottom, 0px) + 16px
+      var(--m-bottom-nav-height, 64px) + var(--m-mini-player-height, 56px) +
+      var(--safe-area-inset-bottom, 0px) + 8px
     );
   }
 }
@@ -133,6 +133,8 @@ provide('openPlaylistDrawer', openPlaylistDrawer);
   background: var(--m-bg, var(--bg-color));
   border-top: 1px solid var(--m-border, transparent);
   flex-shrink: 0;
+  /* iPhone 手势条等底部安全区域适配 */
+  padding-bottom: var(--safe-area-inset-bottom, 0px);
 }
 
 .mobile-menu {

@@ -7,6 +7,7 @@ export default {
     basic: '基础设置',
     interface: '界面设置',
     playback: '播放设置',
+    keepAlive: '增强保活',
     application: '应用设置',
     network: '网络设置',
     system: '系统管理',

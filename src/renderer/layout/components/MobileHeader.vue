@@ -10,14 +10,19 @@
       </div>
     </div>
 
-    <!-- 中间标题 -->
+    <!-- 中间区域 -->
     <div class="header-title">
-      <span v-if="title">{{ t(title) }}</span>
+      <!-- 首页：可点击搜索 pill -->
+      <div v-if="isHomePage" class="header-search-pill" @click="openSearch">
+        <i class="ri-search-line"></i>
+        <span>{{ t('comp.searchBar.searchPlaceholder') }}</span>
+      </div>
+      <span v-else-if="title">{{ t(title) }}</span>
     </div>
 
     <!-- 右侧区域 -->
     <div class="header-right">
-      <div class="header-btn" @click="openSearch">
+      <div v-if="!isHomePage" class="header-btn" @click="openSearch">
         <i class="ri-search-line"></i>
       </div>
       <div class="header-btn" @click="openSettings">
@@ -41,6 +46,9 @@ const hasSafeArea = inject('hasSafeArea', false);
 const showBack = computed(() => {
   return route.meta.back === true;
 });
+
+// 首页展示搜索 pill 而非标题
+const isHomePage = computed(() => route.path === '/');
 
 const title = computed(() => {
   return (route.meta.title as string) || '';
@@ -90,12 +98,40 @@ const openSettings = () => {
 }
 
 .header-title {
-  @apply flex-1 text-center;
+  @apply flex-1 text-center min-w-0;
 
   span {
     font-size: 16px;
     font-weight: 500;
     color: var(--m-text-primary, var(--text-color));
+  }
+}
+
+/* 首页搜索 pill */
+.header-search-pill {
+  @apply flex items-center gap-2 px-4 mx-1;
+  height: 36px;
+  border-radius: var(--m-radius-full, 9999px);
+  background: var(--m-surface, rgba(0, 0, 0, 0.05));
+  color: var(--m-text-muted, #9a9590);
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  i {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  span {
+    @apply truncate flex-1 text-left;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--m-text-muted, #9a9590);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 }
 

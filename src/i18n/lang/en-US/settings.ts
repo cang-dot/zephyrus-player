@@ -7,6 +7,7 @@ export default {
     basic: 'Basic Settings',
     interface: 'Interface Settings',
     playback: 'Playback Settings',
+    keepAlive: 'Keep Alive',
     application: 'Application Settings',
     network: 'Network Settings',
     system: 'System Management',
