@@ -266,16 +266,6 @@ src/
 
 从 [GitHub Releases](https://github.com/cang-dot/zephyrus-player/releases) 下载最新版本。
 
-### v1.0.0 更新内容
-
-- ✨ 新增雨夜播放器样式（Rain）
-- 🎨 7 种全屏播放器样式（默认/舞台/杂志/狂躁/诡谲/陈旧/雨夜）
-- 🌧️ Canvas 雨水效果，音频响应驱动
-- 📝 左右分词歌词显示
-- 🎭 水洼涟漪效果
-- 📱 Android 移动端适配
-- 🔧 多项性能优化和 Bug 修复
-
 ---
 
 ## 📝 更新日志
