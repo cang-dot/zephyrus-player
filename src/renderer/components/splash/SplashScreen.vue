@@ -215,7 +215,7 @@ onUnmounted(() => {
 .splash-container {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 2147483647;
   background: #ffffff;
   overflow: hidden;
 }

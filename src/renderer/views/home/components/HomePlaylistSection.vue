@@ -1,9 +1,9 @@
 <template>
   <section class="playlist-section">
     <!-- Section Header -->
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-4 md:mb-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <h2 class="text-xl font-bold tracking-tight text-neutral-900 md:text-2xl dark:text-white">
+        <h2 class="text-lg font-bold tracking-tight text-neutral-900 md:text-2xl dark:text-white">
           {{ title }}
         </h2>
         <div class="h-1.5 w-1.5 rounded-full bg-[var(--accent-color)]" />
@@ -24,7 +24,15 @@
       </div>
     </div>
 
-    <!-- Infinite Cover Grid -->
+    <!-- Mobile: 横向滑动卡片（名字常驻显示，触屏友好） -->
+    <cover-scroll-row
+      v-else-if="isMobile && displayPlaylists.length > 0"
+      :items="gridItems"
+      @item-click="handlePlaylistClick"
+      @item-play="playPlaylist"
+    />
+
+    <!-- Desktop: Infinite Cover Grid -->
     <infinite-cover-grid
       v-else-if="displayPlaylists.length > 0"
       :items="gridItems"
@@ -53,6 +61,7 @@ import { usePlaylistStore } from '@/store/modules/playlist';
 import { isMobile } from '@/utils';
 
 import InfiniteCoverGrid from '@/components/common/InfiniteCoverGrid.vue';
+import CoverScrollRow from '@/components/common/CoverScrollRow.vue';
 
 const props = withDefaults(
   defineProps<{

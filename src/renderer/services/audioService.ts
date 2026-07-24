@@ -27,6 +27,9 @@ class AudioService {
 
   private playbackRate = 1.0; // 添加播放速度属性
 
+  // 音频焦点恢复状态：当音频被其他应用打断后，记录是否应该恢复播放
+  private shouldBePlaying = false;
+
   private currentSinkId: string = 'default';
 
   private contextStateMonitoringInitialized = false;
@@ -81,18 +84,73 @@ class AudioService {
     window.addEventListener('beforeunload', () => {
       this.forceResetOperationLock();
     });
+
+    // 设置音频焦点恢复机制
+    this.setupAudioFocusRecovery();
+  }
+
+  /**
+   * 音频焦点恢复机制
+   * 当其他应用（如电话、其他音乐应用）打断播放时，
+   * 在焦点恢复后自动继续播放
+   */
+  private setupAudioFocusRecovery() {
+    // 监听 visibilitychange，页面从隐藏变为可见时检查是否需要恢复播放
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && this.shouldBePlaying) {
+        // 页面重新可见且之前应该正在播放
+        if (this.currentSound && !this.currentSound.playing()) {
+          try {
+            // 恢复 AudioContext
+            if (Howler.ctx && Howler.ctx.state === 'suspended') {
+              await Howler.ctx.resume();
+            }
+            this.currentSound.play();
+          } catch (e) {
+            console.warn('音频焦点恢复失败:', e);
+          }
+        }
+      }
+    });
+
+    // 监听 AudioContext 状态变化
+    // 当 AudioContext 被系统挂起后恢复时，如果应该正在播放则自动继续
+    if (Howler.ctx) {
+      Howler.ctx.addEventListener('statechange', async () => {
+        if (Howler.ctx?.state === 'running' && this.shouldBePlaying) {
+          if (this.currentSound && !this.currentSound.playing()) {
+            try {
+              this.currentSound.play();
+            } catch (e) {
+              console.warn('AudioContext 恢复后播放失败:', e);
+            }
+          }
+        }
+      });
+    }
   }
 
   private initMediaSession() {
-    navigator.mediaSession.setActionHandler('play', () => {
+    navigator.mediaSession.setActionHandler('play', async () => {
+      // 恢复 AudioContext（后台可能被挂起）
+      if (Howler.ctx && Howler.ctx.state === 'suspended') {
+        try {
+          await Howler.ctx.resume();
+        } catch (e) {
+          console.warn('恢复 AudioContext 失败:', e);
+        }
+      }
+      this.shouldBePlaying = true;
       this.currentSound?.play();
     });
 
     navigator.mediaSession.setActionHandler('pause', () => {
+      this.shouldBePlaying = false;
       this.currentSound?.pause();
     });
 
     navigator.mediaSession.setActionHandler('stop', () => {
+      this.shouldBePlaying = false;
       this.stop();
     });
 
@@ -818,6 +876,7 @@ class AudioService {
 
     sound.on('play', () => {
       if (this.currentSound === sound || this.crossfadingSound === sound) {
+        this.shouldBePlaying = true;
         this.updateMediaSessionState(true);
         this.emit('play');
       }
@@ -825,6 +884,7 @@ class AudioService {
 
     sound.on('pause', () => {
       if (this.currentSound === sound || this.crossfadingSound === sound) {
+        // 不清除 shouldBePlaying，允许音频焦点恢复后自动继续播放
         this.updateMediaSessionState(false);
         this.emit('pause');
       }
@@ -1171,6 +1231,7 @@ class AudioService {
   }
 
   stop() {
+    this.shouldBePlaying = false;
     // 取消正在进行的 crossfade
     this.cancelCrossfade();
     try {
@@ -1225,6 +1286,7 @@ class AudioService {
   }
 
   pause() {
+    this.shouldBePlaying = false;
     if (this.currentSound) {
       try {
         // 确保任何进行中的seek操作被取消

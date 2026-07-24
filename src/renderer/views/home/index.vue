@@ -6,7 +6,7 @@
         <home-hero class="enter-fade" />
 
         <!-- Main Content Sections -->
-        <div class="content-sections space-y-10 md:space-y-8 lg:space-y-12">
+        <div class="content-sections space-y-8 lg:space-y-12">
           <!-- Recommended Playlists (Grid Section) -->
           <home-playlist-section :title="t('comp.recommendSonglist.title')" :limit="18" class="enter-stagger" />
 

@@ -7,6 +7,7 @@ export default {
   playAll: '播放全部',
   search: '搜索本地音乐',
   emptyState: '暂无本地音乐，请先选择文件夹进行扫描',
+  desktopOnly: '本地音乐暂仅支持桌面端，移动端敬请期待',
   fileNotFound: '文件不存在或已被移动',
   rescan: '重新扫描',
   songCount: '{count} 首歌曲',

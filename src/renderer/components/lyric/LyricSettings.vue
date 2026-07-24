@@ -17,10 +17,6 @@
     >
       <!-- ==================== 主视图：样式选择器 + 内联设置 ==================== -->
       <div class="space-y-2 pt-2">
-        <div class="setting-item">
-          <span>{{ t('settings.lyricSettings.pureMode') }}</span>
-          <input type="checkbox" v-model="config.pureModeEnabled" class="toggle-switch" />
-        </div>
         <div class="style-grid">
           <div
             v-for="style in playerStyles"
@@ -42,19 +38,39 @@
           <!-- 基础设置 -->
           <div class="setting-item">
             <span>{{ t('settings.lyricSettings.hideCover') }}</span>
-            <input type="checkbox" v-model="config.hideCover" class="toggle-switch" />
+            <input 
+              type="checkbox" 
+              :checked="config.hideCover" 
+              @change="config.hideCover = ($event.target as HTMLInputElement).checked"
+              class="toggle-switch" 
+            />
           </div>
           <div class="setting-item">
             <span>{{ t('settings.lyricSettings.centerDisplay') }}</span>
-            <input type="checkbox" v-model="config.centerLyrics" class="toggle-switch" />
+            <input 
+              type="checkbox" 
+              :checked="config.centerLyrics" 
+              @change="config.centerLyrics = ($event.target as HTMLInputElement).checked"
+              class="toggle-switch" 
+            />
           </div>
           <div class="setting-item">
             <span>{{ t('settings.lyricSettings.showTranslation') }}</span>
-            <input type="checkbox" v-model="config.showTranslation" class="toggle-switch" />
+            <input 
+              type="checkbox" 
+              :checked="config.showTranslation" 
+              @change="config.showTranslation = ($event.target as HTMLInputElement).checked"
+              class="toggle-switch" 
+            />
           </div>
           <div class="setting-item">
             <span>{{ t('settings.lyricSettings.hideLyrics') }}</span>
-            <input type="checkbox" v-model="config.hideLyrics" class="toggle-switch" />
+            <input 
+              type="checkbox" 
+              :checked="config.hideLyrics" 
+              @change="config.hideLyrics = ($event.target as HTMLInputElement).checked"
+              class="toggle-switch" 
+            />
           </div>
 
           <div class="radio-group-divider"></div>
@@ -62,7 +78,12 @@
           <!-- 界面设置 -->
           <div class="setting-item">
             <span>{{ t('settings.lyricSettings.showMiniPlayBar') }}</span>
-            <input type="checkbox" v-model="showMiniPlayBar" class="toggle-switch" />
+            <input 
+              type="checkbox" 
+              :checked="showMiniPlayBar" 
+              @change="showMiniPlayBar = ($event.target as HTMLInputElement).checked"
+              class="toggle-switch" 
+            />
           </div>
           <div class="slider-group">
             <label class="slider-label">{{ t('settings.lyricSettings.contentWidth') }}</label>
@@ -477,6 +498,7 @@ const playerStyles = computed(() => {
       if (s.key === 'frenzy') return isFeatureEnabled('frenzy-style');
       if (s.key === 'eerie') return isFeatureEnabled('eerie-style');
       if (s.key === 'neon') return isFeatureEnabled('neon-style');
+      if (s.key === 'rain') return isFeatureEnabled('rain-style');
       return false;
     })
     .map((s) => ({ key: s.key, label: s.label }));

@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.zephyrus.player',
   appName: 'ZephyrusPlayer',
   webDir: 'out/renderer',
+  backgroundColor: '#ffffff',
   server: {
     androidScheme: 'https'
   },

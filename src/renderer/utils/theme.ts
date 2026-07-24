@@ -19,6 +19,15 @@ export const applyTheme = (theme: ThemeType) => {
 
   // 保存主题到本地存储
   localStorage.setItem('theme', theme);
+
+  // 同步 Android 状态栏外观
+  if (typeof window !== 'undefined' && window.AndroidNative) {
+    try {
+      window.AndroidNative.setStatusBarDark(theme === 'dark');
+    } catch {
+      // 忽略
+    }
+  }
 };
 
 // 获取当前主题

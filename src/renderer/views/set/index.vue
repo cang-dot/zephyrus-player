@@ -74,6 +74,9 @@
             <div v-show="currentSection === 'playback'" class="animate-fade-in">
               <playback-tab />
             </div>
+            <div v-show="currentSection === 'keepAlive'" class="animate-fade-in">
+              <keep-alive-tab />
+            </div>
             <div v-show="currentSection === 'application'" class="animate-fade-in">
               <application-tab />
             </div>
@@ -105,6 +108,7 @@ import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 
 import { useI18n } from 'vue-i18n';
 
 import PlayBottom from '@/components/common/PlayBottom.vue';
+import { isAndroidNative } from '@/services/androidNative';
 import { useSettingsStore } from '@/store/modules/settings';
 import { isElectron } from '@/utils';
 import SettingNav from '@/views/set/SettingNav.vue';
@@ -116,6 +120,7 @@ import AboutTab from './tabs/AboutTab.vue';
 import ApplicationTab from './tabs/ApplicationTab.vue';
 import BasicTab from './tabs/BasicTab.vue';
 import InterfaceTab from './tabs/InterfaceTab.vue';
+import KeepAliveTab from './tabs/KeepAliveTab.vue';
 import NetworkTab from './tabs/NetworkTab.vue';
 import PlaybackTab from './tabs/PlaybackTab.vue';
 import ExtraFeaturesTab from './tabs/ExtraFeaturesTab.vue';
@@ -169,12 +174,14 @@ provide(SETTINGS_DIALOG_KEY, dialog);
 type SettingSectionConfig = {
   id: string;
   electron?: boolean;
+  android?: boolean;
 };
 
 const settingSections: SettingSectionConfig[] = [
   { id: 'basic' },
   { id: 'interface' },
   { id: 'playback' },
+  { id: 'keepAlive', android: true },
   { id: 'application', electron: true },
   { id: 'network', electron: true },
   { id: 'system', electron: true },
@@ -183,13 +190,18 @@ const settingSections: SettingSectionConfig[] = [
 ];
 
 const navSections = computed(() => {
+  const isAndroid = isAndroidNative();
   return settingSections
-    .filter((section) => !section.electron || isElectron)
+    .filter((section) => {
+      if (section.electron && !isElectron) return false;
+      if (section.android && !isAndroid) return false;
+      return true;
+    })
     .map((section) => ({
       id: section.id,
       title: t(`settings.sections.${section.id}`)
     }));
-});
+});;
 
 const currentSection = ref('basic');
 
@@ -326,6 +338,21 @@ const settingIndex = computed<SearchResult[]>(() => {
     ];
     systemItems.forEach((item) => {
       items.push({ tabId: 'system', tabLabel: tabLabels['system'], title: item.title, desc: item.desc, titlePath: item.title });
+    });
+  }
+
+  // 增强保活（仅 Android 原生）
+  if (!isElectron) {
+    const keepAliveItems = [
+      { title: '关闭电池优化', desc: '将应用加入电池优化白名单，防止后台被杀' },
+      { title: '允许自启动', desc: '允许应用开机自启动和后台自启动' },
+      { title: '通知权限', desc: '确保音乐控制通知正常显示' },
+      { title: '后台弹出界面权限', desc: '部分厂商系统需要此权限保持后台运行' },
+      { title: '应用详情设置', desc: '手动管理所有权限' },
+      { title: '保活设置指南', desc: '不同品牌手机的保活设置指南' }
+    ];
+    keepAliveItems.forEach((item) => {
+      items.push({ tabId: 'keepAlive', tabLabel: tabLabels['keepAlive'], title: item.title, desc: item.desc, titlePath: item.title });
     });
   }
 

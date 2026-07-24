@@ -39,7 +39,7 @@ const layoutRouter = [
       title: 'comp.newAlbum.title',
       icon: 'ri-album-fill',
       keepAlive: true,
-      isMobile: true
+      isMobile: false
     },
     component: () => import('@/views/album/index.vue')
   },
@@ -50,7 +50,7 @@ const layoutRouter = [
       title: 'comp.toplist',
       icon: 'ri-bar-chart-grouped-fill',
       keepAlive: true,
-      isMobile: true
+      isMobile: false
     },
     component: () => import('@/views/toplist/index.vue')
   },
@@ -87,7 +87,7 @@ const layoutRouter = [
       title: 'comp.history',
       icon: 'icon-a-TicketStar',
       keepAlive: true,
-      isMobile: true
+      isMobile: false
     }
   },
   {
@@ -97,8 +97,7 @@ const layoutRouter = [
       title: 'comp.localMusic',
       icon: 'ri-folder-music-fill',
       keepAlive: true,
-      isMobile: false,
-      electronOnly: true
+      isMobile: true
     },
     component: () => import('@/views/local-music/index.vue')
   },
@@ -122,7 +121,8 @@ const layoutRouter = [
       icon: 'ri-settings-3-fill',
       keepAlive: true,
       noScroll: true,
-      back: true
+      back: true,
+      isMobile: true
     },
     component: () => import('@/views/set/index.vue')
   }
